@@ -1,7 +1,7 @@
+import { Role } from "@/Domain/Role/Entity/Role";
+import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
 import { Table } from "react-bootstrap";
-import { Role } from "../../../Domain/Role/Entity/Role";
-import { PaginationControlsProps } from "../../HOC/WithPagination";
 import { Paginator } from "../Paginator";
 
 export interface RoleListParameters extends PaginationControlsProps {

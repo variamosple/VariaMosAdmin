@@ -1,8 +1,8 @@
+import { queryPermissions } from "@/DataProviders/PermissionRepository";
+import { Permission } from "@/Domain/Permission/Entity/Permission";
+import { PermissionsFilter } from "@/Domain/Permission/Entity/PermissionsFilter";
 import { FC, useEffect } from "react";
 import { Container } from "react-bootstrap";
-import { queryPermissions } from "../../DataProviders/PermissionRepository";
-import { Permission } from "../../Domain/Permission/Entity/Permission";
-import { PermissionsFilter } from "../../Domain/Permission/Entity/PermissionsFilter";
 import { PermissionList } from "../Components/PermissionList";
 import { usePaginatedQuery } from "../Hooks/usePaginatedQuery";
 

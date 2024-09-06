@@ -1,10 +1,10 @@
+import { queryUsers } from "@/DataProviders/UserRepository";
+import { User } from "@/Domain/User/Entity/User";
+import { UsersFilter } from "@/Domain/User/Entity/UsersFilter";
+import { UserList } from "@/UI/Components/UserList";
+import { usePaginatedQuery } from "@/UI/Hooks/usePaginatedQuery";
 import { FC, useEffect } from "react";
 import { Container } from "react-bootstrap";
-import { queryUsers } from "../../DataProviders/UserRepository";
-import { User } from "../../Domain/User/Entity/User";
-import { UsersFilter } from "../../Domain/User/Entity/UsersFilter";
-import { UserList } from "../Components/UserList";
-import { usePaginatedQuery } from "../Hooks/usePaginatedQuery";
 
 export const UserListPage: FC<unknown> = () => {
   const {

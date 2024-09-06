@@ -1,7 +1,7 @@
+import { Permission } from "@/Domain/Permission/Entity/Permission";
+import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
 import { Table } from "react-bootstrap";
-import { Permission } from "../../../Domain/Permission/Entity/Permission";
-import { PaginationControlsProps } from "../../HOC/WithPagination";
 import { Paginator } from "../Paginator";
 
 export interface PermissionListParameters extends PaginationControlsProps {

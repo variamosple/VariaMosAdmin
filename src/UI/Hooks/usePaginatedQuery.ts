@@ -1,6 +1,6 @@
+import { PagedModel } from "@/Domain/Core/Entity/PagedModel";
+import { ResponseModel } from "@/Domain/Core/Entity/ResponseModel";
 import { useCallback, useState } from "react";
-import { PagedModel } from "../../Domain/Core/Entity/PagedModel";
-import { ResponseModel } from "../../Domain/Core/Entity/ResponseModel";
 
 interface UsePaginatedQueryProps<Filter extends PagedModel, Response> {
   queryFunction: (filter: Filter) => Promise<ResponseModel<Response[]>>;
