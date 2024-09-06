@@ -1,0 +1,20 @@
+diff --git a/node_modules/react-scripts/config/webpack.config.js b/node_modules/react-scripts/config/webpack.config.js
+index e465d8e..0de1f8a 100644
+--- a/node_modules/react-scripts/config/webpack.config.js
++++ b/node_modules/react-scripts/config/webpack.config.js
+@@ -37,6 +37,7 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
+ const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
+ // @remove-on-eject-end
+ const createEnvironmentHash = require('./webpack/persistentCache/createEnvironmentHash');
++const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+ 
+ // Source maps are resource heavy and can cause out of memory issue for large source files.
+ const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
+@@ -344,6 +345,7 @@ module.exports = function (webpackEnv) {
+           babelRuntimeEntryHelpers,
+           babelRuntimeRegenerator,
+         ]),
++        new TsconfigPathsPlugin(),
+       ],
+     },
+     module: {
