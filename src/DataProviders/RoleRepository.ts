@@ -2,7 +2,7 @@ import axios from "axios";
 import { ResponseModel } from "../Domain/Core/Entity/ResponseModel";
 import { Role } from "../Domain/Role/Entity/Role";
 import { RolesFilter } from "../Domain/Role/Entity/RolesFilter";
-import { ADMIN_CLIENT } from "./AxiosConfig";
+import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 
 export const queryRoles = (
   filter: RolesFilter

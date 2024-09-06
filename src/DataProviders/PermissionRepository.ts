@@ -2,7 +2,7 @@ import axios from "axios";
 import { ResponseModel } from "../Domain/Core/Entity/ResponseModel";
 import { Permission } from "../Domain/Permission/Entity/Permission";
 import { PermissionsFilter } from "../Domain/Permission/Entity/PermissionsFilter";
-import { ADMIN_CLIENT } from "./AxiosConfig";
+import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 
 export const queryPermissions = (
   filter: PermissionsFilter
