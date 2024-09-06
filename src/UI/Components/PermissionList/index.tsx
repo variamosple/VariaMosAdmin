@@ -1,14 +1,14 @@
 import { FC } from "react";
 import { Table } from "react-bootstrap";
-import { User } from "../../../Domain/User/Entity/User";
+import { Permission } from "../../../Domain/Permission/Entity/Permission";
 import { PaginationControlsProps } from "../../HOC/WithPagination";
 import { Paginator } from "../Paginator";
 
-export interface UserListParameters extends PaginationControlsProps {
-  items: User[];
+export interface PermissionListParameters extends PaginationControlsProps {
+  items: Permission[];
 }
 
-export const UserList: FC<UserListParameters> = ({
+export const PermissionList: FC<PermissionListParameters> = ({
   items,
   currentPage,
   totalPages,
@@ -25,24 +25,20 @@ export const UserList: FC<UserListParameters> = ({
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>user</th>
+            <th>ID</th>
 
             <th>Name</th>
-
-            <th>Email</th>
 
             <th>Actions</th>
           </tr>
         </thead>
 
         <tbody>
-          {items?.map((user) => (
-            <tr key={user.id}>
-              <td>{user.user}</td>
+          {items?.map((permission) => (
+            <tr key={permission.id}>
+              <td>{permission.id}</td>
 
-              <td>{user.name}</td>
-
-              <td>{user.email}</td>
+              <td>{permission.name}</td>
 
               <td></td>
             </tr>
