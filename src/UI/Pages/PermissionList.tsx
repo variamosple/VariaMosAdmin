@@ -1,48 +1,26 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import { Container } from "react-bootstrap";
 import { queryPermissions } from "../../DataProviders/PermissionRepository";
 import { Permission } from "../../Domain/Permission/Entity/Permission";
 import { PermissionsFilter } from "../../Domain/Permission/Entity/PermissionsFilter";
 import { PermissionList } from "../Components/PermissionList";
+import { usePaginatedQuery } from "../Hooks/usePaginatedQuery";
 
 export const PermissionListPage: FC<unknown> = () => {
-  const [isLoading, setIsloading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [permissionsFilter, setPermissionsFilter] = useState(
-    new PermissionsFilter()
-  );
-  const [totalPages, setTotalPages] = useState(1);
-
-  const loadPermissions = useCallback(
-    (filter: PermissionsFilter = new PermissionsFilter()) => {
-      setPermissionsFilter(filter);
-      setIsloading(true);
-
-      queryPermissions(filter)
-        .then((response) => {
-          setPermissions(response.data ?? []);
-          setTotalPages(Math.ceil((response.totalCount || 0) / 20));
-        })
-        .finally(() => {
-          setIsloading(false);
-        });
-    },
-    []
-  );
+  const {
+    data: permissions,
+    currentPage,
+    loadData,
+    totalPages,
+    onPageChange,
+  } = usePaginatedQuery<PermissionsFilter, Permission>({
+    queryFunction: queryPermissions,
+    initialFilter: new PermissionsFilter(),
+  });
 
   useEffect(() => {
-    loadPermissions();
-  }, [loadPermissions]);
-
-  const onPageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-    loadPermissions(
-      Object.assign(new PermissionsFilter(), permissionsFilter, {
-        pageNumber,
-      })
-    );
-  };
+    loadData(new PermissionsFilter());
+  }, [loadData]);
 
   return (
     <Container>

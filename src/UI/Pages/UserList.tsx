@@ -1,43 +1,26 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import { Container } from "react-bootstrap";
 import { queryUsers } from "../../DataProviders/UserRepository";
 import { User } from "../../Domain/User/Entity/User";
 import { UsersFilter } from "../../Domain/User/Entity/UsersFilter";
 import { UserList } from "../Components/UserList";
+import { usePaginatedQuery } from "../Hooks/usePaginatedQuery";
 
 export const UserListPage: FC<unknown> = () => {
-  const [isLoading, setIsloading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [users, setUsers] = useState<User[]>([]);
-  const [usersFilter, setUsersFilter] = useState(new UsersFilter());
-  const [totalPages, setTotalPages] = useState(1);
-
-  const loadUsers = useCallback((filter: UsersFilter = new UsersFilter()) => {
-    setUsersFilter(filter);
-    setIsloading(true);
-
-    queryUsers(filter)
-      .then((response) => {
-        setUsers(response.data ?? []);
-        setTotalPages(Math.ceil((response.totalCount || 0) / 20));
-      })
-      .finally(() => {
-        setIsloading(false);
-      });
-  }, []);
+  const {
+    data: users,
+    currentPage,
+    loadData,
+    totalPages,
+    onPageChange,
+  } = usePaginatedQuery<UsersFilter, User>({
+    queryFunction: queryUsers,
+    initialFilter: new UsersFilter(),
+  });
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
-
-  const onPageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-    loadUsers(
-      Object.assign(new UsersFilter(), usersFilter, {
-        pageNumber,
-      })
-    );
-  };
+    loadData(new UsersFilter());
+  }, [loadData]);
 
   return (
     <Container>
