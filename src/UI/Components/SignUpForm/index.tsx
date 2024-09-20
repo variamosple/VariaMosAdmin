@@ -1,7 +1,7 @@
 import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
 import { useSession } from "@/UI/Context/SessionsContext";
 import { FC } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import "./styles.css";
 
@@ -134,7 +134,11 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
         type="submit"
         disabled={isLoading}
       >
-        Sign up
+        {isLoading ? (
+          <Spinner animation="border" variant="light" size="sm" />
+        ) : (
+          "Sign up"
+        )}
       </Button>
     </Form>
   );

@@ -13,7 +13,6 @@ export const SignUpPage: FC<unknown> = () => {
 
   const onSignUp = (registration: UserRegistration) => {
     signUp(registration).then((response) => {
-      debugger;
       if (response?.errorCode) {
         setErrorMessage(response.message);
       } else if (response?.message) {

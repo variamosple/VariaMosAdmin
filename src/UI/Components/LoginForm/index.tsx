@@ -1,7 +1,7 @@
 import { Credentials } from "@/Domain/User/Entity/Credentials";
 import { useSession } from "@/UI/Context/SessionsContext";
 import { FC } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import "./styles.css";
 
@@ -67,7 +67,11 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
         type="submit"
         disabled={isLoading}
       >
-        Sign in
+        {isLoading ? (
+          <Spinner animation="border" variant="light" size="sm" />
+        ) : (
+          "Sign in"
+        )}
       </Button>
     </Form>
   );
