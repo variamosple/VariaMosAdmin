@@ -1,11 +1,13 @@
 import { Role } from "@/Domain/Role/Entity/Role";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
-import { Table } from "react-bootstrap";
+import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { Trash } from "react-bootstrap-icons";
 import { Paginator } from "../Paginator";
 
 export interface RoleListParameters extends PaginationControlsProps {
   items: Role[];
+  onRoleDelete: (role: Role) => void;
 }
 
 export const RoleList: FC<RoleListParameters> = ({
@@ -13,6 +15,7 @@ export const RoleList: FC<RoleListParameters> = ({
   currentPage,
   totalPages,
   onPageChange,
+  onRoleDelete,
 }) => {
   return (
     <>
@@ -40,7 +43,17 @@ export const RoleList: FC<RoleListParameters> = ({
 
               <td>{role.name}</td>
 
-              <td></td>
+              <td>
+                <ButtonGroup size="sm">
+                  <Button
+                    variant="danger"
+                    onClick={() => onRoleDelete(role)}
+                    title="Delete language"
+                  >
+                    <Trash />
+                  </Button>
+                </ButtonGroup>
+              </td>
             </tr>
           ))}
         </tbody>

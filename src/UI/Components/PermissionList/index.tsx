@@ -1,11 +1,13 @@
 import { Permission } from "@/Domain/Permission/Entity/Permission";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
-import { Table } from "react-bootstrap";
+import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { Trash } from "react-bootstrap-icons";
 import { Paginator } from "../Paginator";
 
 export interface PermissionListParameters extends PaginationControlsProps {
   items: Permission[];
+  onPermissionDelete: (permission: Permission) => void;
 }
 
 export const PermissionList: FC<PermissionListParameters> = ({
@@ -13,6 +15,7 @@ export const PermissionList: FC<PermissionListParameters> = ({
   currentPage,
   totalPages,
   onPageChange,
+  onPermissionDelete,
 }) => {
   return (
     <>
@@ -40,7 +43,17 @@ export const PermissionList: FC<PermissionListParameters> = ({
 
               <td>{permission.name}</td>
 
-              <td></td>
+              <td>
+                <ButtonGroup size="sm">
+                  <Button
+                    variant="danger"
+                    onClick={() => onPermissionDelete(permission)}
+                    title="Delete language"
+                  >
+                    <Trash />
+                  </Button>
+                </ButtonGroup>
+              </td>
             </tr>
           ))}
         </tbody>
