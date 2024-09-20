@@ -4,7 +4,9 @@ import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";
 import { HomePage } from "./Pages/Home";
 import { LoginPage } from "./Pages/LoginPage";
+import { PermissionCreatePage } from "./Pages/PermissionCreate";
 import { PermissionListPage } from "./Pages/PermissionList";
+import { RoleCreatePage } from "./Pages/RoleCreate";
 import { RoleListPage } from "./Pages/RoleList";
 import { SignUpPage } from "./Pages/SignUpPage";
 import { UserListPage } from "./Pages/UserList";
@@ -50,10 +52,18 @@ export const ROUTER = createBrowserRouter([
           </AuthWrapper>
         ),
       },
+      {
+        path: "create",
+        element: (
+          <AuthWrapper>
+            <RoleCreatePage />
+          </AuthWrapper>
+        ),
+      },
     ],
   },
   {
-    path: "/permissions",
+    path: "permissions",
     Component: MainLayout,
     children: [
       {
@@ -61,6 +71,14 @@ export const ROUTER = createBrowserRouter([
         element: (
           <AuthWrapper>
             <PermissionListPage />
+          </AuthWrapper>
+        ),
+      },
+      {
+        path: "create",
+        element: (
+          <AuthWrapper>
+            <PermissionCreatePage />
           </AuthWrapper>
         ),
       },

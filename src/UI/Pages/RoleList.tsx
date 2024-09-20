@@ -4,9 +4,11 @@ import { RolesFilter } from "@/Domain/Role/Entity/RolesFilter";
 import { RoleList } from "@/UI/Components/RoleList";
 import { usePaginatedQuery } from "@/UI/Hooks/usePaginatedQuery";
 import { FC, useEffect } from "react";
-import { Container } from "react-bootstrap";
+import { Button, Container } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 export const RoleListPage: FC<unknown> = () => {
+  const navigate = useNavigate();
   const {
     data: roles,
     currentPage,
@@ -23,8 +25,14 @@ export const RoleListPage: FC<unknown> = () => {
   }, [loadData]);
 
   return (
-    <Container>
-      <h1>Roles list</h1>
+    <Container fluid="sm" className="my-2">
+      <div className="d-flex justify-content-between align-items-end">
+        <h1 className="mb-0">Roles list</h1>
+
+        <div>
+          <Button onClick={() => navigate("/roles/create")}>Create Role</Button>
+        </div>
+      </div>
       <hr />
 
       <RoleList

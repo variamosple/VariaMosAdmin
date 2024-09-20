@@ -17,3 +17,31 @@ export const queryRoles = (
       }
     });
 };
+
+export const createRole = (request: Role): Promise<ResponseModel<Role>> => {
+  return ADMIN_CLIENT.post("/v1/roles", request)
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Network/communication error."
+        );
+      } else {
+        console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          "Error when trying to create the role, please try again later."
+        );
+      }
+    });
+};
