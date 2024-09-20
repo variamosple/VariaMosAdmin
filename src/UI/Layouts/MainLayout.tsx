@@ -1,8 +1,10 @@
 import { FC } from "react";
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { Outlet } from "react-router-dom";
+import { useSession } from "../Context/SessionsContext";
 
 export const MainLayout: FC<unknown> = () => {
+  const { logout } = useSession();
   return (
     <>
       <Navbar bg="dark" variant="dark">
@@ -37,7 +39,7 @@ export const MainLayout: FC<unknown> = () => {
                 <NavDropdown.Item>Report a problem</NavDropdown.Item>
 
                 <NavDropdown.Divider />
-                <NavDropdown.Item>Logout</NavDropdown.Item>
+                <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
               </NavDropdown>
             </Nav>
             <Nav />
