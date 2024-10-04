@@ -17,3 +17,24 @@ export const queryUsers = (
       }
     });
 };
+
+export const queryUserById = (userId: string): Promise<ResponseModel<User>> => {
+  return ADMIN_CLIENT.get(`/v1/users/${userId}`)
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        return response;
+      } else {
+        console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          `Error when trying to query the user with id: ${userId}, please try again later.`
+        );
+      }
+    });
+};

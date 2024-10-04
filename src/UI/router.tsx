@@ -12,6 +12,7 @@ import { RoleDetailsPage } from "./Pages/RoleDetails";
 import { RoleEditPage } from "./Pages/RoleEdit";
 import { RoleListPage } from "./Pages/RoleList";
 import { SignUpPage } from "./Pages/SignUpPage";
+import { UserDetailsPage } from "./Pages/UserDetails";
 import { UserListPage } from "./Pages/UserList";
 
 export const ROUTER = createBrowserRouter([
@@ -40,6 +41,19 @@ export const ROUTER = createBrowserRouter([
             <UserListPage />
           </AuthWrapper>
         ),
+      },
+      {
+        path: ":userId",
+        children: [
+          {
+            index: true,
+            element: (
+              <AuthWrapper>
+                <UserDetailsPage />
+              </AuthWrapper>
+            ),
+          },
+        ],
       },
     ],
   },

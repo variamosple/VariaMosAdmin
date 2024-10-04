@@ -2,7 +2,9 @@ import { User } from "@/Domain/User/Entity/User";
 import { Paginator } from "@/UI/Components/Paginator";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
-import { Table } from "react-bootstrap";
+import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { Ban, Search, TrashFill } from "react-bootstrap-icons";
+import { useNavigate } from "react-router-dom";
 
 export interface UserListParameters extends PaginationControlsProps {
   items: User[];
@@ -14,6 +16,8 @@ export const UserList: FC<UserListParameters> = ({
   totalPages,
   onPageChange,
 }) => {
+  const navigate = useNavigate();
+
   return (
     <>
       <Paginator
@@ -31,6 +35,12 @@ export const UserList: FC<UserListParameters> = ({
 
             <th>Email</th>
 
+            <th>Status</th>
+
+            <th>Created At</th>
+
+            <th>Last Login</th>
+
             <th>Actions</th>
           </tr>
         </thead>
@@ -44,7 +54,43 @@ export const UserList: FC<UserListParameters> = ({
 
               <td>{user.email}</td>
 
-              <td></td>
+              <td>{user.isEnabled ? "active" : "disabled"}</td>
+
+              <td>{new Date(user.createdAt)?.toISOString?.()}</td>
+
+              <td>
+                {user.lastLogin
+                  ? new Date(user.lastLogin)?.toISOString?.()
+                  : ""}
+              </td>
+
+              <td>
+                <ButtonGroup size="sm">
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/users/${user.id}`)}
+                    title="See user details"
+                  >
+                    <Search />
+                  </Button>
+
+                  <Button
+                    variant="warning"
+                    onClick={() => {}}
+                    title="Disable role"
+                  >
+                    <Ban />
+                  </Button>
+
+                  <Button
+                    variant="danger"
+                    onClick={() => {}}
+                    title="Delete user"
+                  >
+                    <TrashFill />
+                  </Button>
+                </ButtonGroup>
+              </td>
             </tr>
           ))}
         </tbody>

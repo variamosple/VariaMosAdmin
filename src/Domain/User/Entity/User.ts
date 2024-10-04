@@ -3,4 +3,7 @@ export interface User {
   user: string;
   name: string;
   email: string;
+  isEnabled: boolean;
+  createdAt: Date;
+  lastLogin?: Date;
 }

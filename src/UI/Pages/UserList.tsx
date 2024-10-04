@@ -23,7 +23,7 @@ export const UserListPage: FC<unknown> = () => {
   }, [loadData]);
 
   return (
-    <Container>
+    <Container fluid="sm" className="my-2">
       <h1>Users list</h1>
       <hr />
 
