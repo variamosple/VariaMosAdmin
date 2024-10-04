@@ -1,6 +1,6 @@
 import { PagedModel } from "@/Domain/Core/Entity/PagedModel";
 import { ResponseModel } from "@/Domain/Core/Entity/ResponseModel";
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 
 interface UsePaginatedQueryProps<Filter extends PagedModel, Response> {
   queryFunction: (filter: Filter) => Promise<ResponseModel<Response[]>>;
@@ -10,13 +10,15 @@ interface UsePaginatedQueryProps<Filter extends PagedModel, Response> {
 
 interface PaginatedQueryResult<Filter extends PagedModel, Response> {
   data: Response[];
-  loadData: (filter: Filter) => void;
+  loadData: (filter: Filter) => Promise<ResponseModel<Response[]>>;
   filter: Filter | null;
   currentPage: number;
+  totalItems: number;
   totalPages: number;
   isLoading: boolean;
   error: string | null;
   onPageChange: (page: number) => void;
+  setCurrentPage: Dispatch<SetStateAction<number>>;
 }
 
 export function usePaginatedQuery<Filter extends PagedModel, Response>({
@@ -29,6 +31,7 @@ export function usePaginatedQuery<Filter extends PagedModel, Response>({
   const [data, setData] = useState<Response[]>([]);
   const [filter, setFilter] = useState<Filter | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
+  const [totalItems, setTotalItems] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [error] = useState<string | null>(null);
@@ -38,12 +41,15 @@ export function usePaginatedQuery<Filter extends PagedModel, Response>({
       setFilter(filter);
       setIsloading(true);
 
-      queryFunction(filter)
+      return queryFunction(filter)
         .then((response) => {
           setData(response.data ?? []);
+          setTotalItems(response.totalCount || 0);
           setTotalPages(
             Math.ceil((response.totalCount || 0) / filter.pageSize)
           );
+
+          return response;
         })
         .finally(() => {
           setIsloading(false);
@@ -52,23 +58,28 @@ export function usePaginatedQuery<Filter extends PagedModel, Response>({
     [queryFunction]
   );
 
-  const onPageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-    loadData(
-      Object.assign(filter!, {
-        pageNumber,
-      })
-    );
-  };
+  const onPageChange = useCallback(
+    (pageNumber: number) => {
+      setCurrentPage(pageNumber);
+      loadData(
+        Object.assign(filter!, {
+          pageNumber,
+        })
+      );
+    },
+    [filter, loadData]
+  );
 
   return {
     data,
     loadData,
     filter,
     currentPage,
+    totalItems,
     totalPages,
     isLoading,
     error,
     onPageChange,
+    setCurrentPage,
   };
 }

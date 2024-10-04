@@ -5,8 +5,11 @@ import { SignInLayout } from "./Layouts/SignInLayout";
 import { HomePage } from "./Pages/Home";
 import { LoginPage } from "./Pages/LoginPage";
 import { PermissionCreatePage } from "./Pages/PermissionCreate";
+import { PermissionEditPage } from "./Pages/PermissionEdit";
 import { PermissionListPage } from "./Pages/PermissionList";
 import { RoleCreatePage } from "./Pages/RoleCreate";
+import { RoleDetailsPage } from "./Pages/RoleDetails";
+import { RoleEditPage } from "./Pages/RoleEdit";
 import { RoleListPage } from "./Pages/RoleList";
 import { SignUpPage } from "./Pages/SignUpPage";
 import { UserListPage } from "./Pages/UserList";
@@ -60,6 +63,27 @@ export const ROUTER = createBrowserRouter([
           </AuthWrapper>
         ),
       },
+      {
+        path: ":roleId",
+        children: [
+          {
+            index: true,
+            element: (
+              <AuthWrapper>
+                <RoleDetailsPage />
+              </AuthWrapper>
+            ),
+          },
+          {
+            path: "edit",
+            element: (
+              <AuthWrapper>
+                <RoleEditPage />
+              </AuthWrapper>
+            ),
+          },
+        ],
+      },
     ],
   },
   {
@@ -79,6 +103,14 @@ export const ROUTER = createBrowserRouter([
         element: (
           <AuthWrapper>
             <PermissionCreatePage />
+          </AuthWrapper>
+        ),
+      },
+      {
+        path: ":permissionId/edit",
+        element: (
+          <AuthWrapper>
+            <PermissionEditPage />
           </AuthWrapper>
         ),
       },

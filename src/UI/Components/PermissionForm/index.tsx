@@ -4,23 +4,27 @@ import { Button, Form, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 export interface PermissionFormProps {
-  onPermissionCreate: (permission: Permission) => void;
+  defaultValue?: Permission;
+  onPermissionSubmit: (permission: Permission) => void;
   isLoading: boolean;
+  submitText?: string;
 }
 
 export const PermissionForm: FC<PermissionFormProps> = ({
-  onPermissionCreate,
+  defaultValue,
+  onPermissionSubmit,
   isLoading,
+  submitText = "Create Permission",
 }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Permission>();
+  } = useForm<Permission>({ defaultValues: defaultValue });
 
   const onSubmit: SubmitHandler<Permission> = (data) => {
     if (!isLoading) {
-      onPermissionCreate(data);
+      onPermissionSubmit(data);
     }
   };
 
@@ -49,7 +53,7 @@ export const PermissionForm: FC<PermissionFormProps> = ({
         {isLoading ? (
           <Spinner animation="border" variant="light" size="sm" />
         ) : (
-          "Create Permission"
+          submitText
         )}
       </Button>
     </Form>

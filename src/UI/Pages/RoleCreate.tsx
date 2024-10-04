@@ -28,7 +28,7 @@ export const RoleCreatePage: FC<unknown> = () => {
 
       <hr />
 
-      <RoleForm onRoleCreate={onRoleCreate} isLoading={isLoading} />
+      <RoleForm onRoleSubmit={onRoleCreate} isLoading={isLoading} />
     </Container>
   );
 };

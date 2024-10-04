@@ -2,7 +2,8 @@ import { Role } from "@/Domain/Role/Entity/Role";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
-import { Trash } from "react-bootstrap-icons";
+import { PencilFill, Search, TrashFill } from "react-bootstrap-icons";
+import { useNavigate } from "react-router-dom";
 import { Paginator } from "../Paginator";
 
 export interface RoleListParameters extends PaginationControlsProps {
@@ -17,6 +18,7 @@ export const RoleList: FC<RoleListParameters> = ({
   onPageChange,
   onRoleDelete,
 }) => {
+  const navigate = useNavigate();
   return (
     <>
       <Paginator
@@ -46,11 +48,27 @@ export const RoleList: FC<RoleListParameters> = ({
               <td>
                 <ButtonGroup size="sm">
                   <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/roles/${role.id}`)}
+                    title="See role details"
+                  >
+                    <Search />
+                  </Button>
+
+                  <Button
+                    variant="primary"
+                    onClick={() => navigate(`/roles/${role.id}/edit`)}
+                    title="Edit role"
+                  >
+                    <PencilFill />
+                  </Button>
+
+                  <Button
                     variant="danger"
                     onClick={() => onRoleDelete(role)}
-                    title="Delete language"
+                    title="Delete role"
                   >
-                    <Trash />
+                    <TrashFill />
                   </Button>
                 </ButtonGroup>
               </td>

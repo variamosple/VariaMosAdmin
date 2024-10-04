@@ -4,20 +4,27 @@ import { Button, Form, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 export interface RoleFormProps {
-  onRoleCreate: (role: Role) => void;
+  defaultValue?: Role;
+  onRoleSubmit: (role: Role) => void;
   isLoading: boolean;
+  submitText?: string;
 }
 
-export const RoleForm: FC<RoleFormProps> = ({ onRoleCreate, isLoading }) => {
+export const RoleForm: FC<RoleFormProps> = ({
+  defaultValue,
+  onRoleSubmit,
+  isLoading,
+  submitText = "Create role",
+}) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Role>();
+  } = useForm<Role>({ defaultValues: defaultValue });
 
   const onSubmit: SubmitHandler<Role> = (data) => {
     if (!isLoading) {
-      onRoleCreate(data);
+      onRoleSubmit(data);
     }
   };
 
@@ -46,7 +53,7 @@ export const RoleForm: FC<RoleFormProps> = ({ onRoleCreate, isLoading }) => {
         {isLoading ? (
           <Spinner animation="border" variant="light" size="sm" />
         ) : (
-          "Create Role"
+          submitText
         )}
       </Button>
     </Form>

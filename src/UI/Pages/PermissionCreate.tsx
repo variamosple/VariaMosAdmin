@@ -29,7 +29,7 @@ export const PermissionCreatePage: FC<unknown> = () => {
       <hr />
 
       <PermissionForm
-        onPermissionCreate={onPermissionCreate}
+        onPermissionSubmit={onPermissionCreate}
         isLoading={isLoading}
       />
     </Container>
