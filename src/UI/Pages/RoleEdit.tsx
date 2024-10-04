@@ -1,11 +1,13 @@
 import { queryRoleById, updateRole } from "@/DataProviders/RoleRepository";
 import { Role } from "@/Domain/Role/Entity/Role";
 import { FC, useEffect, useState } from "react";
-import { Container, Spinner } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { Button, Container, Spinner } from "react-bootstrap";
+import { ArrowLeft } from "react-bootstrap-icons";
+import { useNavigate, useParams } from "react-router-dom";
 import { RoleForm } from "../Components/RoleForm";
 
 export const RoleEditPage: FC<unknown> = () => {
+  const navigate = useNavigate();
   const { roleId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,7 +49,15 @@ export const RoleEditPage: FC<unknown> = () => {
 
   return (
     <Container fluid="sm" className="my-2">
-      <h1 className="mb-0">Edit Role</h1>
+      <div className="d-flex justify-content-between align-items-end">
+        <h1 className="mb-0">Edit Role</h1>
+
+        <div>
+          <Button onClick={() => navigate("/roles")}>
+            <ArrowLeft /> Back To Role List
+          </Button>
+        </div>
+      </div>
 
       <hr />
 

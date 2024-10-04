@@ -4,11 +4,13 @@ import {
 } from "@/DataProviders/PermissionRepository";
 import { Permission } from "@/Domain/Permission/Entity/Permission";
 import { FC, useEffect, useState } from "react";
-import { Container, Spinner } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { Button, Container, Spinner } from "react-bootstrap";
+import { ArrowLeft } from "react-bootstrap-icons";
+import { useNavigate, useParams } from "react-router-dom";
 import { PermissionForm } from "../Components/PermissionForm";
 
 export const PermissionEditPage: FC<unknown> = () => {
+  const navigate = useNavigate();
   const { permissionId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -50,7 +52,15 @@ export const PermissionEditPage: FC<unknown> = () => {
 
   return (
     <Container fluid="sm" className="my-2">
-      <h1 className="mb-0">Edit Permission</h1>
+      <div className="d-flex justify-content-between align-items-end">
+        <h1 className="mb-0">Edit Permission</h1>
+
+        <div>
+          <Button onClick={() => navigate("/permissions")}>
+            <ArrowLeft /> Back To Permission List
+          </Button>
+        </div>
+      </div>
 
       <hr />
 
