@@ -49,3 +49,12 @@ body {
   color: var(--dark-color-text);
   background-color: var(--dark-color-75);
 }
+
+footer {
+  height: 100px;
+  background-color: var(--dark-color-font);
+  color: white;
+  padding-top: 3rem;
+  text-align: center;
+  margin-top: auto;
+}
