@@ -4,12 +4,8 @@ import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";
 import { HomePage } from "./Pages/Home";
 import { LoginPage } from "./Pages/LoginPage";
-import { PermissionCreatePage } from "./Pages/PermissionCreate";
-import { PermissionEditPage } from "./Pages/PermissionEdit";
 import { PermissionListPage } from "./Pages/PermissionList";
-import { RoleCreatePage } from "./Pages/RoleCreate";
 import { RoleDetailsPage } from "./Pages/RoleDetails";
-import { RoleEditPage } from "./Pages/RoleEdit";
 import { RoleListPage } from "./Pages/RoleList";
 import { SignUpPage } from "./Pages/SignUpPage";
 import { UserDetailsPage } from "./Pages/UserDetails";
@@ -70,14 +66,6 @@ export const ROUTER = createBrowserRouter([
         ),
       },
       {
-        path: "create",
-        element: (
-          <AuthWrapper>
-            <RoleCreatePage />
-          </AuthWrapper>
-        ),
-      },
-      {
         path: ":roleId",
         children: [
           {
@@ -85,14 +73,6 @@ export const ROUTER = createBrowserRouter([
             element: (
               <AuthWrapper>
                 <RoleDetailsPage />
-              </AuthWrapper>
-            ),
-          },
-          {
-            path: "edit",
-            element: (
-              <AuthWrapper>
-                <RoleEditPage />
               </AuthWrapper>
             ),
           },
@@ -109,22 +89,6 @@ export const ROUTER = createBrowserRouter([
         element: (
           <AuthWrapper>
             <PermissionListPage />
-          </AuthWrapper>
-        ),
-      },
-      {
-        path: "create",
-        element: (
-          <AuthWrapper>
-            <PermissionCreatePage />
-          </AuthWrapper>
-        ),
-      },
-      {
-        path: ":permissionId/edit",
-        element: (
-          <AuthWrapper>
-            <PermissionEditPage />
           </AuthWrapper>
         ),
       },

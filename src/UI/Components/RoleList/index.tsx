@@ -8,6 +8,7 @@ import { Paginator } from "../Paginator";
 
 export interface RoleListParameters extends PaginationControlsProps {
   items: Role[];
+  onRoleEdit: (role: Role) => void;
   onRoleDelete: (role: Role) => void;
 }
 
@@ -16,6 +17,7 @@ export const RoleList: FC<RoleListParameters> = ({
   currentPage,
   totalPages,
   onPageChange,
+  onRoleEdit,
   onRoleDelete,
 }) => {
   const navigate = useNavigate();
@@ -57,7 +59,7 @@ export const RoleList: FC<RoleListParameters> = ({
 
                   <Button
                     variant="primary"
-                    onClick={() => navigate(`/roles/${role.id}/edit`)}
+                    onClick={() => onRoleEdit(role)}
                     title="Edit role"
                   >
                     <PencilFill />

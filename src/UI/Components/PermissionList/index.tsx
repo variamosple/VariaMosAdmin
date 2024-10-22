@@ -3,11 +3,11 @@ import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, TrashFill } from "react-bootstrap-icons";
-import { useNavigate } from "react-router-dom";
 import { Paginator } from "../Paginator";
 
 export interface PermissionListParameters extends PaginationControlsProps {
   items: Permission[];
+  onPermissionEdit: (permission: Permission) => void;
   onPermissionDelete: (permission: Permission) => void;
 }
 
@@ -16,10 +16,9 @@ export const PermissionList: FC<PermissionListParameters> = ({
   currentPage,
   totalPages,
   onPageChange,
+  onPermissionEdit,
   onPermissionDelete,
 }) => {
-  const navigate = useNavigate();
-
   return (
     <>
       <Paginator
@@ -50,9 +49,7 @@ export const PermissionList: FC<PermissionListParameters> = ({
                 <ButtonGroup size="sm">
                   <Button
                     variant="primary"
-                    onClick={() =>
-                      navigate(`/permissions/${permission.id}/edit`)
-                    }
+                    onClick={() => onPermissionEdit(permission)}
                     title="Edit permission"
                   >
                     <PencilFill />

@@ -64,7 +64,11 @@ export const InfiniteSelect = <ValueType,>({
 
   return (
     <div className="position-relative grow mb-3">
-      <button onClick={toggleDropDown} className="text-start form-select">
+      <button
+        type="button"
+        onClick={toggleDropDown}
+        className="text-start form-select"
+      >
         {isSearchable ? (
           <input
             type="text"
