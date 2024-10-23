@@ -1,18 +1,25 @@
 import { Credentials } from "@/Domain/User/Entity/Credentials";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Alert } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "../Components/GoogleLogin";
 import { LoginForm } from "../Components/LoginForm";
 import { useSession } from "../Context/SessionsContext";
 
 export const LoginPage: FC<unknown> = () => {
+  let [searchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const { signIn } = useSession();
 
   const onSignIn = (credentials: Credentials) => {
     signIn(credentials).then((response) => setErrorMessage(response));
   };
+
+  useEffect(() => {
+    if (searchParams.has("errorMessage")) {
+      setErrorMessage(searchParams.get("errorMessage")!);
+    }
+  }, [searchParams]);
 
   return (
     <>

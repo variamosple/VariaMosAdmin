@@ -1,13 +1,16 @@
 import { User } from "@/Domain/User/Entity/User";
 import { Paginator } from "@/UI/Components/Paginator";
+import { formatDate } from "@/UI/constants";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
-import { Ban, Search, TrashFill } from "react-bootstrap-icons";
+import { Ban, CheckCircle, Search, TrashFill } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 
 export interface UserListParameters extends PaginationControlsProps {
   items: User[];
+  onUserDisable: (user: User) => void;
+  onUserEnable: (user: User) => void;
 }
 
 export const UserList: FC<UserListParameters> = ({
@@ -15,6 +18,8 @@ export const UserList: FC<UserListParameters> = ({
   currentPage,
   totalPages,
   onPageChange,
+  onUserDisable,
+  onUserEnable,
 }) => {
   const navigate = useNavigate();
 
@@ -56,12 +61,10 @@ export const UserList: FC<UserListParameters> = ({
 
               <td>{user.isEnabled ? "active" : "disabled"}</td>
 
-              <td>{new Date(user.createdAt)?.toISOString?.()}</td>
+              <td>{formatDate(new Date(user.createdAt))}</td>
 
               <td>
-                {user.lastLogin
-                  ? new Date(user.lastLogin)?.toISOString?.()
-                  : ""}
+                {user.lastLogin ? formatDate(new Date(user.lastLogin)) : ""}
               </td>
 
               <td>
@@ -74,13 +77,25 @@ export const UserList: FC<UserListParameters> = ({
                     <Search />
                   </Button>
 
-                  <Button
-                    variant="warning"
-                    onClick={() => {}}
-                    title="Disable role"
-                  >
-                    <Ban />
-                  </Button>
+                  {user.isEnabled && (
+                    <Button
+                      variant="warning"
+                      onClick={() => onUserDisable(user)}
+                      title="Disable user"
+                    >
+                      <Ban />
+                    </Button>
+                  )}
+
+                  {!user.isEnabled && (
+                    <Button
+                      variant="success"
+                      onClick={() => onUserEnable(user)}
+                      title="Enable user"
+                    >
+                      <CheckCircle />
+                    </Button>
+                  )}
 
                   <Button
                     variant="danger"
