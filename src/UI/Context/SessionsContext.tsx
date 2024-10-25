@@ -15,6 +15,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { usePageVisibility } from "../Hooks/usePageVisibility";
 
 interface SessionContextType {
   user: User | null;
@@ -35,6 +36,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const isAuthenticated = !!user;
+  const isPageActive = usePageVisibility();
 
   useEffect(() => {
     setIsLoading(true);
@@ -49,7 +51,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isPageActive) {
       const requestSessionInfo = () => {
         getSessionInfo()
           .then((result) => {
@@ -68,7 +70,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
 
       return () => clearInterval(interval);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isPageActive]);
 
   const signIn = (credentials: Credentials) => {
     setIsLoading(true);
