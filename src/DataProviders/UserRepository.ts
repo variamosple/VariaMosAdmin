@@ -48,7 +48,7 @@ export const queryUserById = (userId: string): Promise<ResponseModel<User>> => {
     });
 };
 
-export const disableUser = (userId: string): Promise<ResponseModel<User>> => {
+export const disableUser = (userId: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/users/${userId}/disable`)
     .then((response) => response.data)
     .catch((error) => {
@@ -69,7 +69,7 @@ export const disableUser = (userId: string): Promise<ResponseModel<User>> => {
     });
 };
 
-export const enableUser = (userId: string): Promise<ResponseModel<User>> => {
+export const enableUser = (userId: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/users/${userId}/enable`)
     .then((response) => response.data)
     .catch((error) => {
@@ -85,6 +85,27 @@ export const enableUser = (userId: string): Promise<ResponseModel<User>> => {
         return new ResponseModel("APP-ERROR").withError(
           500,
           `Error when trying to enable the user with id: ${userId}, please try again later.`
+        );
+      }
+    });
+};
+
+export const deleteUser = (userId: string): Promise<ResponseModel<void>> => {
+  return ADMIN_CLIENT.delete(`/v1/users/${userId}`)
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        return response;
+      } else {
+        console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          `Error when trying to delete the user with id: ${userId}, please try again later.`
         );
       }
     });

@@ -4,6 +4,7 @@ export interface User {
   name: string;
   email: string;
   isEnabled: boolean;
+  isDeleted: boolean;
   createdAt: Date;
   lastLogin?: Date;
 }

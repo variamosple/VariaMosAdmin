@@ -1,4 +1,5 @@
 import { User } from "@/Domain/User/Entity/User";
+import { formatDate } from "@/UI/constants";
 import { FC } from "react";
 import { Col, Row } from "react-bootstrap";
 
@@ -36,17 +37,21 @@ export const UserDetails: FC<RoleListParameters> = ({ user }) => {
 
         <Col className="col-12 col-md-6">
           <span className="fw-bold">Created At: </span>{" "}
-          {new Date(user?.createdAt)?.toISOString?.()}
+          {formatDate(new Date(user?.createdAt))}
         </Col>
 
         <Col className="col-12 col-md-6">
           <span className="fw-bold">Last login date: </span>{" "}
-          {user?.lastLogin ? new Date(user?.lastLogin)?.toISOString?.() : ""}
+          {user?.lastLogin ? formatDate(new Date(user?.lastLogin)) : "N/A"}
         </Col>
 
         <Col className="col-12 col-md-6">
           <span className="fw-bold">Status: </span>{" "}
-          {user?.isEnabled ? "active" : "disabled"}
+          {user?.isDeleted
+            ? "deleted"
+            : user?.isEnabled
+            ? "active"
+            : "disabled"}
         </Col>
       </Row>
     </div>

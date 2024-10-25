@@ -11,6 +11,7 @@ export interface UserListParameters extends PaginationControlsProps {
   items: User[];
   onUserDisable: (user: User) => void;
   onUserEnable: (user: User) => void;
+  onUserDelete: (user: User) => void;
 }
 
 export const UserList: FC<UserListParameters> = ({
@@ -20,6 +21,7 @@ export const UserList: FC<UserListParameters> = ({
   onPageChange,
   onUserDisable,
   onUserEnable,
+  onUserDelete,
 }) => {
   const navigate = useNavigate();
 
@@ -59,12 +61,18 @@ export const UserList: FC<UserListParameters> = ({
 
               <td>{user.email}</td>
 
-              <td>{user.isEnabled ? "active" : "disabled"}</td>
+              <td>
+                {user.isDeleted
+                  ? "deleted"
+                  : user.isEnabled
+                  ? "active"
+                  : "disabled"}
+              </td>
 
               <td>{formatDate(new Date(user.createdAt))}</td>
 
               <td>
-                {user.lastLogin ? formatDate(new Date(user.lastLogin)) : ""}
+                {user.lastLogin ? formatDate(new Date(user.lastLogin)) : "N/A"}
               </td>
 
               <td>
@@ -97,13 +105,15 @@ export const UserList: FC<UserListParameters> = ({
                     </Button>
                   )}
 
-                  <Button
-                    variant="danger"
-                    onClick={() => {}}
-                    title="Delete user"
-                  >
-                    <TrashFill />
-                  </Button>
+                  {!user.isDeleted && (
+                    <Button
+                      variant="danger"
+                      onClick={() => onUserDelete(user)}
+                      title="Delete user"
+                    >
+                      <TrashFill />
+                    </Button>
+                  )}
                 </ButtonGroup>
               </td>
             </tr>
