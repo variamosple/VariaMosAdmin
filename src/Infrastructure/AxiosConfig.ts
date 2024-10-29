@@ -1,8 +1,9 @@
 import axios, { AxiosInstance } from "axios";
 import { NavigateFunction } from "react-router-dom";
+import { AppConfig } from "./AppConfig";
 
 export const ADMIN_CLIENT = axios.create({
-  baseURL: "http://localhost:4000",
+  baseURL: AppConfig.ADMIN_API_URL,
   timeout: 10000,
   withCredentials: true,
 });
