@@ -16,6 +16,9 @@ COPY tsconfig.json ./
 # copy source code to /variamos/src folder
 COPY ./ . 
 COPY .env ./ 
+
+# install dependencies
+RUN npm install
 # compile
 RUN npm run build
 
