@@ -17,7 +17,7 @@ export const setupAxiosInterceptors = (
     },
     (error) => {
       if (error?.response?.status === 401) {
-        navigate("/login");
+        navigate(`/login?errorMessage=${error.response?.data?.errorMessage}`);
       }
 
       return Promise.reject(error);

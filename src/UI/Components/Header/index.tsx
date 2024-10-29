@@ -4,7 +4,7 @@ import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { Menu } from "../Menu";
 
 export const Header: FC<unknown> = () => {
-  const { logout } = useSession();
+  const { user, logout } = useSession();
 
   return (
     <Navbar bg="dark" variant="dark">
@@ -32,7 +32,7 @@ export const Header: FC<unknown> = () => {
           </Nav>
           <Nav>
             <NavDropdown
-              title={"Guest"}
+              title={user?.name}
               className="me-5 pe-5"
               id="nav-dropdown"
             >
