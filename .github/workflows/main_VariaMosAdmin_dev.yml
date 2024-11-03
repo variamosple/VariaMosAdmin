@@ -29,7 +29,9 @@ jobs:
 
       - name: Set Environment Variables
         run: |
-          echo "REACT_APP_ADMIN_API_URL=${{vars.REACT_APP_URLBACKENDADMIN}}" >> .env
+          echo "REACT_APP_ADMIN_API_URL=${{vars.REACT_APP_ADMIN_API_URL}}" >> .env
+          echo "REACT_APP_GOOGLE_CLIENT_ID=${{vars.REACT_APP_GOOGLE_CLIENT_ID}}" >> .env
+          echo "REACT_APP_GOOGLE_REDIRECT_URI=${{vars.REACT_APP_GOOGLE_REDIRECT_URI}}" >> .env
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3
