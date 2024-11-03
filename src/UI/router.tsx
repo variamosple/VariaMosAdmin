@@ -5,6 +5,7 @@ import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";
 import { HomePage } from "./Pages/Home";
 import { LoginPage } from "./Pages/LoginPage";
+import { MyAccountPage } from "./Pages/MyAccountPage";
 import { PermissionListPage } from "./Pages/PermissionList";
 import { RoleDetailsPage } from "./Pages/RoleDetails";
 import { RoleListPage } from "./Pages/RoleList";
@@ -27,6 +28,20 @@ export const ROUTER = createBrowserRouter(
               element: (
                 <AuthWrapper>
                   <HomePage />
+                </AuthWrapper>
+              ),
+            },
+          ],
+        },
+        {
+          path: "my-account",
+          Component: MainLayout,
+          children: [
+            {
+              index: true,
+              element: (
+                <AuthWrapper>
+                  <MyAccountPage />
                 </AuthWrapper>
               ),
             },

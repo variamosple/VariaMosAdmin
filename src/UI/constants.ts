@@ -7,7 +7,8 @@ export const formatDate = (date: any) =>
     minute: "2-digit",
     hour12: false,
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  })
-    .formatToParts(date)
-    .map((part) => part.value)
-    .join("");
+  }).format(date);
+
+export const PASSWORD_REGEXP = Object.freeze(
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,24}$/
+);

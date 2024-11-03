@@ -111,7 +111,7 @@ export const PermissionListPage: FC<unknown> = () => {
       <hr />
 
       <PermissionFormModal
-        modalTitle="Crea a Permission"
+        modalTitle="Create a Permission"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onPermissionSubmit={onPermissionCreate}

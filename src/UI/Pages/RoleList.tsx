@@ -111,7 +111,7 @@ export const RoleListPage: FC<unknown> = () => {
       <hr />
 
       <RoleFormModal
-        modalTitle="Crea a Role"
+        modalTitle="Create a Role"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onRoleSubmit={onRoleCreate}

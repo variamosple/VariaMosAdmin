@@ -36,7 +36,8 @@ export const Header: FC<unknown> = () => {
               className="me-5 pe-5"
               id="nav-dropdown"
             >
-              {/* TODO: Add a Profile page */}
+              <NavDropdown.Item href="/my-account">My account</NavDropdown.Item>
+
               <NavDropdown.Item>Report a problem</NavDropdown.Item>
 
               <NavDropdown.Divider />

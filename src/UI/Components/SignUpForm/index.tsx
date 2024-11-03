@@ -1,4 +1,5 @@
 import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
+import { PASSWORD_REGEXP } from "@/UI/constants";
 import { useSession } from "@/UI/Context/SessionsContext";
 import { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
@@ -8,22 +9,6 @@ import "./styles.css";
 export interface SignUpFormProps {
   onSignUp: (credentials: UserRegistration) => void;
 }
-
-export class UserRegistrationForm extends UserRegistration {
-  passwordConfirm: string;
-
-  constructor(
-    name: string,
-    email: string,
-    password: string,
-    passwordConfirm: string
-  ) {
-    super(name, email, password);
-
-    this.passwordConfirm = passwordConfirm;
-  }
-}
-
 export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
   const { isLoading } = useSession();
 
@@ -32,9 +17,9 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<UserRegistrationForm>();
+  } = useForm<UserRegistration>();
 
-  const onSubmit: SubmitHandler<UserRegistrationForm> = (data) => {
+  const onSubmit: SubmitHandler<UserRegistration> = (data) => {
     if (!isLoading) {
       onSignUp(data);
     }
@@ -97,7 +82,7 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           {...register("password", {
             required: "password is required",
             pattern: {
-              value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,24}$/,
+              value: PASSWORD_REGEXP,
               message:
                 "Password must be between 8 and 24 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.",
             },
@@ -117,14 +102,14 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           type="password"
           className="form-control"
           placeholder="Confirm your pasword"
-          {...register("passwordConfirm", {
+          {...register("passwordConfirmation", {
             required: "Please confirm your password",
             validate: validateConfirmPassword,
           })}
-          isInvalid={!!errors.passwordConfirm}
+          isInvalid={!!errors.passwordConfirmation}
         />
         <Form.Control.Feedback type="invalid">
-          {errors.passwordConfirm?.message}
+          {errors.passwordConfirmation?.message}
         </Form.Control.Feedback>
       </Form.Group>
 
