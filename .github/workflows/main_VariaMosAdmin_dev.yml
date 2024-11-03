@@ -27,6 +27,10 @@ jobs:
           username: ${{secrets.ACRUSERNAME_DOKCERHUB}}
           password: ${{secrets.ACRUSERPASSWORD_DOKCERHUB}}
 
+      - name: Clear .env file content during build
+        run: truncate -s 0 .env
+        shell: bash
+
       - name: Set Environment Variables
         run: |
           echo "REACT_APP_ADMIN_API_URL=${{vars.REACT_APP_ADMIN_API_URL}}" >> .env
