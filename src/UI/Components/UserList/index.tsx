@@ -1,11 +1,9 @@
 import { User } from "@/Domain/User/Entity/User";
 import { Paginator } from "@/UI/Components/Paginator";
-import { formatDate } from "@/UI/constants";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
-import { Button, ButtonGroup, Table } from "react-bootstrap";
-import { Ban, CheckCircle, Search, TrashFill } from "react-bootstrap-icons";
-import { useNavigate } from "react-router-dom";
+import { Table } from "react-bootstrap";
+import { UserRowComponent } from "./UserRow";
 
 export interface UserListParameters extends PaginationControlsProps {
   items: User[];
@@ -23,8 +21,6 @@ export const UserList: FC<UserListParameters> = ({
   onUserEnable,
   onUserDelete,
 }) => {
-  const navigate = useNavigate();
-
   return (
     <>
       <Paginator
@@ -54,69 +50,13 @@ export const UserList: FC<UserListParameters> = ({
 
         <tbody>
           {items?.map((user) => (
-            <tr key={user.id}>
-              <td>{user.user}</td>
-
-              <td>{user.name}</td>
-
-              <td>{user.email}</td>
-
-              <td>
-                {user.isDeleted
-                  ? "deleted"
-                  : user.isEnabled
-                  ? "active"
-                  : "disabled"}
-              </td>
-
-              <td>{formatDate(new Date(user.createdAt))}</td>
-
-              <td>
-                {user.lastLogin ? formatDate(new Date(user.lastLogin)) : "N/A"}
-              </td>
-
-              <td>
-                <ButtonGroup size="sm">
-                  <Button
-                    variant="secondary"
-                    onClick={() => navigate(`/users/${user.id}`)}
-                    title="See user details"
-                  >
-                    <Search />
-                  </Button>
-
-                  {user.isEnabled && (
-                    <Button
-                      variant="warning"
-                      onClick={() => onUserDisable(user)}
-                      title="Disable user"
-                    >
-                      <Ban />
-                    </Button>
-                  )}
-
-                  {!user.isEnabled && (
-                    <Button
-                      variant="success"
-                      onClick={() => onUserEnable(user)}
-                      title="Enable user"
-                    >
-                      <CheckCircle />
-                    </Button>
-                  )}
-
-                  {!user.isDeleted && (
-                    <Button
-                      variant="danger"
-                      onClick={() => onUserDelete(user)}
-                      title="Delete user"
-                    >
-                      <TrashFill />
-                    </Button>
-                  )}
-                </ButtonGroup>
-              </td>
-            </tr>
+            <UserRowComponent
+              key={user.id}
+              user={user}
+              onUserDelete={onUserDelete}
+              onUserDisable={onUserDisable}
+              onUserEnable={onUserEnable}
+            />
           ))}
         </tbody>
       </Table>

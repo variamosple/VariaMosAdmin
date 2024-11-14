@@ -17,8 +17,24 @@ export const getSessionInfo = (): Promise<User> => {
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Error when comunicating with the back-end."
+        );
       } else {
         console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          "Error when trying to get session info, please try again later."
+        );
       }
     });
 };
@@ -29,8 +45,24 @@ export const requestLogout = (): Promise<void> => {
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Error when comunicating with the back-end."
+        );
       } else {
         console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          "Error when trying to logout, please try again later."
+        );
       }
     });
 };

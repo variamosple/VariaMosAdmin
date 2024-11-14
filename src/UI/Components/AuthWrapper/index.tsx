@@ -1,5 +1,6 @@
 import { useSession } from "@/UI/Context/SessionsContext";
 import React, { ReactNode } from "react";
+import { Container, Spinner } from "react-bootstrap";
 import { Navigate } from "react-router-dom";
 
 interface AuthWrapperProps {
@@ -18,7 +19,13 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({
   const { isAuthenticated, isLoading } = useSession();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Container fluid="sm" className="my-2">
+        <div className="w-100 text-center my-3">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      </Container>
+    );
   }
 
   if (!isAuthenticated) {

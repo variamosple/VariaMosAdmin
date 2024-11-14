@@ -15,7 +15,14 @@ export const queryUsers = (
 
         const response = error.response?.data;
 
-        return response;
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Network/communication error."
+        );
       } else {
         console.error("Unexpected error:", error);
 
@@ -36,7 +43,14 @@ export const queryUserById = (userId: string): Promise<ResponseModel<User>> => {
 
         const response = error.response?.data;
 
-        return response;
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Network/communication error."
+        );
       } else {
         console.error("Unexpected error:", error);
 

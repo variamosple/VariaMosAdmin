@@ -12,8 +12,24 @@ export const queryPermissions = (
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Network/communication error."
+        );
       } else {
         console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          `Error when trying to query permissions, please try again later.`
+        );
       }
     });
 };
@@ -89,7 +105,14 @@ export const queryPermissionById = (
 
         const response = error.response?.data;
 
-        return response;
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Network/communication error."
+        );
       } else {
         console.error("Unexpected error:", error);
 
