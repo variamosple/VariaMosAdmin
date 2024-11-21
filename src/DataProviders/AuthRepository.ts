@@ -6,7 +6,7 @@ import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
 import axios from "axios";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 
-export const getSessionInfo = (): Promise<User> => {
+export const getSessionInfo = (): Promise<ResponseModel<User>> => {
   return ADMIN_CLIENT.get("/auth/session-info", {
     headers: {
       "Cache-Control": "no-cache",

@@ -42,7 +42,11 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
     setIsLoading(true);
     getSessionInfo()
       .then((result) => {
-        setUser(result ?? null);
+        if (!result?.errorCode) {
+          setUser(result?.data ?? null);
+        } else {
+          setUser(null);
+        }
       })
       .catch(() => {
         setUser(null);
@@ -55,7 +59,11 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
       const requestSessionInfo = () => {
         getSessionInfo()
           .then((result) => {
-            setUser(result ?? null);
+            if (!result?.errorCode) {
+              setUser(result?.data ?? null);
+            } else {
+              setUser(null);
+            }
           })
           .catch(() => {
             setUser(null);
@@ -83,7 +91,11 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
 
         return getSessionInfo()
           .then((result) => {
-            setUser(result ?? null);
+            if (!result?.errorCode) {
+              setUser(result?.data ?? null);
+            } else {
+              setUser(null);
+            }
             return "";
           })
           .catch(() => {
