@@ -162,7 +162,7 @@ export const RolesDetails: FC<RolesDetailsProps> = ({ isLoading, roles }) => {
   return (
     <Accordion alwaysOpen flush>
       {roles.map((role) => (
-        <Accordion.Item eventKey={`${role.id}`}>
+        <Accordion.Item key={role.id} eventKey={`${role.id}`}>
           <Accordion.Header>Role: {role.name}</Accordion.Header>
 
           <Accordion.Body>
@@ -173,7 +173,7 @@ export const RolesDetails: FC<RolesDetailsProps> = ({ isLoading, roles }) => {
               }}
             >
               {role.permissions!.map((permission) => (
-                <div>{permission.name}</div>
+                <div key={permission.id}>{permission.name}</div>
               ))}
             </div>
           </Accordion.Body>

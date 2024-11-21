@@ -5,6 +5,7 @@ import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";
 import { HomePage } from "./Pages/Home";
 import { LoginPage } from "./Pages/LoginPage";
+import { MicroServiceListPage } from "./Pages/MicroServiceList";
 import { MyAccountPage } from "./Pages/MyAccountPage";
 import { PermissionListPage } from "./Pages/PermissionList";
 import { RoleDetailsPage } from "./Pages/RoleDetails";
@@ -110,6 +111,20 @@ export const ROUTER = createBrowserRouter(
               element: (
                 <AuthWrapper>
                   <PermissionListPage />
+                </AuthWrapper>
+              ),
+            },
+          ],
+        },
+        {
+          path: "monitoring",
+          Component: MainLayout,
+          children: [
+            {
+              index: true,
+              element: (
+                <AuthWrapper>
+                  <MicroServiceListPage />
                 </AuthWrapper>
               ),
             },

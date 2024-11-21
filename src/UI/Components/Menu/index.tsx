@@ -23,6 +23,12 @@ export const Menu: FC<unknown> = () => {
             <Nav.Link className="p-0" onClick={navigateTo("/permissions")}>
               Permission
             </Nav.Link>
+            <Nav.Link className="p-0" onClick={navigateTo("/metrics")}>
+              Metrics
+            </Nav.Link>
+            <Nav.Link className="p-0" onClick={navigateTo("/monitoring")}>
+              Monitoring
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
