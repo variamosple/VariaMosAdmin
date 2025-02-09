@@ -1,10 +1,9 @@
 import { MicroService } from "@/Domain/MicroService/MicroService";
-import { formatDate } from "@/UI/constants";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
-import { Button, ButtonGroup, Table } from "react-bootstrap";
-import { ArrowClockwise, PlayFill, StopFill } from "react-bootstrap-icons";
+import { Table } from "react-bootstrap";
 import { Paginator } from "../Paginator";
+import { MicroServiceRowComponent } from "./MicroserviceRow";
 
 export interface MicroServiceListParameters extends PaginationControlsProps {
   items: MicroService[];
@@ -30,7 +29,13 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover>
+      <Table
+        striped
+        bordered
+        hover
+        className="w-100"
+        style={{ tableLayout: "fixed" }}
+      >
         <thead>
           <tr>
             <th>ID</th>
@@ -49,57 +54,13 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
 
         <tbody>
           {items?.map((microService) => (
-            <tr key={microService.id}>
-              <td className="word-break-all">{microService.id}</td>
-
-              <td className="word-break-all">
-                {microService.names.join(", ")}
-              </td>
-
-              <td>{microService.state}</td>
-
-              <td>{microService.status}</td>
-
-              <td>
-                {microService.created
-                  ? formatDate(new Date(microService.created))
-                  : null}
-              </td>
-
-              <td className="text-center">
-                <ButtonGroup size="sm">
-                  {microService.state === "exited" && (
-                    <Button
-                      variant="success"
-                      onClick={() => onMicroServiceStart(microService)}
-                      title="Start Microservice"
-                    >
-                      <PlayFill />
-                    </Button>
-                  )}
-
-                  {microService.state === "running" && (
-                    <Button
-                      variant="warning"
-                      onClick={() => onMicroServiceRestart(microService)}
-                      title="Restart Microservice"
-                    >
-                      <ArrowClockwise />
-                    </Button>
-                  )}
-
-                  {microService.state === "running" && (
-                    <Button
-                      variant="danger"
-                      onClick={() => onMicroServiceStop(microService)}
-                      title="Stop Microservice"
-                    >
-                      <StopFill />
-                    </Button>
-                  )}
-                </ButtonGroup>
-              </td>
-            </tr>
+            <MicroServiceRowComponent
+              key={microService.id}
+              microService={microService}
+              onMicroServiceStart={onMicroServiceStart}
+              onMicroServiceRestart={onMicroServiceRestart}
+              onMicroServiceStop={onMicroServiceStop}
+            />
           ))}
         </tbody>
       </Table>
