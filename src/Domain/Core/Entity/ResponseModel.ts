@@ -7,8 +7,14 @@ export class ResponseModel<Type> {
     public data?: Type
   ) {}
 
-  withError(errorCode: number, errorMessage: string) {
+  withData(data: Type): this {
+    this.data = data;
+    return this;
+  }
+
+  withError(errorCode: number, errorMessage: string): this {
     this.errorCode = errorCode;
     this.message = errorMessage;
+    return this;
   }
 }
