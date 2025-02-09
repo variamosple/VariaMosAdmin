@@ -32,10 +32,13 @@ export const UserRowComponent: FC<UserRowProps> = ({
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
 
-  const { loadData, isLoading, data, filter, isLoaded } = useQuery<
-    UserRoleFilter,
-    RoleDetails
-  >({
+  const {
+    loadData,
+    isLoading,
+    data = [],
+    filter,
+    isLoaded,
+  } = useQuery<UserRoleFilter, RoleDetails[]>({
     queryFunction: queryUserRolesDetails,
     initialFilter: new UserRoleFilter(user.id),
   });

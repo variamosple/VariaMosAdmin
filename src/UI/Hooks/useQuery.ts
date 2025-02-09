@@ -1,25 +1,24 @@
-import { PagedModel } from "@/Domain/Core/Entity/PagedModel";
 import { ResponseModel } from "@/Domain/Core/Entity/ResponseModel";
 import { useCallback, useState } from "react";
 
-interface UseQueryProps<Filter extends PagedModel, Response> {
-  queryFunction: (filter: Filter) => Promise<ResponseModel<Response[]>>;
+interface UseQueryProps<Filter, Response> {
+  queryFunction: (filter: Filter) => Promise<ResponseModel<Response>>;
   initialFilter: Filter;
 }
 
-interface QueryResult<Filter extends PagedModel, Response> {
-  data: Response[];
-  loadData: (filter: Filter) => Promise<ResponseModel<Response[]>>;
+interface QueryResult<Filter, Response> {
+  data?: Response;
+  loadData: (filter: Filter) => Promise<ResponseModel<Response>>;
   filter: Filter | null;
   isLoading: boolean;
   isLoaded: boolean;
   error: string | null;
 }
 
-export function useQuery<Filter extends PagedModel, Response>({
+export function useQuery<Filter, Response>({
   queryFunction,
 }: UseQueryProps<Filter, Response>): QueryResult<Filter, Response> {
-  const [data, setData] = useState<Response[]>([]);
+  const [data, setData] = useState<Response>();
   const [filter, setFilter] = useState<Filter | null>(null);
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
@@ -32,7 +31,7 @@ export function useQuery<Filter extends PagedModel, Response>({
 
       return queryFunction(filter)
         .then((response) => {
-          setData(response.data ?? []);
+          setData(response.data);
 
           return response;
         })

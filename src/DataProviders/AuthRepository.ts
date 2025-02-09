@@ -1,6 +1,7 @@
 import { ResponseModel } from "@/Domain/Core/Entity/ResponseModel";
 import { Credentials } from "@/Domain/User/Entity/Credentials";
 import { PasswordUpdate } from "@/Domain/User/Entity/PasswordUpdate";
+import { PersonalInformationUpdate } from "@/Domain/User/Entity/PersonalInformationUpdate";
 import { User } from "@/Domain/User/Entity/User";
 import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
 import axios from "axios";
@@ -129,6 +130,36 @@ export const requestSignUp = (
 
 export const getMyAccount = (): Promise<ResponseModel<User>> => {
   return ADMIN_CLIENT.get("/auth/my-account")
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Error when comunicating with the back-end."
+        );
+      } else {
+        console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          "Error when trying to get account details, please try again later."
+        );
+      }
+    });
+};
+
+export const updatePersonalInformation = (
+  personalInformation: PersonalInformationUpdate
+): Promise<ResponseModel<void>> => {
+  return ADMIN_CLIENT.put("/auth/my-account/information", personalInformation)
     .then((response) => response.data)
     .catch((error) => {
       if (axios.isAxiosError(error)) {

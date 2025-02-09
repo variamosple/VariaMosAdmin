@@ -11,6 +11,7 @@ import { usePaginatedQuery } from "@/UI/Hooks/usePaginatedQuery";
 import { FC, useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import ConfirmationModal from "../Components/ConfirmationModal";
+import { SearchForm } from "../Components/SearchForm";
 
 export const UserListPage: FC<unknown> = () => {
   const [showEnable, setShowEnable] = useState(false);
@@ -24,6 +25,7 @@ export const UserListPage: FC<unknown> = () => {
     currentPage,
     loadData,
     totalPages,
+    isLoading,
     onPageChange,
   } = usePaginatedQuery<UsersFilter, User>({
     queryFunction: queryUsers,
@@ -82,10 +84,25 @@ export const UserListPage: FC<unknown> = () => {
     });
   };
 
+  const onSearchReset = () => {
+    loadData(new UsersFilter());
+  };
+
+  const onSearchSubmit = (search?: string) => {
+    loadData(new UsersFilter(undefined, undefined, search));
+  };
+
   return (
     <Container fluid="sm" className="my-2">
       <h1>Users list</h1>
       <hr />
+
+      <SearchForm
+        isLoading={isLoading}
+        onSearchReset={onSearchReset}
+        onSubmit={onSearchSubmit}
+        placeholder="Search by user name or email"
+      />
 
       <UserList
         items={users}

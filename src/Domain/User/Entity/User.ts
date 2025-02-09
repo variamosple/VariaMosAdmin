@@ -3,6 +3,8 @@ export interface User {
   user: string;
   name: string;
   email: string;
+  countryCode?: string;
+  countryName?: string;
   isEnabled: boolean;
   isDeleted: boolean;
   createdAt: Date;

@@ -1,12 +1,21 @@
-import { RouterProvider } from "react-router-dom";
+import { FC } from "react";
+import { HashRouter, useRoutes } from "react-router-dom";
 import "./App.css";
+import { VariamosAnalitycsComponent } from "./UI/Components/VariamosAnalitycs";
 import { SessionProvider } from "./UI/Context/SessionsContext";
-import { ROUTER } from "./UI/router";
+import { ROUTES } from "./UI/router";
+
+const Routes: FC = () => {
+  return useRoutes(ROUTES);
+};
 
 function App() {
   return (
     <SessionProvider>
-      <RouterProvider router={ROUTER} />
+      <HashRouter>
+        <VariamosAnalitycsComponent routes={ROUTES} />
+        <Routes />
+      </HashRouter>
     </SessionProvider>
   );
 }
