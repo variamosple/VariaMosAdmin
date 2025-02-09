@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createHashRouter, Navigate } from "react-router-dom";
 import AuthWrapper from "./Components/AuthWrapper";
 import { SecurityWrapper } from "./Components/SecurityWrapper";
 import { MainLayout } from "./Layouts/MainLayout";
@@ -13,7 +13,7 @@ import { SignUpPage } from "./Pages/SignUpPage";
 import { UserDetailsPage } from "./Pages/UserDetails";
 import { UserListPage } from "./Pages/UserList";
 
-export const ROUTER = createBrowserRouter(
+export const ROUTER = createHashRouter(
   [
     {
       path: "/",
