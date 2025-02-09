@@ -40,6 +40,7 @@ export function usePaginatedQuery<Filter extends PagedModel, Response>({
     (filter: Filter) => {
       setFilter(filter);
       setIsloading(true);
+      setCurrentPage(filter.pageNumber || 1);
 
       return queryFunction(filter)
         .then((response) => {
@@ -60,7 +61,6 @@ export function usePaginatedQuery<Filter extends PagedModel, Response>({
 
   const onPageChange = useCallback(
     (pageNumber: number) => {
-      setCurrentPage(pageNumber);
       loadData(
         Object.assign(filter!, {
           pageNumber,

@@ -12,6 +12,7 @@ import { FC, useEffect, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import ConfirmationModal from "../Components/ConfirmationModal";
 import { RoleFormModal } from "../Components/RoleFormModal";
+import { SearchForm } from "../Components/SearchForm";
 
 export const RoleListPage: FC<unknown> = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -28,6 +29,7 @@ export const RoleListPage: FC<unknown> = () => {
     currentPage,
     loadData,
     totalPages,
+    isLoading,
     onPageChange,
   } = usePaginatedQuery<RolesFilter, Role>({
     queryFunction: queryRoles,
@@ -99,6 +101,14 @@ export const RoleListPage: FC<unknown> = () => {
     setShowDelete(true);
   };
 
+  const onSearchReset = () => {
+    loadData(new RolesFilter());
+  };
+
+  const onSearchSubmit = (search?: string) => {
+    loadData(new RolesFilter(search));
+  };
+
   return (
     <Container fluid="sm" className="my-2">
       <div className="d-flex justify-content-between align-items-end">
@@ -126,6 +136,13 @@ export const RoleListPage: FC<unknown> = () => {
         onRoleSubmit={performEditRole}
         submitText="Edit role"
         isLoading={isEditing}
+      />
+
+      <SearchForm
+        isLoading={isLoading}
+        onSearchReset={onSearchReset}
+        onSubmit={onSearchSubmit}
+        placeholder="Search by role name"
       />
 
       <RoleList

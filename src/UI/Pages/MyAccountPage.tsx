@@ -1,18 +1,29 @@
 import {
   getMyAccount,
+  updatePersonalInformation,
   updateUserPassword,
 } from "@/DataProviders/AuthRepository";
 import { PasswordUpdate } from "@/Domain/User/Entity/PasswordUpdate";
+import { PersonalInformationUpdate } from "@/Domain/User/Entity/PersonalInformationUpdate";
 import { User } from "@/Domain/User/Entity/User";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { PasswordUpdateForm } from "../Components/PasswordUpdateForm";
+import { PersonalInformationUpdateForModal } from "../Components/UserInformationUpdateFormModal";
 
 export const MyAccountPage: FC<unknown> = () => {
   const [user, setUser] = useState<User>();
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordUpdate, setShowPasswordUpdate] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const [showInformationUpdate, setShowInformationUpdate] = useState(false);
+  const [isUpdatingInformation, setIsUpdatingInformation] = useState(false);
+
+  const personalInformation: PersonalInformationUpdate = useMemo(
+    () => ({ countryCode: user?.countryCode }),
+    [user]
+  );
 
   const queryUser = () => {
     setIsLoading(true);
@@ -42,6 +53,24 @@ export const MyAccountPage: FC<unknown> = () => {
       });
   };
 
+  const onPersonalInformationUpdate = (
+    information: PersonalInformationUpdate
+  ) => {
+    setIsUpdatingInformation(true);
+    return updatePersonalInformation(information)
+      .then((response) => {
+        if (!response.errorCode) {
+          setShowInformationUpdate(false);
+          queryUser();
+        }
+
+        return response;
+      })
+      .finally(() => {
+        setIsUpdatingInformation(false);
+      });
+  };
+
   if (isLoading) {
     return (
       <Container fluid="sm" className="my-2">
@@ -54,7 +83,15 @@ export const MyAccountPage: FC<unknown> = () => {
 
   return (
     <Container fluid="sm" className="my-2">
-      <h1 className="mb-0">My account</h1>
+      <div className="d-flex justify-content-between align-items-end">
+        <h1 className="mb-0">My account</h1>
+
+        <div>
+          <Button onClick={() => setShowInformationUpdate(true)}>
+            Edit information
+          </Button>
+        </div>
+      </div>
 
       <hr />
 
@@ -69,6 +106,10 @@ export const MyAccountPage: FC<unknown> = () => {
 
         <Col className="col-12 col-md-6">
           <span className="fw-bold">Email: </span> {user?.email}
+        </Col>
+
+        <Col className="col-12 col-md-6">
+          <span className="fw-bold">Country: </span> {user?.countryName}
         </Col>
 
         <Col className="col-12 col-md-6">
@@ -90,6 +131,14 @@ export const MyAccountPage: FC<unknown> = () => {
         onClose={() => setShowPasswordUpdate(false)}
         onUpdatePasswordSubmit={onPasswordUpdate}
         isLoading={isUpdatingPassword}
+      />
+
+      <PersonalInformationUpdateForModal
+        showModal={showInformationUpdate}
+        onClose={() => setShowInformationUpdate(false)}
+        onUpdatePersonalInformationSubmit={onPersonalInformationUpdate}
+        defaultValue={personalInformation}
+        isLoading={isUpdatingInformation}
       />
     </Container>
   );

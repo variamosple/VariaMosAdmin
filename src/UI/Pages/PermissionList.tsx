@@ -11,6 +11,7 @@ import { Button, Container } from "react-bootstrap";
 import ConfirmationModal from "../Components/ConfirmationModal";
 import { PermissionFormModal } from "../Components/PermissionFormModal";
 import { PermissionList } from "../Components/PermissionList";
+import { SearchForm } from "../Components/SearchForm";
 import { usePaginatedQuery } from "../Hooks/usePaginatedQuery";
 
 export const PermissionListPage: FC<unknown> = () => {
@@ -27,6 +28,7 @@ export const PermissionListPage: FC<unknown> = () => {
     data: permissions,
     currentPage,
     loadData,
+    isLoading,
     totalPages,
     onPageChange,
   } = usePaginatedQuery<PermissionsFilter, Permission>({
@@ -99,6 +101,14 @@ export const PermissionListPage: FC<unknown> = () => {
     setShowDelete(true);
   };
 
+  const onSearchReset = () => {
+    loadData(new PermissionsFilter());
+  };
+
+  const onSearchSubmit = (search?: string) => {
+    loadData(new PermissionsFilter(search));
+  };
+
   return (
     <Container fluid="sm" className="my-2">
       <div className="d-flex justify-content-between align-items-end">
@@ -126,6 +136,13 @@ export const PermissionListPage: FC<unknown> = () => {
         onPermissionSubmit={performEditPermission}
         submitText="Edit permission"
         isLoading={isEditing}
+      />
+
+      <SearchForm
+        isLoading={isLoading}
+        onSearchReset={onSearchReset}
+        onSubmit={onSearchSubmit}
+        placeholder="Search by permission name"
       />
 
       <PermissionList
