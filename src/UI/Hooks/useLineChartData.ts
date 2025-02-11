@@ -31,10 +31,11 @@ export const useLineChartData = (metric: Metric) => {
   );
 
   const { xAxis, yAxis }: ChartAxist = useMemo(() => {
+    const metricData = metric.data || [];
     const x = new Set<string>();
     const y = new Set<string>();
 
-    metric.data.forEach((item: any) => {
+    metricData.forEach((item: any) => {
       x.add(item[metric.labelKey!]);
       y.add(item[metric.defaultFilter]);
     });
@@ -43,7 +44,9 @@ export const useLineChartData = (metric: Metric) => {
   }, [metric]);
 
   const data = useMemo(() => {
-    const groupedData: Map<string, any> = metric.data.reduce(
+    const metricData = metric.data || [];
+
+    const groupedData: Map<string, any> = metricData.reduce(
       (acc: Map<string, any[]>, item: any) => {
         const key = item[activeFilter];
 

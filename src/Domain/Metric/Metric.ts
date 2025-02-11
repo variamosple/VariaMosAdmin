@@ -4,5 +4,5 @@ export interface Metric {
   defaultFilter: string;
   filters?: string[];
   labelKey?: string;
-  data: any;
+  data?: any;
 }

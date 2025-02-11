@@ -14,7 +14,9 @@ export const useChart = (metric: Metric) => {
   );
 
   const data = useMemo(() => {
-    const dataset = metric.data.map((item: any) => [
+    const metricData = metric.data || [];
+
+    const dataset = metricData.map((item: any) => [
       item[metric.labelKey!],
       item.count,
     ]);
