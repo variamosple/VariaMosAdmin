@@ -4,7 +4,7 @@ import { AppConfig } from "./AppConfig";
 
 export const ADMIN_CLIENT = axios.create({
   baseURL: AppConfig.ADMIN_API_URL,
-  timeout: 10000,
+  timeout: 30000,
   withCredentials: true,
 });
 
@@ -18,7 +18,7 @@ export const setupAxiosInterceptors = (
     },
     (error) => {
       if (error?.response?.status === 401) {
-        navigate(`/login?errorMessage=${error.response?.data?.errorMessage}`);
+        navigate(`/login?errorMessage=${error.response?.data?.message || ""}`);
       }
 
       return Promise.reject(error);
