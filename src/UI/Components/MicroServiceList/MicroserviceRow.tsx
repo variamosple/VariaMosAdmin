@@ -1,6 +1,8 @@
+import { watchMicroserviceLogs } from "@/DataProviders/MicroServiceRepository";
 import { MicroService } from "@/Domain/MicroService/MicroService";
 import { formatDate } from "@/UI/constants";
 import { useLineBuffer } from "@/UI/Hooks/useLineBuffer";
+import { useSocket } from "@/UI/Hooks/useSocket";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
 import { FC, useEffect, useState } from "react";
@@ -31,6 +33,8 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
+  const { connect, socket } = useSocket(watchMicroserviceLogs, false);
+
   useEffect(() => {
     if (!show) {
       setIsLoaded(false);
@@ -43,7 +47,11 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
     try {
       setIsLoading(true);
-      const socket = new WebSocket("ws://localhost:4000");
+      const socket = connect();
+
+      if (!socket) {
+        return;
+      }
 
       socket.onopen = () => {
         console.log("WebSocket connection established");
@@ -62,15 +70,17 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
       socket.onerror = (error) => {
         console.error("WebSocket error:", error);
       };
-
-      return () => {
-        //socket.close();
-      };
     } finally {
       setIsLoading(false);
       setIsLoaded(true);
     }
-  }, [microService.id, show, isLoaded, isLoading, addToLogsBuffer]);
+  }, [microService.id, show, isLoaded, isLoading, addToLogsBuffer, connect]);
+
+  useEffect(() => {
+    if (socket && !show) {
+      socket.close();
+    }
+  }, [show, socket]);
 
   return (
     <>

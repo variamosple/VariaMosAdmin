@@ -3,6 +3,7 @@ import { ResponseModel } from "../Domain/Core/Entity/ResponseModel";
 
 import { MicroService } from "@/Domain/MicroService/MicroService";
 import { MicroServiceFilter } from "@/Domain/MicroService/MicroServiceFilter";
+import { AppConfig } from "@/Infrastructure/AppConfig";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 
 export const queryMicroServices = (
@@ -125,48 +126,6 @@ export const stopMicroservice = (
     });
 };
 
-export const watchMicroserviceLogs = (
-  microserviceId: string,
-  signal: AbortSignal
-): Promise<ResponseModel<ReadableStream<Uint8Array>>> => {
-  return ADMIN_CLIENT.get(`/v1/micro-services/${microserviceId}/logs/watch`, {
-    responseType: "stream",
-    signal: signal,
-    timeout: 0,
-  })
-    .then((response) => {
-      const stream = response.data; // Should be a stream if server supports it
-      if (stream && typeof stream.pipe === "function") {
-        return new ResponseModel<ReadableStream<Uint8Array>>().withData(stream);
-      } else {
-        console.error("Expected a stream, but got:", typeof stream);
-        return new ResponseModel<string>().withError(
-          500,
-          "Server did not return a stream as expected."
-        );
-      }
-    })
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (!!response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
-          "Network/communication error."
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying get the microservice logs, please try again later."
-        );
-      }
-    });
+export const watchMicroserviceLogs = (): WebSocket => {
+  return new WebSocket(AppConfig.ADMIN_WS_URL);
 };
