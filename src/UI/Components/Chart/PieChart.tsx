@@ -11,8 +11,8 @@ export const PieChart: FC<PieChartProps> = ({ metric }) => {
   const { data, options } = useChart(metric);
 
   return (
-    <div className="d-flex flex-column align-items-center col-12 col-md-6 ">
-      <h2 className="fs-5 text-center mt-5">{metric.title}</h2>
+    <div className="d-flex flex-column align-items-center col-12 col-lg-6 mb-4">
+      <h2 className="fs-4 text-center my-2">{metric.title}</h2>
 
       <div className="w-100">
         <Chart

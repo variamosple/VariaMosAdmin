@@ -44,7 +44,11 @@ export const useLineChartData = (metric: Metric) => {
   }, [metric]);
 
   const data = useMemo(() => {
-    const metricData = metric.data || [];
+    if (!metric.data) {
+      return [["Date", "Visits"]];
+    }
+
+    const metricData = metric.data;
 
     const groupedData: Map<string, any> = metricData.reduce(
       (acc: Map<string, any[]>, item: any) => {

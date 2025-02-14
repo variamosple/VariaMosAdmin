@@ -13,8 +13,8 @@ export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
     useGeoChartData(metric);
 
   return (
-    <div className="d-flex flex-column align-items-center w-100">
-      <div className="d-flex justify-content-between align-items-center mx-3 w-100">
+    <div className="d-flex flex-column align-items-center w-100 mb-4">
+      <div className="d-flex justify-content-between align-items-center my-2 mx-3 w-100">
         <h1 className="fs-4 m-0 w-auto">
           {metric.title} - {activeFilter}
         </h1>
@@ -25,11 +25,11 @@ export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
               key={option}
               id={`radio-${option}`}
               type="radio"
-              variant="outline-secondary"
+              variant="outline-primary"
               name="radio"
               value={option}
               checked={activeFilter === option}
-              onChange={(e) => setFilter(option)}
+              onChange={() => setFilter(option)}
             >
               {option}
             </ToggleButton>
