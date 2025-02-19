@@ -62,3 +62,7 @@ footer {
 .word-break-all {
   word-break: break-all;
 }
+
+.text-decoration-underline-hover:hover {
+  text-decoration: underline !important;
+}

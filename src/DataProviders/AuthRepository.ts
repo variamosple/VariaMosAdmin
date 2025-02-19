@@ -98,6 +98,36 @@ export const requestSignIn = (
     });
 };
 
+export const requestSignInAsGuest = (
+  guestId?: string | null
+): Promise<ResponseModel<string>> => {
+  return ADMIN_CLIENT.post("/auth/guest/sign-in", { guestId })
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        if (!!response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500"),
+          "Error when comunicating with the back-end."
+        );
+      } else {
+        console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          "Error when trying to sign in as guest, please try again later."
+        );
+      }
+    });
+};
+
 export const requestSignUp = (
   request: UserRegistration
 ): Promise<ResponseModel<unknown>> => {

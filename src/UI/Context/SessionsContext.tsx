@@ -2,6 +2,7 @@ import {
   getSessionInfo,
   requestLogout,
   requestSignIn,
+  requestSignInAsGuest,
   requestSignUp,
 } from "@/DataProviders/AuthRepository";
 import { ResponseModel } from "@/Domain/Core/Entity/ResponseModel";
@@ -22,11 +23,14 @@ interface SessionContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (credentials: Credentials) => Promise<string | undefined>;
+  signInAsGuest: () => Promise<string | undefined>;
   signUp: (
     registration: UserRegistration
   ) => Promise<ResponseModel<unknown> | null>;
   logout: () => void;
 }
+
+const guestIdKey = "guestId";
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
@@ -118,9 +122,47 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
+  const signInAsGuest = () => {
+    setIsLoading(true);
+
+    const guestId = localStorage.getItem(guestIdKey);
+
+    return requestSignInAsGuest(guestId)
+      .then((response) => {
+        if (response?.errorCode) {
+          return response.message;
+        }
+
+        localStorage.setItem(guestIdKey, response?.data || "");
+
+        return getSessionInfo()
+          .then((result) => {
+            if (!result?.errorCode) {
+              setUser(result?.data ?? null);
+            } else {
+              setUser(null);
+            }
+            return "";
+          })
+          .catch(() => {
+            setUser(null);
+            return "Sign in error.";
+          });
+      })
+      .finally(() => setIsLoading(false));
+  };
+
   return (
     <SessionContext.Provider
-      value={{ user, isAuthenticated, logout, isLoading, signIn, signUp }}
+      value={{
+        user,
+        isAuthenticated,
+        logout,
+        isLoading,
+        signIn,
+        signUp,
+        signInAsGuest,
+      }}
     >
       {children}
     </SessionContext.Provider>
