@@ -2,9 +2,9 @@ import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
 import { FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { useSession } from "variamos-components";
 import { GoogleLogin } from "../Components/GoogleLogin";
 import { SignUpForm } from "../Components/SignUpForm";
-import { useSession } from "../Context/SessionsContext";
 
 export const SignUpPage: FC<unknown> = () => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();

@@ -3,16 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "variamos_admin/",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "postinstall": "patch-package"
+  },
   "dependencies": {
     "@patternfly/react-core": "^6.0.0",
     "@patternfly/react-log-viewer": "^6.0.0",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.107",
-    "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0",
     "ansi-to-html": "^0.7.2",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
@@ -27,14 +27,21 @@
     "typescript": "^4.9.5",
     "uuid": "^11.0.5",
     "variamos_admin": "file:",
+    "variamos-components": "file:C:\\Users\\luis_\\programming\\variamos_components\\variamos-components-0.0.15.tgz",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "postinstall": "patch-package"
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.107",
+    "@types/react": "^18.3.5",
+    "@types/react-bootstrap": "^0.32.37",
+    "@types/react-dom": "^18.3.0",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
+    "tsconfig-paths-webpack-plugin": "^4.1.0"
   },
   "eslintConfig": {
     "extends": [
@@ -53,11 +60,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@types/react-bootstrap": "^0.32.37",
-    "patch-package": "^8.0.0",
-    "postinstall-postinstall": "^2.1.0",
-    "tsconfig-paths-webpack-plugin": "^4.1.0"
   }
 }

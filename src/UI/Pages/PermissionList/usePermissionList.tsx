@@ -7,8 +7,8 @@ import {
 import { Permission } from "@/Domain/Permission/Entity/Permission";
 import { PermissionsFilter } from "@/Domain/Permission/Entity/PermissionsFilter";
 import { useToast } from "@/UI/Context/ToastContext";
-import { usePaginatedQuery } from "@/UI/Hooks/usePaginatedQuery";
 import { useEffect, useState } from "react";
+import { usePaginatedQuery } from "variamos-components";
 
 export const usePermissionList = () => {
   const [showCreate, setShowCreate] = useState(false);

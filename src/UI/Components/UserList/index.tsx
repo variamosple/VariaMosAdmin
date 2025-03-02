@@ -1,8 +1,8 @@
 import { User } from "@/Domain/User/Entity/User";
-import { Paginator } from "@/UI/Components/Paginator";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
 import { Table } from "react-bootstrap";
+import { Paginator } from "variamos-components";
 import { UserRowComponent } from "./UserRow";
 
 export interface UserListParameters extends PaginationControlsProps {

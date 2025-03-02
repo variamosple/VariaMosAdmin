@@ -12,12 +12,12 @@ import { FC, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
+import { usePaginatedQuery, withPageVisit } from "variamos-components";
 import ConfirmationModal from "../Components/ConfirmationModal";
 import { RolePermissionForm } from "../Components/RolePermissionForm";
 import { RolePermissionList } from "../Components/RolePermissionList";
-import { usePaginatedQuery } from "../Hooks/usePaginatedQuery";
 
-export const RoleDetailsPage: FC<unknown> = () => {
+const RoleDetailsPageComponent: FC<unknown> = () => {
   const navigate = useNavigate();
   const { roleId: roleIdParam } = useParams();
   const [role, setRole] = useState<Role>();
@@ -160,3 +160,8 @@ export const RoleDetailsPage: FC<unknown> = () => {
     </Container>
   );
 };
+
+export const RoleDetailsPage = withPageVisit(
+  RoleDetailsPageComponent,
+  "RoleDetails"
+);

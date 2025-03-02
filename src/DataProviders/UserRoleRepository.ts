@@ -1,7 +1,7 @@
 import { UserRole } from "@/Domain/User/Entity/UserRole";
 import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
 import axios from "axios";
-import { ResponseModel } from "../Domain/Core/Entity/ResponseModel";
+import { ResponseModel } from "variamos-components";
 import { Role, RoleDetails } from "../Domain/Role/Entity/Role";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 

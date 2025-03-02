@@ -2,12 +2,11 @@ import { queryPermissions } from "@/DataProviders/PermissionRepository";
 import { Permission } from "@/Domain/Permission/Entity/Permission";
 import { PermissionsFilter } from "@/Domain/Permission/Entity/PermissionsFilter";
 import { RolePermission } from "@/Domain/Role/Entity/RolePermission";
-import { useDebouncedValue } from "@/UI/Hooks/useDebouncedValue";
 import useIntersectionObserver from "@/UI/Hooks/useIntersectionObserver";
-import { usePaginatedQuery } from "@/UI/Hooks/usePaginatedQuery";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { useDebouncedValue, usePaginatedQuery } from "variamos-components";
 import { InfiniteSelect } from "../InfiniteSelect";
 import { SelectOptionProps } from "../InfiniteSelect/index.types";
 
@@ -30,7 +29,7 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
   });
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const debouncedSearchInput = useDebouncedValue<string>(searchValue, 500);
+  const [debouncedSearchInput] = useDebouncedValue<string>(searchValue, 500);
   const [permissionOptions, setSemanticOptions] = useState<
     SelectOptionProps<number>[]
   >([]);

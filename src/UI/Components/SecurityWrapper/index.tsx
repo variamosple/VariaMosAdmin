@@ -3,9 +3,13 @@ import {
   setupAxiosInterceptors,
 } from "@/Infrastructure/AxiosConfig";
 import { FC, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export const SecurityWrapper: FC = () => {
+export interface SecurityWrapperProps {
+  children?: React.ReactNode;
+}
+
+export const SecurityWrapper: FC<SecurityWrapperProps> = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,5 +20,5 @@ export const SecurityWrapper: FC = () => {
     };
   }, [navigate]);
 
-  return <Outlet />;
+  return <>{children}</>;
 };

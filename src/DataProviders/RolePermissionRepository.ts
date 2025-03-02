@@ -1,7 +1,7 @@
 import { RolePermission } from "@/Domain/Role/Entity/RolePermission";
 import { RolePermissionFilter } from "@/Domain/Role/Entity/RolePermissionFilter";
 import axios from "axios";
-import { ResponseModel } from "../Domain/Core/Entity/ResponseModel";
+import { ResponseModel } from "variamos-components";
 import { Permission } from "../Domain/Permission/Entity/Permission";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 

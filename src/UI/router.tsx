@@ -1,5 +1,10 @@
-import { Navigate, RouteObject } from "react-router-dom";
-import AuthWrapper from "./Components/AuthWrapper";
+import { Navigate, Outlet, RouteObject } from "react-router-dom";
+
+import {
+  AuthWrapper,
+  NotAuthorized,
+  ProtectedRoute,
+} from "variamos-components";
 import { SecurityWrapper } from "./Components/SecurityWrapper";
 import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";
@@ -15,64 +20,71 @@ import { SignUpPage } from "./Pages/SignUpPage";
 import { UserDetailsPage } from "./Pages/UserDetails";
 import { UserListPage } from "./Pages/UserList";
 
+const NOT_AUTHORIZED_PATH = "/403";
+
 export const ROUTES: RouteObject[] = [
   {
     path: "/",
-    Component: SecurityWrapper,
+    element: (
+      <SecurityWrapper>
+        <AuthWrapper redirectPath="http://localhost:8081/variamos_admin/#/login">
+          <MainLayout>
+            <Outlet />
+          </MainLayout>
+        </AuthWrapper>
+      </SecurityWrapper>
+    ),
     children: [
       {
         path: "",
-        Component: MainLayout,
-        children: [
-          {
-            id: "home",
-            index: true,
-            element: (
-              <AuthWrapper>
-                <HomePage />
-              </AuthWrapper>
-            ),
-          },
-        ],
+        index: true,
+        element: (
+          <ProtectedRoute
+            notAuthorizedPath={NOT_AUTHORIZED_PATH}
+            allowedPermissions={[]}
+          >
+            <HomePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "my-account",
-        Component: MainLayout,
-        children: [
-          {
-            id: "MyAccount",
-            index: true,
-            element: (
-              <AuthWrapper>
-                <MyAccountPage />
-              </AuthWrapper>
-            ),
-          },
-        ],
+        element: (
+          <ProtectedRoute
+            notAuthorizedPath={NOT_AUTHORIZED_PATH}
+            allowedPermissions={[]}
+          >
+            <MyAccountPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "users",
-        Component: MainLayout,
+        element: (
+          <ProtectedRoute
+            notAuthorizedPath={NOT_AUTHORIZED_PATH}
+            allowedPermissions={["users::query"]}
+          >
+            <Outlet />
+          </ProtectedRoute>
+        ),
         children: [
           {
-            id: "UsersList",
             index: true,
-            element: (
-              <AuthWrapper>
-                <UserListPage />
-              </AuthWrapper>
-            ),
+            element: <UserListPage />,
           },
           {
             path: ":userId",
             children: [
               {
-                id: "UsersDetails",
                 index: true,
                 element: (
-                  <AuthWrapper>
+                  <ProtectedRoute
+                    notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                    allowedPermissions={["users::update"]}
+                  >
                     <UserDetailsPage />
-                  </AuthWrapper>
+                  </ProtectedRoute>
                 ),
               },
             ],
@@ -81,27 +93,30 @@ export const ROUTES: RouteObject[] = [
       },
       {
         path: "roles",
-        Component: MainLayout,
         children: [
           {
-            id: "RolesList",
             index: true,
             element: (
-              <AuthWrapper>
+              <ProtectedRoute
+                notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                allowedPermissions={["roles::query"]}
+              >
                 <RoleListPage />
-              </AuthWrapper>
+              </ProtectedRoute>
             ),
           },
           {
             path: ":roleId",
             children: [
               {
-                id: "RolesDetails",
                 index: true,
                 element: (
-                  <AuthWrapper>
+                  <ProtectedRoute
+                    notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                    allowedPermissions={["roles::update"]}
+                  >
                     <RoleDetailsPage />
-                  </AuthWrapper>
+                  </ProtectedRoute>
                 ),
               },
             ],
@@ -110,45 +125,50 @@ export const ROUTES: RouteObject[] = [
       },
       {
         path: "permissions",
-        Component: MainLayout,
         children: [
           {
-            id: "PermissionsList",
             index: true,
             element: (
-              <AuthWrapper>
+              <ProtectedRoute
+                notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                allowedPermissions={["permissions::query"]}
+              >
                 <PermissionListPage />
-              </AuthWrapper>
+              </ProtectedRoute>
             ),
           },
         ],
       },
       {
         path: "metrics",
-        Component: MainLayout,
+
         children: [
           {
-            id: "Metrics",
             index: true,
             element: (
-              <AuthWrapper>
+              <ProtectedRoute
+                notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                allowedPermissions={["metrics::query"]}
+              >
                 <MetricsPage />
-              </AuthWrapper>
+              </ProtectedRoute>
             ),
           },
         ],
       },
       {
         path: "monitoring",
-        Component: MainLayout,
+
         children: [
           {
-            id: "Monitoring",
             index: true,
             element: (
-              <AuthWrapper>
+              <ProtectedRoute
+                notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                allowedPermissions={["micro-services::query"]}
+              >
                 <MicroServiceListPage />
-              </AuthWrapper>
+              </ProtectedRoute>
             ),
           },
         ],
@@ -169,6 +189,14 @@ export const ROUTES: RouteObject[] = [
       <SignInLayout>
         <SignUpPage />
       </SignInLayout>
+    ),
+  },
+  {
+    path: "/403",
+    element: (
+      <MainLayout>
+        <NotAuthorized homePath="/" />
+      </MainLayout>
     ),
   },
   {

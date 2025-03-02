@@ -1,9 +1,9 @@
-import { ResponseModel } from "@/Domain/Core/Entity/ResponseModel";
 import { PasswordUpdate } from "@/Domain/User/Entity/PasswordUpdate";
 import { PASSWORD_REGEXP } from "@/UI/constants";
 import { FC } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { ResponseModel } from "variamos-components";
 
 export interface PasswordUpdateFormProps {
   onUpdatePasswordSubmit: (

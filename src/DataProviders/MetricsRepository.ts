@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ResponseModel } from "../Domain/Core/Entity/ResponseModel";
+import { ResponseModel } from "variamos-components";
 
 import { Metric } from "@/Domain/Metric/Metric";
 import { MetricsFilter } from "@/Domain/Metric/MetricsFilter";

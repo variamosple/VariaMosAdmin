@@ -4,9 +4,10 @@ import { PermissionList } from "@/UI/Components/PermissionList";
 import { SearchForm } from "@/UI/Components/SearchForm";
 import { FC } from "react";
 import { Button, Container } from "react-bootstrap";
+import { withPageVisit } from "variamos-components";
 import { usePermissionList } from "./usePermissionList";
 
-export const PermissionListPage: FC<unknown> = () => {
+const PermissionListPageComponent: FC<unknown> = () => {
   const {
     showCreate,
     setShowCreate,
@@ -94,3 +95,8 @@ export const PermissionListPage: FC<unknown> = () => {
     </Container>
   );
 };
+
+export const PermissionListPage = withPageVisit(
+  PermissionListPageComponent,
+  "PermissionList"
+);

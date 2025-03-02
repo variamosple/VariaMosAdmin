@@ -3,9 +3,10 @@ import { SearchForm } from "@/UI/Components/SearchForm";
 import { UserList } from "@/UI/Components/UserList";
 import { FC } from "react";
 import { Container } from "react-bootstrap";
+import { withPageVisit } from "variamos-components";
 import { useUserList } from "./useUserList";
 
-export const UserListPage: FC<unknown> = () => {
+const UserListPageComponent: FC<unknown> = () => {
   const {
     showEnable,
     setShowEnable,
@@ -95,3 +96,5 @@ export const UserListPage: FC<unknown> = () => {
     </Container>
   );
 };
+
+export const UserListPage = withPageVisit(UserListPageComponent, "UserList");

@@ -1,11 +1,10 @@
 import { queryCountries } from "@/DataProviders/CountriesRepository";
-import { ResponseModel } from "@/Domain/Core/Entity/ResponseModel";
 import { Country } from "@/Domain/Country/Country";
 import { PersonalInformationUpdate } from "@/Domain/User/Entity/PersonalInformationUpdate";
-import { useQuery } from "@/UI/Hooks/useQuery";
 import { FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { ResponseModel, useQuery } from "variamos-components";
 
 export interface PersonalInformationUpdateForModalProps {
   onUpdatePersonalInformationSubmit: (

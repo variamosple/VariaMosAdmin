@@ -2,9 +2,10 @@ import { queryMetrics } from "@/DataProviders/MetricsRepository";
 import { Metric } from "@/Domain/Metric/Metric";
 import { FC, useEffect, useState } from "react";
 import { Container, Row, Spinner } from "react-bootstrap";
+import { withPageVisit } from "variamos-components";
 import { ChartComponent } from "../Components/Chart";
 
-export const MetricsPage: FC<unknown> = () => {
+const MetricsPageComponent: FC<unknown> = () => {
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,3 +46,5 @@ export const MetricsPage: FC<unknown> = () => {
     </Container>
   );
 };
+
+export const MetricsPage = withPageVisit(MetricsPageComponent, "Metrics");

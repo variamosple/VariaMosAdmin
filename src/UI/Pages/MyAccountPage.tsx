@@ -8,10 +8,11 @@ import { PersonalInformationUpdate } from "@/Domain/User/Entity/PersonalInformat
 import { User } from "@/Domain/User/Entity/User";
 import { FC, useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
+import { withPageVisit } from "variamos-components";
 import { PasswordUpdateForm } from "../Components/PasswordUpdateForm";
 import { PersonalInformationUpdateForModal } from "../Components/UserInformationUpdateFormModal";
 
-export const MyAccountPage: FC<unknown> = () => {
+const MyAccountPageComponent: FC<unknown> = () => {
   const [user, setUser] = useState<User>();
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordUpdate, setShowPasswordUpdate] = useState(false);
@@ -143,3 +144,5 @@ export const MyAccountPage: FC<unknown> = () => {
     </Container>
   );
 };
+
+export const MyAccountPage = withPageVisit(MyAccountPageComponent, "MyAccount");

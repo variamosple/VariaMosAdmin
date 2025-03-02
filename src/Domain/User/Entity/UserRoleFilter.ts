@@ -1,4 +1,4 @@
-import { PagedModel } from "@/Domain/Core/Entity/PagedModel";
+import { PagedModel } from "variamos-components";
 
 export class UserRoleFilter extends PagedModel {
   constructor(public userId?: string, pageNumber?: number, pageSize?: number) {

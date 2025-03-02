@@ -3,7 +3,7 @@ import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { TrashFill } from "react-bootstrap-icons";
-import { Paginator } from "../Paginator";
+import { Paginator } from "variamos-components";
 
 export interface UserRoleListParameters extends PaginationControlsProps {
   items: Role[];

@@ -1,8 +1,8 @@
 import { Credentials } from "@/Domain/User/Entity/Credentials";
-import { useSession } from "@/UI/Context/SessionsContext";
 import { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useSession } from "variamos-components";
 import "./styles.css";
 
 export interface LoginFormProps {

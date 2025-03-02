@@ -1,9 +1,9 @@
 import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
 import { PASSWORD_REGEXP } from "@/UI/constants";
-import { useSession } from "@/UI/Context/SessionsContext";
 import { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useSession } from "variamos-components";
 import "./styles.css";
 
 export interface SignUpFormProps {

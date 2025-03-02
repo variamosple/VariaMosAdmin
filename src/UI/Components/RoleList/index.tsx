@@ -4,7 +4,7 @@ import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, Search, TrashFill } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
-import { Paginator } from "../Paginator";
+import { Paginator } from "variamos-components";
 
 export interface RoleListParameters extends PaginationControlsProps {
   items: Role[];

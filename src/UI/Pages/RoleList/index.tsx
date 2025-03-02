@@ -4,9 +4,10 @@ import { RoleList } from "@/UI/Components/RoleList";
 import { SearchForm } from "@/UI/Components/SearchForm";
 import { FC } from "react";
 import { Button, Container } from "react-bootstrap";
+import { withPageVisit } from "variamos-components";
 import { useRoleList } from "./useRoleList";
 
-export const RoleListPage: FC<unknown> = () => {
+const RoleListPageComponent: FC<unknown> = () => {
   const {
     showCreate,
     setShowCreate,
@@ -94,3 +95,5 @@ export const RoleListPage: FC<unknown> = () => {
     </Container>
   );
 };
+
+export const RoleListPage = withPageVisit(RoleListPageComponent, "RoleList");

@@ -12,13 +12,13 @@ import { FC, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
+import { usePaginatedQuery, withPageVisit } from "variamos-components";
 import ConfirmationModal from "../Components/ConfirmationModal";
 import { UserDetails } from "../Components/UserDetails";
 import { UserRoleForm } from "../Components/UserRoleForm";
 import { UserRoleList } from "../Components/UserRoleList";
-import { usePaginatedQuery } from "../Hooks/usePaginatedQuery";
 
-export const UserDetailsPage: FC<unknown> = () => {
+const UserDetailsPageComponent: FC<unknown> = () => {
   const navigate = useNavigate();
   const { userId: userIdParam } = useParams();
   const [user, setUser] = useState<User>();
@@ -166,3 +166,8 @@ export const UserDetailsPage: FC<unknown> = () => {
     </Container>
   );
 };
+
+export const UserDetailsPage = withPageVisit(
+  UserDetailsPageComponent,
+  "UserDetails"
+);

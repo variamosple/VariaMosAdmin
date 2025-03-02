@@ -1,29 +1,50 @@
+import { registerRedirect } from "@/DataProviders/AuthRepository";
 import { Credentials } from "@/Domain/User/Entity/Credentials";
 import { FC, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useRouter, useSession } from "variamos-components";
 import { GoogleLogin } from "../Components/GoogleLogin";
 import { LoginForm } from "../Components/LoginForm";
-import { useSession } from "../Context/SessionsContext";
 
 export const LoginPage: FC<unknown> = () => {
-  let [searchParams] = useSearchParams();
+  const { queryParams, navigate } = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const { signIn, signInAsGuest, isLoading } = useSession();
 
   const onSignIn = (credentials: Credentials) => {
-    signIn(credentials).then((response) => setErrorMessage(response));
+    signIn(credentials).then((response) => {
+      if (response.errorCode) {
+        setErrorMessage(response.message);
+      } else {
+        navigate(response.data?.redirect || "/");
+      }
+    });
   };
 
   const onSignInAsGuest = () => {
-    signInAsGuest().then((response) => setErrorMessage(response));
+    signInAsGuest().then((response) => {
+      if (response.errorCode) {
+        setErrorMessage(response.message);
+      } else {
+        navigate(response.data?.redirect || "/");
+      }
+    });
   };
 
   useEffect(() => {
-    if (searchParams.has("errorMessage")) {
-      setErrorMessage(searchParams.get("errorMessage")!);
+    if (queryParams.has("errorMessage")) {
+      setErrorMessage(queryParams.get("errorMessage")!);
     }
-  }, [searchParams]);
+
+    if (queryParams.has("redirectTo")) {
+      const decodedRedirectTo = decodeURIComponent(
+        queryParams.get("redirectTo") || ""
+      );
+
+      registerRedirect(decodedRedirectTo).then();
+    }
+  }, [queryParams]);
 
   return (
     <>
