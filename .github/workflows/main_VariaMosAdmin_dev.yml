@@ -37,6 +37,7 @@ jobs:
           echo "REACT_APP_ADMIN_WS_URL=${{vars.REACT_APP_ADMIN_WS_URL}}" >> .env
           echo "REACT_APP_GOOGLE_CLIENT_ID=${{vars.REACT_APP_GOOGLE_CLIENT_ID}}" >> .env
           echo "REACT_APP_GOOGLE_REDIRECT_URI=${{vars.REACT_APP_GOOGLE_REDIRECT_URI}}" >> .env
+          echo "REACT_APP_LOGIN_URL=\"${{vars.REACT_APP_LOGIN_URL}}\"" >> .env
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3

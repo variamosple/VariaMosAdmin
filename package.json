@@ -27,7 +27,7 @@
     "typescript": "^4.9.5",
     "uuid": "^11.0.5",
     "variamos_admin": "file:",
-    "variamos-components": "file:C:\\Users\\luis_\\programming\\variamos_components\\variamos-components-0.0.15.tgz",
+    "variamos-components": "file:.\\dependencies\\variamos-components-0.0.19.tgz",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {

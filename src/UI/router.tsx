@@ -1,5 +1,6 @@
 import { Navigate, Outlet, RouteObject } from "react-router-dom";
 
+import { AppConfig } from "@/Infrastructure/AppConfig";
 import {
   AuthWrapper,
   NotAuthorized,
@@ -27,7 +28,7 @@ export const ROUTES: RouteObject[] = [
     path: "/",
     element: (
       <SecurityWrapper>
-        <AuthWrapper redirectPath="http://localhost:8081/variamos_admin/#/login">
+        <AuthWrapper redirectPath={AppConfig.LOGIN_URL}>
           <MainLayout>
             <Outlet />
           </MainLayout>
