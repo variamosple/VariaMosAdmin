@@ -7,8 +7,8 @@ import {
 import { User } from "@/Domain/User/Entity/User";
 import { UsersFilter } from "@/Domain/User/Entity/UsersFilter";
 import { useToast } from "@/UI/Context/ToastContext";
+import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
-import { usePaginatedQuery } from "variamos-components";
 
 export const useUserList = () => {
   const [showEnable, setShowEnable] = useState(false);

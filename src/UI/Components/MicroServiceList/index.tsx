@@ -1,8 +1,8 @@
 import { MicroService } from "@/Domain/MicroService/MicroService";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
+import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Table } from "react-bootstrap";
-import { Paginator } from "variamos-components";
 import { MicroServiceRowComponent } from "./MicroserviceRow";
 
 export interface MicroServiceListParameters extends PaginationControlsProps {

@@ -2,9 +2,9 @@ import ConfirmationModal from "@/UI/Components/ConfirmationModal";
 import { RoleFormModal } from "@/UI/Components/RoleFormModal";
 import { RoleList } from "@/UI/Components/RoleList";
 import { SearchForm } from "@/UI/Components/SearchForm";
+import { withPageVisit } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, Container } from "react-bootstrap";
-import { withPageVisit } from "variamos-components";
 import { useRoleList } from "./useRoleList";
 
 const RoleListPageComponent: FC<unknown> = () => {

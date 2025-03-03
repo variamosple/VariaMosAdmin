@@ -1,3 +1,9 @@
+import {
+  getBasePath,
+  isAbsoluteUrl,
+  RouterContext,
+  RouterContextProps,
+} from "@variamosple/variamos-components";
 import { FC, ReactNode, useCallback, useContext, useMemo } from "react";
 import {
   useLocation,
@@ -5,12 +11,6 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import {
-  getBasePath,
-  isAbsoluteUrl,
-  RouterContext,
-  RouterContextProps,
-} from "variamos-components";
 
 export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const navigate = useNavigate();

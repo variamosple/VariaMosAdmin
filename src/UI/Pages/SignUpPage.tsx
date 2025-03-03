@@ -1,8 +1,8 @@
 import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
+import { useSession } from "@variamosple/variamos-components";
 import { FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useSession } from "variamos-components";
 import { GoogleLogin } from "../Components/GoogleLogin";
 import { SignUpForm } from "../Components/SignUpForm";
 

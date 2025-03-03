@@ -1,5 +1,5 @@
+import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { ResponseModel } from "variamos-components";
 import { Permission } from "../Domain/Permission/Entity/Permission";
 import { PermissionsFilter } from "../Domain/Permission/Entity/PermissionsFilter";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";

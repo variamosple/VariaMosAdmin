@@ -3,12 +3,12 @@ import { PasswordUpdate } from "@/Domain/User/Entity/PasswordUpdate";
 import { PersonalInformationUpdate } from "@/Domain/User/Entity/PersonalInformationUpdate";
 import { User } from "@/Domain/User/Entity/User";
 import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
-import axios from "axios";
 import {
   ResponseModel,
   SessionUser,
   singInResponse,
-} from "variamos-components";
+} from "@variamosple/variamos-components";
+import axios from "axios";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 
 export const getSessionInfo = (): Promise<ResponseModel<SessionUser>> => {

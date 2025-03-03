@@ -2,9 +2,9 @@ import ConfirmationModal from "@/UI/Components/ConfirmationModal";
 import { PermissionFormModal } from "@/UI/Components/PermissionFormModal";
 import { PermissionList } from "@/UI/Components/PermissionList";
 import { SearchForm } from "@/UI/Components/SearchForm";
+import { withPageVisit } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, Container } from "react-bootstrap";
-import { withPageVisit } from "variamos-components";
 import { usePermissionList } from "./usePermissionList";
 
 const PermissionListPageComponent: FC<unknown> = () => {

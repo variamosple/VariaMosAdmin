@@ -5,7 +5,7 @@ import {
   AuthWrapper,
   NotAuthorized,
   ProtectedRoute,
-} from "variamos-components";
+} from "@variamosple/variamos-components";
 import { SecurityWrapper } from "./Components/SecurityWrapper";
 import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";

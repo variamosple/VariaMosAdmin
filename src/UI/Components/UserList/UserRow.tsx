@@ -3,6 +3,7 @@ import { RoleDetails } from "@/Domain/Role/Entity/Role";
 import { User } from "@/Domain/User/Entity/User";
 import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
 import { formatDate } from "@/UI/constants";
+import { useQuery } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Accordion, Button, ButtonGroup, Spinner } from "react-bootstrap";
 import {
@@ -14,7 +15,6 @@ import {
   TrashFill,
 } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "variamos-components";
 
 export interface UserRowProps {
   user: User;

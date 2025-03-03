@@ -7,8 +7,8 @@ import {
 import { Role } from "@/Domain/Role/Entity/Role";
 import { RolesFilter } from "@/Domain/Role/Entity/RolesFilter";
 import { useToast } from "@/UI/Context/ToastContext";
+import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
-import { usePaginatedQuery } from "variamos-components";
 
 export const useRoleList = () => {
   const [showCreate, setShowCreate] = useState(false);

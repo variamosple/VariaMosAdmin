@@ -1,5 +1,5 @@
+import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { ResponseModel } from "variamos-components";
 
 import { MicroService } from "@/Domain/MicroService/MicroService";
 import { MicroServiceFilter } from "@/Domain/MicroService/MicroServiceFilter";

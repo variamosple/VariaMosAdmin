@@ -1,5 +1,5 @@
+import { Menu, ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { Menu, ResponseModel } from "variamos-components";
 
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 

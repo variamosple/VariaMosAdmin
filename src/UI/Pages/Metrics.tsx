@@ -1,8 +1,8 @@
 import { queryMetrics } from "@/DataProviders/MetricsRepository";
 import { Metric } from "@/Domain/Metric/Metric";
+import { withPageVisit } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Container, Row, Spinner } from "react-bootstrap";
-import { withPageVisit } from "variamos-components";
 import { ChartComponent } from "../Components/Chart";
 
 const MetricsPageComponent: FC<unknown> = () => {

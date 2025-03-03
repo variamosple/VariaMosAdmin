@@ -1,9 +1,9 @@
 import { registerRedirect } from "@/DataProviders/AuthRepository";
 import { Credentials } from "@/Domain/User/Entity/Credentials";
+import { useRouter, useSession } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useRouter, useSession } from "variamos-components";
 import { GoogleLogin } from "../Components/GoogleLogin";
 import { LoginForm } from "../Components/LoginForm";
 

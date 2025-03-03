@@ -1,5 +1,5 @@
+import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { ResponseModel } from "variamos-components";
 
 import { Country } from "@/Domain/Country/Country";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";

@@ -8,11 +8,14 @@ import { Role } from "@/Domain/Role/Entity/Role";
 import { User } from "@/Domain/User/Entity/User";
 import { UserRole } from "@/Domain/User/Entity/UserRole";
 import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
+import {
+  usePaginatedQuery,
+  withPageVisit,
+} from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
-import { usePaginatedQuery, withPageVisit } from "variamos-components";
 import ConfirmationModal from "../Components/ConfirmationModal";
 import { UserDetails } from "../Components/UserDetails";
 import { UserRoleForm } from "../Components/UserRoleForm";

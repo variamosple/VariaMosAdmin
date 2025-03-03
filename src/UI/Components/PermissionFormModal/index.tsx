@@ -1,8 +1,8 @@
 import { Permission } from "@/Domain/Permission/Entity/Permission";
+import { ResponseModel } from "@variamosple/variamos-components";
 import { FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ResponseModel } from "variamos-components";
 
 export interface PermissionFormModalProps {
   modalTitle: string;

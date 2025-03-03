@@ -6,9 +6,12 @@ import {
 } from "@/DataProviders/MicroServiceRepository";
 import { MicroService } from "@/Domain/MicroService/MicroService";
 import { MicroServiceFilter } from "@/Domain/MicroService/MicroServiceFilter";
+import {
+  usePaginatedQuery,
+  withPageVisit,
+} from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
-import { usePaginatedQuery, withPageVisit } from "variamos-components";
 import ConfirmationModal from "../Components/ConfirmationModal";
 import { MicroServiceList } from "../Components/MicroServiceList";
 

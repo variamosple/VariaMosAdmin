@@ -1,5 +1,5 @@
+import { ResponseModel } from "@variamosple/variamos-components";
 import { useCallback, useState } from "react";
-import { ResponseModel } from "variamos-components";
 
 interface UseWatchProps<Filter, Response> {
   watchFunction: (

@@ -1,9 +1,9 @@
 import { Permission } from "@/Domain/Permission/Entity/Permission";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
+import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, TrashFill } from "react-bootstrap-icons";
-import { Paginator } from "variamos-components";
 
 export interface PermissionListParameters extends PaginationControlsProps {
   items: Permission[];

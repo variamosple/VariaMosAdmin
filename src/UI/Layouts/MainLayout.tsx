@@ -2,7 +2,11 @@ import { requestMenuConfig } from "@/DataProviders/ConfigRepository";
 import { AppConfig } from "@/Infrastructure/AppConfig";
 import { FC } from "react";
 
-import { Footer, Header, MenuContextProvider } from "variamos-components";
+import {
+  Footer,
+  Header,
+  MenuContextProvider,
+} from "@variamosple/variamos-components";
 
 export const MainLayout: FC<any> = ({ children }) => {
   return (

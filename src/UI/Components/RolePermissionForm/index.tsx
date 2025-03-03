@@ -3,10 +3,13 @@ import { Permission } from "@/Domain/Permission/Entity/Permission";
 import { PermissionsFilter } from "@/Domain/Permission/Entity/PermissionsFilter";
 import { RolePermission } from "@/Domain/Role/Entity/RolePermission";
 import useIntersectionObserver from "@/UI/Hooks/useIntersectionObserver";
+import {
+  useDebouncedValue,
+  usePaginatedQuery,
+} from "@variamosple/variamos-components";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { useDebouncedValue, usePaginatedQuery } from "variamos-components";
 import { InfiniteSelect } from "../InfiniteSelect";
 import { SelectOptionProps } from "../InfiniteSelect/index.types";
 

@@ -6,9 +6,9 @@ import {
 import { PasswordUpdate } from "@/Domain/User/Entity/PasswordUpdate";
 import { PersonalInformationUpdate } from "@/Domain/User/Entity/PersonalInformationUpdate";
 import { User } from "@/Domain/User/Entity/User";
+import { withPageVisit } from "@variamosple/variamos-components";
 import { FC, useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
-import { withPageVisit } from "variamos-components";
 import { PasswordUpdateForm } from "../Components/PasswordUpdateForm";
 import { PersonalInformationUpdateForModal } from "../Components/UserInformationUpdateFormModal";
 

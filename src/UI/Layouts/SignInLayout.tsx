@@ -1,7 +1,7 @@
+import { useSession } from "@variamosple/variamos-components";
 import { FC, ReactNode, useEffect } from "react";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { useSession } from "variamos-components";
 
 export interface SignInLayoutProps {
   children: ReactNode;

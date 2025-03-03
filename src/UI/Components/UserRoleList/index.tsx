@@ -1,9 +1,9 @@
 import { Role } from "@/Domain/Role/Entity/Role";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
+import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { TrashFill } from "react-bootstrap-icons";
-import { Paginator } from "variamos-components";
 
 export interface UserRoleListParameters extends PaginationControlsProps {
   items: Role[];

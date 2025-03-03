@@ -1,5 +1,5 @@
+import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { ResponseModel } from "variamos-components";
 import { User } from "../Domain/User/Entity/User";
 import { UsersFilter } from "../Domain/User/Entity/UsersFilter";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";

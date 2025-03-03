@@ -1,9 +1,9 @@
 import ConfirmationModal from "@/UI/Components/ConfirmationModal";
 import { SearchForm } from "@/UI/Components/SearchForm";
 import { UserList } from "@/UI/Components/UserList";
+import { withPageVisit } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Container } from "react-bootstrap";
-import { withPageVisit } from "variamos-components";
 import { useUserList } from "./useUserList";
 
 const UserListPageComponent: FC<unknown> = () => {

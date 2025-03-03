@@ -1,8 +1,8 @@
 import { Role } from "@/Domain/Role/Entity/Role";
+import { ResponseModel } from "@variamosple/variamos-components";
 import { FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ResponseModel } from "variamos-components";
 
 export interface RoleFormModalProps {
   modalTitle: string;
