@@ -13,6 +13,7 @@ import {
   requestSignUp,
 } from "./DataProviders/AuthRepository";
 import { registerVisit } from "./DataProviders/VisitsRepository";
+import { AppConfig } from "./Infrastructure/AppConfig";
 import { RouterProvider } from "./UI/Context/RouterContext";
 import { ToastProvider } from "./UI/Context/ToastContext";
 import { ROUTES } from "./UI/router";
@@ -26,6 +27,7 @@ function App() {
     <ToastProvider>
       <AnalyticsProvider onVisit={registerVisit}>
         <SessionProvider
+          loginUrl={AppConfig.LOGIN_URL}
           getSessionInfo={getSessionInfo}
           requestSignUp={requestSignUp}
           requestSignIn={requestSignIn}
