@@ -5,13 +5,15 @@ import { User } from "@/Domain/User/Entity/User";
 import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
 import {
   ResponseModel,
-  SessionUser,
+  SessionInfoResponse,
   singInResponse,
 } from "@variamosple/variamos-components";
 import axios from "axios";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 
-export const getSessionInfo = (): Promise<ResponseModel<SessionUser>> => {
+export const getSessionInfo = (): Promise<
+  ResponseModel<SessionInfoResponse>
+> => {
   return ADMIN_CLIENT.get("/auth/session-info", {
     headers: {
       "Cache-Control": "no-cache",

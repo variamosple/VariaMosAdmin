@@ -1,10 +1,10 @@
 import {
+  Events,
   getBasePath,
   isAbsoluteUrl,
   RouterContext,
-  RouterContextProps,
 } from "@variamosple/variamos-components";
-import { FC, ReactNode, useCallback, useContext, useMemo } from "react";
+import { FC, ReactNode, useCallback, useEffect, useMemo } from "react";
 import {
   useLocation,
   useNavigate,
@@ -31,6 +31,16 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
     [navigate, pathname]
   );
 
+  useEffect(() => {
+    const eventListener = (event: CustomEvent<string>) => {
+      navigateTo(event.detail, {});
+    };
+
+    Events.subscribe<string>("navigate", eventListener);
+
+    return () => Events.unsubscribe("navigate", eventListener);
+  }, [navigateTo]);
+
   return (
     <RouterContext.Provider
       value={{
@@ -44,12 +54,4 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
       {children}
     </RouterContext.Provider>
   );
-};
-
-export const useRouter = (): RouterContextProps => {
-  const context = useContext(RouterContext);
-  if (!context) {
-    throw new Error("useRouter must be used within a RouterProvider");
-  }
-  return context;
 };
