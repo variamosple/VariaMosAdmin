@@ -21,7 +21,7 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
 
   const navigateTo = useCallback(
     (url: string, options: any) => {
-      console.log("navigateTo", url, options);
+      console.info("Router context navigateTo", url, options);
 
       const basePath = window.location.origin + pathname;
       if (isAbsoluteUrl(url) && !url.startsWith(basePath)) {
@@ -35,12 +35,13 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     const eventListener = (event: CustomEvent<string>) => {
+      console.info("sessionContext event received", event.detail);
       navigateTo(event.detail, {});
     };
 
-    Events.subscribe<string>("navigate", eventListener);
+    Events.subscribe<string>("variamosNavigate", eventListener);
 
-    return () => Events.unsubscribe("navigate", eventListener);
+    return () => Events.unsubscribe("variamosNavigate", eventListener);
   }, [navigateTo]);
 
   return (
