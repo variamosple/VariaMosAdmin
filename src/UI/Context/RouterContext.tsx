@@ -21,6 +21,8 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
 
   const navigateTo = useCallback(
     (url: string, options: any) => {
+      console.log("navigateTo", url, options);
+
       const basePath = window.location.origin + pathname;
       if (isAbsoluteUrl(url) && !url.startsWith(basePath)) {
         window.open(url, options?.target || "_self");
