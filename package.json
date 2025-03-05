@@ -13,7 +13,7 @@
   "dependencies": {
     "@patternfly/react-core": "^6.0.0",
     "@patternfly/react-log-viewer": "^6.0.0",
-    "@variamosple/variamos-components": "^0.0.22",
+    "@variamosple/variamos-components": "^0.0.23",
     "ansi-to-html": "^0.7.2",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
