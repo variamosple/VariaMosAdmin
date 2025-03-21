@@ -22,7 +22,16 @@ export const SignUpPage: FC<unknown> = () => {
   };
 
   return (
-    <>
+    <div
+      className="d-flex flex-column align-items-center gap-3 p-4 rounded-2 dark-container"
+      style={{ width: 350 }}
+      data-bs-theme="dark"
+    >
+      <img
+        src="./images/VariaMosLogo.png"
+        alt="Variamos logo"
+        className="img-fluid"
+      />
       <SignUpForm onSignUp={onSignUp} />
 
       <Alert
@@ -53,6 +62,6 @@ export const SignUpPage: FC<unknown> = () => {
           Sign in
         </Link>
       </div>
-    </>
+    </div>
   );
 };

@@ -1,11 +1,11 @@
 import { registerRedirect } from "@/DataProviders/AuthRepository";
 import { Credentials } from "@/Domain/User/Entity/Credentials";
+import { GoogleLogin } from "@/UI/Components/GoogleLogin";
+import { LoginForm } from "@/UI/Components/LoginForm";
 import { useRouter, useSession } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { GoogleLogin } from "../Components/GoogleLogin";
-import { LoginForm } from "../Components/LoginForm";
 
 export const LoginPage: FC<unknown> = () => {
   const { queryParams, navigate } = useRouter();
@@ -47,7 +47,17 @@ export const LoginPage: FC<unknown> = () => {
   }, [queryParams]);
 
   return (
-    <>
+    <div
+      className="d-flex flex-column align-items-center gap-3 p-4 rounded-2 dark-container"
+      style={{ width: 350 }}
+      data-bs-theme="dark"
+    >
+      <img
+        src="./images/VariaMosLogo.png"
+        alt="Variamos logo"
+        className="img-fluid"
+      />
+
       <LoginForm onSignIn={onSignIn} />
 
       <Alert
@@ -81,6 +91,6 @@ export const LoginPage: FC<unknown> = () => {
           Sign up here
         </Link>
       </div>
-    </>
+    </div>
   );
 };
