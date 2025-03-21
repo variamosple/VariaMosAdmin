@@ -56,5 +56,5 @@ jobs:
           script: |
             echo "Executing command on remote server..."
             sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml pull
-            sudo docker image prune -f
             sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml up -d
+            sudo docker image prune -f
