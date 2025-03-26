@@ -5,7 +5,11 @@ export const About: FC<unknown> = () => {
   return (
     <section className="p-2 p-md-5">
       <article>
-        <h1 className="text-primary-color-constrast play-bold">Variamos</h1>
+        <img
+          className="col-12 col-lg-10 col-xl-6"
+          src="images/VariaMosLogo.png"
+          alt="VariaMos logo"
+        />
 
         <p>
           VariaMos is a web-based tool that utilizes micro services to enable
@@ -634,7 +638,7 @@ fd_labeling(L).`}
             Period
           </h3>
 
-          <p>2014-2019</p>
+          <p>2017-2020</p>
 
           <h3 className="text-primary-color-constrast play-regular fs-5">
             Working team
