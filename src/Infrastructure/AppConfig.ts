@@ -7,4 +7,5 @@ export const AppConfig = {
     REDIRECT_URI: process.env.REACT_APP_GOOGLE_REDIRECT_URI || "",
   },
   LOGIN_URL: process.env.REACT_APP_LOGIN_URL || "",
+  HOME_PAGE: process.env.REACT_APP_HOME_PAGE || "",
 };

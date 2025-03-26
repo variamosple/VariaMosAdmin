@@ -1,5 +1,6 @@
 import { registerRedirect } from "@/DataProviders/AuthRepository";
 import { Credentials } from "@/Domain/User/Entity/Credentials";
+import { AppConfig } from "@/Infrastructure/AppConfig";
 import { GoogleLogin } from "@/UI/Components/GoogleLogin";
 import { LoginForm } from "@/UI/Components/LoginForm";
 import { useRouter, useSession } from "@variamosple/variamos-components";
@@ -17,7 +18,7 @@ export const LoginPage: FC<unknown> = () => {
       if (response.errorCode) {
         setErrorMessage(response.message);
       } else {
-        navigate(response.data?.redirect || "/");
+        navigate(response.data?.redirect || AppConfig.HOME_PAGE);
       }
     });
   };
@@ -27,7 +28,7 @@ export const LoginPage: FC<unknown> = () => {
       if (response.errorCode) {
         setErrorMessage(response.message);
       } else {
-        navigate(response.data?.redirect || "/");
+        navigate(response.data?.redirect || AppConfig.HOME_PAGE);
       }
     });
   };
