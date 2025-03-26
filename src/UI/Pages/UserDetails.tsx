@@ -10,19 +10,22 @@ import { UserRole } from "@/Domain/User/Entity/UserRole";
 import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
 import {
   usePaginatedQuery,
+  useRouter,
   withPageVisit,
 } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import ConfirmationModal from "../Components/ConfirmationModal";
 import { UserDetails } from "../Components/UserDetails";
 import { UserRoleForm } from "../Components/UserRoleForm";
 import { UserRoleList } from "../Components/UserRoleList";
+import { useToast } from "../Context/ToastContext";
 
 const UserDetailsPageComponent: FC<unknown> = () => {
-  const navigate = useNavigate();
+  const { pushToast, removeToast } = useToast();
+  const { navigate } = useRouter();
   const { userId: userIdParam } = useParams();
   const [user, setUser] = useState<User>();
   const [isLoading, setIsLoading] = useState(false);
@@ -53,13 +56,30 @@ const UserDetailsPageComponent: FC<unknown> = () => {
 
   const onUserRoleCreate = (UserRole: UserRole) => {
     setIsCreating(true);
+    const toastId = pushToast({
+      title: "Role assignment",
+      message: "Deleting role...",
+    });
+
     createUserRole({
       ...UserRole,
       userId: userIdParam!,
     })
       .then((response) => {
-        if (!response.errorCode) {
+        removeToast(toastId);
+        if (response.errorCode) {
+          pushToast({
+            title: "Role assignment",
+            message: response.message!,
+            variant: "danger",
+          });
+        } else {
           loadUserRoles(userRolesFilter!);
+          pushToast({
+            title: "Role assignment",
+            message: "Role assigned successfully",
+            variant: "success",
+          });
         }
       })
       .finally(() => {
@@ -73,22 +93,29 @@ const UserDetailsPageComponent: FC<unknown> = () => {
   };
 
   const performDeleteUserRole = (role: Role) => {
-    // alertify.notify("Deleting role...", "info");
+    const toastId = pushToast({
+      title: "Role delete",
+      message: "Deleting role...",
+    });
 
-    deleteUserRole(new UserRole(userIdParam!, role.id!))
-      .then((response) => {
-        // alertify.dismissAll();
+    deleteUserRole(new UserRole(userIdParam!, role.id!)).then((response) => {
+      removeToast(toastId);
 
-        if (response.errorCode) {
-          // alertify.error(response.message);
-        } else {
-          // alertify.success("Role deleted successfully");
-        }
-        onUserRolesPageChange(currentUserRolePage);
-      })
-      .catch(() => {
-        // alertify.error("Error when trying to delete the role");
-      });
+      if (response.errorCode) {
+        pushToast({
+          title: "Role delete",
+          message: response.message!,
+          variant: "danger",
+        });
+      } else {
+        pushToast({
+          title: "Role delete",
+          message: "Role deleted successfully",
+          variant: "success",
+        });
+      }
+      onUserRolesPageChange(currentUserRolePage);
+    });
   };
 
   useEffect(() => {

@@ -10,18 +10,21 @@ import { RolePermission } from "@/Domain/Role/Entity/RolePermission";
 import { RolePermissionFilter } from "@/Domain/Role/Entity/RolePermissionFilter";
 import {
   usePaginatedQuery,
+  useRouter,
   withPageVisit,
 } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import ConfirmationModal from "../Components/ConfirmationModal";
 import { RolePermissionForm } from "../Components/RolePermissionForm";
 import { RolePermissionList } from "../Components/RolePermissionList";
+import { useToast } from "../Context/ToastContext";
 
 const RoleDetailsPageComponent: FC<unknown> = () => {
-  const navigate = useNavigate();
+  const { pushToast, removeToast } = useToast();
+  const { navigate } = useRouter();
   const { roleId: roleIdParam } = useParams();
   const [role, setRole] = useState<Role>();
   const [isLoading, setIsLoading] = useState(false);
@@ -52,13 +55,28 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
 
   const onRolePermissionCreate = (rolePermission: RolePermission) => {
     setIsCreating(true);
+
+    const toastId = pushToast({
+      title: "Permission assignment",
+      message: "Assigning permission...",
+      variant: "info",
+    });
+
     createRolePermission({
       ...rolePermission,
       roleId: Number.parseInt(roleIdParam!),
     })
       .then((response) => {
+        removeToast(toastId);
+
         if (!response.errorCode) {
           loadRolePermissions(rolePermissionsFilter!);
+
+          pushToast({
+            title: "Permission assignment",
+            message: "Permission assigned successfully",
+            variant: "success",
+          });
         }
       })
       .finally(() => {
@@ -72,24 +90,32 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
   };
 
   const performDeleteRolePermission = (permission: Permission) => {
-    // alertify.notify("Deleting permission...", "info");
+    const toastId = pushToast({
+      title: "Permission deletion",
+      message: "Deleting permissiong...",
+      variant: "info",
+    });
 
     deleteRolePermission(
       new RolePermission(Number.parseInt(roleIdParam!), permission.id!)
-    )
-      .then((response) => {
-        // alertify.dismissAll();
+    ).then((response) => {
+      removeToast(toastId);
 
-        if (response.errorCode) {
-          // alertify.error(response.message);
-        } else {
-          // alertify.success("Permission deleted successfully");
-        }
-        onRolePermissionsPageChange(1);
-      })
-      .catch(() => {
-        // alertify.error("Error when trying to delete the permission");
-      });
+      if (response.errorCode) {
+        pushToast({
+          title: "Permission deletion",
+          message: response.message!,
+          variant: "danger",
+        });
+      } else {
+        pushToast({
+          title: "Permission delete",
+          message: "Permission deleted successfully",
+          variant: "success",
+        });
+      }
+      onRolePermissionsPageChange(1);
+    });
   };
 
   useEffect(() => {

@@ -3,7 +3,7 @@ import { RoleDetails } from "@/Domain/Role/Entity/Role";
 import { User } from "@/Domain/User/Entity/User";
 import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
 import { formatDate } from "@/UI/constants";
-import { useQuery } from "@variamosple/variamos-components";
+import { useQuery, useRouter } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Accordion, Button, ButtonGroup, Spinner } from "react-bootstrap";
 import {
@@ -14,7 +14,6 @@ import {
   Search,
   TrashFill,
 } from "react-bootstrap-icons";
-import { useNavigate } from "react-router-dom";
 
 export interface UserRowProps {
   user: User;
@@ -30,7 +29,7 @@ export const UserRowComponent: FC<UserRowProps> = ({
   onUserDelete,
 }) => {
   const [show, setShow] = useState(false);
-  const navigate = useNavigate();
+  const { navigate } = useRouter();
 
   const {
     loadData,

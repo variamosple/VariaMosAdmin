@@ -1,10 +1,9 @@
 import { Role } from "@/Domain/Role/Entity/Role";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
-import { Paginator } from "@variamosple/variamos-components";
+import { Paginator, useRouter } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, Search, TrashFill } from "react-bootstrap-icons";
-import { useNavigate } from "react-router-dom";
 
 export interface RoleListParameters extends PaginationControlsProps {
   items: Role[];
@@ -20,7 +19,7 @@ export const RoleList: FC<RoleListParameters> = ({
   onRoleEdit,
   onRoleDelete,
 }) => {
-  const navigate = useNavigate();
+  const { navigate } = useRouter();
   return (
     <>
       <Paginator

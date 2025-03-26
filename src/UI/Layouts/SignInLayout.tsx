@@ -1,7 +1,7 @@
-import { useSession } from "@variamosple/variamos-components";
+import { AppConfig } from "@/Infrastructure/AppConfig";
+import { useRouter, useSession } from "@variamosple/variamos-components";
 import { FC, ReactNode, useEffect } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
 import { About } from "../Components/About";
 
 export interface SignInLayoutProps {
@@ -10,11 +10,11 @@ export interface SignInLayoutProps {
 
 export const SignInLayout: FC<SignInLayoutProps> = ({ children }) => {
   const { isAuthenticated } = useSession();
-  const navigate = useNavigate();
+  const { navigate } = useRouter();
 
   useEffect(() => {
     if (isAuthenticated) {
-      const timeout = setTimeout(() => navigate("/"), 300);
+      const timeout = setTimeout(() => navigate(AppConfig.HOME_PAGE), 300);
 
       return () => {
         clearTimeout(timeout);

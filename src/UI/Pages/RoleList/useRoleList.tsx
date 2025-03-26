@@ -20,7 +20,7 @@ export const useRoleList = () => {
   const [toEditRole, setToEditRole] = useState<Role>();
   const [toDeleteRole, setToDeleteRole] = useState<Role>();
 
-  const { pushToast } = useToast();
+  const { pushToast, removeToast } = useToast();
 
   const {
     data: roles,
@@ -80,8 +80,15 @@ export const useRoleList = () => {
 
   const performEditRole = (role: Role) => {
     setIsEditing(true);
+    const toastId = pushToast({
+      title: "Role edit",
+      message: "Updating role...",
+    });
+
     return updateRole(role)
       .then((response) => {
+        removeToast(toastId);
+
         if (!response.errorCode) {
           onPageChange(currentPage);
           setShowEdit(false);
@@ -107,13 +114,13 @@ export const useRoleList = () => {
   };
 
   const performDeleteRole = (role: Role) => {
-    pushToast({
+    const toastId = pushToast({
       title: "Role delete",
       message: "Deleting role...",
     });
 
     deleteRole(role.id!).then((response) => {
-      // alertify.dismissAll();
+      removeToast(toastId);
 
       if (response.errorCode) {
         pushToast({

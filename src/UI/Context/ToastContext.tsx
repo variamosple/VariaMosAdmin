@@ -25,7 +25,7 @@ export type ToastType = {
 };
 
 interface ToastContextType {
-  pushToast: (toast: Omit<ToastType, "id">) => void;
+  pushToast: (toast: Omit<ToastType, "id">) => string;
   removeToast: (id: string) => void;
 }
 
@@ -48,6 +48,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       ...prev,
       { delay: 5000, variant: "light", ...toast, id },
     ]);
+
+    return id;
   }, []);
 
   const removeToast = useCallback((id: string) => {

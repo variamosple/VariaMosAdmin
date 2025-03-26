@@ -263,8 +263,8 @@ fd_labeling(L).`}
 
           <p>
             and due to the fact that the solver gives one solution (i.e.,{" "}
-            <pre className="d-inline">L = [0,1,0,0])</pre>, VariaMos concludes
-            that the model is not void.
+            <code className="d-inline text-body">L = [0,1,0,0])</code>, VariaMos
+            concludes that the model is not void.
           </p>
 
           <h3 className="text-primary-color-constrast play-regular fs-5">
@@ -287,14 +287,15 @@ fd_labeling(L).`}
               This operation may be useful for determining the richness of a
               PLM. VaroaMos implements this operation with GNU Prolog in the
               following way:{" "}
-              <pre className="d-inline">
+              <code className="d-inline text-body">
                 g_assign(cpt,0), pl(_), g_inc(cpt), fail;g_read(cpt,N)
-              </pre>
-              , where <pre className="d-inline">pl</pre> is the fact that
-              represents the product line model. With this operationalization we
-              avoid the overload of the RAM with each solution generated and
-              counted by the solver because each time a solution is found, we
-              release the pile of solutions before the generation of a new one.
+              </code>
+              , where <code className="d-inline text-body">pl</code> is the fact
+              that represents the product line model. With this
+              operationalization we avoid the overload of the RAM with each
+              solution generated and counted by the solver because each time a
+              solution is found, we release the pile of solutions before the
+              generation of a new one.
             </li>
 
             <li>
@@ -323,9 +324,9 @@ fd_labeling(L).`}
               unique variable appears only in one product) while a less
               homogeneous one would be one with a lot of unique variables. By
               definition,{" "}
-              <pre className="d-inline">
+              <code className="d-inline text-body">
                 Homogeneity = 1 - (#unicVariables / #products)
-              </pre>
+              </code>
               . This operation computes the number of variables that appear in
               only one product by means of a request to the solver and computes
               the number of products using the operation 1.
@@ -338,9 +339,9 @@ fd_labeling(L).`}
               is the potential number of products represented by a PLM, assuming
               that there are not cross-tree constraint on the model and that all
               PLM’s variables are Boolean.{" "}
-              <pre className="d-inline">
+              <code className="d-inline text-body">
                 Variability factor = NProd / 2^NVar
-              </pre>
+              </code>
               . This function uses the solver to compute the number of variables
               and the number of products in the PLM.
             </li>
@@ -428,14 +429,14 @@ fd_labeling(L).`}
             <li>
               <p>
                 Find an optimal product with respect to a given attribute like
-                cost (<pre className="d-inline">min goal</pre>) and benefit (
-                <pre className="d-inline">max goal</pre>). Detection of
-                “optimal” products is very important for decision makers as
-                presented in (Mazo, 2011). To operationalize this function we
-                use the
-                <pre className="d-inline">fd_maximize</pre> and the{" "}
-                <pre className="d-inline">fd_minimize</pre> facts offered by the
-                GNU Prolog solver.
+                cost (<code className="d-inline text-body">min goal</code>) and
+                benefit (<code className="d-inline text-body">max goal</code>).
+                Detection of “optimal” products is very important for decision
+                makers as presented in (Mazo, 2011). To operationalize this
+                function we use the
+                <code className="d-inline text-body">fd_maximize</code> and the{" "}
+                <code className="d-inline text-body">fd_minimize</code> facts
+                offered by the GNU Prolog solver.
               </p>
 
               <figure className="text-center">
@@ -470,13 +471,14 @@ fd_labeling(L).`}
             </strong>{" "}
             The execution time of each reasoning operation can be calculated by
             the solver by means of a request for the current time (by means of
-            the prolog function <pre className="d-inline">user_time(T1)</pre>)
-            at the beginning and at the end (by means of the prolog function{" "}
-            <pre className="d-inline">user_time(T2)</pre>) of each constraint
-            program. The time spent by the solver to execute the operation at
-            hand, is computed by means of the clause:{" "}
-            <pre className="d-inline">T is T2 - T1</pre>. Works like the one
-            presented by Mazo (2011) show the efficiency of VariaMos in
+            the prolog function{" "}
+            <code className="d-inline text-body">user_time(T1)</code>) at the
+            beginning and at the end (by means of the prolog function{" "}
+            <code className="d-inline text-body">user_time(T2)</code>) of each
+            constraint program. The time spent by the solver to execute the
+            operation at hand, is computed by means of the clause:{" "}
+            <code className="d-inline text-body">T is T2 - T1</code>. Works like
+            the one presented by Mazo (2011) show the efficiency of VariaMos in
             verification of product line models and show the efficiency of
             VariaMos in transforming product line models.
           </p>
