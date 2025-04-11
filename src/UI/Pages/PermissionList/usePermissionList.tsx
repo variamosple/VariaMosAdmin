@@ -107,8 +107,8 @@ export const usePermissionList = () => {
 
   const performDeletePermission = (permission: Permission) => {
     pushToast({
-      title: "Role delete",
-      message: "Deleting role...",
+      title: "Permission delete",
+      message: "Deleting permission...",
     });
 
     deletePermission(permission.id!).then((response) => {
@@ -116,14 +116,14 @@ export const usePermissionList = () => {
 
       if (response.errorCode) {
         pushToast({
-          title: "Role delete",
+          title: "Permission delete",
           message: response.message!,
           variant: "danger",
         });
       } else {
         pushToast({
-          title: "Role delete",
-          message: "Role deleted successfully",
+          title: "Permission delete",
+          message: "Permission deleted successfully",
           variant: "success",
         });
         onPageChange(currentPage);

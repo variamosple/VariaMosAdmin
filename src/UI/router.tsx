@@ -15,6 +15,7 @@ import { MetricsPage } from "./Pages/Metrics";
 import { MicroServiceListPage } from "./Pages/MicroServiceList";
 import { MyAccountPage } from "./Pages/MyAccountPage";
 import { PermissionListPage } from "./Pages/PermissionList";
+import { ProjectListPage } from "./Pages/ProjectListPage";
 import { RoleDetailsPage } from "./Pages/RoleDetails";
 import { RoleListPage } from "./Pages/RoleList";
 import { SignUpPage } from "./Pages/SignUpPage";
@@ -135,6 +136,22 @@ export const ROUTES: RouteObject[] = [
                 allowedPermissions={["permissions::query"]}
               >
                 <PermissionListPage />
+              </ProtectedRoute>
+            ),
+          },
+        ],
+      },
+      {
+        path: "projects",
+        children: [
+          {
+            index: true,
+            element: (
+              <ProtectedRoute
+                notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                allowedPermissions={["admin::projects::query"]}
+              >
+                <ProjectListPage />
               </ProtectedRoute>
             ),
           },

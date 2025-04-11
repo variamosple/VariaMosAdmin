@@ -25,22 +25,21 @@ const Routes: FC = () => {
 function App() {
   return (
     <ToastProvider>
-      <AnalyticsProvider onVisit={registerVisit}>
-        <SessionProvider
-          loginUrl={AppConfig.LOGIN_URL}
-          getSessionInfo={getSessionInfo}
-          requestSignUp={requestSignUp}
-          requestSignIn={requestSignIn}
-          requestSignInAsGuest={requestSignInAsGuest}
-          requestLogout={requestLogout}
-        >
-          <HashRouter>
-            <RouterProvider>
-              <Routes />
-            </RouterProvider>
-          </HashRouter>
-        </SessionProvider>
-      </AnalyticsProvider>
+      <AnalyticsProvider onVisit={registerVisit} />
+      <SessionProvider
+        loginUrl={AppConfig.LOGIN_URL}
+        getSessionInfo={getSessionInfo}
+        requestSignUp={requestSignUp}
+        requestSignIn={requestSignIn}
+        requestSignInAsGuest={requestSignInAsGuest}
+        requestLogout={requestLogout}
+      >
+        <HashRouter>
+          <RouterProvider>
+            <Routes />
+          </RouterProvider>
+        </HashRouter>
+      </SessionProvider>
     </ToastProvider>
   );
 }

@@ -74,7 +74,7 @@ export const UserRowComponent: FC<UserRowProps> = ({
         <td className="text-center">
           <ButtonGroup size="sm">
             <Button
-              variant="secondary"
+              variant="primary"
               onClick={() => navigate(`/users/${user.id}`)}
               title="See user details"
             >
@@ -113,6 +113,7 @@ export const UserRowComponent: FC<UserRowProps> = ({
 
             <Button
               size="sm"
+              variant="info"
               onClick={() => setShow((isShown) => !isShown)}
               title="Show/Hide permissions"
             >

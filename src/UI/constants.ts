@@ -12,3 +12,14 @@ export const formatDate = (date: any) =>
 export const PASSWORD_REGEXP = Object.freeze(
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,24}$/
 );
+
+export const formatBoolean = (
+  value?: boolean,
+  yesValue: string = "Yes",
+  noValue: string = "No",
+  nullValue?: string
+) => {
+  if (value === undefined || value === null) return nullValue || "";
+
+  return value ? yesValue : noValue;
+};
