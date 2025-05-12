@@ -1,6 +1,6 @@
 import { watchMicroserviceLogs } from "@/DataProviders/MicroServiceRepository";
 import { MicroService } from "@/Domain/MicroService/MicroService";
-import { formatDate } from "@/UI/constants";
+import { formatDateTime } from "@/UI/constants";
 import { useLineBuffer } from "@/UI/Hooks/useLineBuffer";
 import { useSocket } from "@/UI/Hooks/useSocket";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
@@ -95,7 +95,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
         <td>
           {microService.created
-            ? formatDate(new Date(microService.created))
+            ? formatDateTime(new Date(microService.created))
             : null}
         </td>
 

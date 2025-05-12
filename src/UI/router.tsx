@@ -10,9 +10,11 @@ import { SecurityWrapper } from "./Components/SecurityWrapper";
 import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";
 import { HomePage } from "./Pages/Home";
+import { LanguageListPage } from "./Pages/LanguageListPage";
 import { LoginPage } from "./Pages/LoginPage";
 import { MetricsPage } from "./Pages/Metrics";
 import { MicroServiceListPage } from "./Pages/MicroServiceList";
+import { ModelListPage } from "./Pages/ModelListPage";
 import { MyAccountPage } from "./Pages/MyAccountPage";
 import { PermissionListPage } from "./Pages/PermissionList";
 import { ProjectListPage } from "./Pages/ProjectListPage";
@@ -142,6 +144,22 @@ export const ROUTES: RouteObject[] = [
         ],
       },
       {
+        path: "languages",
+        children: [
+          {
+            index: true,
+            element: (
+              <ProtectedRoute
+                notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                allowedPermissions={["admin::languages::query"]}
+              >
+                <LanguageListPage />
+              </ProtectedRoute>
+            ),
+          },
+        ],
+      },
+      {
         path: "projects",
         children: [
           {
@@ -152,6 +170,22 @@ export const ROUTES: RouteObject[] = [
                 allowedPermissions={["admin::projects::query"]}
               >
                 <ProjectListPage />
+              </ProtectedRoute>
+            ),
+          },
+        ],
+      },
+      {
+        path: "models",
+        children: [
+          {
+            index: true,
+            element: (
+              <ProtectedRoute
+                notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                allowedPermissions={["admin::models::query"]}
+              >
+                <ModelListPage />
               </ProtectedRoute>
             ),
           },

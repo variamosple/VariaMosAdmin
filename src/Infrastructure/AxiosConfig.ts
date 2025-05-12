@@ -20,6 +20,14 @@ export const ADMIN_CLIENT = axios.create({
 
 ADMIN_CLIENT.interceptors.request.use(authInterceptor);
 
+export const LANGUAGES_CLIENT = axios.create({
+  baseURL: AppConfig.LANGUAGES_API_URL,
+  timeout: 30000,
+  withCredentials: true,
+});
+
+LANGUAGES_CLIENT.interceptors.request.use(authInterceptor);
+
 export const PROJECTS_CLIENT = axios.create({
   baseURL: AppConfig.PROJECTS_API_URL,
   timeout: 30000,

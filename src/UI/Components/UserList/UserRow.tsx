@@ -2,7 +2,7 @@ import { queryUserRolesDetails } from "@/DataProviders/UserRoleRepository";
 import { RoleDetails } from "@/Domain/Role/Entity/Role";
 import { User } from "@/Domain/User/Entity/User";
 import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
-import { formatDate } from "@/UI/constants";
+import { formatDateTime } from "@/UI/constants";
 import { useQuery, useRouter } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Accordion, Button, ButtonGroup, Spinner } from "react-bootstrap";
@@ -67,9 +67,11 @@ export const UserRowComponent: FC<UserRowProps> = ({
           {user.isDeleted ? "deleted" : user.isEnabled ? "active" : "disabled"}
         </td>
 
-        <td>{formatDate(new Date(user.createdAt))}</td>
+        <td>{formatDateTime(new Date(user.createdAt))}</td>
 
-        <td>{user.lastLogin ? formatDate(new Date(user.lastLogin)) : "N/A"}</td>
+        <td>
+          {user.lastLogin ? formatDateTime(new Date(user.lastLogin)) : "N/A"}
+        </td>
 
         <td className="text-center">
           <ButtonGroup size="sm">
