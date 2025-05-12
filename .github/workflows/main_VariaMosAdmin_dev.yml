@@ -35,7 +35,7 @@ jobs:
         run: |
           echo "REACT_APP_ADMIN_API_URL=${{vars.REACT_APP_ADMIN_API_URL}}" >> .env
           echo "REACT_APP_ADMIN_WS_URL=${{vars.REACT_APP_ADMIN_WS_URL}}" >> .env
-          echo "REACT_APP_LANGUAGES_API_URL=${{vars.REACT_APP_URLVARIAMOSLANGUAGES}}" >> .env
+          echo "REACT_APP_LANGUAGES_API_URL=${{vars.REACT_APP_LANGUAGES_API_URL}}" >> .env
           echo "REACT_APP_PROJECTS_API_URL=${{vars.REACT_APP_PROJECTS_API_URL}}" >> .env
           echo "REACT_APP_GOOGLE_CLIENT_ID=${{vars.REACT_APP_GOOGLE_CLIENT_ID}}" >> .env
           echo "REACT_APP_GOOGLE_REDIRECT_URI=${{vars.REACT_APP_GOOGLE_REDIRECT_URI}}" >> .env
