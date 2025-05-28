@@ -749,7 +749,7 @@ fd_labeling(L).`}
             Product line engineering (PLE)
           </h3>
 
-          <ul className="decoration-none">
+          <ul className="list-unstyled">
             <li>
               <a
                 href="https://docs.google.com/document/d/1-f0u5pwDDAiOt3u-suUEOJJlQKvtr8y9/edit?usp=drive_link&ouid=106498246296993132947&rtpof=true&sd=true"
@@ -823,7 +823,7 @@ fd_labeling(L).`}
             Model driven engineering (MDE)
           </h3>
 
-          <ul className="decoration-none">
+          <ul className="list-unstyled">
             <li>
               <a
                 href="https://docs.google.com/document/d/1x6HH3DtzIz7IyVK-zxtpmVEL5-1dAdOz/edit?usp=drive_link&ouid=106498246296993132947&rtpof=true&sd=true"
@@ -841,6 +841,25 @@ fd_labeling(L).`}
               >
                 Tutorial 2 MDE: Language semantic specification
               </a>
+            </li>
+          </ul>
+        </Tab>
+
+        <Tab eventKey="VIDEOS" title="Videos">
+          <h3 className="text-primary-color-constrast play-regular fs-5">
+            Video Tutorials
+          </h3>
+
+          <ul className="list-unstyled">
+            <li>
+              <div className="responsive-video">
+                <iframe
+                  title="VariaMos Language Tutorial"
+                  src="https://drive.google.com/file/d/1oC-HvJy9aAnMnBzVkZGAFohtlOslGzRc/preview"
+                  allow="autoplay"
+                  allowFullScreen={"true" as any}
+                ></iframe>
+              </div>
             </li>
           </ul>
         </Tab>

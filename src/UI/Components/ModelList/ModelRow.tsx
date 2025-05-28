@@ -1,7 +1,7 @@
 import { Model } from "@/Domain/Model/Model";
 import { FC, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
-import { DashCircle, PlusCircle } from "react-bootstrap-icons";
+import { DashCircle, PencilFill, PlusCircle } from "react-bootstrap-icons";
 
 export interface ModelRowProps {
   model: Model;
@@ -88,7 +88,7 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
 
         <td>
           <ButtonGroup size="sm">
-            {/* <Button
+            <Button
               variant="primary"
               onClick={() => onModelEdit(model)}
               title="Edit model"
@@ -96,7 +96,7 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
               <PencilFill />
             </Button>
 
-            <Button
+            {/* <Button
               variant="danger"
               onClick={() => onModelDelete(model)}
               title="Delete model"

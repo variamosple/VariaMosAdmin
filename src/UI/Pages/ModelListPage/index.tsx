@@ -1,3 +1,4 @@
+import { ModelFormModal } from "@/UI/Components/ModelFormModal";
 import { ModelList } from "@/UI/Components/ModelList";
 import { ModelSearchForm } from "@/UI/Components/ModelSearchForm";
 import { withPageVisit } from "@variamosple/variamos-components";
@@ -33,7 +34,7 @@ const ModelListPageComponent: FC = () => {
       <h1 className="mb-0">Models list</h1>
       <hr />
 
-      {/* <ModelFormModal
+      <ModelFormModal
         defaultValue={toEditModel}
         modalTitle="Edit a Model"
         showModal={showEdit}
@@ -41,7 +42,7 @@ const ModelListPageComponent: FC = () => {
         onModelSubmit={performEditModel}
         submitText="Edit model"
         isLoading={isEditing}
-      /> */}
+      />
 
       <ModelSearchForm
         isLoading={isLoading}
