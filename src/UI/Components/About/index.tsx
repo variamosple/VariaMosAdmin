@@ -844,70 +844,74 @@ fd_labeling(L).`}
             </li>
           </ul>
         </Tab>
-        <Tab eventKey="VIDEOS" title="Videos">
-          <h3 className="text-primary-color-constrast play-regular fs-5">
-            Video Tutorials
-          </h3>
+        <Tab eventKey="VIDEOS" title="Video tutorials">
           <Container>
-            <Tab.Container id="video-tabs-top" defaultActiveKey="first">
-              <Nav variant="pills" className="mb-3 justify-content-center gap-2">
-                <Nav.Item>
-                  <Nav.Link eventKey="first" style={{ cursor: 'pointer' }}>
-                    VariaMos Language Definition
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="second" style={{ cursor: 'pointer' }}>
-                    Collaborative Project Creation
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="third" style={{ cursor: 'pointer' }}>
-                    Collaborative Project Creation with GenAI
-                  </Nav.Link>
-                </Nav.Item>
-              </Nav>
-              <Tab.Content>
-                <Tab.Pane eventKey="first">
-                  <h3 className="text-primary-color- play-bold fs-6 mb-3">
-                    Defining the concrete and abstract syntax of a modeling language
-                  </h3>
-                  <div className="responsive-video">
-                    <iframe
-                      title="VariaMos Language Definition"
-                      src="https://drive.google.com/file/d/1oC-HvJy9aAnMnBzVkZGAFohtlOslGzRc/preview"
-                      allow="autoplay"
-                      allowFullScreen={"true" as any}
-                    ></iframe>
-                  </div>
-                </Tab.Pane>
-                <Tab.Pane eventKey="second">
-                  <h3 className="text-primary-color- play-bold fs-6 mb-3">
-                    Creation of collaborative projects for product lines
-                  </h3>
-                  <div className="responsive-video">
-                    <iframe
-                      title="Collaborative Project Creation"
-                      src="https://drive.google.com/file/d/1Q8lwzOfPucU8r-Z6dNKK-g6T6kIo7bkR/preview"
-                      allow="autoplay"
-                      allowFullScreen={"true" as any}
-                    ></iframe>
-                  </div>
-                </Tab.Pane>
-                <Tab.Pane eventKey="third">
-                  <h3 className="text-primary-color- play-bold fs-6 mb-3">
-                    Creation of collaborative projects for product lines with generative artificial intelligence
-                  </h3>
-                  <div className="responsive-video">
-                    <iframe
-                      title="Collaborative Project Creation with GenAI"
-                      src="https://drive.google.com/file/d/1j8BGIKWBbEnOGGR2zMV7uwUdGW6-t8vF/preview"
-                      allow="autoplay"
-                      allowFullScreen={"true" as any}
-                    ></iframe>
-                  </div>
-                </Tab.Pane>
-              </Tab.Content>
+
+            <Tab.Container id="video-category-sidebar" defaultActiveKey="MDE">
+              <Row>
+                <Col md={3} className="border-end">
+                  <Nav variant="pills" className="flex-column">
+                    <Nav.Item>
+                      <Nav.Link eventKey="MDE" style={{ cursor: 'pointer' }}>
+                        MDE
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey="PLE" style={{ cursor: 'pointer' }}>
+                        PLE
+                      </Nav.Link>
+                    </Nav.Item>
+                  </Nav>
+                </Col>
+                <Col md={9}>
+                  <Tab.Content>
+                    <Tab.Pane eventKey="MDE" unmountOnExit={true}>
+                      <div>
+                        <h3 className="text-primary-color- play-bold fs-6 mb-3">
+                          1. Defining the concrete and abstract syntax of a modeling language
+                        </h3>
+                        <div className="responsive-video">
+                          <iframe
+                            title="VariaMos Language Definition"
+                            src="https://drive.google.com/file/d/1oC-HvJy9aAnMnBzVkZGAFohtlOslGzRc/preview"
+                            allow="autoplay"
+                            allowFullScreen={"true" as any}
+                          ></iframe>
+                        </div>
+                      </div>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="PLE" unmountOnExit={true}>
+                      <div>
+                        <h3 className="text-primary-color- play-bold fs-6 mb-3">
+                          1. Creation of collaborative projects for product lines
+                        </h3>
+                        <div className="responsive-video">
+                          <iframe
+                            title="Collaborative Project Creation"
+                            src="https://drive.google.com/file/d/1Q8lwzOfPucU8r-Z6dNKK-g6T6kIo7bkR/preview"
+                            allow="autoplay"
+                            allowFullScreen={"true" as any}
+                          ></iframe>
+                        </div>
+                      </div>
+                      <hr className="my-4" />
+                      <div>
+                        <h3 className="text-primary-color- play-bold fs-6 mb-3">
+                          2. Creation of collaborative projects for product lines with generative artificial intelligence
+                        </h3>
+                        <div className="responsive-video">
+                          <iframe
+                            title="Collaborative Project Creation with GenAI"
+                            src="https://drive.google.com/file/d/1j8BGIKWBbEnOGGR2zMV7uwUdGW6-t8vF/preview"
+                            allow="autoplay"
+                            allowFullScreen={"true" as any}
+                          ></iframe>
+                        </div>
+                      </div>
+                    </Tab.Pane>
+                  </Tab.Content>
+                </Col>
+              </Row>
             </Tab.Container>
           </Container>
         </Tab>
