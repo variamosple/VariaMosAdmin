@@ -817,7 +817,6 @@ fd_labeling(L).`}
             </li>
           </ul>
         </Tab>
-
         <Tab eventKey="MDE" title="MDE">
           <h3 className="text-primary-color-constrast play-regular fs-5">
             Model driven engineering (MDE)
@@ -846,10 +845,9 @@ fd_labeling(L).`}
         </Tab>
         <Tab eventKey="VIDEOS" title="Video tutorials">
           <Container>
-
             <Tab.Container id="video-category-sidebar" defaultActiveKey="MDE">
               <Row>
-                <Col md={3} className="border-end">
+                <Col md={3} className="border-end mb-4">
                   <Nav variant="pills" className="flex-column">
                     <Nav.Item>
                       <Nav.Link eventKey="MDE" style={{ cursor: 'pointer' }}>
