@@ -906,6 +906,20 @@ fd_labeling(L).`}
                           ></iframe>
                         </div>
                       </div>
+                      <hr className="my-4" />
+                      <div>
+                        <h3 className="text-primary-color- play-bold fs-6 mb-3">
+                          3. Generating the scope of a product line
+                        </h3>
+                        <div className="responsive-video">
+                          <iframe
+                            title="Generating the scope of a product line"
+                            src="https://drive.google.com/file/d/1Jj00ZAyh0nbsX4boykkhjCipgrokTTDj/preview"
+                            allow="autoplay"
+                            allowFullScreen={"true" as any}
+                          ></iframe>
+                        </div>
+                      </div>
                     </Tab.Pane>
                   </Tab.Content>
                 </Col>
