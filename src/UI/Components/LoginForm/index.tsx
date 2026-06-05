@@ -3,6 +3,7 @@ import { useSession } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import "./styles.css";
 
 export interface LoginFormProps {
@@ -52,14 +53,23 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
         <Form.Control
           type="password"
           className="form-control"
-          placeholder="Type your pasword"
-          {...register("password", { required: "password is required" })}
+          placeholder="Type your password"
+          {...register("password", { required: "Password is required" })}
           isInvalid={!!errors.password}
         />
         <Form.Control.Feedback type="invalid">
           {errors.password?.message}
         </Form.Control.Feedback>
       </Form.Group>
+
+      <div className="d-flex justify-content-start w-100 mb-3">
+        <Link
+          to="/forgot-password"
+          className="text-decoration-none text-decoration-underline-hover text-primary-small"
+        >
+          Forgot Password?
+        </Link>
+      </div>
 
       <Button
         className="w-100"

@@ -9,6 +9,7 @@ import {
 import { SecurityWrapper } from "./Components/SecurityWrapper";
 import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";
+import { ForgotPasswordPage } from "./Pages/ForgotPasswordPage";
 import { HomePage } from "./Pages/Home";
 import { LanguageListPage } from "./Pages/LanguageListPage";
 import { LoginPage } from "./Pages/LoginPage";
@@ -18,6 +19,7 @@ import { ModelListPage } from "./Pages/ModelListPage";
 import { MyAccountPage } from "./Pages/MyAccountPage";
 import { PermissionListPage } from "./Pages/PermissionList";
 import { ProjectListPage } from "./Pages/ProjectListPage";
+import { ResetPasswordPage } from "./Pages/ResetPasswordPage";
 import { RoleDetailsPage } from "./Pages/RoleDetails";
 import { RoleListPage } from "./Pages/RoleList";
 import { SignUpPage } from "./Pages/SignUpPage";
@@ -235,6 +237,23 @@ export const ROUTES: RouteObject[] = [
       </SignInLayout>
     ),
   },
+  {
+    path: "/forgot-password",
+    element: (
+      <SignInLayout>
+        <ForgotPasswordPage />
+      </SignInLayout>
+    ),
+  },
+  {
+    path: "/reset-password",
+    element: (
+      <SignInLayout>
+        <ResetPasswordPage />
+      </SignInLayout>
+    ),
+  },
+
   {
     path: "/sign-up",
     element: (
