@@ -11,6 +11,7 @@ import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 
 export const useUserList = () => {
+  const [showResetLink, setShowResetLink] = useState(false);
   const [showEnable, setShowEnable] = useState(false);
   const [showDisable, setShowDisable] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
@@ -41,6 +42,11 @@ export const useUserList = () => {
       }
     });
   }, [loadData, pushToast]);
+
+  const onUserResetLink = (user: User) => {
+    setSelectedUser(user);
+    setShowResetLink(true);
+  };
 
   const onUserDisable = (user: User) => {
     setSelectedUser(user);
@@ -160,6 +166,8 @@ export const useUserList = () => {
   return {
     currentPage,
     onPageChange,
+    showResetLink,
+    setShowResetLink,
     showEnable,
     setShowEnable,
     showDisable,
@@ -171,6 +179,7 @@ export const useUserList = () => {
     users,
     totalPages,
     isLoading,
+    onUserResetLink,
     onUserDisable,
     performDisableUser,
     onUserEnable,
