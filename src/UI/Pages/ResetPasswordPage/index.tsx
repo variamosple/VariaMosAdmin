@@ -1,6 +1,6 @@
 import { type FC, useState, useEffect } from "react";
 import { Alert, Spinner } from "react-bootstrap";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ResetPasswordForm } from "@/UI/Components/ResetPasswordForm";
 import { ADMIN_CLIENT } from "@/Infrastructure/AxiosConfig";
 
@@ -35,6 +35,8 @@ export const ResetPasswordPage: FC = () => {
     verifyToken();
   }, [token]);
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (password: string) => {
     setIsLoading(true);
     setError(null);
@@ -43,6 +45,9 @@ export const ResetPasswordPage: FC = () => {
     try {
       await ADMIN_CLIENT.post("/auth/reset-password", { token, password });
       setMessage("Your password has been reset successfully !");
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
     } catch (err: any) {
       const serverMessage = err.response?.data?.message || "";
       if (

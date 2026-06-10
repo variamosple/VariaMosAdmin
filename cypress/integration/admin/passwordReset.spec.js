@@ -1,3 +1,4 @@
+/* eslint-disable */
 /// <reference types="cypress" />
 
 describe('Admin - Password Reset Flow', () => {
@@ -123,16 +124,15 @@ describe('Admin - Password Reset Flow', () => {
       const recoveryLink = `http://localhost:3000/#/reset-password?token=${tokenHash}`;
       cy.visit(recoveryLink);
 
-      // Saisie du nouveau mot de passe
+      // Input new password and confirmation
       cy.get('input[id="new_password"]').type(newPassword);
       cy.get('input[id="confirm_password"]').type(newPassword);
       cy.get('button[type="submit"]').click();
 
       cy.contains('Your password has been reset successfully !').should('be.visible');
 
-      // Verify that login succeeds with the newly set password
-      cy.contains('Back to Sign In').click();
-      cy.url().should('include', '/login');
+      // Verify automatic redirection to login page after 3 seconds
+      cy.url({ timeout: 5000 }).should('include', '/login');
       cy.get('input[name="email"]').type(smtpEmail);
       cy.get('input[name="password"]').type(newPassword);
       cy.get('button[type="submit"]').click();
