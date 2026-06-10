@@ -46,7 +46,16 @@ export const setupAxiosInterceptors = (
     },
     (error) => {
       if (error?.response?.status === 401) {
-        navigate(`/login?errorMessage=${error.response?.data?.message || ""}`);
+        const currentHash = window.location.hash || "";
+        const isPublicRoute =
+          currentHash.includes("/login") ||
+          currentHash.includes("/forgot-password") ||
+          currentHash.includes("/reset-password") ||
+          currentHash.includes("/sign-up");
+
+        if (!isPublicRoute) {
+          navigate(`/login?errorMessage=${error.response?.data?.message || ""}`);
+        }
       }
 
       return Promise.reject(error);

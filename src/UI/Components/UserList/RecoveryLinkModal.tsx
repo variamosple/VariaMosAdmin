@@ -96,6 +96,7 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
             </Form.Label>
             <InputGroup>
               <Form.Control
+                type="text"
                 readOnly
                 value={recoveryUrl}
                 className="bg-light text-dark border-secondary small font-monospace"
