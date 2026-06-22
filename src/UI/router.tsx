@@ -24,6 +24,8 @@ import { SignUpPage } from "./Pages/SignUpPage";
 import { UserDetailsPage } from "./Pages/UserDetails";
 import { UserListPage } from "./Pages/UserList";
 
+import { BugListPage } from "./Pages/BugListPage";
+
 const NOT_AUTHORIZED_PATH = "/403";
 
 export const ROUTES: RouteObject[] = [
@@ -222,6 +224,23 @@ export const ROUTES: RouteObject[] = [
                 <MicroServiceListPage />
               </ProtectedRoute>
             ),
+          },
+        ],
+      },
+      {
+        path: "bugs",
+        element: (
+          <ProtectedRoute
+            notAuthorizedPath={NOT_AUTHORIZED_PATH}
+            allowedPermissions={["bugs::query"]}
+          >
+            <Outlet />
+          </ProtectedRoute>
+        ),
+        children: [
+          {
+            index: true,
+            element: <BugListPage />,
           },
         ],
       },

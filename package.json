@@ -39,7 +39,9 @@
     "@types/react": "^18.3.5",
     "@types/react-bootstrap": "^0.32.37",
     "@types/react-dom": "^18.3.0",
+    "cypress": "^15.17.0",
     "patch-package": "^8.0.0",
+    "pg": "^8.21.0",
     "postinstall-postinstall": "^2.1.0",
     "tsconfig-paths-webpack-plugin": "^4.1.0"
   },
