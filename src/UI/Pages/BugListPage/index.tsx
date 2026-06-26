@@ -4,7 +4,18 @@ import { BugList } from "@/UI/Components/BugList";
 import { BugSearchForm } from "@/UI/Components/BugSearchForm";
 import { withPageVisit } from "@variamosple/variamos-components";
 import { FC, useState } from "react";
-import { Alert, Badge, Button, Col, Container, Modal, Row, Spinner, Tab, Tabs } from "react-bootstrap";
+import {
+  Alert,
+  Badge,
+  Button,
+  Col,
+  Container,
+  Modal,
+  Row,
+  Spinner,
+  Tab,
+  Tabs,
+} from "react-bootstrap";
 import { ArrowRepeat, Plus, Github } from "react-bootstrap-icons";
 import { useBugList } from "./useBugList";
 
@@ -89,7 +100,11 @@ const BugListPageComponent: FC = () => {
         activeTab={activeTab}
       />
 
-      <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k as any)} className="mb-3">
+      <Tabs
+        activeKey={activeTab}
+        onSelect={(k) => setActiveTab(k as any)}
+        className="mb-3"
+      >
         <Tab eventKey="github" title="GitHub Bugs">
           {isLoading ? (
             <div className="d-flex justify-content-center align-items-center p-5">
@@ -154,7 +169,7 @@ const BugListPageComponent: FC = () => {
             data.priority,
             data.category,
             data.githubRepo,
-            file
+            file,
           );
           setShowUserCreateModal(false);
         }}
@@ -174,7 +189,7 @@ const BugListPageComponent: FC = () => {
             data.priority,
             data.category,
             data.githubRepo,
-            file
+            file,
           );
           setShowAdminCreateModal(false);
         }}
@@ -200,7 +215,10 @@ const BugListPageComponent: FC = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            Bug Details {selectedBugForDetails?.gitIssueNumber ? `#${selectedBugForDetails.gitIssueNumber}` : ""}
+            Bug Details{" "}
+            {selectedBugForDetails?.gitIssueNumber
+              ? `#${selectedBugForDetails.gitIssueNumber}`
+              : ""}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -218,10 +236,14 @@ const BugListPageComponent: FC = () => {
                         selectedBugForDetails.priority === "high"
                           ? "danger"
                           : selectedBugForDetails.priority === "medium"
-                          ? "warning"
-                          : "info"
+                            ? "warning"
+                            : "info"
                       }
-                      text={selectedBugForDetails.priority === "high" ? "white" : "dark"}
+                      text={
+                        selectedBugForDetails.priority === "high"
+                          ? "white"
+                          : "dark"
+                      }
                     >
                       {selectedBugForDetails.priority.toUpperCase()}
                     </Badge>
@@ -232,8 +254,8 @@ const BugListPageComponent: FC = () => {
                         selectedBugForDetails.status === "open"
                           ? "success"
                           : selectedBugForDetails.status === "closed"
-                          ? "secondary"
-                          : "light"
+                            ? "secondary"
+                            : "light"
                       }
                       text={
                         selectedBugForDetails.status === "open" ||
@@ -280,7 +302,7 @@ const BugListPageComponent: FC = () => {
                   <strong>Creator: </strong>{" "}
                   {selectedBugForDetails.githubCreator
                     ? `@${selectedBugForDetails.githubCreator}`
-                    : (selectedBugForDetails.createdBy?.name || "System")}
+                    : selectedBugForDetails.createdBy?.name || "System"}
                 </Col>
                 <Col md={6}>
                   <strong>Reporter Email: </strong>{" "}
@@ -290,44 +312,56 @@ const BugListPageComponent: FC = () => {
                 </Col>
               </Row>
 
-              {selectedBugForDetails.githubRepo && selectedBugForDetails.gitIssueNumber && (
-                <div className="mb-3 bg-light p-2 rounded" style={{ border: "1px dashed #ced4da" }}>
-                  <strong>GitHub Link: </strong>
-                  <a
-                    href={`https://github.com/${selectedBugForDetails.githubRepo}/issues/${selectedBugForDetails.gitIssueNumber}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-decoration-none ms-1 font-monospace"
+              {selectedBugForDetails.githubRepo &&
+                selectedBugForDetails.gitIssueNumber && (
+                  <div
+                    className="mb-3 bg-light p-2 rounded"
+                    style={{ border: "1px dashed #ced4da" }}
                   >
-                    {selectedBugForDetails.githubRepo}#{selectedBugForDetails.gitIssueNumber}
-                  </a>
-                </div>
-              )}
+                    <strong>GitHub Link: </strong>
+                    <a
+                      href={`https://github.com/${selectedBugForDetails.githubRepo}/issues/${selectedBugForDetails.gitIssueNumber}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-decoration-none ms-1 font-monospace"
+                    >
+                      {selectedBugForDetails.githubRepo}#
+                      {selectedBugForDetails.gitIssueNumber}
+                    </a>
+                  </div>
+                )}
 
-              {selectedBugForDetails.attachments && selectedBugForDetails.attachments.length > 0 && (
-                <div className="mb-3">
-                  <strong>Attachments:</strong>
-                  <ul className="mt-1 mb-0 pl-3">
-                    {selectedBugForDetails.attachments.map((attachment: any) => (
-                      <li key={attachment.id} className="my-1">
-                        <a
-                          href={`${process.env.REACT_APP_API_URL || "http://localhost:4000"}${attachment.filePath}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-decoration-none"
-                        >
-                          View Attachment (Type: {attachment.fileType || "unknown"})
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {selectedBugForDetails.attachments &&
+                selectedBugForDetails.attachments.length > 0 && (
+                  <div className="mb-3">
+                    <strong>Attachments:</strong>
+                    <ul className="mt-1 mb-0 pl-3">
+                      {selectedBugForDetails.attachments.map(
+                        (attachment: any) => (
+                          <li key={attachment.id} className="my-1">
+                            <a
+                              href={`${process.env.REACT_APP_ADMIN_API_URL || "http://localhost:4000"}${attachment.filePath}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-decoration-none"
+                            >
+                              View Attachment (Type:{" "}
+                              {attachment.fileType || "unknown"})
+                            </a>
+                          </li>
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                )}
             </div>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setSelectedBugForDetails(null)}>
+          <Button
+            variant="secondary"
+            onClick={() => setSelectedBugForDetails(null)}
+          >
             Close
           </Button>
         </Modal.Footer>
@@ -336,9 +370,6 @@ const BugListPageComponent: FC = () => {
   );
 };
 
-export const BugListPage = withPageVisit(
-  BugListPageComponent,
-  "AdminBugList"
-);
+export const BugListPage = withPageVisit(BugListPageComponent, "AdminBugList");
 
 export default BugListPage;

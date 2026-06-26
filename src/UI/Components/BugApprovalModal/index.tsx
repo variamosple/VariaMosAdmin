@@ -1,5 +1,8 @@
 import { Bug } from "@/Domain/Bug/Bug";
-import { deleteAttachment, uploadAttachment } from "@/DataProviders/BugRepository";
+import {
+  deleteAttachment,
+  uploadAttachment,
+} from "@/DataProviders/BugRepository";
 import { FC, useEffect, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { useForm } from "react-hook-form";
@@ -166,7 +169,9 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
               as="textarea"
               rows={4}
               isInvalid={!!errors.description}
-              {...register("description", { required: "Description is required" })}
+              {...register("description", {
+                required: "Description is required",
+              })}
             />
             {errors.description && (
               <Form.Control.Feedback type="invalid">
@@ -181,7 +186,9 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                 <Form.Label>Target Repository (GitHub) *</Form.Label>
                 <Form.Select
                   isInvalid={!!errors.githubRepo}
-                  {...register("githubRepo", { required: "Dépôt GitHub est requis" })}
+                  {...register("githubRepo", {
+                    required: "Dépôt GitHub est requis",
+                  })}
                 >
                   <option value="">Select repository...</option>
                   {repos.map((repo) => (
@@ -237,7 +244,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                     className="list-group-item d-flex justify-content-between align-items-center py-2"
                   >
                     <a
-                      href={`${process.env.REACT_APP_API_URL || "http://localhost:4000"}${att.filePath}`}
+                      href={`${process.env.REACT_APP_ADMIN_API_URL || "http://localhost:4000"}${att.filePath}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-decoration-none small text-truncate"
@@ -295,7 +302,11 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
           <Button variant="secondary" onClick={onHide} disabled={isApproving}>
             Cancel
           </Button>
-          <Button variant="success" type="submit" disabled={isApproving || isUploading}>
+          <Button
+            variant="success"
+            type="submit"
+            disabled={isApproving || isUploading}
+          >
             {isApproving ? "Approving..." : "Approve & Send to GitHub"}
           </Button>
         </Modal.Footer>

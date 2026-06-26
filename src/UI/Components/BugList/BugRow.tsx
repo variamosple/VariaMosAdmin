@@ -59,9 +59,10 @@ export const BugRowComponent: FC<BugRowProps> = ({
     }
   };
 
-  const githubUrl = bug.githubRepo && bug.gitIssueNumber
-    ? `https://github.com/${bug.githubRepo}/issues/${bug.gitIssueNumber}`
-    : undefined;
+  const githubUrl =
+    bug.githubRepo && bug.gitIssueNumber
+      ? `https://github.com/${bug.githubRepo}/issues/${bug.gitIssueNumber}`
+      : undefined;
 
   return (
     <tr key={bug.id}>
@@ -116,7 +117,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
         <div>
           {bug.githubCreator
             ? `@${bug.githubCreator}`
-            : (bug.createdBy?.name || bug.reporterEmail || "Guest")}
+            : bug.createdBy?.name || bug.reporterEmail || "Guest"}
         </div>
         <div className="text-muted" style={{ fontSize: "0.75rem" }}>
           {bug.createdAt ? formatDate(new Date(bug.createdAt)) : "N/A"}
@@ -127,7 +128,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
         <td className="align-middle">
           {bug.attachments && bug.attachments.length > 0 ? (
             <a
-              href={`${process.env.REACT_APP_API_URL || "http://localhost:4000"}${bug.attachments[0].filePath}`}
+              href={`${process.env.REACT_APP_ADMIN_API_URL || "http://localhost:4000"}${bug.attachments[0].filePath}`}
               target="_blank"
               rel="noopener noreferrer"
             >
