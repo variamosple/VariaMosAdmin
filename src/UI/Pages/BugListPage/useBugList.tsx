@@ -9,8 +9,10 @@ import {
   restoreLocalBug,
   updateBugStatus,
   queryCategories,
+  queryBugNotes,
+  addBugNote,
 } from "@/DataProviders/BugRepository";
-import { Bug } from "@/Domain/Bug/Bug";
+import { Bug, BugStatusLog } from "@/Domain/Bug/Bug";
 import { BugFilter } from "@/Domain/Bug/BugFilter";
 
 export const useBugList = () => {
@@ -21,7 +23,13 @@ export const useBugList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'github' | 'local' | 'trash'>('github');
+  const [activeTab, setActiveTab] = useState<"github" | "local" | "trash">(
+    "github",
+  );
+
+  // Bug Notes States
+  const [notes, setNotes] = useState<BugStatusLog[]>([]);
+  const [isLoadingNotes, setIsLoadingNotes] = useState<boolean>(false);
 
   // 2. State for filtering
   const [filter, setFilter] = useState<BugFilter>({
@@ -63,7 +71,7 @@ export const useBugList = () => {
   const fetchBugs = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     let response;
     if (activeTab === "github") {
       response = await queryBugs(filter);
@@ -84,6 +92,39 @@ export const useBugList = () => {
   useEffect(() => {
     fetchBugs();
   }, [fetchBugs]);
+
+  // Bug Notes Functions
+  const fetchNotes = useCallback(async (bugId: string) => {
+    setIsLoadingNotes(true);
+    setError(null);
+    const response = await queryBugNotes(bugId);
+    if (response.errorCode) {
+      setError(response.message || "Failed to load bug notes");
+    } else {
+      const mapped = (response.data || []).map((n: any) => ({
+        id: n.id,
+        status: "",
+        comment: n.body || "",
+        changedAt: n.createdAt,
+        changedBy: n.author?.name
+          ? { id: "", name: n.author.name, email: "" }
+          : undefined,
+      }));
+      setNotes(mapped);
+    }
+    setIsLoadingNotes(false);
+  }, []);
+
+  const handleAddNote = async (bugId: string, body: string) => {
+    setError(null);
+    const response = await addBugNote(bugId, body);
+    if (response.errorCode) {
+      setError(response.message || "Failed to add bug note");
+      return false;
+    }
+    await fetchNotes(bugId);
+    return true;
+  };
 
   // 5. Function to submit the creation of a bug
   const handleCreateBug = async (
@@ -198,5 +239,9 @@ export const useBugList = () => {
     handleRestore,
     handleApprove,
     refreshBugs: fetchBugs,
+    notes,
+    isLoadingNotes,
+    fetchNotes,
+    handleAddNote,
   };
 };

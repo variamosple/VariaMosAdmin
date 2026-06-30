@@ -15,6 +15,7 @@ import {
   Spinner,
   Tab,
   Tabs,
+  Form,
 } from "react-bootstrap";
 import { ArrowRepeat, Plus, Github } from "react-bootstrap-icons";
 import { useBugList } from "./useBugList";
@@ -36,15 +37,35 @@ const BugListPageComponent: FC = () => {
     handleRestore,
     handleApprove,
     error,
+    notes,
+    isLoadingNotes,
+    fetchNotes,
+    handleAddNote,
   } = useBugList();
 
   const [showUserCreateModal, setShowUserCreateModal] = useState(false);
   const [showAdminCreateModal, setShowAdminCreateModal] = useState(false);
   const [bugToApprove, setBugToApprove] = useState<any>(null);
   const [selectedBugForDetails, setSelectedBugForDetails] = useState<any>(null);
+  const [newNoteBody, setNewNoteBody] = useState("");
+  const [isSubmittingNote, setIsSubmittingNote] = useState(false);
 
   const handleViewDetails = (bug: any) => {
     setSelectedBugForDetails(bug);
+    if (bug && bug.id) {
+      fetchNotes(bug.id);
+    }
+  };
+
+  const handleNoteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNoteBody.trim() || !selectedBugForDetails?.id) return;
+    setIsSubmittingNote(true);
+    const success = await handleAddNote(selectedBugForDetails.id, newNoteBody);
+    if (success) {
+      setNewNoteBody("");
+    }
+    setIsSubmittingNote(false);
   };
 
   return (
@@ -212,6 +233,7 @@ const BugListPageComponent: FC = () => {
         onHide={() => setSelectedBugForDetails(null)}
         size="lg"
         centered
+        scrollable
       >
         <Modal.Header closeButton>
           <Modal.Title>
@@ -354,6 +376,190 @@ const BugListPageComponent: FC = () => {
                     </ul>
                   </div>
                 )}
+
+              <hr />
+              <div className="mb-3">
+                <h5 className="mb-3">Comments & Audit Logs</h5>
+                {isLoadingNotes ? (
+                  <div className="d-flex align-items-center py-2">
+                    <Spinner
+                      animation="border"
+                      size="sm"
+                      variant="secondary"
+                      className="me-2"
+                    />
+                    <span className="text-muted small">Loading notes...</span>
+                  </div>
+                ) : notes.length === 0 ? (
+                  <p className="text-muted small">
+                    No comments or logs recorded yet.
+                  </p>
+                ) : (
+                  <div
+                    className="d-flex flex-column gap-2 mb-3"
+                    style={{ maxHeight: "300px", overflowY: "auto" }}
+                  >
+                    {notes.map((note) => {
+                      const isSystem = note.comment?.startsWith("[Audit]");
+                      if (isSystem) {
+                        const cleanComment = (note.comment || "").replace(
+                          "[Audit] ",
+                          "",
+                        );
+                        return (
+                          <Alert
+                            key={note.id}
+                            variant="light"
+                            className="py-2 px-3 m-0 small border rounded-3 bg-light text-muted"
+                          >
+                            <div className="d-flex align-items-center mb-1 border-bottom pb-1">
+                              <span
+                                className="badge bg-secondary-subtle text-secondary small-text font-monospace"
+                                style={{
+                                  fontSize: "0.65rem",
+                                  padding: "0.2rem 0.4rem",
+                                }}
+                              >
+                                SYSTEM AUDIT
+                              </span>
+                              <span
+                                className="text-muted small-text ms-auto"
+                                style={{ fontSize: "0.7rem" }}
+                              >
+                                {new Date(note.changedAt).toLocaleString()}
+                              </span>
+                            </div>
+                            <div
+                              className="font-monospace text-secondary mt-1"
+                              style={{ fontSize: "0.8rem", lineHeight: "1.5" }}
+                            >
+                              {cleanComment.split("\n").map((line, idx) => {
+                                if (line.startsWith("* ")) {
+                                  const content = line.substring(2);
+                                  if (content.includes(" -> ")) {
+                                    const [left, right] = content.split(" -> ");
+                                    const colonIndex = left.indexOf(":");
+                                    if (colonIndex !== -1) {
+                                      const label = left.substring(
+                                        0,
+                                        colonIndex + 1,
+                                      );
+                                      const oldValue = left
+                                        .substring(colonIndex + 1)
+                                        .trim();
+                                      return (
+                                        <div
+                                          key={idx}
+                                          className="my-1 ps-2 border-start border-2 border-secondary-subtle d-flex flex-wrap align-items-center gap-1"
+                                        >
+                                          <strong className="text-dark-emphasis me-1">
+                                            {label}
+                                          </strong>
+                                          <span
+                                            className="text-danger bg-danger-subtle px-1 rounded"
+                                            style={{ fontSize: "0.75rem" }}
+                                          >
+                                            {oldValue}
+                                          </span>
+                                          <span
+                                            className="text-secondary fw-bold"
+                                            style={{
+                                              fontSize: "1.1rem",
+                                              margin: "0 0.2rem",
+                                            }}
+                                          >
+                                            →
+                                          </span>
+                                          <span
+                                            className="text-success bg-success-subtle px-1 rounded fw-bold"
+                                            style={{ fontSize: "0.75rem" }}
+                                          >
+                                            {right}
+                                          </span>
+                                        </div>
+                                      );
+                                    }
+                                  }
+                                }
+                                if (line.startsWith("Admin Comment:")) {
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="mt-2 pt-1 border-top text-dark-emphasis fw-semibold"
+                                      style={{ fontSize: "0.85rem" }}
+                                    >
+                                      {line}
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <div
+                                    key={idx}
+                                    style={{ whiteSpace: "pre-wrap" }}
+                                    className="my-1"
+                                  >
+                                    {line}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </Alert>
+                        );
+                      }
+                      return (
+                        <div
+                          key={note.id}
+                          className="border rounded p-2 bg-light"
+                        >
+                          <div
+                            className="text-dark small-text"
+                            style={{ whiteSpace: "pre-wrap" }}
+                          >
+                            {note.comment}
+                          </div>
+                          <div
+                            className="text-end text-muted mt-1"
+                            style={{ fontSize: "0.75rem" }}
+                          >
+                            {note.changedBy?.name || "Anonymous"} at{" "}
+                            {new Date(note.changedAt).toLocaleString()}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {selectedBugForDetails.status === "pending" ? (
+                  <Form onSubmit={handleNoteSubmit} className="mt-3">
+                    <Form.Group className="mb-2">
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        placeholder="Write a comment..."
+                        value={newNoteBody}
+                        onChange={(e) => setNewNoteBody(e.target.value)}
+                        required
+                        disabled={isSubmittingNote}
+                      />
+                    </Form.Group>
+                    <div className="text-end">
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        size="sm"
+                        disabled={isSubmittingNote}
+                      >
+                        {isSubmittingNote ? "Adding..." : "Add Comment"}
+                      </Button>
+                    </div>
+                  </Form>
+                ) : (
+                  <Alert variant="warning" className="m-0 py-2 small">
+                    This discussion is closed. Please use GitHub to communicate.
+                  </Alert>
+                )}
+              </div>
             </div>
           )}
         </Modal.Body>
