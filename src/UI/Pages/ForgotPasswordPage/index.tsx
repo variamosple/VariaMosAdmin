@@ -2,7 +2,7 @@ import { type FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { ForgotPasswordForm } from "@/UI/Components/ForgotPasswordForm";
-import { ADMIN_CLIENT } from "@/Infrastructure/AxiosConfig";
+import { requestPasswordReset } from "@/DataProviders/AuthRepository";
 
 export const ForgotPasswordPage: FC = () => {
   const [message, setMessage] = useState<string | null>(null);
@@ -15,10 +15,16 @@ export const ForgotPasswordPage: FC = () => {
     setMessage(null);
 
     try {
-      await ADMIN_CLIENT.post("/auth/forgot-password", { email });
-      setMessage(
-        "If an account with this email exists, a password reset link has been sent. Please check your inbox!",
-      );
+      const response = await requestPasswordReset(email);
+      if (response.errorCode) {
+        setError(
+          response.message || "Error sending reset link. Please try again.",
+        );
+      } else {
+        setMessage(
+          "If an account with this email exists, a password reset link has been sent. Please check your inbox!",
+        );
+      }
     } catch (error) {
       setError("Error sending reset link. Please try again.");
     } finally {

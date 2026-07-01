@@ -2,7 +2,10 @@ import { type FC, useState, useEffect } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ResetPasswordForm } from "@/UI/Components/ResetPasswordForm";
-import { ADMIN_CLIENT } from "@/Infrastructure/AxiosConfig";
+import {
+  verifyPasswordResetToken,
+  resetPassword,
+} from "@/DataProviders/AuthRepository";
 
 export const ResetPasswordPage: FC = () => {
   const [message, setMessage] = useState<string | null>(null);
@@ -23,8 +26,12 @@ export const ResetPasswordPage: FC = () => {
       }
 
       try {
-        await ADMIN_CLIENT.get(`/auth/verify-token?token=${token}`);
-        setIsTokenValid(true);
+        const response = await verifyPasswordResetToken(token);
+        if (response.errorCode) {
+          setIsTokenValid(false);
+        } else {
+          setIsTokenValid(true);
+        }
       } catch (err) {
         setIsTokenValid(false);
       } finally {
@@ -42,23 +49,35 @@ export const ResetPasswordPage: FC = () => {
     setError(null);
     setMessage(null);
 
+    if (!token) {
+      setError("Token is missing.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      await ADMIN_CLIENT.post("/auth/reset-password", { token, password });
-      setMessage("Your password has been reset successfully !");
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
-    } catch (err: any) {
-      const serverMessage = err.response?.data?.message || "";
-      if (
-        serverMessage.includes(
-          "New password cannot be the same as the old password",
-        )
-      ) {
-        setError("New password must be different from the current one.");
+      const response = await resetPassword(token, password);
+      if (response.errorCode) {
+        const serverMessage = response.message || "";
+        if (
+          serverMessage.includes(
+            "New password cannot be the same as the old password",
+          )
+        ) {
+          setError("New password must be different from the current one.");
+        } else {
+          setError(
+            serverMessage || "Error modifying password. Please try again.",
+          );
+        }
       } else {
-        setError("Error modifying password. Please try again.");
+        setMessage("Your password has been reset successfully !");
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
       }
+    } catch (err: any) {
+      setError("Error modifying password. Please try again.");
     } finally {
       setIsLoading(false);
     }
