@@ -7,6 +7,7 @@ import { UserRowComponent } from "./UserRow";
 
 export interface UserListParameters extends PaginationControlsProps {
   items: User[];
+  onUserResetLink: (user: User) => void;
   onUserDisable: (user: User) => void;
   onUserEnable: (user: User) => void;
   onUserDelete: (user: User) => void;
@@ -17,6 +18,7 @@ export const UserList: FC<UserListParameters> = ({
   currentPage,
   totalPages,
   onPageChange,
+  onUserResetLink,
   onUserDisable,
   onUserEnable,
   onUserDelete,
@@ -53,6 +55,7 @@ export const UserList: FC<UserListParameters> = ({
             <UserRowComponent
               key={user.id}
               user={user}
+              onUserResetLink={onUserResetLink}
               onUserDelete={onUserDelete}
               onUserDisable={onUserDisable}
               onUserEnable={onUserEnable}

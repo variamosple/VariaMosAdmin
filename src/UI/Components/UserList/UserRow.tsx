@@ -10,6 +10,7 @@ import {
   Ban,
   CheckCircle,
   DashCircle,
+  Key,
   PlusCircle,
   Search,
   TrashFill,
@@ -17,6 +18,7 @@ import {
 
 export interface UserRowProps {
   user: User;
+  onUserResetLink: (user: User) => void;
   onUserDisable: (user: User) => void;
   onUserEnable: (user: User) => void;
   onUserDelete: (user: User) => void;
@@ -24,6 +26,7 @@ export interface UserRowProps {
 
 export const UserRowComponent: FC<UserRowProps> = ({
   user,
+  onUserResetLink,
   onUserDisable,
   onUserEnable,
   onUserDelete,
@@ -83,7 +86,17 @@ export const UserRowComponent: FC<UserRowProps> = ({
               <Search />
             </Button>
 
-            {user.isEnabled && (
+            {user.isEnabled && !user.isDeleted && (
+              <Button
+                variant="secondary"
+                onClick={() => onUserResetLink(user)}
+                title="Generate password reset link"
+              >
+                <Key />
+              </Button>
+            )}
+
+            {user.isEnabled && !user.isDeleted && (
               <Button
                 variant="warning"
                 onClick={() => onUserDisable(user)}
@@ -93,7 +106,7 @@ export const UserRowComponent: FC<UserRowProps> = ({
               </Button>
             )}
 
-            {!user.isEnabled && (
+            {!user.isEnabled && !user.isDeleted && (
               <Button
                 variant="success"
                 onClick={() => onUserEnable(user)}

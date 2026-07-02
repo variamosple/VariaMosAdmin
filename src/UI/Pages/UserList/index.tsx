@@ -1,4 +1,5 @@
 import ConfirmationModal from "@/UI/Components/ConfirmationModal";
+import { RecoveryLinkModal } from "@/UI/Components/UserList/RecoveryLinkModal";
 import { SearchForm } from "@/UI/Components/SearchForm";
 import { UserList } from "@/UI/Components/UserList";
 import { withPageVisit } from "@variamosple/variamos-components";
@@ -8,6 +9,8 @@ import { useUserList } from "./useUserList";
 
 const UserListPageComponent: FC<unknown> = () => {
   const {
+    showResetLink,
+    setShowResetLink,
     showEnable,
     setShowEnable,
     showDisable,
@@ -19,6 +22,7 @@ const UserListPageComponent: FC<unknown> = () => {
     users,
     totalPages,
     isLoading,
+    onUserResetLink,
     onUserDisable,
     performDisableUser,
     onUserEnable,
@@ -48,9 +52,16 @@ const UserListPageComponent: FC<unknown> = () => {
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
+        onUserResetLink={onUserResetLink}
         onUserDisable={onUserDisable}
         onUserEnable={onUserEnable}
         onUserDelete={onUserDelete}
+      />
+
+      <RecoveryLinkModal
+        show={showResetLink}
+        onHide={() => setShowResetLink(false)}
+        user={selectedUser!}
       />
 
       <ConfirmationModal
