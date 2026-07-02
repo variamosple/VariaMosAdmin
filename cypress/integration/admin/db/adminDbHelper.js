@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const crypto = require('crypto');
 
 // Load environment variables from the backend development.env to avoid hardcoding credentials
-const envPath = path.resolve(__dirname, '../../../../variamos_ms_admin/env/development.env');
+const envPath = path.resolve(__dirname, '../../../../../variamos_ms_admin/env/development.env');
 let dbConfig = {
   user: 'variamos_admin',
   host: 'localhost',
@@ -50,7 +50,6 @@ module.exports = {
         DELETE FROM "variamos"."password_reset_tokens" 
         WHERE "user_id" IN (${targetUserIdsQuery})
       `);
-
       // 2. Cascade delete other relations
       await client.query(`
         DELETE FROM "variamos"."user_role" 
