@@ -1,0 +1,59 @@
+name: Frontend CI
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+        cache-dependency-path: VariaMosAdmin/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd VariaMosAdmin
+        npm ci
+
+    - name: Audit npm dependencies for high vulnerabilities
+      run: |
+        cd VariaMosAdmin
+        npm audit --audit-level=high
+
+    - name: Check code formatting (Prettier)
+      run: |
+        cd VariaMosAdmin
+        npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css,md}"
+
+    - name: Run linter (ESLint)
+      run: |
+        cd VariaMosAdmin
+        npm run lint
+
+    - name: Verify TypeScript types
+      run: |
+        cd VariaMosAdmin
+        npm run typecheck
+
+    - name: Verify Clean Architecture boundaries
+      run: |
+        cd VariaMosAdmin
+        npm run check-arch
+
+    - name: Run unit tests
+      run: |
+        cd VariaMosAdmin
+        npm run test -- --watchAll=false
+
+    - name: Run Gitleaks secret scan
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

@@ -8,7 +8,12 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "prepare": "husky",
+    "check-arch": "dependency-cruiser --config .dependency-cruiser.js src/",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "find-deadcode": "knip"
   },
   "dependencies": {
     "@patternfly/react-core": "^6.0.0",
@@ -31,6 +36,8 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -39,18 +46,18 @@
     "@types/react": "^18.3.5",
     "@types/react-bootstrap": "^0.32.37",
     "@types/react-dom": "^18.3.0",
+    "cspell": "^9.8.0",
     "cypress": "^15.17.0",
+    "dependency-cruiser": "^17.4.3",
     "dotenv": "^17.4.2",
+    "husky": "^9.1.7",
+    "knip": "^6.24.0",
+    "lint-staged": "^16.4.0",
     "patch-package": "^8.0.0",
     "pg": "^8.21.0",
     "postinstall-postinstall": "^2.1.0",
+    "prettier": "^3.9.4",
     "tsconfig-paths-webpack-plugin": "^4.1.0"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

@@ -1,0 +1,32 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "variamos",
+    "patternfly",
+    "axios",
+    "sequelize",
+    "postgres",
+    "uuid",
+    "eject",
+    "postinstall",
+    "usecases",
+    "dataproviders",
+    "entrypoints",
+    "jwt",
+    "envvars",
+    "stryker",
+    "eslint",
+    "prettier",
+    "commitlint",
+    "lintstaged"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "build/**",
+    "dist/**",
+    "coverage/**",
+    "package-lock.json",
+    "cypress/**"
+  ]
+}
