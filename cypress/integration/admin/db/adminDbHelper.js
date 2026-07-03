@@ -45,17 +45,11 @@ module.exports = {
       // Helper subquery to target test user IDs
       const targetUserIdsQuery = `SELECT "id" FROM "variamos"."user" WHERE "email" LIKE '%@variamos-test.com'`;
 
-      // 1. Delete existing password reset tokens for testing domains (wrapped in try-catch in case table doesn't exist)
-      try {
-        await client.query(`
-          DELETE FROM "variamos"."password_reset_tokens" 
-          WHERE "user_id" IN (${targetUserIdsQuery})
-        `);
-      } catch (tokenErr) {
-        // TODO: Remove this try-catch block after merging with the password-reset branch
-        // Table doesn't exist yet on this branch, ignore safely
-      }
-
+      // 1. Delete existing password reset tokens for testing domains
+      await client.query(`
+        DELETE FROM "variamos"."password_reset_tokens" 
+        WHERE "user_id" IN (${targetUserIdsQuery})
+      `);
       // 2. Cascade delete other relations
       await client.query(`
         DELETE FROM "variamos"."user_role" 
@@ -227,15 +221,10 @@ module.exports = {
     try {
       const targetUserIdsQuery = `SELECT "id" FROM "variamos"."user" WHERE "email" LIKE '%@variamos-test.com'`;
 
-      try {
-        await client.query(`
-          DELETE FROM "variamos"."password_reset_tokens" 
-          WHERE "user_id" IN (${targetUserIdsQuery})
-        `);
-      } catch (tokenErr) {
-        // TODO: Remove this try-catch block after merging with the password-reset branch
-        // Table doesn't exist, ignore safely
-      }
+      await client.query(`
+        DELETE FROM "variamos"."password_reset_tokens" 
+        WHERE "user_id" IN (${targetUserIdsQuery})
+      `);
 
       await client.query(`
         DELETE FROM "variamos"."user_role" 
