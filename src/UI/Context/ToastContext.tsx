@@ -1,10 +1,5 @@
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+/* cspell:disable */
+import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { Toast, ToastContainer } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 
@@ -12,15 +7,7 @@ export type ToastType = {
   id: string;
   title: string;
   message: string;
-  variant?:
-    | "primary"
-    | "secondary"
-    | "success"
-    | "danger"
-    | "warning"
-    | "info"
-    | "light"
-    | "dark";
+  variant?: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "light" | "dark";
   delay?: number;
 };
 
@@ -44,10 +31,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
   const pushToast = useCallback((toast: Omit<ToastType, "id">) => {
     const id = uuidv4();
-    setToasts((prev) => [
-      ...prev,
-      { delay: 5000, variant: "light", ...toast, id },
-    ]);
+    setToasts((prev) => [...prev, { delay: 5000, variant: "light", ...toast, id }]);
 
     return id;
   }, []);
@@ -67,13 +51,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         style={{ zIndex: 1050 }}
       >
         {toasts.map(({ id, title, message, variant, delay }) => (
-          <Toast
-            key={id}
-            bg={variant}
-            onClose={() => removeToast(id)}
-            delay={delay}
-            autohide
-          >
+          <Toast key={id} bg={variant} onClose={() => removeToast(id)} delay={delay} autohide>
             <Toast.Header>
               <strong className="me-auto">{title}</strong>
             </Toast.Header>

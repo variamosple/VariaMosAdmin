@@ -8,7 +8,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 
 export interface PersonalInformationUpdateForModalProps {
   onUpdatePersonalInformationSubmit: (
-    PersonalInformationUpdate: PersonalInformationUpdate
+    PersonalInformationUpdate: PersonalInformationUpdate,
   ) => Promise<ResponseModel<void>>;
   showModal: boolean;
   onClose: () => void;
@@ -16,9 +16,7 @@ export interface PersonalInformationUpdateForModalProps {
   defaultValue?: PersonalInformationUpdate;
 }
 
-export const PersonalInformationUpdateForModal: FC<
-  PersonalInformationUpdateForModalProps
-> = ({
+export const PersonalInformationUpdateForModal: FC<PersonalInformationUpdateForModalProps> = ({
   onUpdatePersonalInformationSubmit,
   showModal,
   onClose,
@@ -70,20 +68,14 @@ export const PersonalInformationUpdateForModal: FC<
   }, [showModal, defaultValue, reset]);
 
   return (
-    <Modal
-      show={showModal}
-      backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
-    >
+    <Modal show={showModal} backdrop={isLoading ? "static" : true} onHide={onCloseModal}>
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title>PersonalInformation update</Modal.Title>
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">
           <Form.Group className="w-100" controlId="countryCode">
-            <Form.Label className="form-label align-self-start m-0">
-              Country
-            </Form.Label>
+            <Form.Label className="form-label align-self-start m-0">Country</Form.Label>
 
             {isLoadingCountries ? (
               <span className="d-block">Loading Countries...</span>
@@ -110,12 +102,7 @@ export const PersonalInformationUpdateForModal: FC<
           </Form.Group>
 
           <Modal.Footer>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={isLoading}
-              onClick={onCloseModal}
-            >
+            <Button type="button" variant="secondary" disabled={isLoading} onClick={onCloseModal}>
               Cancel
             </Button>
 

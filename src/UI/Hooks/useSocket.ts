@@ -2,10 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export type SocketFunction = () => WebSocket;
 
-export const useSocket = (
-  socketFunction: SocketFunction,
-  connectOnMounth: Boolean = false
-) => {
+export const useSocket = (socketFunction: SocketFunction, connectOnMount: Boolean = false) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
   const connect = useCallback(() => {
@@ -21,7 +18,7 @@ export const useSocket = (
   }, [socketFunction]);
 
   useEffect(() => {
-    if (!connectOnMounth) {
+    if (!connectOnMount) {
       return;
     }
 
@@ -36,7 +33,7 @@ export const useSocket = (
         return null;
       });
     };
-  }, [connect, connectOnMounth]);
+  }, [connect, connectOnMount]);
 
   useEffect(() => {
     return () => {

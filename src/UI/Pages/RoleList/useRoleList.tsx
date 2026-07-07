@@ -1,9 +1,4 @@
-import {
-  createRole,
-  deleteRole,
-  queryRoles,
-  updateRole,
-} from "@/DataProviders/RoleRepository";
+import { createRole, deleteRole, queryRoles, updateRole } from "@/DataProviders/RoleRepository";
 import { Role } from "@/Domain/Role/Entity/Role";
 import { RolesFilter } from "@/Domain/Role/Entity/RolesFilter";
 import { useToast } from "@/UI/Context/ToastContext";

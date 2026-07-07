@@ -27,11 +27,7 @@ export const SignUpPage: FC<unknown> = () => {
       style={{ width: 350 }}
       data-bs-theme="dark"
     >
-      <img
-        src="./images/VariaMosLogo.png"
-        alt="Variamos logo"
-        className="img-fluid"
-      />
+      <img src="./images/VariaMosLogo.png" alt="Variamos logo" className="img-fluid" />
       <SignUpForm onSignUp={onSignUp} />
 
       <Alert

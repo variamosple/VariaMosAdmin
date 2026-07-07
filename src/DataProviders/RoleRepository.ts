@@ -4,9 +4,7 @@ import { Role } from "../Domain/Role/Entity/Role";
 import { RolesFilter } from "../Domain/Role/Entity/RolesFilter";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 
-export const queryRoles = (
-  filter: RolesFilter
-): Promise<ResponseModel<Role[]>> => {
+export const queryRoles = (filter: RolesFilter): Promise<ResponseModel<Role[]>> => {
   return ADMIN_CLIENT.get("/v1/roles", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -21,14 +19,14 @@ export const queryRoles = (
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          `Error when trying to query roles, please try again later.`
+          `Error when trying to query roles, please try again later.`,
         );
       }
     });
@@ -49,14 +47,14 @@ export const createRole = (request: Role): Promise<ResponseModel<Role>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          "Error when trying to create the role, please try again later."
+          "Error when trying to create the role, please try again later.",
         );
       }
     });
@@ -77,14 +75,14 @@ export const deleteRole = (roleId: number): Promise<ResponseModel<void>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          "Error when trying to delete the role, please try again later."
+          "Error when trying to delete the role, please try again later.",
         );
       }
     });
@@ -105,14 +103,14 @@ export const queryRoleById = (roleId: number): Promise<ResponseModel<Role>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          `Error when trying to query the role with id: ${roleId}, please try again later.`
+          `Error when trying to query the role with id: ${roleId}, please try again later.`,
         );
       }
     });
@@ -133,14 +131,14 @@ export const updateRole = (request: Role): Promise<ResponseModel<Role>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          `Error when trying to update the role with id: ${request.id}, please try again later.`
+          `Error when trying to update the role with id: ${request.id}, please try again later.`,
         );
       }
     });

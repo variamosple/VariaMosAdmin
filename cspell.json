@@ -19,7 +19,8 @@
     "eslint",
     "prettier",
     "commitlint",
-    "lintstaged"
+    "lintstaged",
+    "variamosple"
   ],
   "ignorePaths": [
     "node_modules/**",

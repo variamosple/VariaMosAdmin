@@ -25,11 +25,7 @@ export const UserList: FC<UserListParameters> = ({
 }) => {
   return (
     <>
-      <Paginator
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
 
       <Table striped bordered hover>
         <thead>
@@ -64,11 +60,7 @@ export const UserList: FC<UserListParameters> = ({
         </tbody>
       </Table>
 
-      <Paginator
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
     </>
   );
 };

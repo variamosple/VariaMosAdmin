@@ -1,7 +1,4 @@
-import {
-  AnalyticsProvider,
-  SessionProvider,
-} from "@variamosple/variamos-components";
+import { AnalyticsProvider, SessionProvider } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { HashRouter, useRoutes } from "react-router-dom";
 import "./App.css";

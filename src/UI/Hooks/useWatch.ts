@@ -2,10 +2,7 @@ import { ResponseModel } from "@variamosple/variamos-components";
 import { useCallback, useState } from "react";
 
 interface UseWatchProps<Filter, Response> {
-  watchFunction: (
-    filter: Filter,
-    signal: AbortSignal
-  ) => Promise<ResponseModel<Response>>;
+  watchFunction: (filter: Filter, signal: AbortSignal) => Promise<ResponseModel<Response>>;
   initialFilter: Filter;
 }
 
@@ -25,14 +22,14 @@ export function useWatch<Filter, Response>({
   const [, setSignal] = useState<AbortController>();
   const [data, setData] = useState<Response>();
   const [filter, setFilter] = useState<Filter | null>(null);
-  const [isLoading, setIsloading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [error] = useState<string | null>(null);
 
   const loadData = useCallback(
     (filter: Filter) => {
       setFilter(filter);
-      setIsloading(true);
+      setIsLoading(true);
       const abortController = new AbortController();
       setSignal((prev) => {
         if (prev) {
@@ -49,11 +46,11 @@ export function useWatch<Filter, Response>({
           return response;
         })
         .finally(() => {
-          setIsloading(false);
+          setIsLoading(false);
           setIsLoaded(true);
         });
     },
-    [watchFunction]
+    [watchFunction],
   );
 
   const abort = useCallback(() => {

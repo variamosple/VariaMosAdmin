@@ -77,7 +77,4 @@ const LanguageListPageComponent: FC = () => {
   );
 };
 
-export const LanguageListPage = withPageVisit(
-  LanguageListPageComponent,
-  "AdminLanguageList"
-);
+export const LanguageListPage = withPageVisit(LanguageListPageComponent, "AdminLanguageList");

@@ -10,16 +10,13 @@ export const useChart = (metric: Metric) => {
       is3D: false,
       chartArea: { top: 10, height: "80%", width: "80%" },
     }),
-    [metric]
+    [metric],
   );
 
   const data = useMemo(() => {
     const metricData = metric.data || [];
 
-    const dataset = metricData.map((item: any) => [
-      item[metric.labelKey!],
-      item.count,
-    ]);
+    const dataset = metricData.map((item: any) => [item[metric.labelKey!], item.count]);
 
     return [["Page", "Visits"], ...dataset];
   }, [metric]);

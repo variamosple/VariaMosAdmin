@@ -1,7 +1,7 @@
 import { Metric } from "@/Domain/Metric/Metric";
 import { useMemo, useState } from "react";
 
-export interface ChartAxist {
+export interface ChartAxes {
   xAxis: string[];
   yAxis: string[];
 }
@@ -27,10 +27,10 @@ export const useLineChartData = (metric: Metric) => {
       focusTarget: "category",
       tooltip: { trigger: "focus" },
     }),
-    []
+    [],
   );
 
-  const { xAxis, yAxis }: ChartAxist = useMemo(() => {
+  const { xAxis, yAxis }: ChartAxes = useMemo(() => {
     const metricData = metric.data || [];
     const x = new Set<string>();
     const y = new Set<string>();
@@ -61,7 +61,7 @@ export const useLineChartData = (metric: Metric) => {
 
         return acc;
       },
-      new Map<string, any[]>()
+      new Map<string, any[]>(),
     );
 
     const columns = ["Date", ...yAxis];

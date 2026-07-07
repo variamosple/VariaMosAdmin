@@ -23,10 +23,7 @@ export const SignInLayout: FC<SignInLayoutProps> = ({ children }) => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <Container
-      fluid
-      className="d-flex justify-content-center align-items-center p-0 h-100 "
-    >
+    <Container fluid className="d-flex justify-content-center align-items-center p-0 h-100 ">
       <Row className="w-100 h-100 overflow-y-auto">
         <Col className="col-12 col-md-6 col-xl-5 order-1 order-md-2 d-flex justify-content-center align-items-center dark-75-container sticky-md-top vh-md-100 py-4 py-md-0">
           {children}

@@ -7,13 +7,7 @@ import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
 import { FC, useEffect, useState } from "react";
 import { Button, ButtonGroup, Spinner } from "react-bootstrap";
-import {
-  ArrowClockwise,
-  DashCircle,
-  PlayFill,
-  Search,
-  StopFill,
-} from "react-bootstrap-icons";
+import { ArrowClockwise, DashCircle, PlayFill, Search, StopFill } from "react-bootstrap-icons";
 
 export interface MicroServiceRowProps {
   microService: MicroService;
@@ -93,11 +87,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
         <td>{microService.status}</td>
 
-        <td>
-          {microService.created
-            ? formatDateTime(new Date(microService.created))
-            : null}
-        </td>
+        <td>{microService.created ? formatDateTime(new Date(microService.created)) : null}</td>
 
         <td className="text-center">
           <ButtonGroup size="sm">
@@ -131,11 +121,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
               </Button>
             )}
 
-            <Button
-              size="sm"
-              onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide logs"
-            >
+            <Button size="sm" onClick={() => setShow((isShown) => !isShown)} title="Show/Hide logs">
               {!show ? <Search /> : <DashCircle />}
             </Button>
           </ButtonGroup>
@@ -168,10 +154,7 @@ interface MicroServiceLogsProps {
   logs: string;
 }
 
-export const MicroServiceLogs: FC<MicroServiceLogsProps> = ({
-  isLoading,
-  logs,
-}) => {
+export const MicroServiceLogs: FC<MicroServiceLogsProps> = ({ isLoading, logs }) => {
   if (isLoading) {
     return (
       <div className="w-100 text-center my-3">
@@ -184,7 +167,5 @@ export const MicroServiceLogs: FC<MicroServiceLogsProps> = ({
     return <div>No logs found</div>;
   }
 
-  return (
-    <LogViewer hasLineNumbers={true} height={300} data={logs} theme="dark" />
-  );
+  return <LogViewer hasLineNumbers={true} height={300} data={logs} theme="dark" />;
 };

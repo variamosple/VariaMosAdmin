@@ -1,18 +1,10 @@
 import { queryUserById } from "@/DataProviders/UserRepository";
-import {
-  createUserRole,
-  deleteUserRole,
-  queryUserRoles,
-} from "@/DataProviders/UserRoleRepository";
+import { createUserRole, deleteUserRole, queryUserRoles } from "@/DataProviders/UserRoleRepository";
 import { Role } from "@/Domain/Role/Entity/Role";
 import { User } from "@/Domain/User/Entity/User";
 import { UserRole } from "@/Domain/User/Entity/UserRole";
 import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
-import {
-  usePaginatedQuery,
-  useRouter,
-  withPageVisit,
-} from "@variamosple/variamos-components";
+import { usePaginatedQuery, useRouter, withPageVisit } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
@@ -197,7 +189,4 @@ const UserDetailsPageComponent: FC<unknown> = () => {
   );
 };
 
-export const UserDetailsPage = withPageVisit(
-  UserDetailsPageComponent,
-  "UserDetails"
-);
+export const UserDetailsPage = withPageVisit(UserDetailsPageComponent, "UserDetails");

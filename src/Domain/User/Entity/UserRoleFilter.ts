@@ -1,7 +1,11 @@
 import { PagedModel } from "@variamosple/variamos-components";
 
 export class UserRoleFilter extends PagedModel {
-  constructor(public userId?: string, pageNumber?: number, pageSize?: number) {
+  constructor(
+    public userId?: string,
+    pageNumber?: number,
+    pageSize?: number,
+  ) {
     super(pageNumber, pageSize);
   }
 
@@ -10,11 +14,7 @@ export class UserRoleFilter extends PagedModel {
   }
 
   public static build(builder: UserRoleFilterBuilder): UserRoleFilter {
-    return new UserRoleFilter(
-      builder.userId,
-      builder.pageNumber,
-      builder.pageSize
-    );
+    return new UserRoleFilter(builder.userId, builder.pageNumber, builder.pageSize);
   }
 }
 

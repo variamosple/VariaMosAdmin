@@ -66,15 +66,11 @@ export const UserRowComponent: FC<UserRowProps> = ({
 
         <td>{user.email}</td>
 
-        <td>
-          {user.isDeleted ? "deleted" : user.isEnabled ? "active" : "disabled"}
-        </td>
+        <td>{user.isDeleted ? "deleted" : user.isEnabled ? "active" : "disabled"}</td>
 
         <td>{formatDateTime(new Date(user.createdAt))}</td>
 
-        <td>
-          {user.lastLogin ? formatDateTime(new Date(user.lastLogin)) : "N/A"}
-        </td>
+        <td>{user.lastLogin ? formatDateTime(new Date(user.lastLogin)) : "N/A"}</td>
 
         <td className="text-center">
           <ButtonGroup size="sm">
@@ -97,31 +93,19 @@ export const UserRowComponent: FC<UserRowProps> = ({
             )}
 
             {user.isEnabled && !user.isDeleted && (
-              <Button
-                variant="warning"
-                onClick={() => onUserDisable(user)}
-                title="Disable user"
-              >
+              <Button variant="warning" onClick={() => onUserDisable(user)} title="Disable user">
                 <Ban />
               </Button>
             )}
 
             {!user.isEnabled && !user.isDeleted && (
-              <Button
-                variant="success"
-                onClick={() => onUserEnable(user)}
-                title="Enable user"
-              >
+              <Button variant="success" onClick={() => onUserEnable(user)} title="Enable user">
                 <CheckCircle />
               </Button>
             )}
 
             {!user.isDeleted && (
-              <Button
-                variant="danger"
-                onClick={() => onUserDelete(user)}
-                title="Delete user"
-              >
+              <Button variant="danger" onClick={() => onUserDelete(user)} title="Delete user">
                 <TrashFill />
               </Button>
             )}

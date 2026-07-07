@@ -9,7 +9,7 @@ export interface BugSearchFormProps {
   isLoading: boolean;
   onSearchReset: () => void;
   repos: string[];
-  activeTab: 'github' | 'local' | 'trash';
+  activeTab: "github" | "local" | "trash";
 }
 export const BugSearchForm: FC<BugSearchFormProps> = ({
   onSubmit,
@@ -85,7 +85,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
   const isGitHub = activeTab === "github";
 
   return (
-    <Form onSubmit={handleSubmit(submit)}>
+    <Form onSubmit={handleSubmit(submit)} onReset={onReset}>
       <Row className="d-flex align-items-end mb-3">
         <Col xs={12} sm={isGitHub ? 6 : 12} lg={isGitHub ? 3 : 6}>
           <Form.Group className="w-100" controlId="name">

@@ -50,11 +50,7 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
   };
 
   return (
-    <Modal
-      show={showModal}
-      backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
-    >
+    <Modal show={showModal} backdrop={isLoading ? "static" : true} onHide={onCloseModal}>
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title>{modalTitle}</Modal.Title>
       </Modal.Header>
@@ -70,18 +66,12 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
               {...register("name", { required: "Language name is required" })}
               isInvalid={!!errors.name}
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.name?.message}
-            </Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">{errors.name?.message}</Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="col-12" controlId="stateAccept">
             <Form.Label className="form-label">State</Form.Label>
-            <Form.Select
-              className="form-control"
-              aria-label="State"
-              {...register("stateAccept")}
-            >
+            <Form.Select className="form-control" aria-label="State" {...register("stateAccept")}>
               <option value="ACTIVE">Active</option>
               <option value="PENDING">Pending</option>
             </Form.Select>
@@ -89,21 +79,12 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isLoading}
-            onClick={onCloseModal}
-          >
+          <Button type="button" variant="secondary" disabled={isLoading} onClick={onCloseModal}>
             Cancel
           </Button>
 
           <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <Spinner animation="border" variant="light" size="sm" />
-            ) : (
-              submitText
-            )}
+            {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : submitText}
           </Button>
         </Modal.Footer>
       </Form>

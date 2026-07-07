@@ -6,10 +6,7 @@ import {
 } from "@/DataProviders/MicroServiceRepository";
 import { MicroService } from "@/Domain/MicroService/MicroService";
 import { MicroServiceFilter } from "@/Domain/MicroService/MicroServiceFilter";
-import {
-  usePaginatedQuery,
-  withPageVisit,
-} from "@variamosple/variamos-components";
+import { usePaginatedQuery, withPageVisit } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import ConfirmationModal from "../Components/ConfirmationModal";
@@ -20,10 +17,8 @@ const MicroServiceListPageComponent: FC<unknown> = () => {
   const [showRestart, setShowRestart] = useState(false);
   const [showStop, setShowStop] = useState(false);
 
-  const [toStartMicroService, setToStartMicroService] =
-    useState<MicroService>();
-  const [toRestartMicroService, setToRestartMicroService] =
-    useState<MicroService>();
+  const [toStartMicroService, setToStartMicroService] = useState<MicroService>();
+  const [toRestartMicroService, setToRestartMicroService] = useState<MicroService>();
   const [toStopMicroService, setToStopMicroService] = useState<MicroService>();
 
   const onMicroSerViceStart = (microService: MicroService) => {
@@ -146,7 +141,4 @@ const MicroServiceListPageComponent: FC<unknown> = () => {
   );
 };
 
-export const MicroServiceListPage = withPageVisit(
-  MicroServiceListPageComponent,
-  "Monitoring"
-);
+export const MicroServiceListPage = withPageVisit(MicroServiceListPageComponent, "Monitoring");

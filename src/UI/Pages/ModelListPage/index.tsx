@@ -76,7 +76,4 @@ const ModelListPageComponent: FC = () => {
   );
 };
 
-export const ModelListPage = withPageVisit(
-  ModelListPageComponent,
-  "AdminModelList"
-);
+export const ModelListPage = withPageVisit(ModelListPageComponent, "AdminModelList");

@@ -96,7 +96,4 @@ const PermissionListPageComponent: FC<unknown> = () => {
   );
 };
 
-export const PermissionListPage = withPageVisit(
-  PermissionListPageComponent,
-  "PermissionList"
-);
+export const PermissionListPage = withPageVisit(PermissionListPageComponent, "PermissionList");

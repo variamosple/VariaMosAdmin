@@ -56,17 +56,9 @@ export const BugFormModal: FC<BugFormModalProps> = ({
   };
 
   return (
-    <Modal
-      show={show}
-      onHide={onHide}
-      backdrop="static"
-      keyboard={false}
-      centered
-    >
+    <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered>
       <Modal.Header closeButton>
-        <Modal.Title>
-          {mode === "admin" ? "Report a GitHub Bug" : "Report a New Bug"}
-        </Modal.Title>
+        <Modal.Title>{mode === "admin" ? "Report a GitHub Bug" : "Report a New Bug"}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleSubmit(handleFormSubmit)}>
@@ -86,9 +78,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
               })}
             />
             {errors.title && (
-              <Form.Control.Feedback type="invalid">
-                {errors.title.message}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{errors.title.message}</Form.Control.Feedback>
             )}
           </Form.Group>
 

@@ -6,7 +6,7 @@ export class UsersFilter extends PagedModel {
     public email?: string,
     public search?: string,
     pageNumber?: number,
-    pageSize?: number
+    pageSize?: number,
   ) {
     super(pageNumber, pageSize);
   }

@@ -41,7 +41,7 @@ export const SearchForm: FC<SearchFormProps> = ({
       reset(data);
       onSubmit(data.search);
     },
-    [onSubmit, reset]
+    [onSubmit, reset],
   );
 
   useEffect(() => {
@@ -86,9 +86,7 @@ export const SearchForm: FC<SearchFormProps> = ({
               </Button>
             </InputGroup>
 
-            <Form.Control.Feedback type="invalid">
-              {errors.search?.message}
-            </Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">{errors.search?.message}</Form.Control.Feedback>
           </Form.Group>
         </Col>
       </Row>

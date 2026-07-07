@@ -2,10 +2,7 @@ import { type FC, useState, useEffect } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ResetPasswordForm } from "@/UI/Components/ResetPasswordForm";
-import {
-  verifyPasswordResetToken,
-  resetPassword,
-} from "@/DataProviders/AuthRepository";
+import { verifyPasswordResetToken, resetPassword } from "@/DataProviders/AuthRepository";
 
 export const ResetPasswordPage: FC = () => {
   const [message, setMessage] = useState<string | null>(null);
@@ -59,16 +56,10 @@ export const ResetPasswordPage: FC = () => {
       const response = await resetPassword(token, password);
       if (response.errorCode) {
         const serverMessage = response.message || "";
-        if (
-          serverMessage.includes(
-            "New password cannot be the same as the old password",
-          )
-        ) {
+        if (serverMessage.includes("New password cannot be the same as the old password")) {
           setError("New password must be different from the current one.");
         } else {
-          setError(
-            serverMessage || "Error modifying password. Please try again.",
-          );
+          setError(serverMessage || "Error modifying password. Please try again.");
         }
       } else {
         setMessage("Your password has been reset successfully !");
@@ -90,11 +81,7 @@ export const ResetPasswordPage: FC = () => {
         style={{ width: 350 }}
         data-bs-theme="dark"
       >
-        <img
-          src="./images/VariaMosLogo.png"
-          alt="Variamos logo"
-          className="img-fluid"
-        />
+        <img src="./images/VariaMosLogo.png" alt="Variamos logo" className="img-fluid" />
 
         <div className="w-100 text-center">
           <h4 className="text-light mb-2">Reset Password</h4>
@@ -103,20 +90,14 @@ export const ResetPasswordPage: FC = () => {
         {isVerifyingToken ? (
           <div className="text-center my-3">
             <Spinner animation="border" variant="light" size="sm" />
-            <p className="text-secondary small mt-2">
-              Checking link validity...
-            </p>
+            <p className="text-secondary small mt-2">Checking link validity...</p>
           </div>
         ) : !isTokenValid ? (
           <div className="w-100 text-center">
             <Alert variant="danger" className="w-100 small mb-3">
-              This password reset link is invalid, has expired, or has already
-              been used.
+              This password reset link is invalid, has expired, or has already been used.
             </Alert>
-            <Link
-              to="/forgot-password"
-              className="text-decoration-none text-primary-small"
-            >
+            <Link to="/forgot-password" className="text-decoration-none text-primary-small">
               Request a new link
             </Link>
           </div>
@@ -125,10 +106,7 @@ export const ResetPasswordPage: FC = () => {
             <Alert variant="success" className="w-100 small mb-3">
               {message}
             </Alert>
-            <Link
-              to="/login"
-              className="text-decoration-none text-primary-small"
-            >
+            <Link to="/login" className="text-decoration-none text-primary-small">
               Back to Sign In
             </Link>
           </div>
@@ -144,10 +122,7 @@ export const ResetPasswordPage: FC = () => {
                 {error}
               </Alert>
             )}
-            <ResetPasswordForm
-              onSubmitPassword={handleSubmit}
-              isLoading={isLoading}
-            />
+            <ResetPasswordForm onSubmitPassword={handleSubmit} isLoading={isLoading} />
           </>
         )}
       </div>

@@ -76,7 +76,4 @@ const ProjectListPageComponent: FC = () => {
   );
 };
 
-export const ProjectListPage = withPageVisit(
-  ProjectListPageComponent,
-  "AdminProjectList"
-);
+export const ProjectListPage = withPageVisit(ProjectListPageComponent, "AdminProjectList");

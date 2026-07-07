@@ -38,7 +38,7 @@ PROJECTS_CLIENT.interceptors.request.use(authInterceptor);
 
 export const setupAxiosInterceptors = (
   axiosInstance: AxiosInstance,
-  navigate: NavigateFunction
+  navigate: NavigateFunction,
 ) => {
   const interceptorId = axiosInstance.interceptors.response.use(
     (response) => {
@@ -59,7 +59,7 @@ export const setupAxiosInterceptors = (
       }
 
       return Promise.reject(error);
-    }
+    },
   );
 
   return interceptorId;

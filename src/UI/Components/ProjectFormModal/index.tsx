@@ -62,11 +62,7 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
   };
 
   return (
-    <Modal
-      show={showModal}
-      backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
-    >
+    <Modal show={showModal} backdrop={isLoading ? "static" : true} onHide={onCloseModal}>
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title>{modalTitle}</Modal.Title>
       </Modal.Header>
@@ -82,9 +78,7 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
               {...register("name", { required: "Project name is required" })}
               isInvalid={!!errors.name}
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.name?.message}
-            </Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">{errors.name?.message}</Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="col-12" controlId="author">
@@ -133,21 +127,12 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isLoading}
-            onClick={onCloseModal}
-          >
+          <Button type="button" variant="secondary" disabled={isLoading} onClick={onCloseModal}>
             Cancel
           </Button>
 
           <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <Spinner animation="border" variant="light" size="sm" />
-            ) : (
-              submitText
-            )}
+            {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : submitText}
           </Button>
         </Modal.Footer>
       </Form>

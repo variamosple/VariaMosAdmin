@@ -13,13 +13,9 @@ export interface PaginationControlsProps {
 }
 
 function withPagination<T>(
-  Component: React.ComponentType<PaginationControlsProps & { items: T[] }>
+  Component: React.ComponentType<PaginationControlsProps & { items: T[] }>,
 ) {
-  return function WithPagination({
-    items,
-    itemsPerPage,
-    totalCount,
-  }: WithPaginationProps<T>) {
+  return function WithPagination({ items, itemsPerPage, totalCount }: WithPaginationProps<T>) {
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 

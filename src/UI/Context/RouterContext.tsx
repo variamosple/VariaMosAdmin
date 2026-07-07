@@ -5,12 +5,7 @@ import {
   RouterContext,
 } from "@variamosple/variamos-components";
 import { FC, ReactNode, useCallback, useEffect, useMemo } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -28,7 +23,7 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
         navigate(url.replace(basePath, "").replace(/^#/, ""), options);
       }
     },
-    [navigate, pathname]
+    [navigate, pathname],
   );
 
   useEffect(() => {

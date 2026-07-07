@@ -22,11 +22,7 @@ export const RoleList: FC<RoleListParameters> = ({
   const { navigate } = useRouter();
   return (
     <>
-      <Paginator
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
 
       <Table striped bordered hover>
         <thead>
@@ -56,19 +52,11 @@ export const RoleList: FC<RoleListParameters> = ({
                     <Search />
                   </Button>
 
-                  <Button
-                    variant="primary"
-                    onClick={() => onRoleEdit(role)}
-                    title="Edit role"
-                  >
+                  <Button variant="primary" onClick={() => onRoleEdit(role)} title="Edit role">
                     <PencilFill />
                   </Button>
 
-                  <Button
-                    variant="danger"
-                    onClick={() => onRoleDelete(role)}
-                    title="Delete role"
-                  >
+                  <Button variant="danger" onClick={() => onRoleDelete(role)} title="Delete role">
                     <TrashFill />
                   </Button>
                 </ButtonGroup>
@@ -78,11 +66,7 @@ export const RoleList: FC<RoleListParameters> = ({
         </tbody>
       </Table>
 
-      <Paginator
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
     </>
   );
 };

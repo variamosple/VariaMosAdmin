@@ -11,11 +11,7 @@ interface RecoveryLinkModalProps {
   onHide: () => void;
 }
 
-export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
-  user,
-  show,
-  onHide,
-}) => {
+export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({ user, show, onHide }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [recoveryUrl, setRecoveryUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
@@ -69,9 +65,8 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
 
       <Modal.Body>
         <p className="text-secondary small">
-          Use this to help <strong>{user?.name}</strong> who has lost access to
-          their email. Generate a unique link and send it to them via a secure
-          channel.
+          Use this to help <strong>{user?.name}</strong> who has lost access to their email.
+          Generate a unique link and send it to them via a secure channel.
         </p>
 
         {!recoveryUrl && !loading && (
@@ -91,9 +86,7 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
 
         {recoveryUrl && (
           <Form.Group className="mt-3">
-            <Form.Label className="form-label align-self-start m-0">
-              Copy this link:
-            </Form.Label>
+            <Form.Label className="form-label align-self-start m-0">Copy this link:</Form.Label>
             <InputGroup>
               <Form.Control
                 type="text"
@@ -108,9 +101,7 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
                 {copied ? <ClipboardCheck /> : <Clipboard />}
               </Button>
             </InputGroup>
-            {copied && (
-              <p className="text-success small mt-1">Copied to clipboard!</p>
-            )}
+            {copied && <p className="text-success small mt-1">Copied to clipboard!</p>}
           </Form.Group>
         )}
       </Modal.Body>

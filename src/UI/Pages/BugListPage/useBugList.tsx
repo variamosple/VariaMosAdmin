@@ -23,9 +23,7 @@ export const useBugList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<"github" | "local" | "trash">(
-    "github",
-  );
+  const [activeTab, setActiveTab] = useState<"github" | "local" | "trash">("github");
 
   // Bug Notes States
   const [notes, setNotes] = useState<BugStatusLog[]>([]);
@@ -106,9 +104,7 @@ export const useBugList = () => {
         status: "",
         comment: n.body || "",
         changedAt: n.createdAt,
-        changedBy: n.author?.name
-          ? { id: "", name: n.author.name, email: "" }
-          : undefined,
+        changedBy: n.author?.name ? { id: "", name: n.author.name, email: "" } : undefined,
       }));
       setNotes(mapped);
     }
@@ -136,14 +132,7 @@ export const useBugList = () => {
     file?: File,
   ) => {
     setIsSubmitting(true);
-    const response = await createBug(
-      title,
-      description,
-      priority,
-      category,
-      githubRepo,
-      file,
-    );
+    const response = await createBug(title, description, priority, category, githubRepo, file);
 
     if (response.errorCode) {
       setError(response.message || "Failed to create bug");

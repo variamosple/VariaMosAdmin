@@ -1,8 +1,4 @@
-import {
-  deleteModel,
-  queryModels,
-  updateModel,
-} from "@/DataProviders/ModelRepository";
+import { deleteModel, queryModels, updateModel } from "@/DataProviders/ModelRepository";
 import { Model } from "@/Domain/Model/Model";
 import { ModelsFilter } from "@/Domain/Model/ModelFilter";
 import { useToast } from "@/UI/Context/ToastContext";
@@ -82,8 +78,6 @@ export const useModelList = () => {
     });
 
     deleteModel(model.id!).then((response) => {
-      // alertify.dismissAll();
-
       if (response.errorCode) {
         pushToast({
           title: "Model delete",

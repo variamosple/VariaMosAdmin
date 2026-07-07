@@ -21,11 +21,7 @@ export const ProjectList: FC<ProjectListProps> = ({
 }) => {
   return (
     <>
-      <Paginator
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
 
       <Table striped bordered hover responsive>
         <thead>
@@ -58,11 +54,7 @@ export const ProjectList: FC<ProjectListProps> = ({
         </tbody>
       </Table>
 
-      <Paginator
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
     </>
   );
 };
