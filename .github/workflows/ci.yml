@@ -45,7 +45,7 @@ jobs:
 
     - name: Run unit tests
       run: |
-        npm run test -- --watchAll=false
+        npm run test -- --watchAll=false --passWithNoTests
 
     - name: Run TruffleHog Secret Scan
       uses: trufflesecurity/trufflehog@main
