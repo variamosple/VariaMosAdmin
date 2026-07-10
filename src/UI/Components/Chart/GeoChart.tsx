@@ -9,8 +9,7 @@ export interface GeoChartProps {
 }
 
 export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
-  const { activeFilter, data, options, filterOptions, setFilter } =
-    useGeoChartData(metric);
+  const { activeFilter, data, options, filterOptions, setFilter } = useGeoChartData(metric);
 
   return (
     <div className="d-flex flex-column align-items-center w-100 mb-4">

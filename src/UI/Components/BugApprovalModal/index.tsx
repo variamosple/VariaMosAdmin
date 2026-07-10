@@ -1,8 +1,5 @@
 import { Bug } from "@/Domain/Bug/Bug";
-import {
-  deleteAttachment,
-  uploadAttachment,
-} from "@/DataProviders/BugRepository";
+import { deleteAttachment, uploadAttachment } from "@/DataProviders/BugRepository";
 import { FC, useEffect, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { useForm } from "react-hook-form";
@@ -133,14 +130,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
   };
 
   return (
-    <Modal
-      show={show}
-      onHide={onHide}
-      backdrop="static"
-      keyboard={false}
-      size="lg"
-      centered
-    >
+    <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>Review and Approve Local Bug</Modal.Title>
       </Modal.Header>
@@ -157,9 +147,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
               {...register("title", { required: "Title is required" })}
             />
             {errors.title && (
-              <Form.Control.Feedback type="invalid">
-                {errors.title.message}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{errors.title.message}</Form.Control.Feedback>
             )}
           </Form.Group>
 
@@ -187,7 +175,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                 <Form.Select
                   isInvalid={!!errors.githubRepo}
                   {...register("githubRepo", {
-                    required: "Dépôt GitHub est requis",
+                    required: "GitHub repository is required",
                   })}
                 >
                   <option value="">Select repository...</option>
@@ -302,11 +290,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
           <Button variant="secondary" onClick={onHide} disabled={isApproving}>
             Cancel
           </Button>
-          <Button
-            variant="success"
-            type="submit"
-            disabled={isApproving || isUploading}
-          >
+          <Button variant="success" type="submit" disabled={isApproving || isUploading}>
             {isApproving ? "Approving..." : "Approve & Send to GitHub"}
           </Button>
         </Modal.Footer>

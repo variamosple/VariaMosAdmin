@@ -25,15 +25,9 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
   };
 
   return (
-    <Form
-      className="login-form w-100"
-      data-bs-theme="dark"
-      onSubmit={handleSubmit(onSubmit)}
-    >
+    <Form className="login-form w-100" data-bs-theme="dark" onSubmit={handleSubmit(onSubmit)}>
       <Form.Group className="w-100" controlId="email">
-        <Form.Label className="form-label align-self-start m-0">
-          Email Address
-        </Form.Label>
+        <Form.Label className="form-label align-self-start m-0">Email Address</Form.Label>
         <Form.Control
           type="email"
           className="form-control"
@@ -41,15 +35,11 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
           {...register("email", { required: "Email is required" })}
           isInvalid={!!errors.email}
         />
-        <Form.Control.Feedback type="invalid">
-          {errors.email?.message}
-        </Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="w-100" controlId="password">
-        <Form.Label className="form-label align-self-start m-0">
-          Password
-        </Form.Label>
+        <Form.Label className="form-label align-self-start m-0">Password</Form.Label>
         <Form.Control
           type="password"
           className="form-control"
@@ -57,9 +47,7 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
           {...register("password", { required: "Password is required" })}
           isInvalid={!!errors.password}
         />
-        <Form.Control.Feedback type="invalid">
-          {errors.password?.message}
-        </Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback>
       </Form.Group>
 
       <div className="d-flex justify-content-start w-100 mb-3">
@@ -71,17 +59,8 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
         </Link>
       </div>
 
-      <Button
-        className="w-100"
-        variant="primary"
-        type="submit"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <Spinner animation="border" variant="light" size="sm" />
-        ) : (
-          "Sign in"
-        )}
+      <Button className="w-100" variant="primary" type="submit" disabled={isLoading}>
+        {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : "Sign in"}
       </Button>
     </Form>
   );

@@ -83,10 +83,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
         )}
       </td>
 
-      <td
-        className="align-middle font-weight-bold text-dark"
-        style={{ minWidth: "150px" }}
-      >
+      <td className="align-middle font-weight-bold text-dark" style={{ minWidth: "150px" }}>
         {bug.title}
       </td>
 

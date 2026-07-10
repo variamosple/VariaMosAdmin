@@ -10,9 +10,7 @@ interface IChartContext {
   metric: Metric;
   chartFilter: ChartDateFormProperties;
   isLoading: boolean;
-  filterChartData: (
-    chartFilter: ChartDateFormProperties
-  ) => Promise<ResponseModel<Metric>>;
+  filterChartData: (chartFilter: ChartDateFormProperties) => Promise<ResponseModel<Metric>>;
 }
 
 const ChartContext = createContext<IChartContext | undefined>(undefined);
@@ -22,10 +20,7 @@ export interface ChartContextProviderProps {
   children: React.ReactNode;
 }
 
-export const ChartContextProvider: FC<ChartContextProviderProps> = ({
-  metric,
-  children,
-}) => {
+export const ChartContextProvider: FC<ChartContextProviderProps> = ({ metric, children }) => {
   const { pushToast } = useToast();
   const [currentMetric, setCurrentMetric] = useState(metric);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,9 +34,7 @@ export const ChartContextProvider: FC<ChartContextProviderProps> = ({
       setIsLoading(true);
       setChartFilter(chartFilter);
 
-      return queryMetric(
-        new MetricsFilter(metric.id, chartFilter.fromDate, chartFilter.toDate)
-      )
+      return queryMetric(new MetricsFilter(metric.id, chartFilter.fromDate, chartFilter.toDate))
         .then((response) => {
           if (response.errorCode) {
             pushToast({
@@ -61,7 +54,7 @@ export const ChartContextProvider: FC<ChartContextProviderProps> = ({
           setIsLoading(false);
         });
     },
-    [metric, pushToast]
+    [metric, pushToast],
   );
 
   return (
@@ -81,9 +74,7 @@ export const ChartContextProvider: FC<ChartContextProviderProps> = ({
 export const useChartContext = () => {
   const context = useContext(ChartContext);
   if (!context) {
-    throw new Error(
-      "useChartContext must be used within a ChartContextProvider"
-    );
+    throw new Error("useChartContext must be used within a ChartContextProvider");
   }
   return context;
 };

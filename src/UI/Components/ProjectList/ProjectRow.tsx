@@ -2,12 +2,7 @@ import { Project } from "@/Domain/Project/Project";
 import { formatBoolean, formatDate } from "@/UI/constants";
 import { FC, useState } from "react";
 import { Accordion, Button, ButtonGroup } from "react-bootstrap";
-import {
-  DashCircle,
-  PencilFill,
-  PlusCircle,
-  TrashFill,
-} from "react-bootstrap-icons";
+import { DashCircle, PencilFill, PlusCircle, TrashFill } from "react-bootstrap-icons";
 
 export interface ProjectRowProps {
   project: Project;
@@ -72,11 +67,7 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
 
         <td>
           <ButtonGroup size="sm">
-            <Button
-              variant="primary"
-              onClick={() => onProjectEdit(project)}
-              title="Edit project"
-            >
+            <Button variant="primary" onClick={() => onProjectEdit(project)} title="Edit project">
               <PencilFill />
             </Button>
 
@@ -125,23 +116,19 @@ export const ProjectDetails: FC<ProjectDetailsProps> = ({ project }) => {
       {project.project.productLines.map((productLine) => (
         <Accordion.Item key={productLine.id} eventKey={`${productLine.id}`}>
           <Accordion.Header>
-            Product Line: {productLine.name} - Type: {productLine.type} -
-            Domain: {productLine.domain}
+            Product Line: {productLine.name} - Type: {productLine.type} - Domain:{" "}
+            {productLine.domain}
           </Accordion.Header>
 
           <Accordion.Body>
             <Accordion alwaysOpen flush>
-              <Accordion.Item
-                key={productLine.id}
-                eventKey={`${productLine.id}-domainEngineering`}
-              >
+              <Accordion.Item key={productLine.id} eventKey={`${productLine.id}-domainEngineering`}>
                 <Accordion.Header>Domain Engineering - Models</Accordion.Header>
                 <Accordion.Body>
                   <div
                     className="d-grid gap-1"
                     style={{
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                     }}
                   >
                     {productLine.domainEngineering?.models?.map?.((model) => (
@@ -158,22 +145,17 @@ export const ProjectDetails: FC<ProjectDetailsProps> = ({ project }) => {
                 key={productLine.id}
                 eventKey={`${productLine.id}-applicationEngineering`}
               >
-                <Accordion.Header>
-                  Application Engineering - Models
-                </Accordion.Header>
+                <Accordion.Header>Application Engineering - Models</Accordion.Header>
                 <Accordion.Body>
                   <div
                     className="d-grid gap-1"
                     style={{
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                     }}
                   >
-                    {productLine.applicationEngineering?.models?.map?.(
-                      (model) => (
-                        <div key={model.id}>{model.name}</div>
-                      )
-                    )}
+                    {productLine.applicationEngineering?.models?.map?.((model) => (
+                      <div key={model.id}>{model.name}</div>
+                    ))}
 
                     {!productLine.applicationEngineering?.models?.length &&
                       "There are no application engineering models in this product line."}

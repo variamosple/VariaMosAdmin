@@ -17,9 +17,7 @@ export const ForgotPasswordPage: FC = () => {
     try {
       const response = await requestPasswordReset(email);
       if (response.errorCode) {
-        setError(
-          response.message || "Error sending reset link. Please try again.",
-        );
+        setError(response.message || "Error sending reset link. Please try again.");
       } else {
         setMessage(
           "If an account with this email exists, a password reset link has been sent. Please check your inbox!",
@@ -39,20 +37,13 @@ export const ForgotPasswordPage: FC = () => {
         style={{ width: 350 }}
         data-bs-theme="dark"
       >
-        <img
-          src="./images/VariaMosLogo.png"
-          alt="Variamos logo"
-          className="img-fluid"
-        />
+        <img src="./images/VariaMosLogo.png" alt="Variamos logo" className="img-fluid" />
         {message ? (
           <div className="w-100 text-center">
             <Alert variant="success" className="w-100 small mb-3">
               {message}
             </Alert>
-            <Link
-              to="/login"
-              className="text-decoration-none text-primary-small"
-            >
+            <Link to="/login" className="text-decoration-none text-primary-small">
               Back to Sign In
             </Link>
           </div>
@@ -69,16 +60,10 @@ export const ForgotPasswordPage: FC = () => {
                 {error}
               </Alert>
             )}
-            <ForgotPasswordForm
-              onSubmitEmail={handleSubmit}
-              isLoading={isLoading}
-            />
+            <ForgotPasswordForm onSubmitEmail={handleSubmit} isLoading={isLoading} />
 
             <div className="mt-2">
-              <Link
-                to="/login"
-                className="text-decoration-none text-primary-small"
-              >
+              <Link to="/login" className="text-decoration-none text-primary-small">
                 Back to Sign In
               </Link>
             </div>

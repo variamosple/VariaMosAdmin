@@ -1,8 +1,4 @@
-import {
-  deleteLanguage,
-  queryLanguages,
-  updateLanguage,
-} from "@/DataProviders/LanguageRepository";
+import { deleteLanguage, queryLanguages, updateLanguage } from "@/DataProviders/LanguageRepository";
 import { Language } from "@/Domain/Language/Language";
 import { LanguagesFilter } from "@/Domain/Language/LanguageFilter";
 import { useToast } from "@/UI/Context/ToastContext";
@@ -86,8 +82,6 @@ export const useLanguageList = () => {
     });
 
     deleteLanguage(language.id!).then((response) => {
-      // alertify.dismissAll();
-
       if (response.errorCode) {
         pushToast({
           title: "Language delete",
@@ -123,17 +117,15 @@ export const useLanguageList = () => {
   };
 
   const onSearchSubmit = (search?: LanguagesFilter) => {
-    loadData(new LanguagesFilter(search?.name, search?.status)).then(
-      (response) => {
-        if (response.errorCode) {
-          pushToast({
-            title: "Language query error",
-            message: response.message!,
-            variant: "danger",
-          });
-        }
+    loadData(new LanguagesFilter(search?.name, search?.status)).then((response) => {
+      if (response.errorCode) {
+        pushToast({
+          title: "Language query error",
+          message: response.message!,
+          variant: "danger",
+        });
       }
-    );
+    });
   };
 
   return {

@@ -23,7 +23,7 @@ const MyAccountPageComponent: FC<unknown> = () => {
 
   const personalInformation: PersonalInformationUpdate = useMemo(
     () => ({ countryCode: user?.countryCode }),
-    [user]
+    [user],
   );
 
   const queryUser = () => {
@@ -54,9 +54,7 @@ const MyAccountPageComponent: FC<unknown> = () => {
       });
   };
 
-  const onPersonalInformationUpdate = (
-    information: PersonalInformationUpdate
-  ) => {
+  const onPersonalInformationUpdate = (information: PersonalInformationUpdate) => {
     setIsUpdatingInformation(true);
     return updatePersonalInformation(information)
       .then((response) => {
@@ -88,9 +86,7 @@ const MyAccountPageComponent: FC<unknown> = () => {
         <h1 className="mb-0">My account</h1>
 
         <div>
-          <Button onClick={() => setShowInformationUpdate(true)}>
-            Edit information
-          </Button>
+          <Button onClick={() => setShowInformationUpdate(true)}>Edit information</Button>
         </div>
       </div>
 
@@ -114,8 +110,7 @@ const MyAccountPageComponent: FC<unknown> = () => {
         </Col>
 
         <Col className="col-12 col-md-6">
-          <span className="fw-bold">Password: </span>{" "}
-          <span className="text-muted">********</span>
+          <span className="fw-bold">Password: </span> <span className="text-muted">********</span>
           <Button
             className="ms-1"
             variant="primary"

@@ -3,10 +3,7 @@ import { Role } from "@/Domain/Role/Entity/Role";
 import { RolesFilter } from "@/Domain/Role/Entity/RolesFilter";
 import { UserRole } from "@/Domain/User/Entity/UserRole";
 import useIntersectionObserver from "@/UI/Hooks/useIntersectionObserver";
-import {
-  useDebouncedValue,
-  usePaginatedQuery,
-} from "@variamosple/variamos-components";
+import { useDebouncedValue, usePaginatedQuery } from "@variamosple/variamos-components";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -24,18 +21,14 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
   isLoading,
   submitText = "Add role",
 }) => {
-  const [selectedOption, setSelectedOption] = useState<
-    SelectOptionProps<number>
-  >({
+  const [selectedOption, setSelectedOption] = useState<SelectOptionProps<number>>({
     label: "",
     value: 0,
   });
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchInput] = useDebouncedValue<string>(searchValue, 500);
-  const [roleOptions, setSemanticOptions] = useState<
-    SelectOptionProps<number>[]
-  >([]);
+  const [roleOptions, setSemanticOptions] = useState<SelectOptionProps<number>[]>([]);
 
   const onSearchChange = (search: string) => {
     setSearchInput(search);
@@ -48,9 +41,7 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
     setSearchValue("");
   };
 
-  const transformToSelectOptions = (
-    roles: Role[]
-  ): SelectOptionProps<number>[] => {
+  const transformToSelectOptions = (roles: Role[]): SelectOptionProps<number>[] => {
     if (!roles) return [];
 
     return roles?.map(({ id, name }) => {
@@ -75,20 +66,15 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
   const { lastEntryRef, setHasMore, page } = useIntersectionObserver(
     isFetchingRoles,
     currentRolesPage,
-    setRolesCurrentPage
+    setRolesCurrentPage,
   );
 
   const fetchAndSetRoles = useCallback(async () => {
-    loadRolesData(new RolesFilter(debouncedSearchInput, page)).then(
-      (result) => {
-        if (page === 1) setSemanticOptions([]);
+    loadRolesData(new RolesFilter(debouncedSearchInput, page)).then((result) => {
+      if (page === 1) setSemanticOptions([]);
 
-        setSemanticOptions((prev) => [
-          ...prev,
-          ...transformToSelectOptions(result?.data || []),
-        ]);
-      }
-    );
+      setSemanticOptions((prev) => [...prev, ...transformToSelectOptions(result?.data || [])]);
+    });
   }, [debouncedSearchInput, page, loadRolesData]);
 
   const {
@@ -115,10 +101,7 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
   }, [roleOptions, totalRoleItems, isFetchingRoles, setHasMore]);
 
   return (
-    <Form
-      className="d-flex justify-content-between"
-      onSubmit={handleSubmit(onSubmit)}
-    >
+    <Form className="d-flex justify-content-between" onSubmit={handleSubmit(onSubmit)}>
       <Form.Group controlId="name" className="col-6 col-md-4">
         <Controller
           name="roleId"
@@ -142,18 +125,12 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
           )}
         />
 
-        <Form.Control.Feedback type="invalid">
-          {errors.roleId?.message}
-        </Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">{errors.roleId?.message}</Form.Control.Feedback>
       </Form.Group>
 
       <div>
         <Button variant="primary" type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <Spinner animation="border" variant="light" size="sm" />
-          ) : (
-            submitText
-          )}
+          {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : submitText}
         </Button>
       </div>
     </Form>

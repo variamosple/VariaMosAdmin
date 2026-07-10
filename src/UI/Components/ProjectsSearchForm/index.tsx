@@ -53,7 +53,7 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
       onSubmit(new ProjectsFilter(data?.name, template));
       reset(data);
     },
-    [onSubmit, reset]
+    [onSubmit, reset],
   );
 
   useEffect(() => {

@@ -1,7 +1,11 @@
 import { PagedModel } from "@variamosple/variamos-components";
 
 export class RolePermissionFilter extends PagedModel {
-  constructor(public roleId?: number, pageNumber?: number, pageSize?: number) {
+  constructor(
+    public roleId?: number,
+    pageNumber?: number,
+    pageSize?: number,
+  ) {
     super(pageNumber, pageSize);
   }
 
@@ -9,14 +13,8 @@ export class RolePermissionFilter extends PagedModel {
     return new RolePermissionFilterBuilder();
   }
 
-  public static build(
-    builder: RolePermissionFilterBuilder
-  ): RolePermissionFilter {
-    return new RolePermissionFilter(
-      builder.roleId,
-      builder.pageNumber,
-      builder.pageSize
-    );
+  public static build(builder: RolePermissionFilterBuilder): RolePermissionFilter {
+    return new RolePermissionFilter(builder.roleId, builder.pageNumber, builder.pageSize);
   }
 }
 

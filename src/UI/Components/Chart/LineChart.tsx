@@ -1,10 +1,7 @@
 import { useLineChartData } from "@/UI/Hooks/useLineChartData";
 import { FC } from "react";
 
-import {
-  useChartContext,
-  withChartContextWrapper,
-} from "@/UI/Context/ChartContext";
+import { useChartContext, withChartContextWrapper } from "@/UI/Context/ChartContext";
 import { Spinner } from "react-bootstrap";
 import Chart from "react-google-charts";
 import { ChartDateFilter } from "./ChartDateFilter";
@@ -25,13 +22,9 @@ const LineChartComponent: FC<unknown> = () => {
         className="d-flex justify-content-center align-items-center w-100"
         style={{ height: "350px" }}
       >
-        {isLoading && (
-          <Spinner className="mt-5" animation="border" variant="primary" />
-        )}
+        {isLoading && <Spinner className="mt-5" animation="border" variant="primary" />}
 
-        {!isLoading && !metric.data && (
-          <span className="text-muted">No data found.</span>
-        )}
+        {!isLoading && !metric.data && <span className="text-muted">No data found.</span>}
 
         {!isLoading && metric.data && (
           <Chart

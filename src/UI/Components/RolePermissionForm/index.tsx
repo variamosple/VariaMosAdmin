@@ -3,10 +3,7 @@ import { Permission } from "@/Domain/Permission/Entity/Permission";
 import { PermissionsFilter } from "@/Domain/Permission/Entity/PermissionsFilter";
 import { RolePermission } from "@/Domain/Role/Entity/RolePermission";
 import useIntersectionObserver from "@/UI/Hooks/useIntersectionObserver";
-import {
-  useDebouncedValue,
-  usePaginatedQuery,
-} from "@variamosple/variamos-components";
+import { useDebouncedValue, usePaginatedQuery } from "@variamosple/variamos-components";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -24,18 +21,14 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
   isLoading,
   submitText = "Add permission",
 }) => {
-  const [selectedOption, setSelectedOption] = useState<
-    SelectOptionProps<number>
-  >({
+  const [selectedOption, setSelectedOption] = useState<SelectOptionProps<number>>({
     label: "",
     value: 0,
   });
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchInput] = useDebouncedValue<string>(searchValue, 500);
-  const [permissionOptions, setSemanticOptions] = useState<
-    SelectOptionProps<number>[]
-  >([]);
+  const [permissionOptions, setSemanticOptions] = useState<SelectOptionProps<number>[]>([]);
 
   const onSearchChange = (search: string) => {
     setSearchInput(search);
@@ -48,9 +41,7 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
     setSearchValue("");
   };
 
-  const transformToSelectOptions = (
-    permissions: Permission[]
-  ): SelectOptionProps<number>[] => {
+  const transformToSelectOptions = (permissions: Permission[]): SelectOptionProps<number>[] => {
     if (!permissions) return [];
 
     return permissions?.map(({ id, name }) => {
@@ -75,20 +66,15 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
   const { lastEntryRef, setHasMore, page } = useIntersectionObserver(
     isFetchingPermissions,
     currentPermissionsPage,
-    setPermissionsCurrentPage
+    setPermissionsCurrentPage,
   );
 
   const fetchAndSetPermissions = useCallback(async () => {
-    loadPermissionsData(new PermissionsFilter(debouncedSearchInput, page)).then(
-      (result) => {
-        if (page === 1) setSemanticOptions([]);
+    loadPermissionsData(new PermissionsFilter(debouncedSearchInput, page)).then((result) => {
+      if (page === 1) setSemanticOptions([]);
 
-        setSemanticOptions((prev) => [
-          ...prev,
-          ...transformToSelectOptions(result?.data || []),
-        ]);
-      }
-    );
+      setSemanticOptions((prev) => [...prev, ...transformToSelectOptions(result?.data || [])]);
+    });
   }, [debouncedSearchInput, page, loadPermissionsData]);
 
   const {
@@ -112,18 +98,10 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
     if (!isFetchingPermissions) {
       setHasMore(permissionOptions?.length < totalPermissionItems);
     }
-  }, [
-    permissionOptions,
-    totalPermissionItems,
-    isFetchingPermissions,
-    setHasMore,
-  ]);
+  }, [permissionOptions, totalPermissionItems, isFetchingPermissions, setHasMore]);
 
   return (
-    <Form
-      className="d-flex justify-content-between"
-      onSubmit={handleSubmit(onSubmit)}
-    >
+    <Form className="d-flex justify-content-between" onSubmit={handleSubmit(onSubmit)}>
       <Form.Group controlId="name" className="col-6 col-md-4">
         <Controller
           name="permissionId"
@@ -147,18 +125,12 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
           )}
         />
 
-        <Form.Control.Feedback type="invalid">
-          {errors.permissionId?.message}
-        </Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">{errors.permissionId?.message}</Form.Control.Feedback>
       </Form.Group>
 
       <div>
         <Button variant="primary" type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <Spinner animation="border" variant="light" size="sm" />
-          ) : (
-            submitText
-          )}
+          {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : submitText}
         </Button>
       </div>
     </Form>

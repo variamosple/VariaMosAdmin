@@ -5,9 +5,7 @@ import { Model } from "@/Domain/Model/Model";
 import { ModelsFilter } from "@/Domain/Model/ModelFilter";
 import { PROJECTS_CLIENT } from "../Infrastructure/AxiosConfig";
 
-export const queryModels = (
-  filter: ModelsFilter
-): Promise<ResponseModel<Model[]>> => {
+export const queryModels = (filter: ModelsFilter): Promise<ResponseModel<Model[]>> => {
   return PROJECTS_CLIENT.get("/v1/admin/models", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -22,14 +20,14 @@ export const queryModels = (
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          `Error when trying to query model, please try again later.`
+          `Error when trying to query model, please try again later.`,
         );
       }
     });
@@ -50,22 +48,20 @@ export const deleteModel = (modelId: string): Promise<ResponseModel<void>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          "Error when trying to delete the model, please try again later."
+          "Error when trying to delete the model, please try again later.",
         );
       }
     });
 };
 
-export const queryModelById = (
-  modelId: number
-): Promise<ResponseModel<Model>> => {
+export const queryModelById = (modelId: number): Promise<ResponseModel<Model>> => {
   return PROJECTS_CLIENT.get(`/v1/admin/models/${modelId}`)
     .then((response) => response.data)
     .catch((error) => {
@@ -80,14 +76,14 @@ export const queryModelById = (
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          `Error when trying to query the model with id: ${modelId}, please try again later.`
+          `Error when trying to query the model with id: ${modelId}, please try again later.`,
         );
       }
     });
@@ -108,14 +104,14 @@ export const updateModel = (request: Model): Promise<ResponseModel<Model>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          `Error when trying to update the model with id: ${request.id}, please try again later.`
+          `Error when trying to update the model with id: ${request.id}, please try again later.`,
         );
       }
     });

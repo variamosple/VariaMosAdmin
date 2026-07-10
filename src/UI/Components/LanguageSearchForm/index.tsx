@@ -35,7 +35,7 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
       onSubmit(data);
       reset(data);
     },
-    [onSubmit, reset]
+    [onSubmit, reset],
   );
 
   useEffect(() => {

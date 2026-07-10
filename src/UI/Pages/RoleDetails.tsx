@@ -8,11 +8,7 @@ import { Permission } from "@/Domain/Permission/Entity/Permission";
 import { Role } from "@/Domain/Role/Entity/Role";
 import { RolePermission } from "@/Domain/Role/Entity/RolePermission";
 import { RolePermissionFilter } from "@/Domain/Role/Entity/RolePermissionFilter";
-import {
-  usePaginatedQuery,
-  useRouter,
-  withPageVisit,
-} from "@variamosple/variamos-components";
+import { usePaginatedQuery, useRouter, withPageVisit } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
@@ -92,30 +88,30 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
   const performDeleteRolePermission = (permission: Permission) => {
     const toastId = pushToast({
       title: "Permission deletion",
-      message: "Deleting permissiong...",
+      message: "Deleting permission...",
       variant: "info",
     });
 
-    deleteRolePermission(
-      new RolePermission(Number.parseInt(roleIdParam!), permission.id!)
-    ).then((response) => {
-      removeToast(toastId);
+    deleteRolePermission(new RolePermission(Number.parseInt(roleIdParam!), permission.id!)).then(
+      (response) => {
+        removeToast(toastId);
 
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission deletion",
-          message: response.message!,
-          variant: "danger",
-        });
-      } else {
-        pushToast({
-          title: "Permission delete",
-          message: "Permission deleted successfully",
-          variant: "success",
-        });
-      }
-      onRolePermissionsPageChange(1);
-    });
+        if (response.errorCode) {
+          pushToast({
+            title: "Permission deletion",
+            message: response.message!,
+            variant: "danger",
+          });
+        } else {
+          pushToast({
+            title: "Permission delete",
+            message: "Permission deleted successfully",
+            variant: "success",
+          });
+        }
+        onRolePermissionsPageChange(1);
+      },
+    );
   };
 
   useEffect(() => {
@@ -160,10 +156,7 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
 
       <hr />
 
-      <RolePermissionForm
-        isLoading={isCreating}
-        onRolePermissionSubmit={onRolePermissionCreate}
-      />
+      <RolePermissionForm isLoading={isCreating} onRolePermissionSubmit={onRolePermissionCreate} />
 
       <RolePermissionList
         items={rolePermissions}
@@ -190,7 +183,4 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
   );
 };
 
-export const RoleDetailsPage = withPageVisit(
-  RoleDetailsPageComponent,
-  "RoleDetails"
-);
+export const RoleDetailsPage = withPageVisit(RoleDetailsPageComponent, "RoleDetails");

@@ -5,7 +5,7 @@ export class ProjectsFilter extends PagedModel {
     public name?: string,
     public isTemplate?: boolean,
     pageNumber?: number,
-    pageSize?: number
+    pageSize?: number,
   ) {
     super(pageNumber, pageSize);
   }

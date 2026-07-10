@@ -1,9 +1,4 @@
-import {
-  deleteUser,
-  disableUser,
-  enableUser,
-  queryUsers,
-} from "@/DataProviders/UserRepository";
+import { deleteUser, disableUser, enableUser, queryUsers } from "@/DataProviders/UserRepository";
 import { User } from "@/Domain/User/Entity/User";
 import { UsersFilter } from "@/Domain/User/Entity/UsersFilter";
 import { useToast } from "@/UI/Context/ToastContext";
@@ -70,7 +65,7 @@ export const useUserList = () => {
         });
       } else {
         pushToast({
-          title: "User disbale",
+          title: "User disable",
           message: response.message!,
           variant: "danger",
         });

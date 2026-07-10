@@ -17,9 +17,7 @@ export interface ChartDateFilterFormProperties {
   onFilterSubmit: (data: ChartDateFormProperties) => void;
 }
 
-export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
-  onFilterSubmit,
-}) => {
+export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({ onFilterSubmit }) => {
   const { isLoading, chartFilter } = useChartContext();
   const {
     register,
@@ -44,9 +42,7 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
             isInvalid={!!errors.fromDate}
             style={formControlsStyle}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.fromDate?.message}
-          </Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">{errors.fromDate?.message}</Form.Control.Feedback>
         </Form.Group>
 
         <Form.Group controlId="toDate">
@@ -59,25 +55,13 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
             isInvalid={!!errors.toDate}
             style={formControlsStyle}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.toDate?.message}
-          </Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">{errors.toDate?.message}</Form.Control.Feedback>
         </Form.Group>
       </fieldset>
 
       <div className="w-100 text-end mt-2">
-        <Button
-          className="w-auto"
-          variant="primary"
-          type="submit"
-          size="sm"
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <Spinner animation="border" variant="light" size="sm" />
-          ) : (
-            "Apply"
-          )}
+        <Button className="w-auto" variant="primary" type="submit" size="sm" disabled={isLoading}>
+          {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : "Apply"}
         </Button>
       </div>
     </Form>

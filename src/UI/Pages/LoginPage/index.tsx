@@ -39,9 +39,7 @@ export const LoginPage: FC<unknown> = () => {
     }
 
     if (queryParams.has("redirectTo")) {
-      const decodedRedirectTo = decodeURIComponent(
-        queryParams.get("redirectTo") || ""
-      );
+      const decodedRedirectTo = decodeURIComponent(queryParams.get("redirectTo") || "");
 
       registerRedirect(decodedRedirectTo).then();
     }
@@ -53,11 +51,7 @@ export const LoginPage: FC<unknown> = () => {
       style={{ width: 350 }}
       data-bs-theme="dark"
     >
-      <img
-        src="./images/VariaMosLogo.png"
-        alt="Variamos logo"
-        className="img-fluid"
-      />
+      <img src="./images/VariaMosLogo.png" alt="Variamos logo" className="img-fluid" />
 
       <LoginForm onSignIn={onSignIn} />
 

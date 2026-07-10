@@ -35,7 +35,7 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
       onSubmit(data);
       reset(data);
     },
-    [onSubmit, reset]
+    [onSubmit, reset],
   );
 
   useEffect(() => {

@@ -121,11 +121,7 @@ const BugListPageComponent: FC = () => {
         activeTab={activeTab}
       />
 
-      <Tabs
-        activeKey={activeTab}
-        onSelect={(k) => setActiveTab(k as any)}
-        className="mb-3"
-      >
+      <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k as any)} className="mb-3">
         <Tab eventKey="github" title="GitHub Bugs">
           {isLoading ? (
             <div className="d-flex justify-content-center align-items-center p-5">
@@ -261,11 +257,7 @@ const BugListPageComponent: FC = () => {
                             ? "warning"
                             : "info"
                       }
-                      text={
-                        selectedBugForDetails.priority === "high"
-                          ? "white"
-                          : "dark"
-                      }
+                      text={selectedBugForDetails.priority === "high" ? "white" : "dark"}
                     >
                       {selectedBugForDetails.priority.toUpperCase()}
                     </Badge>
@@ -334,45 +326,37 @@ const BugListPageComponent: FC = () => {
                 </Col>
               </Row>
 
-              {selectedBugForDetails.githubRepo &&
-                selectedBugForDetails.gitIssueNumber && (
-                  <div
-                    className="mb-3 bg-light p-2 rounded"
-                    style={{ border: "1px dashed #ced4da" }}
+              {selectedBugForDetails.githubRepo && selectedBugForDetails.gitIssueNumber && (
+                <div className="mb-3 bg-light p-2 rounded" style={{ border: "1px dashed #ced4da" }}>
+                  <strong>GitHub Link: </strong>
+                  <a
+                    href={`https://github.com/${selectedBugForDetails.githubRepo}/issues/${selectedBugForDetails.gitIssueNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-decoration-none ms-1 font-monospace"
                   >
-                    <strong>GitHub Link: </strong>
-                    <a
-                      href={`https://github.com/${selectedBugForDetails.githubRepo}/issues/${selectedBugForDetails.gitIssueNumber}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-decoration-none ms-1 font-monospace"
-                    >
-                      {selectedBugForDetails.githubRepo}#
-                      {selectedBugForDetails.gitIssueNumber}
-                    </a>
-                  </div>
-                )}
+                    {selectedBugForDetails.githubRepo}#{selectedBugForDetails.gitIssueNumber}
+                  </a>
+                </div>
+              )}
 
               {selectedBugForDetails.attachments &&
                 selectedBugForDetails.attachments.length > 0 && (
                   <div className="mb-3">
                     <strong>Attachments:</strong>
                     <ul className="mt-1 mb-0 pl-3">
-                      {selectedBugForDetails.attachments.map(
-                        (attachment: any) => (
-                          <li key={attachment.id} className="my-1">
-                            <a
-                              href={`${process.env.REACT_APP_ADMIN_API_URL || "http://localhost:4000"}${attachment.filePath}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-decoration-none"
-                            >
-                              View Attachment (Type:{" "}
-                              {attachment.fileType || "unknown"})
-                            </a>
-                          </li>
-                        ),
-                      )}
+                      {selectedBugForDetails.attachments.map((attachment: any) => (
+                        <li key={attachment.id} className="my-1">
+                          <a
+                            href={`${process.env.REACT_APP_ADMIN_API_URL || "http://localhost:4000"}${attachment.filePath}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-decoration-none"
+                          >
+                            View Attachment (Type: {attachment.fileType || "unknown"})
+                          </a>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 )}
@@ -382,18 +366,11 @@ const BugListPageComponent: FC = () => {
                 <h5 className="mb-3">Comments & Audit Logs</h5>
                 {isLoadingNotes ? (
                   <div className="d-flex align-items-center py-2">
-                    <Spinner
-                      animation="border"
-                      size="sm"
-                      variant="secondary"
-                      className="me-2"
-                    />
+                    <Spinner animation="border" size="sm" variant="secondary" className="me-2" />
                     <span className="text-muted small">Loading notes...</span>
                   </div>
                 ) : notes.length === 0 ? (
-                  <p className="text-muted small">
-                    No comments or logs recorded yet.
-                  </p>
+                  <p className="text-muted small">No comments or logs recorded yet.</p>
                 ) : (
                   <div
                     className="d-flex flex-column gap-2 mb-3"
@@ -402,10 +379,7 @@ const BugListPageComponent: FC = () => {
                     {notes.map((note) => {
                       const isSystem = note.comment?.startsWith("[Audit]");
                       if (isSystem) {
-                        const cleanComment = (note.comment || "").replace(
-                          "[Audit] ",
-                          "",
-                        );
+                        const cleanComment = (note.comment || "").replace("[Audit] ", "");
                         return (
                           <Alert
                             key={note.id}
@@ -440,13 +414,8 @@ const BugListPageComponent: FC = () => {
                                     const [left, right] = content.split(" -> ");
                                     const colonIndex = left.indexOf(":");
                                     if (colonIndex !== -1) {
-                                      const label = left.substring(
-                                        0,
-                                        colonIndex + 1,
-                                      );
-                                      const oldValue = left
-                                        .substring(colonIndex + 1)
-                                        .trim();
+                                      const label = left.substring(0, colonIndex + 1);
+                                      const oldValue = left.substring(colonIndex + 1).trim();
                                       return (
                                         <div
                                           key={idx}
@@ -507,20 +476,11 @@ const BugListPageComponent: FC = () => {
                         );
                       }
                       return (
-                        <div
-                          key={note.id}
-                          className="border rounded p-2 bg-light"
-                        >
-                          <div
-                            className="text-dark small-text"
-                            style={{ whiteSpace: "pre-wrap" }}
-                          >
+                        <div key={note.id} className="border rounded p-2 bg-light">
+                          <div className="text-dark small-text" style={{ whiteSpace: "pre-wrap" }}>
                             {note.comment}
                           </div>
-                          <div
-                            className="text-end text-muted mt-1"
-                            style={{ fontSize: "0.75rem" }}
-                          >
+                          <div className="text-end text-muted mt-1" style={{ fontSize: "0.75rem" }}>
                             {note.changedBy?.name || "Anonymous"} at{" "}
                             {new Date(note.changedAt).toLocaleString()}
                           </div>
@@ -544,12 +504,7 @@ const BugListPageComponent: FC = () => {
                       />
                     </Form.Group>
                     <div className="text-end">
-                      <Button
-                        type="submit"
-                        variant="primary"
-                        size="sm"
-                        disabled={isSubmittingNote}
-                      >
+                      <Button type="submit" variant="primary" size="sm" disabled={isSubmittingNote}>
                         {isSubmittingNote ? "Adding..." : "Add Comment"}
                       </Button>
                     </div>
@@ -564,10 +519,7 @@ const BugListPageComponent: FC = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setSelectedBugForDetails(null)}
-          >
+          <Button variant="secondary" onClick={() => setSelectedBugForDetails(null)}>
             Close
           </Button>
         </Modal.Footer>

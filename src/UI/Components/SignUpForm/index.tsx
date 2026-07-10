@@ -32,15 +32,9 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
   };
 
   return (
-    <Form
-      className="sign-up-form w-100"
-      data-bs-theme="dark"
-      onSubmit={handleSubmit(onSubmit)}
-    >
+    <Form className="sign-up-form w-100" data-bs-theme="dark" onSubmit={handleSubmit(onSubmit)}>
       <Form.Group className="w-100" controlId="name">
-        <Form.Label className="form-label align-self-start m-0">
-          Full Name
-        </Form.Label>
+        <Form.Label className="form-label align-self-start m-0">Full Name</Form.Label>
         <Form.Control
           type="text"
           className="form-control"
@@ -50,15 +44,11 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           })}
           isInvalid={!!errors.name}
         />
-        <Form.Control.Feedback type="invalid">
-          {errors.name?.message}
-        </Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">{errors.name?.message}</Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="w-100" controlId="email">
-        <Form.Label className="form-label align-self-start m-0">
-          Email Address
-        </Form.Label>
+        <Form.Label className="form-label align-self-start m-0">Email Address</Form.Label>
         <Form.Control
           type="email"
           className="form-control"
@@ -66,19 +56,15 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           {...register("email", { required: "Email is required" })}
           isInvalid={!!errors.email}
         />
-        <Form.Control.Feedback type="invalid">
-          {errors.email?.message}
-        </Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="w-100" controlId="password">
-        <Form.Label className="form-label align-self-start m-0">
-          Password
-        </Form.Label>
+        <Form.Label className="form-label align-self-start m-0">Password</Form.Label>
         <Form.Control
           type="password"
           className="form-control"
-          placeholder="Type your new pasword"
+          placeholder="Type your new password"
           {...register("password", {
             required: "password is required",
             pattern: {
@@ -89,19 +75,15 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           })}
           isInvalid={!!errors.password}
         />
-        <Form.Control.Feedback type="invalid">
-          {errors.password?.message}
-        </Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="w-100" controlId="passwordConfirm">
-        <Form.Label className="form-label align-self-start m-0">
-          Confirm Password
-        </Form.Label>
+        <Form.Label className="form-label align-self-start m-0">Confirm Password</Form.Label>
         <Form.Control
           type="password"
           className="form-control"
-          placeholder="Confirm your pasword"
+          placeholder="Confirm your password"
           {...register("passwordConfirmation", {
             required: "Please confirm your password",
             validate: validateConfirmPassword,
@@ -113,17 +95,8 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
         </Form.Control.Feedback>
       </Form.Group>
 
-      <Button
-        className="w-100"
-        variant="primary"
-        type="submit"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <Spinner animation="border" variant="light" size="sm" />
-        ) : (
-          "Sign up"
-        )}
+      <Button className="w-100" variant="primary" type="submit" disabled={isLoading}>
+        {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : "Sign up"}
       </Button>
     </Form>
   );

@@ -18,14 +18,14 @@ export const requestMenuConfig = (): Promise<ResponseModel<Menu>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Network/communication error."
+          "Network/communication error.",
         );
       } else {
         console.error("Unexpected error:", error);
 
         return new ResponseModel("APP-ERROR").withError(
           500,
-          `Error when trying to query menu config, please try again later.`
+          `Error when trying to query menu config, please try again later.`,
         );
       }
     });

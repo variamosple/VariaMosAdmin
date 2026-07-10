@@ -18,7 +18,7 @@ export const useLineBuffer = (maxSize: number) => {
         return updatedBuffer;
       });
     },
-    [maxSize]
+    [maxSize],
   );
 
   return { buffer, addToBuffer };

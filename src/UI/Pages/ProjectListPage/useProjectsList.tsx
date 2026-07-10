@@ -1,8 +1,4 @@
-import {
-  deleteProject,
-  queryProjects,
-  updateProject,
-} from "@/DataProviders/ProjectRepository";
+import { deleteProject, queryProjects, updateProject } from "@/DataProviders/ProjectRepository";
 import { Project } from "@/Domain/Project/Project";
 import { ProjectsFilter } from "@/Domain/Project/ProjectFilter";
 import { useToast } from "@/UI/Context/ToastContext";
@@ -82,8 +78,6 @@ export const useProjectList = () => {
     });
 
     deleteProject(project.id!).then((response) => {
-      // alertify.dismissAll();
-
       if (response.errorCode) {
         pushToast({
           title: "Project delete",
@@ -119,17 +113,15 @@ export const useProjectList = () => {
   };
 
   const onSearchSubmit = (search?: ProjectsFilter) => {
-    loadData(new ProjectsFilter(search?.name, search?.isTemplate)).then(
-      (response) => {
-        if (response.errorCode) {
-          pushToast({
-            title: "Project query error",
-            message: response.message!,
-            variant: "danger",
-          });
-        }
+    loadData(new ProjectsFilter(search?.name, search?.isTemplate)).then((response) => {
+      if (response.errorCode) {
+        pushToast({
+          title: "Project query error",
+          message: response.message!,
+          variant: "danger",
+        });
       }
-    );
+    });
   };
 
   return {

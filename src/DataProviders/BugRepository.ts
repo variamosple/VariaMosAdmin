@@ -72,9 +72,7 @@ export const createBug = (
     });
 };
 
-export const queryBugHistory = (
-  bugId: string,
-): Promise<ResponseModel<BugStatusLog[]>> => {
+export const queryBugHistory = (bugId: string): Promise<ResponseModel<BugStatusLog[]>> => {
   return ADMIN_CLIENT.get(`/bugs/${bugId}/history`)
     .then((response) => response.data)
     .catch((error) => {
@@ -135,10 +133,7 @@ export const updateBugStatus = (
     });
 };
 
-export const addBugNote = (
-  bugId: string,
-  body: string,
-): Promise<ResponseModel<any>> => {
+export const addBugNote = (bugId: string, body: string): Promise<ResponseModel<any>> => {
   return ADMIN_CLIENT.post(`/bugs/${bugId}/notes`, { body })
     .then((response) => response.data)
     .catch((error) => {
@@ -226,9 +221,7 @@ export const syncBugs = (): Promise<ResponseModel<void>> => {
     });
 };
 
-export const queryLocalBugs = (
-  filter: BugFilter,
-): Promise<ResponseModel<Bug[]>> => {
+export const queryLocalBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
   return ADMIN_CLIENT.get("/bugs/local", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -294,10 +287,7 @@ export const restoreLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
     });
 };
 
-export const uploadAttachment = (
-  bugId: string,
-  file: File,
-): Promise<ResponseModel<any>> => {
+export const uploadAttachment = (bugId: string, file: File): Promise<ResponseModel<any>> => {
   const formData = new FormData();
   formData.append("file", file);
   return ADMIN_CLIENT.post(`/bugs/${bugId}/attachments`, formData, {
@@ -325,9 +315,7 @@ export const uploadAttachment = (
     });
 };
 
-export const deleteAttachment = (
-  attachmentId: string,
-): Promise<ResponseModel<void>> => {
+export const deleteAttachment = (attachmentId: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.delete(`/bugs/attachments/${attachmentId}`)
     .then((response) => response.data)
     .catch((error) => {
@@ -349,9 +337,7 @@ export const deleteAttachment = (
     });
 };
 
-export const queryBugNotes = (
-  bugId: string,
-): Promise<ResponseModel<BugStatusLog[]>> => {
+export const queryBugNotes = (bugId: string): Promise<ResponseModel<BugStatusLog[]>> => {
   return ADMIN_CLIENT.get(`/bugs/${bugId}/notes`)
     .then((response) => response.data)
     .catch((error) => {

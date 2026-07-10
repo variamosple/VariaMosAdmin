@@ -6,9 +6,7 @@ import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 export interface PasswordUpdateFormProps {
-  onUpdatePasswordSubmit: (
-    passwordUpdate: PasswordUpdate
-  ) => Promise<ResponseModel<void>>;
+  onUpdatePasswordSubmit: (passwordUpdate: PasswordUpdate) => Promise<ResponseModel<void>>;
   showModal: boolean;
   onClose: () => void;
   isLoading: boolean;
@@ -50,24 +48,18 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
   };
 
   return (
-    <Modal
-      show={showModal}
-      backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
-    >
+    <Modal show={showModal} backdrop={isLoading ? "static" : true} onHide={onCloseModal}>
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title>Password update</Modal.Title>
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">
           <Form.Group className="w-100" controlId="newPassword">
-            <Form.Label className="form-label align-self-start m-0">
-              Currrent password
-            </Form.Label>
+            <Form.Label className="form-label align-self-start m-0">Current password</Form.Label>
             <Form.Control
               type="password"
               className="form-control"
-              placeholder="Type your current pasword"
+              placeholder="Type your current password"
               {...register("currentPassword", {
                 required: "Current password is required",
               })}
@@ -79,13 +71,11 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
           </Form.Group>
 
           <Form.Group className="w-100" controlId="currentPassword">
-            <Form.Label className="form-label align-self-start m-0">
-              New password
-            </Form.Label>
+            <Form.Label className="form-label align-self-start m-0">New password</Form.Label>
             <Form.Control
               type="password"
               className="form-control"
-              placeholder="Type your new pasword"
+              placeholder="Type your new password"
               {...register("newPassword", {
                 required: "New password is required",
                 pattern: {
@@ -102,13 +92,11 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
           </Form.Group>
 
           <Form.Group className="w-100" controlId="passwordConfirm">
-            <Form.Label className="form-label align-self-start m-0">
-              Confirm Password
-            </Form.Label>
+            <Form.Label className="form-label align-self-start m-0">Confirm Password</Form.Label>
             <Form.Control
               type="password"
               className="form-control"
-              placeholder="Confirm your pasword"
+              placeholder="Confirm your password"
               {...register("passwordConfirmation", {
                 required: "Please confirm your password",
                 validate: validatePasswordConfirmation,
@@ -121,12 +109,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
           </Form.Group>
 
           <Modal.Footer>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={isLoading}
-              onClick={onCloseModal}
-            >
+            <Button type="button" variant="secondary" disabled={isLoading} onClick={onCloseModal}>
               Cancel
             </Button>
 

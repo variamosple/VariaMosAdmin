@@ -1,11 +1,7 @@
 import { Navigate, Outlet, RouteObject } from "react-router-dom";
 
 import { AppConfig } from "@/Infrastructure/AppConfig";
-import {
-  AuthWrapper,
-  NotAuthorized,
-  ProtectedRoute,
-} from "@variamosple/variamos-components";
+import { AuthWrapper, NotAuthorized, ProtectedRoute } from "@variamosple/variamos-components";
 import { SecurityWrapper } from "./Components/SecurityWrapper";
 import { MainLayout } from "./Layouts/MainLayout";
 import { SignInLayout } from "./Layouts/SignInLayout";
@@ -47,10 +43,7 @@ export const ROUTES: RouteObject[] = [
         path: "",
         index: true,
         element: (
-          <ProtectedRoute
-            notAuthorizedPath={NOT_AUTHORIZED_PATH}
-            allowedPermissions={[]}
-          >
+          <ProtectedRoute notAuthorizedPath={NOT_AUTHORIZED_PATH} allowedPermissions={[]}>
             <HomePage />
           </ProtectedRoute>
         ),
@@ -58,10 +51,7 @@ export const ROUTES: RouteObject[] = [
       {
         path: "my-account",
         element: (
-          <ProtectedRoute
-            notAuthorizedPath={NOT_AUTHORIZED_PATH}
-            allowedPermissions={[]}
-          >
+          <ProtectedRoute notAuthorizedPath={NOT_AUTHORIZED_PATH} allowedPermissions={[]}>
             <MyAccountPage />
           </ProtectedRoute>
         ),

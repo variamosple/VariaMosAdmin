@@ -12,9 +12,7 @@ import axios from "axios";
 import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
 import { handleRepositoryError } from "./RepositoryUtils";
 
-export const getSessionInfo = (): Promise<
-  ResponseModel<SessionInfoResponse>
-> => {
+export const getSessionInfo = (): Promise<ResponseModel<SessionInfoResponse>> => {
   return ADMIN_CLIENT.get("/auth/session-info", {
     headers: {
       "Cache-Control": "no-cache",
@@ -34,7 +32,7 @@ export const getSessionInfo = (): Promise<
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -62,7 +60,7 @@ export const requestLogout = (): Promise<ResponseModel<void>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -75,9 +73,7 @@ export const requestLogout = (): Promise<ResponseModel<void>> => {
     });
 };
 
-export const requestSignIn = (
-  request: Credentials,
-): Promise<ResponseModel<singInResponse>> => {
+export const requestSignIn = (request: Credentials): Promise<ResponseModel<singInResponse>> => {
   return ADMIN_CLIENT.post("/auth/sign-in", request)
     .then((response) => response.data)
     .catch((error) => {
@@ -92,7 +88,7 @@ export const requestSignIn = (
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -122,7 +118,7 @@ export const requestSignInAsGuest = (
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -135,9 +131,7 @@ export const requestSignInAsGuest = (
     });
 };
 
-export const requestSignUp = (
-  request: UserRegistration,
-): Promise<ResponseModel<unknown>> => {
+export const requestSignUp = (request: UserRegistration): Promise<ResponseModel<unknown>> => {
   return ADMIN_CLIENT.post("/auth/sign-up", request)
     .then((response) => response.data)
     .catch((error) => {
@@ -152,7 +146,7 @@ export const requestSignUp = (
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -180,7 +174,7 @@ export const getMyAccount = (): Promise<ResponseModel<User>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -210,7 +204,7 @@ export const updatePersonalInformation = (
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -240,7 +234,7 @@ export const updateUserPassword = (
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -268,7 +262,7 @@ export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
 
         return new ResponseModel("BACK-ERROR").withError(
           Number.parseInt(error.code || "500"),
-          "Error when comunicating with the back-end.",
+          "Error when communicating with the back-end.",
         );
       } else {
         console.error("Unexpected error:", error);
@@ -281,9 +275,7 @@ export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
     });
 };
 
-export const requestPasswordReset = (
-  email: string,
-): Promise<ResponseModel<void>> => {
+export const requestPasswordReset = (email: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/auth/forgot-password", { email })
     .then((response) => response.data)
     .catch((error) =>
@@ -294,16 +286,11 @@ export const requestPasswordReset = (
     );
 };
 
-export const verifyPasswordResetToken = (
-  token: string,
-): Promise<ResponseModel<void>> => {
+export const verifyPasswordResetToken = (token: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.get(`/auth/verify-token?token=${token}`)
     .then((response) => response.data)
     .catch((error) =>
-      handleRepositoryError(
-        error,
-        "Error when trying to verify token, please try again later.",
-      ),
+      handleRepositoryError(error, "Error when trying to verify token, please try again later."),
     );
 };
 
@@ -317,9 +304,6 @@ export const resetPassword = (
   })
     .then((response) => response.data)
     .catch((error) =>
-      handleRepositoryError(
-        error,
-        "Error when trying to reset password, please try again later.",
-      ),
+      handleRepositoryError(error, "Error when trying to reset password, please try again later."),
     );
 };

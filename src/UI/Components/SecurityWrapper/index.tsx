@@ -1,7 +1,4 @@
-import {
-  ADMIN_CLIENT,
-  setupAxiosInterceptors,
-} from "@/Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT, setupAxiosInterceptors } from "@/Infrastructure/AxiosConfig";
 import { FC, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 

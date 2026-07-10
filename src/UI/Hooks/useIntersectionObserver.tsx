@@ -3,7 +3,7 @@ import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
 const useIntersectionObserver = (
   isDataLoading: boolean,
   page: number,
-  setPage: Dispatch<SetStateAction<number>>
+  setPage: Dispatch<SetStateAction<number>>,
 ) => {
   const [hasMore, setHasMore] = useState(true);
 
@@ -23,7 +23,7 @@ const useIntersectionObserver = (
 
       if (node) observer.current.observe(node);
     },
-    [isDataLoading, hasMore, setPage]
+    [isDataLoading, hasMore, setPage],
   );
 
   return { lastEntryRef, setHasMore, setPage, page };
