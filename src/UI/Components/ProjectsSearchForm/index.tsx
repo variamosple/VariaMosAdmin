@@ -10,7 +10,7 @@ export interface ProjectSearchFormProps {
   onSearchReset: () => void;
 }
 
-export interface ProjectSearchFormFields {
+interface ProjectSearchFormFields {
   name?: string;
   isTemplate?: string;
 }

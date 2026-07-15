@@ -529,5 +529,3 @@ const BugListPageComponent: FC = () => {
 };
 
 export const BugListPage = withPageVisit(BugListPageComponent, "AdminBugList");
-
-export default BugListPage;

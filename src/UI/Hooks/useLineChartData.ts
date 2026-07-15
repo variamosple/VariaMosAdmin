@@ -1,7 +1,7 @@
 import { Metric } from "@/Domain/Metric/Metric";
 import { useMemo, useState } from "react";
 
-export interface ChartAxes {
+interface ChartAxes {
   xAxis: string[];
   yAxis: string[];
 }

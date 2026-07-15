@@ -154,7 +154,7 @@ interface MicroServiceLogsProps {
   logs: string;
 }
 
-export const MicroServiceLogs: FC<MicroServiceLogsProps> = ({ isLoading, logs }) => {
+const MicroServiceLogs: FC<MicroServiceLogsProps> = ({ isLoading, logs }) => {
   if (isLoading) {
     return (
       <div className="w-100 text-center my-3">

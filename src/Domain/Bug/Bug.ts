@@ -15,7 +15,7 @@ export interface Bug {
   reporterEmail?: string;
 }
 
-export interface BugAttachment {
+interface BugAttachment {
   id: number;
   filePath: string;
   fileType: string;

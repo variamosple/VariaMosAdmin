@@ -106,7 +106,7 @@ interface ProjectDetailsProps {
   project: Project;
 }
 
-export const ProjectDetails: FC<ProjectDetailsProps> = ({ project }) => {
+const ProjectDetails: FC<ProjectDetailsProps> = ({ project }) => {
   if (!project?.project?.productLines?.length) {
     return <div>No data</div>;
   }

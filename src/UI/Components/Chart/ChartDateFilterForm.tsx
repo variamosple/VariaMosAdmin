@@ -1,21 +1,16 @@
-import { useChartContext } from "@/UI/Context/ChartContext";
+import {
+  useChartContext,
+  ChartDateFormProperties,
+  ChartDateFilterFormProperties,
+} from "@/UI/Context/ChartContext";
 import { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
-
-export interface ChartDateFormProperties {
-  fromDate: string;
-  toDate: string;
-}
 
 const formControlsStyle: React.CSSProperties = {
   backgroundImage: "none",
   paddingRight: "0",
 };
-
-export interface ChartDateFilterFormProperties {
-  onFilterSubmit: (data: ChartDateFormProperties) => void;
-}
 
 export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({ onFilterSubmit }) => {
   const { isLoading, chartFilter } = useChartContext();

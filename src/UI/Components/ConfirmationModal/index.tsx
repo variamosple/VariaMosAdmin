@@ -11,13 +11,6 @@ export interface ConfirmationModalProps {
   cancelButtonVariant?: string;
 }
 
-export const confirmationModalDefaultProps: ConfirmationModalProps = Object.freeze({
-  message: "",
-  show: false,
-  onCancel: () => {},
-  onConfirm: () => {},
-});
-
 export default function ConfirmationModal({
   show,
   onCancel,

@@ -61,33 +61,34 @@ export const deleteProject = (projectId: number): Promise<ResponseModel<void>> =
     });
 };
 
-export const queryProjectById = (projectId: number): Promise<ResponseModel<Project>> => {
-  return PROJECTS_CLIENT.get(`/v1/admin/projects/${projectId}`)
-    .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (!!response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query the project with id: ${projectId}, please try again later.`,
-        );
-      }
-    });
-};
+// ARCHIVED: Unused in frontend currently
+// export const queryProjectById = (projectId: number): Promise<ResponseModel<Project>> => {
+//   return PROJECTS_CLIENT.get(`/v1/admin/projects/${projectId}`)
+//     .then((response) => response.data)
+//     .catch((error) => {
+//       if (axios.isAxiosError(error)) {
+//         console.error("Axios error:", error.message);
+//
+//         const response = error.response?.data;
+//
+//         if (!!response) {
+//           return response;
+//         }
+//
+//         return new ResponseModel("BACK-ERROR").withError(
+//           Number.parseInt(error.code || "500"),
+//           "Network/communication error.",
+//         );
+//       } else {
+//         console.error("Unexpected error:", error);
+//
+//         return new ResponseModel("APP-ERROR").withError(
+//           500,
+//           `Error when trying to query the project with id: ${projectId}, please try again later.`,
+//         );
+//       }
+//     });
+// };
 
 export const updateProject = (request: Project): Promise<ResponseModel<Project>> => {
   return PROJECTS_CLIENT.put(`/v1/admin/projects/${request.id}`, request)

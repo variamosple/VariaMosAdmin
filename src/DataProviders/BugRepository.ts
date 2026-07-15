@@ -72,27 +72,28 @@ export const createBug = (
     });
 };
 
-export const queryBugHistory = (bugId: string): Promise<ResponseModel<BugStatusLog[]>> => {
-  return ADMIN_CLIENT.get(`/bugs/${bugId}/history`)
-    .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (!!response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to query bug history, please try again later.",
-        );
-      }
-    });
-};
+// ARCHIVED: Unused in frontend currently
+// export const queryBugHistory = (bugId: string): Promise<ResponseModel<BugStatusLog[]>> => {
+//   return ADMIN_CLIENT.get(`/bugs/${bugId}/history`)
+//     .then((response) => response.data)
+//     .catch((error) => {
+//       if (axios.isAxiosError(error)) {
+//         console.error("Axios error:", error.message);
+//         const response = error.response?.data;
+//         if (!!response) return response;
+//         return new ResponseModel("BACK-ERROR").withError(
+//           Number.parseInt(error.code || "500"),
+//           "Network/communication error.",
+//         );
+//       } else {
+//         console.error("Unexpected error:", error);
+//         return new ResponseModel("APP-ERROR").withError(
+//           500,
+//           "Error when trying to query bug history, please try again later.",
+//         );
+//       }
+//     });
+// };
 
 export const updateBugStatus = (
   bugId: string,

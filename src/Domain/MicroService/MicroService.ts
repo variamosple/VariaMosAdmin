@@ -1,4 +1,4 @@
-export interface Labels {
+interface Labels {
   [label: string]: string;
 }
 

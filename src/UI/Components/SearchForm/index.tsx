@@ -10,7 +10,7 @@ export interface SearchFormProps {
   placeholder?: string;
 }
 
-export interface SearchFormFields {
+interface SearchFormFields {
   search?: string;
 }
 

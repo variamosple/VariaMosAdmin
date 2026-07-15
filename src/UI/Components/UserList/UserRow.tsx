@@ -148,7 +148,7 @@ interface RolesDetailsProps {
   roles: RoleDetails[];
 }
 
-export const RolesDetails: FC<RolesDetailsProps> = ({ isLoading, roles }) => {
+const RolesDetails: FC<RolesDetailsProps> = ({ isLoading, roles }) => {
   if (isLoading) {
     return (
       <div className="w-100 text-center my-3">

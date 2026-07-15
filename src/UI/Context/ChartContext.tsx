@@ -1,10 +1,18 @@
 import { queryMetric } from "@/DataProviders/MetricsRepository";
 import { Metric } from "@/Domain/Metric/Metric";
 import { MetricsFilter } from "@/Domain/Metric/MetricsFilter";
-import { ChartDateFormProperties } from "@/UI/Components/Chart/ChartDateFilterForm";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { createContext, FC, useCallback, useContext, useState } from "react";
 import { useToast } from "./ToastContext";
+
+export interface ChartDateFormProperties {
+  fromDate: string;
+  toDate: string;
+}
+
+export interface ChartDateFilterFormProperties {
+  onFilterSubmit: (data: ChartDateFormProperties) => void;
+}
 
 interface IChartContext {
   metric: Metric;
@@ -15,12 +23,12 @@ interface IChartContext {
 
 const ChartContext = createContext<IChartContext | undefined>(undefined);
 
-export interface ChartContextProviderProps {
+interface ChartContextProviderProps {
   metric: Metric;
   children: React.ReactNode;
 }
 
-export const ChartContextProvider: FC<ChartContextProviderProps> = ({ metric, children }) => {
+const ChartContextProvider: FC<ChartContextProviderProps> = ({ metric, children }) => {
   const { pushToast } = useToast();
   const [currentMetric, setCurrentMetric] = useState(metric);
   const [isLoading, setIsLoading] = useState(false);

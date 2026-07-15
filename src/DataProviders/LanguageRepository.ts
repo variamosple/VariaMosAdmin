@@ -61,33 +61,34 @@ export const deleteLanguage = (languageId: number): Promise<ResponseModel<void>>
     });
 };
 
-export const queryLanguageById = (languageId: number): Promise<ResponseModel<Language>> => {
-  return LANGUAGES_CLIENT.get(`/v1/admin/languages/${languageId}`)
-    .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (!!response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query the language with id: ${languageId}, please try again later.`,
-        );
-      }
-    });
-};
+// ARCHIVED: Unused in frontend currently
+// export const queryLanguageById = (languageId: number): Promise<ResponseModel<Language>> => {
+//   return LANGUAGES_CLIENT.get(`/v1/admin/languages/${languageId}`)
+//     .then((response) => response.data)
+//     .catch((error) => {
+//       if (axios.isAxiosError(error)) {
+//         console.error("Axios error:", error.message);
+//
+//         const response = error.response?.data;
+//
+//         if (!!response) {
+//           return response;
+//         }
+//
+//         return new ResponseModel("BACK-ERROR").withError(
+//           Number.parseInt(error.code || "500"),
+//           "Network/communication error.",
+//         );
+//       } else {
+//         console.error("Unexpected error:", error);
+//
+//         return new ResponseModel("APP-ERROR").withError(
+//           500,
+//           `Error when trying to query the language with id: ${languageId}, please try again later.`,
+//         );
+//       }
+//     });
+// };
 
 export const updateLanguage = (request: Partial<Language>): Promise<ResponseModel<Language>> => {
   return LANGUAGES_CLIENT.put(`/v1/admin/languages/${request.id}`, request)

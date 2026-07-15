@@ -123,7 +123,7 @@ interface ModelDetailsProps {
   model: Model;
 }
 
-export const ModelDetails: FC<ModelDetailsProps> = ({ model }) => {
+const ModelDetails: FC<ModelDetailsProps> = ({ model }) => {
   return (
     <Container>
       <Row>

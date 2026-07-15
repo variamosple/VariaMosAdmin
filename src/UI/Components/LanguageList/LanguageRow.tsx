@@ -115,7 +115,7 @@ interface LanguageDetailsProps {
   language: Language;
 }
 
-export const LanguageDetails: FC<LanguageDetailsProps> = ({ language }) => {
+const LanguageDetails: FC<LanguageDetailsProps> = ({ language }) => {
   return (
     <Container>
       <Row>

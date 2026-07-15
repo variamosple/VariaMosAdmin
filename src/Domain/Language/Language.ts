@@ -11,7 +11,7 @@ export interface Language {
   owners?: LanguageOwner[];
 }
 
-export interface LanguageOwner {
+interface LanguageOwner {
   id?: string;
   name?: string;
   email?: string;
