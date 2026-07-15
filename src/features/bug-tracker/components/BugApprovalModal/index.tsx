@@ -1,5 +1,5 @@
-import { Bug } from "@/Domain/Bug/Bug";
-import { deleteAttachment, uploadAttachment } from "@/DataProviders/BugRepository";
+import { Bug } from "../../domain/Bug";
+import { deleteAttachment, uploadAttachment } from "../../api/BugRepository";
 import { FC, useEffect, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { useForm } from "react-hook-form";

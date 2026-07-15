@@ -11,9 +11,9 @@ import {
   queryCategories,
   queryBugNotes,
   addBugNote,
-} from "@/DataProviders/BugRepository";
-import { Bug, BugStatusLog } from "@/Domain/Bug/Bug";
-import { BugFilter } from "@/Domain/Bug/BugFilter";
+} from "../api/BugRepository";
+import { Bug, BugStatusLog } from "../domain/Bug";
+import { BugFilter } from "../domain/BugFilter";
 
 export const useBugList = () => {
   // 1. States for data
@@ -39,12 +39,12 @@ export const useBugList = () => {
 
   // Fetch repos and categories on mount
   useEffect(() => {
-    queryBugRepos().then((res) => {
+    queryBugRepos().then((res: any) => {
       if (!res.errorCode) {
         setRepos(res.data || []);
       }
     });
-    queryCategories().then((res) => {
+    queryCategories().then((res: any) => {
       if (!res.errorCode) {
         setCategories(res.data || []);
       }

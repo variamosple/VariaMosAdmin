@@ -1,8 +1,8 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { Bug, BugStatusLog } from "@/Domain/Bug/Bug";
-import { BugFilter } from "@/Domain/Bug/BugFilter";
+import { Bug, BugStatusLog } from "../domain/Bug";
+import { BugFilter } from "../domain/BugFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {

@@ -22,7 +22,7 @@ import { SignUpPage } from "@/UI/Pages/SignUpPage";
 import { UserDetailsPage } from "@/UI/Pages/UserDetails";
 import { UserListPage } from "@/UI/Pages/UserList";
 
-import { BugListPage } from "@/UI/Pages/BugListPage";
+import { BugListPage } from "@/features/bug-tracker";
 
 const NOT_AUTHORIZED_PATH = "/403";
 

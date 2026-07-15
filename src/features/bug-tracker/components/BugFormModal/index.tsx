@@ -1,4 +1,4 @@
-import { Bug } from "@/Domain/Bug/Bug";
+import { Bug } from "../../domain/Bug";
 import { FC, useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
@@ -78,7 +78,9 @@ export const BugFormModal: FC<BugFormModalProps> = ({
               })}
             />
             {errors.title && (
-              <Form.Control.Feedback type="invalid">{errors.title.message}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {errors.title.message as string}
+              </Form.Control.Feedback>
             )}
           </Form.Group>
 
@@ -95,7 +97,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
             />
             {errors.description && (
               <Form.Control.Feedback type="invalid">
-                {errors.description.message}
+                {errors.description.message as string}
               </Form.Control.Feedback>
             )}
           </Form.Group>
@@ -118,7 +120,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
               </Form.Select>
               {errors.githubRepo && (
                 <Form.Control.Feedback type="invalid">
-                  {errors.githubRepo.message}
+                  {errors.githubRepo.message as string}
                 </Form.Control.Feedback>
               )}
             </Form.Group>

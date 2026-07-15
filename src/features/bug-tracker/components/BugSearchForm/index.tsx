@@ -1,4 +1,4 @@
-import { BugFilter } from "@/Domain/Bug/BugFilter";
+import { BugFilter } from "../../domain/BugFilter";
 import { FC, useCallback, useEffect, useRef } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";

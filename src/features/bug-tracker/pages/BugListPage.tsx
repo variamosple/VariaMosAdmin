@@ -1,7 +1,7 @@
-import { BugFormModal } from "@/UI/Components/BugFormModal";
-import { BugApprovalModal } from "@/UI/Components/BugApprovalModal";
-import { BugList } from "@/UI/Components/BugList";
-import { BugSearchForm } from "@/UI/Components/BugSearchForm";
+import { BugFormModal } from "../components/BugFormModal";
+import { BugApprovalModal } from "../components/BugApprovalModal";
+import { BugList } from "../components/BugList";
+import { BugSearchForm } from "../components/BugSearchForm";
 import { withPageVisit } from "@variamosple/variamos-components";
 import { FC, useState } from "react";
 import {
@@ -18,7 +18,7 @@ import {
   Form,
 } from "react-bootstrap";
 import { ArrowRepeat, Plus, Github } from "react-bootstrap-icons";
-import { useBugList } from "./useBugList";
+import { useBugList } from "../hooks/useBugList";
 
 const BugListPageComponent: FC = () => {
   const {
@@ -114,7 +114,7 @@ const BugListPageComponent: FC = () => {
       )}
 
       <BugSearchForm
-        onSubmit={(search) => setFilter(search || {})}
+        onSubmit={(search: any) => setFilter(search || {})}
         onSearchReset={() => setFilter({})}
         isLoading={isLoading}
         repos={repos}
@@ -179,7 +179,7 @@ const BugListPageComponent: FC = () => {
         mode="user"
         show={showUserCreateModal}
         onHide={() => setShowUserCreateModal(false)}
-        onSubmit={async (data, file) => {
+        onSubmit={async (data: any, file?: any) => {
           await handleCreateBug(
             data.title,
             data.description,
@@ -199,7 +199,7 @@ const BugListPageComponent: FC = () => {
         mode="admin"
         show={showAdminCreateModal}
         onHide={() => setShowAdminCreateModal(false)}
-        onSubmit={async (data, file) => {
+        onSubmit={async (data: any, file?: any) => {
           await handleCreateBug(
             data.title,
             data.description,
@@ -376,7 +376,7 @@ const BugListPageComponent: FC = () => {
                     className="d-flex flex-column gap-2 mb-3"
                     style={{ maxHeight: "300px", overflowY: "auto" }}
                   >
-                    {notes.map((note) => {
+                    {notes.map((note: any) => {
                       const isSystem = note.comment?.startsWith("[Audit]");
                       if (isSystem) {
                         const cleanComment = (note.comment || "").replace("[Audit] ", "");
@@ -407,7 +407,7 @@ const BugListPageComponent: FC = () => {
                               className="font-monospace text-secondary mt-1"
                               style={{ fontSize: "0.8rem", lineHeight: "1.5" }}
                             >
-                              {cleanComment.split("\n").map((line, idx) => {
+                              {cleanComment.split("\n").map((line: string, idx: number) => {
                                 if (line.startsWith("* ")) {
                                   const content = line.substring(2);
                                   if (content.includes(" -> ")) {
