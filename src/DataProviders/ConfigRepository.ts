@@ -1,7 +1,7 @@
 import { Menu, ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const requestMenuConfig = (): Promise<ResponseModel<Menu>> => {
   return ADMIN_CLIENT.get(`/v1/configurations/menu`)

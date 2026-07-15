@@ -1,5 +1,5 @@
 import { Bug } from "@/Domain/Bug/Bug";
-import { formatDate } from "@/UI/constants";
+import { formatDate } from "@/shared/constants";
 import { FC } from "react";
 import { Badge, Button } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";

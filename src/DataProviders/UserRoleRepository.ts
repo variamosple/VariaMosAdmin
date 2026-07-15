@@ -3,7 +3,7 @@ import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 import { Role, RoleDetails } from "../Domain/Role/Entity/Role";
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryUserRoles = (filter: UserRoleFilter): Promise<ResponseModel<Role[]>> => {
   return ADMIN_CLIENT.get(`/v1/users/${filter.userId}/roles`, {

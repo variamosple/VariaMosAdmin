@@ -1,28 +1,28 @@
 import { Navigate, Outlet, RouteObject } from "react-router-dom";
 
-import { AppConfig } from "@/Infrastructure/AppConfig";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { AuthWrapper, NotAuthorized, ProtectedRoute } from "@variamosple/variamos-components";
-import { SecurityWrapper } from "./Components/SecurityWrapper";
-import { MainLayout } from "./Layouts/MainLayout";
-import { SignInLayout } from "./Layouts/SignInLayout";
-import { ForgotPasswordPage } from "./Pages/ForgotPasswordPage";
-import { HomePage } from "./Pages/Home";
-import { LanguageListPage } from "./Pages/LanguageListPage";
-import { LoginPage } from "./Pages/LoginPage";
-import { MetricsPage } from "./Pages/Metrics";
-import { MicroServiceListPage } from "./Pages/MicroServiceList";
-import { ModelListPage } from "./Pages/ModelListPage";
-import { MyAccountPage } from "./Pages/MyAccountPage";
-import { PermissionListPage } from "./Pages/PermissionList";
-import { ProjectListPage } from "./Pages/ProjectListPage";
-import { ResetPasswordPage } from "./Pages/ResetPasswordPage";
-import { RoleDetailsPage } from "./Pages/RoleDetails";
-import { RoleListPage } from "./Pages/RoleList";
-import { SignUpPage } from "./Pages/SignUpPage";
-import { UserDetailsPage } from "./Pages/UserDetails";
-import { UserListPage } from "./Pages/UserList";
+import { SecurityWrapper } from "@/UI/Components/SecurityWrapper";
+import { MainLayout } from "@/UI/Layouts/MainLayout";
+import { SignInLayout } from "@/UI/Layouts/SignInLayout";
+import { ForgotPasswordPage } from "@/UI/Pages/ForgotPasswordPage";
+import { HomePage } from "@/UI/Pages/Home";
+import { LanguageListPage } from "@/UI/Pages/LanguageListPage";
+import { LoginPage } from "@/UI/Pages/LoginPage";
+import { MetricsPage } from "@/UI/Pages/Metrics";
+import { MicroServiceListPage } from "@/UI/Pages/MicroServiceList";
+import { ModelListPage } from "@/UI/Pages/ModelListPage";
+import { MyAccountPage } from "@/UI/Pages/MyAccountPage";
+import { PermissionListPage } from "@/UI/Pages/PermissionList";
+import { ProjectListPage } from "@/UI/Pages/ProjectListPage";
+import { ResetPasswordPage } from "@/UI/Pages/ResetPasswordPage";
+import { RoleDetailsPage } from "@/UI/Pages/RoleDetails";
+import { RoleListPage } from "@/UI/Pages/RoleList";
+import { SignUpPage } from "@/UI/Pages/SignUpPage";
+import { UserDetailsPage } from "@/UI/Pages/UserDetails";
+import { UserListPage } from "@/UI/Pages/UserList";
 
-import { BugListPage } from "./Pages/BugListPage";
+import { BugListPage } from "@/UI/Pages/BugListPage";
 
 const NOT_AUTHORIZED_PATH = "/403";
 

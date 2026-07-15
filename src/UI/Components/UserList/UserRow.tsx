@@ -2,7 +2,7 @@ import { queryUserRolesDetails } from "@/DataProviders/UserRoleRepository";
 import { RoleDetails } from "@/Domain/Role/Entity/Role";
 import { User } from "@/Domain/User/Entity/User";
 import { UserRoleFilter } from "@/Domain/User/Entity/UserRoleFilter";
-import { formatDateTime } from "@/UI/constants";
+import { formatDateTime } from "@/shared/constants";
 import { useQuery, useRouter } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Accordion, Button, ButtonGroup, Spinner } from "react-bootstrap";

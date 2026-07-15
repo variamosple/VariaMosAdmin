@@ -3,7 +3,7 @@ import { RolePermissionFilter } from "@/Domain/Role/Entity/RolePermissionFilter"
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 import { Permission } from "../Domain/Permission/Entity/Permission";
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryRolePermissions = (
   filter: RolePermissionFilter,

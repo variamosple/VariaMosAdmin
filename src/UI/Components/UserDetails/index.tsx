@@ -1,5 +1,5 @@
 import { User } from "@/Domain/User/Entity/User";
-import { formatDateTime } from "@/UI/constants";
+import { formatDateTime } from "@/shared/constants";
 import { FC } from "react";
 import { Col, Row } from "react-bootstrap";
 

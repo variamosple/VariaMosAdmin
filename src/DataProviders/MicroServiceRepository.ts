@@ -3,8 +3,8 @@ import axios from "axios";
 
 import { MicroService } from "@/Domain/MicroService/MicroService";
 import { MicroServiceFilter } from "@/Domain/MicroService/MicroServiceFilter";
-import { AppConfig } from "@/Infrastructure/AppConfig";
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryMicroServices = (
   filter: MicroServiceFilter,

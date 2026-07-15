@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { Language } from "@/Domain/Language/Language";
 import { LanguagesFilter } from "@/Domain/Language/LanguageFilter";
-import { LANGUAGES_CLIENT } from "@/Infrastructure/AxiosConfig";
+import { LANGUAGES_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryLanguages = (filter: LanguagesFilter): Promise<ResponseModel<Language[]>> => {
   return LANGUAGES_CLIENT.get("/v1/admin/languages", { params: filter })

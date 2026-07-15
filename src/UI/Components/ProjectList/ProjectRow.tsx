@@ -1,5 +1,5 @@
 import { Project } from "@/Domain/Project/Project";
-import { formatBoolean, formatDate } from "@/UI/constants";
+import { formatBoolean, formatDate } from "@/shared/constants";
 import { FC, useState } from "react";
 import { Accordion, Button, ButtonGroup } from "react-bootstrap";
 import { DashCircle, PencilFill, PlusCircle, TrashFill } from "react-bootstrap-icons";

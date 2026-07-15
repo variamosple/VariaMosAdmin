@@ -1,4 +1,4 @@
-import { AppConfig } from "@/Infrastructure/AppConfig";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { useRouter, useSession } from "@variamosple/variamos-components";
 import { FC, ReactNode, useEffect } from "react";
 import { Col, Container, Row } from "react-bootstrap";

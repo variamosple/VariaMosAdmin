@@ -1,7 +1,7 @@
 import { type FC } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Form, Spinner } from "react-bootstrap";
-import { PASSWORD_REGEXP } from "@/UI/constants";
+import { PASSWORD_REGEXP } from "@/shared/constants";
 
 interface FormData {
   new_password: string;

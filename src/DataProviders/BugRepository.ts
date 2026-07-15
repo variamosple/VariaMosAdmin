@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { Bug, BugStatusLog } from "@/Domain/Bug/Bug";
 import { BugFilter } from "@/Domain/Bug/BugFilter";
-import { ADMIN_CLIENT } from "@/Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
   return ADMIN_CLIENT.get("/bugs", { params: filter })

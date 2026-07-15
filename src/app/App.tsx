@@ -8,12 +8,12 @@ import {
   requestSignIn,
   requestSignInAsGuest,
   requestSignUp,
-} from "./DataProviders/AuthRepository";
-import { registerVisit } from "./DataProviders/VisitsRepository";
-import { AppConfig } from "./Infrastructure/AppConfig";
-import { RouterProvider } from "./UI/Context/RouterContext";
-import { ToastProvider } from "./UI/Context/ToastContext";
-import { ROUTES } from "./UI/router";
+} from "@/DataProviders/AuthRepository";
+import { registerVisit } from "@/DataProviders/VisitsRepository";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { RouterProvider } from "@/UI/Context/RouterContext";
+import { ToastProvider } from "@/UI/Context/ToastContext";
+import { ROUTES } from "./router";
 
 const Routes: FC = () => {
   return useRoutes(ROUTES);

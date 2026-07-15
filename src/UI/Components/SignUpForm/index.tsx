@@ -1,5 +1,5 @@
 import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
-import { PASSWORD_REGEXP } from "@/UI/constants";
+import { PASSWORD_REGEXP } from "@/shared/constants";
 import { useSession } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";

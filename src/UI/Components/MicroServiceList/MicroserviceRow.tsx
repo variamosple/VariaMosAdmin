@@ -1,6 +1,6 @@
 import { watchMicroserviceLogs } from "@/DataProviders/MicroServiceRepository";
 import { MicroService } from "@/Domain/MicroService/MicroService";
-import { formatDateTime } from "@/UI/constants";
+import { formatDateTime } from "@/shared/constants";
 import { useLineBuffer } from "@/UI/Hooks/useLineBuffer";
 import { useSocket } from "@/UI/Hooks/useSocket";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";

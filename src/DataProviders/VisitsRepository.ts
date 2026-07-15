@@ -1,7 +1,7 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const registerVisit = (pageId: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post(`/v1/visits`, { pageId })

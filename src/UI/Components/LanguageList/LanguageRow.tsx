@@ -1,5 +1,5 @@
 import { Language } from "@/Domain/Language/Language";
-import { formatDate, formatDateTime } from "@/UI/constants";
+import { formatDate, formatDateTime } from "@/shared/constants";
 import { FC, useMemo, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
 import { DashCircle, PencilFill, PlusCircle, TrashFill } from "react-bootstrap-icons";

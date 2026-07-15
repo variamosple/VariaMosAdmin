@@ -2,7 +2,7 @@ import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
 import { Country } from "@/Domain/Country/Country";
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryCountries = (): Promise<ResponseModel<Country[]>> => {
   return ADMIN_CLIENT.get(`/v1/countries`)

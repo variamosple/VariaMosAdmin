@@ -2,7 +2,7 @@ import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 import { User } from "../Domain/User/Entity/User";
 import { UsersFilter } from "../Domain/User/Entity/UsersFilter";
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryUsers = (filter: UsersFilter): Promise<ResponseModel<User[]>> => {
   return ADMIN_CLIENT.get("/v1/users", { params: filter })

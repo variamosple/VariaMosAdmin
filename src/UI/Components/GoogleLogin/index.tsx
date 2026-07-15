@@ -1,4 +1,4 @@
-import { AppConfig } from "@/Infrastructure/AppConfig";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { FC, useEffect } from "react";
 
 interface GoogleLoginProps {

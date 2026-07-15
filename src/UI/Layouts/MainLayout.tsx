@@ -1,5 +1,5 @@
 import { requestMenuConfig } from "@/DataProviders/ConfigRepository";
-import { AppConfig } from "@/Infrastructure/AppConfig";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { FC } from "react";
 
 import { Footer, Header, MenuContextProvider } from "@variamosple/variamos-components";

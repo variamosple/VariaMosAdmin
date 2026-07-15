@@ -9,7 +9,7 @@ import {
   singInResponse,
 } from "@variamosple/variamos-components";
 import axios from "axios";
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import { handleRepositoryError } from "./RepositoryUtils";
 
 export const getSessionInfo = (): Promise<ResponseModel<SessionInfoResponse>> => {

@@ -1,6 +1,6 @@
 import { registerRedirect } from "@/DataProviders/AuthRepository";
 import { Credentials } from "@/Domain/User/Entity/Credentials";
-import { AppConfig } from "@/Infrastructure/AppConfig";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { GoogleLogin } from "@/UI/Components/GoogleLogin";
 import { LoginForm } from "@/UI/Components/LoginForm";
 import { useRouter, useSession } from "@variamosple/variamos-components";

@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { Metric } from "@/Domain/Metric/Metric";
 import { MetricsFilter } from "@/Domain/Metric/MetricsFilter";
-import { ADMIN_CLIENT } from "../Infrastructure/AxiosConfig";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryMetrics = (): Promise<ResponseModel<Metric[]>> => {
   return ADMIN_CLIENT.get(`/v1/metrics`)

@@ -1,5 +1,5 @@
 import { PasswordUpdate } from "@/Domain/User/Entity/PasswordUpdate";
-import { PASSWORD_REGEXP } from "@/UI/constants";
+import { PASSWORD_REGEXP } from "@/shared/constants";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";

@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { Model } from "@/Domain/Model/Model";
 import { ModelsFilter } from "@/Domain/Model/ModelFilter";
-import { PROJECTS_CLIENT } from "../Infrastructure/AxiosConfig";
+import { PROJECTS_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryModels = (filter: ModelsFilter): Promise<ResponseModel<Model[]>> => {
   return PROJECTS_CLIENT.get("/v1/admin/models", { params: filter })
