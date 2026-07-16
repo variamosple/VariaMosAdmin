@@ -1,4 +1,4 @@
-import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
+import { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
 import { useSession } from "@variamosple/variamos-components";
 import { FC, useState } from "react";
 import { Alert } from "react-bootstrap";

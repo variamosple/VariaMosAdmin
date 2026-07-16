@@ -1,4 +1,4 @@
-import { UserRegistration } from "@/Domain/User/Entity/UserRegistration";
+import { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
 import { PASSWORD_REGEXP } from "@/shared/constants";
 import { useSession } from "@variamosple/variamos-components";
 import { FC } from "react";

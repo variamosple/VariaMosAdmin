@@ -1,4 +1,4 @@
-import { Role } from "@/Domain/Role/Entity/Role";
+import { Role } from "@/features/role-management/domain/Entity/Role";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";

@@ -5,22 +5,17 @@ import { AuthWrapper, NotAuthorized, ProtectedRoute } from "@variamosple/variamo
 import { SecurityWrapper } from "@/UI/Components/SecurityWrapper";
 import { MainLayout } from "@/UI/Layouts/MainLayout";
 import { SignInLayout } from "@/UI/Layouts/SignInLayout";
-import { ForgotPasswordPage } from "@/UI/Pages/ForgotPasswordPage";
+import { ForgotPasswordPage, LoginPage, MyAccountPage, ResetPasswordPage } from "@/features/auth";
 import { HomePage } from "@/UI/Pages/Home";
 import { LanguageListPage } from "@/UI/Pages/LanguageListPage";
-import { LoginPage } from "@/UI/Pages/LoginPage";
 import { MetricsPage } from "@/UI/Pages/Metrics";
 import { MicroServiceListPage } from "@/UI/Pages/MicroServiceList";
 import { ModelListPage } from "@/UI/Pages/ModelListPage";
-import { MyAccountPage } from "@/UI/Pages/MyAccountPage";
 import { PermissionListPage } from "@/UI/Pages/PermissionList";
 import { ProjectListPage } from "@/UI/Pages/ProjectListPage";
-import { ResetPasswordPage } from "@/UI/Pages/ResetPasswordPage";
-import { RoleDetailsPage } from "@/UI/Pages/RoleDetails";
-import { RoleListPage } from "@/UI/Pages/RoleList";
+import { RoleDetailsPage, RoleListPage } from "@/features/role-management";
 import { SignUpPage } from "@/UI/Pages/SignUpPage";
-import { UserDetailsPage } from "@/UI/Pages/UserDetails";
-import { UserListPage } from "@/UI/Pages/UserList";
+import { UserDetailsPage, UserListPage } from "@/features/user-management";
 
 import { BugListPage } from "@/features/bug-tracker";
 

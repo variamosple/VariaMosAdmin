@@ -8,7 +8,7 @@ import {
   requestSignIn,
   requestSignInAsGuest,
   requestSignUp,
-} from "@/DataProviders/AuthRepository";
+} from "@/features/auth";
 import { registerVisit } from "@/DataProviders/VisitsRepository";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { RouterProvider } from "@/UI/Context/RouterContext";

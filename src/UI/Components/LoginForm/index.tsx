@@ -1,4 +1,4 @@
-import { Credentials } from "@/Domain/User/Entity/Credentials";
+import { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import { useSession } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
