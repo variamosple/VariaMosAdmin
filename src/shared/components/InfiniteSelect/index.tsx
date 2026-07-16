@@ -28,7 +28,7 @@ export const InfiniteSelect = <ValueType,>({
   const { elementRef } = useListenOutsideClicks(closeDropdown);
 
   const renderNoOptions = () => {
-    if (isFetchingOptions) return <Spinner />;
+    if (isFetchingOptions) return <Spinner animation="border" role="status" />;
 
     return (
       <div className="relative cursor-default select-none py-2 pl-3 pr-9">
@@ -90,7 +90,7 @@ export const InfiniteSelect = <ValueType,>({
         >
           {renderOptions(options)}
 
-          {isFetchingOptions && options?.length > 0 && <Spinner />}
+          {isFetchingOptions && options?.length > 0 && <Spinner animation="border" role="status" />}
         </div>
       )}
     </div>

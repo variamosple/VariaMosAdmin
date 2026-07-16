@@ -28,7 +28,7 @@ interface ChartContextProviderProps {
   children: React.ReactNode;
 }
 
-const ChartContextProvider: FC<ChartContextProviderProps> = ({ metric, children }) => {
+export const ChartContextProvider: FC<ChartContextProviderProps> = ({ metric, children }) => {
   const { pushToast } = useToast();
   const [currentMetric, setCurrentMetric] = useState(metric);
   const [isLoading, setIsLoading] = useState(false);

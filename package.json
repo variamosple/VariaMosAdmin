@@ -7,6 +7,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "jest:coverage": "react-scripts test --coverage --watchAll=false",
     "eject": "react-scripts eject",
     "postinstall": "patch-package",
     "prepare": "husky",
@@ -81,6 +82,20 @@
   "jest": {
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
-    }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!src/**/*.d.ts",
+      "!src/**/domain/Entity/**",
+      "!src/**/index.ts",
+      "!src/index.tsx",
+      "!src/reportWebVitals.ts",
+      "!src/**/api/**",
+      "!src/**/infrastructure/**",
+      "!src/**/types/**",
+      "!src/shared/constants.ts",
+      "!src/shared/components/About/**",
+      "!src/shared/layouts/MainLayout.tsx"
+    ]
   }
 }
