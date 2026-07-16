@@ -20,7 +20,8 @@
     "prettier",
     "commitlint",
     "lintstaged",
-    "variamosple"
+    "variamosple",
+    "alertify"
   ],
   "ignorePaths": [
     "node_modules/**",

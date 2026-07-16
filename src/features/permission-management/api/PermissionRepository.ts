@@ -1,7 +1,7 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { Permission } from "../Domain/Permission/Entity/Permission";
-import { PermissionsFilter } from "../Domain/Permission/Entity/PermissionsFilter";
+import { Permission } from "../domain/Entity/Permission";
+import { PermissionsFilter } from "../domain/Entity/PermissionsFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryPermissions = (

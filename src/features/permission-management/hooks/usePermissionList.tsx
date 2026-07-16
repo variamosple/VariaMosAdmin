@@ -3,9 +3,9 @@ import {
   deletePermission,
   queryPermissions,
   updatePermission,
-} from "@/DataProviders/PermissionRepository";
-import { Permission } from "@/Domain/Permission/Entity/Permission";
-import { PermissionsFilter } from "@/Domain/Permission/Entity/PermissionsFilter";
+} from "@/features/permission-management/api/PermissionRepository";
+import { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { useToast } from "@/UI/Context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";

@@ -4,7 +4,7 @@ import {
   queryRolePermissions,
 } from "@/features/role-management/api/RolePermissionRepository";
 import { queryRoleById } from "@/features/role-management/api/RoleRepository";
-import { Permission } from "@/Domain/Permission/Entity/Permission";
+import { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
 import { RolePermissionFilter } from "@/features/role-management/domain/Entity/RolePermissionFilter";

@@ -11,7 +11,7 @@ import { LanguageListPage } from "@/UI/Pages/LanguageListPage";
 import { MetricsPage } from "@/UI/Pages/Metrics";
 import { MicroServiceListPage } from "@/UI/Pages/MicroServiceList";
 import { ModelListPage } from "@/UI/Pages/ModelListPage";
-import { PermissionListPage } from "@/UI/Pages/PermissionList";
+import { PermissionListPage } from "@/features/permission-management";
 import { ProjectListPage } from "@/UI/Pages/ProjectListPage";
 import { RoleDetailsPage, RoleListPage } from "@/features/role-management";
 import { SignUpPage } from "@/UI/Pages/SignUpPage";

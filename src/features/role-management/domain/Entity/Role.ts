@@ -1,4 +1,4 @@
-import { Permission } from "@/Domain/Permission/Entity/Permission";
+import { Permission } from "@/features/permission-management/domain/Entity/Permission";
 
 export interface Role {
   id?: number;

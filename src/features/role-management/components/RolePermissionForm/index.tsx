@@ -1,6 +1,6 @@
-import { queryPermissions } from "@/DataProviders/PermissionRepository";
-import { Permission } from "@/Domain/Permission/Entity/Permission";
-import { PermissionsFilter } from "@/Domain/Permission/Entity/PermissionsFilter";
+import { queryPermissions } from "@/features/permission-management/api/PermissionRepository";
+import { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
 import useIntersectionObserver from "@/UI/Hooks/useIntersectionObserver";
 import { useDebouncedValue, usePaginatedQuery } from "@variamosple/variamos-components";
