@@ -1,7 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { usePermissionList } from "./usePermissionList";
 import * as PermissionRepository from "../api/PermissionRepository";
-import { Permission } from "../domain/Entity/Permission";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 
 // Mock the dependencies
@@ -79,9 +78,8 @@ describe("usePermissionList Hook", () => {
     createPermissionMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => usePermissionList());
 
-    let response;
     await act(async () => {
-      response = await result.current.onPermissionCreate({ name: "write:roles" });
+      await result.current.onPermissionCreate({ name: "write:roles" });
     });
 
     expect(createPermissionMock).toHaveBeenCalledWith({ name: "write:roles" });
