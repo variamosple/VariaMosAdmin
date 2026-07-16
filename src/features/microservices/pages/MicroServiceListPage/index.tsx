@@ -1,7 +1,7 @@
 import { MicroServiceList } from "../../components/MicroServiceList";
 import { useMicroServiceList } from "../../hooks/useMicroServiceList";
 import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@/UI/Components/ConfirmationModal";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { FC } from "react";
 import { Container } from "react-bootstrap";
 

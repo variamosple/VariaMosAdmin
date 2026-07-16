@@ -1,4 +1,4 @@
-import { requestMenuConfig } from "@/DataProviders/ConfigRepository";
+import { requestMenuConfig } from "@/shared/api/ConfigRepository";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { FC } from "react";
 

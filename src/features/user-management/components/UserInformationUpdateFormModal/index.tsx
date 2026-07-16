@@ -1,5 +1,5 @@
-import { queryCountries } from "@/DataProviders/CountriesRepository";
-import { Country } from "@/Domain/Country/Country";
+import { queryCountries } from "@/shared/api/CountriesRepository";
+import { Country } from "@/shared/domain/Entity/Country";
 import { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import { ResponseModel, useQuery } from "@variamosple/variamos-components";
 import { FC, useEffect } from "react";

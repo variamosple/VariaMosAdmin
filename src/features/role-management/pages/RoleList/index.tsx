@@ -1,7 +1,7 @@
-import ConfirmationModal from "@/UI/Components/ConfirmationModal";
-import { RoleFormModal } from "@/UI/Components/RoleFormModal";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { RoleFormModal } from "@/features/role-management/components/RoleFormModal";
 import { RoleList } from "../../components/RoleList";
-import { SearchForm } from "@/UI/Components/SearchForm";
+import { SearchForm } from "@/shared/components/SearchForm";
 import { withPageVisit } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, Container } from "react-bootstrap";

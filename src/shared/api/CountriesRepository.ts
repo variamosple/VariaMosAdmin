@@ -1,7 +1,7 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { Country } from "@/Domain/Country/Country";
+import { Country } from "@/shared/domain/Entity/Country";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryCountries = (): Promise<ResponseModel<Country[]>> => {

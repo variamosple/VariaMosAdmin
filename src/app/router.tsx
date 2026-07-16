@@ -2,11 +2,17 @@ import { Navigate, Outlet, RouteObject } from "react-router-dom";
 
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { AuthWrapper, NotAuthorized, ProtectedRoute } from "@variamosple/variamos-components";
-import { SecurityWrapper } from "@/UI/Components/SecurityWrapper";
-import { MainLayout } from "@/UI/Layouts/MainLayout";
-import { SignInLayout } from "@/UI/Layouts/SignInLayout";
-import { ForgotPasswordPage, LoginPage, MyAccountPage, ResetPasswordPage } from "@/features/auth";
-import { HomePage } from "@/UI/Pages/Home";
+import { SecurityWrapper } from "@/shared/components/SecurityWrapper";
+import { MainLayout } from "@/shared/layouts/MainLayout";
+import { SignInLayout } from "@/shared/layouts/SignInLayout";
+import {
+  ForgotPasswordPage,
+  LoginPage,
+  MyAccountPage,
+  ResetPasswordPage,
+  SignUpPage,
+} from "@/features/auth";
+import { HomePage } from "@/features/home";
 import { LanguageListPage } from "@/features/language-management";
 import { MetricsPage } from "@/features/metrics-dashboard";
 import { MicroServiceListPage } from "@/features/microservices";
@@ -14,7 +20,6 @@ import { ModelListPage } from "@/features/model-management";
 import { PermissionListPage } from "@/features/permission-management";
 import { ProjectListPage } from "@/features/project-management";
 import { RoleDetailsPage, RoleListPage } from "@/features/role-management";
-import { SignUpPage } from "@/UI/Pages/SignUpPage";
 import { UserDetailsPage, UserListPage } from "@/features/user-management";
 
 import { BugListPage } from "@/features/bug-tracker";

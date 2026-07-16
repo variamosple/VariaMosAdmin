@@ -1,5 +1,5 @@
 import { Project } from "@/features/project-management/domain/Entity/Project";
-import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
+import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Table } from "react-bootstrap";

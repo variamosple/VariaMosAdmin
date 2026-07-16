@@ -2,13 +2,13 @@ import { queryRoles } from "@/features/role-management/api/RoleRepository";
 import { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
 import { UserRole } from "@/features/user-management/domain/Entity/UserRole";
-import useIntersectionObserver from "@/UI/Hooks/useIntersectionObserver";
+import useIntersectionObserver from "@/shared/hooks/useIntersectionObserver";
 import { useDebouncedValue, usePaginatedQuery } from "@variamosple/variamos-components";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { InfiniteSelect } from "@/UI/Components/InfiniteSelect";
-import { SelectOptionProps } from "@/UI/Components/InfiniteSelect/index.types";
+import { InfiniteSelect } from "@/shared/components/InfiniteSelect";
+import { SelectOptionProps } from "@/shared/components/InfiniteSelect/index.types";
 
 export interface UserRoleFormProps {
   onUserRoleSubmit: (roleRole: UserRole) => void;

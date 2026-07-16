@@ -11,8 +11,8 @@ import {
 } from "@/features/auth";
 import { registerVisit } from "@/features/metrics-dashboard/api/VisitsRepository";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
-import { RouterProvider } from "@/UI/Context/RouterContext";
-import { ToastProvider } from "@/UI/Context/ToastContext";
+import { RouterProvider } from "@/shared/context/RouterContext";
+import { ToastProvider } from "@/shared/context/ToastContext";
 import { ROUTES } from "./router";
 
 const Routes: FC = () => {

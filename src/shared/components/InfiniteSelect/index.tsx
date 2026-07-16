@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Spinner } from "react-bootstrap";
 
-import useListenOutsideClicks from "@/UI/Hooks/useListenOutsideClicks";
+import useListenOutsideClicks from "@/shared/hooks/useListenOutsideClicks";
 import { SelectOptionProps, SelectProps } from "./index.types";
 
 export const InfiniteSelect = <ValueType,>({

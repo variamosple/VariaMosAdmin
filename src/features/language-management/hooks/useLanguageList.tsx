@@ -1,7 +1,7 @@
 import { deleteLanguage, queryLanguages, updateLanguage } from "../api/LanguageRepository";
 import { Language } from "../domain/Entity/Language";
 import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 

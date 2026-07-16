@@ -7,7 +7,7 @@ import { usePaginatedQuery } from "@variamosple/variamos-components";
 jest.mock("../api/ModelRepository");
 
 const mockPushToast = jest.fn();
-jest.mock("@/UI/Context/ToastContext", () => ({
+jest.mock("@/shared/context/ToastContext", () => ({
   useToast: () => ({
     pushToast: mockPushToast,
   }),

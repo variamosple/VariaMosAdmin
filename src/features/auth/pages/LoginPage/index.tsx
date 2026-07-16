@@ -1,8 +1,8 @@
 import { registerRedirect } from "../../api/AuthRepository";
 import { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
-import { GoogleLogin } from "@/UI/Components/GoogleLogin";
-import { LoginForm } from "@/UI/Components/LoginForm";
+import { GoogleLogin } from "../../components/GoogleLogin";
+import { LoginForm } from "../../components/LoginForm";
 import { useRouter, useSession } from "@variamosple/variamos-components";
 import { FC, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";

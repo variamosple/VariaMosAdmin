@@ -1,7 +1,7 @@
 import { type FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { ForgotPasswordForm } from "@/UI/Components/ForgotPasswordForm";
+import { ForgotPasswordForm } from "../../components/ForgotPasswordForm";
 import { requestPasswordReset } from "../../api/AuthRepository";
 
 export const ForgotPasswordPage: FC = () => {

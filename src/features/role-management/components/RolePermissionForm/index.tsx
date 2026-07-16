@@ -2,13 +2,13 @@ import { queryPermissions } from "@/features/permission-management/api/Permissio
 import { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
-import useIntersectionObserver from "@/UI/Hooks/useIntersectionObserver";
+import useIntersectionObserver from "@/shared/hooks/useIntersectionObserver";
 import { useDebouncedValue, usePaginatedQuery } from "@variamosple/variamos-components";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { InfiniteSelect } from "@/UI/Components/InfiniteSelect";
-import { SelectOptionProps } from "@/UI/Components/InfiniteSelect/index.types";
+import { InfiniteSelect } from "@/shared/components/InfiniteSelect";
+import { SelectOptionProps } from "@/shared/components/InfiniteSelect/index.types";
 
 export interface RolePermissionFormProps {
   onRolePermissionSubmit: (rolePermission: RolePermission) => void;

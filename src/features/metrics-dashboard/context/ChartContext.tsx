@@ -3,7 +3,7 @@ import { Metric } from "../domain/Entity/Metric";
 import { MetricsFilter } from "../domain/Entity/MetricsFilter";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { createContext, FC, useCallback, useContext, useState } from "react";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 
 export interface ChartDateFormProperties {
   fromDate: string;

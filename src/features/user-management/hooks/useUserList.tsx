@@ -6,7 +6,7 @@ import {
 } from "@/features/user-management/api/UserRepository";
 import { User } from "@/features/user-management/domain/Entity/User";
 import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 

@@ -5,7 +5,7 @@ import { User } from "@/features/user-management/domain/Entity/User";
 import { withPageVisit } from "@variamosple/variamos-components";
 import { FC, useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
-import { PasswordUpdateForm } from "@/UI/Components/PasswordUpdateForm";
+import { PasswordUpdateForm } from "../components/PasswordUpdateForm";
 import { PersonalInformationUpdateForModal } from "@/features/user-management/components/UserInformationUpdateFormModal";
 
 const MyAccountPageComponent: FC<unknown> = () => {

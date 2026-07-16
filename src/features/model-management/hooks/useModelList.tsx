@@ -5,7 +5,7 @@ import {
 } from "@/features/model-management/api/ModelRepository";
 import { Model } from "@/features/model-management/domain/Entity/Model";
 import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 

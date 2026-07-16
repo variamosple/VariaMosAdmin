@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { UserRoleForm } from "./index";
 
-jest.mock("@/UI/Hooks/useIntersectionObserver", () => {
+jest.mock("@/shared/hooks/useIntersectionObserver", () => {
   return () => ({
     lastEntryRef: jest.fn(),
     setHasMore: jest.fn(),
@@ -10,7 +10,7 @@ jest.mock("@/UI/Hooks/useIntersectionObserver", () => {
   });
 });
 
-jest.mock("@/UI/Components/InfiniteSelect", () => {
+jest.mock("@/shared/components/InfiniteSelect", () => {
   return {
     InfiniteSelect: ({ handleSelect, options }: any) => (
       <select

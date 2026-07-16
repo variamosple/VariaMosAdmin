@@ -3,8 +3,8 @@ import { useSession } from "@variamosple/variamos-components";
 import { FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { GoogleLogin } from "../Components/GoogleLogin";
-import { SignUpForm } from "../Components/SignUpForm";
+import { GoogleLogin } from "../components/GoogleLogin";
+import { SignUpForm } from "../components/SignUpForm";
 
 export const SignUpPage: FC<unknown> = () => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();

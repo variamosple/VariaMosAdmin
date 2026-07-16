@@ -1,7 +1,7 @@
 import { type FC, useState, useEffect } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ResetPasswordForm } from "@/UI/Components/ResetPasswordForm";
+import { ResetPasswordForm } from "../../components/ResetPasswordForm";
 import { verifyPasswordResetToken, resetPassword } from "../../api/AuthRepository";
 
 export const ResetPasswordPage: FC = () => {

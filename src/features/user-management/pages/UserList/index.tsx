@@ -1,6 +1,6 @@
-import ConfirmationModal from "@/UI/Components/ConfirmationModal";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { RecoveryLinkModal } from "../../components/UserList/RecoveryLinkModal";
-import { SearchForm } from "@/UI/Components/SearchForm";
+import { SearchForm } from "@/shared/components/SearchForm";
 import { UserList } from "../../components/UserList";
 import { withPageVisit } from "@variamosple/variamos-components";
 import { FC } from "react";

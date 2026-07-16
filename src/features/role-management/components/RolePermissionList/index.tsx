@@ -1,5 +1,5 @@
 import { Permission } from "@/features/permission-management/domain/Entity/Permission";
-import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
+import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";

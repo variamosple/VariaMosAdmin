@@ -6,7 +6,7 @@ import {
 } from "@/features/role-management/api/RoleRepository";
 import { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 

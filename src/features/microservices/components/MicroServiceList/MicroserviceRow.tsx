@@ -1,8 +1,8 @@
 import { watchMicroserviceLogs } from "../../api/MicroServiceRepository";
 import { MicroService } from "../../domain/Entity/MicroService";
 import { formatDateTime } from "@/shared/constants";
-import { useLineBuffer } from "@/UI/Hooks/useLineBuffer";
-import { useSocket } from "@/UI/Hooks/useSocket";
+import { useLineBuffer } from "@/shared/hooks/useLineBuffer";
+import { useSocket } from "@/shared/hooks/useSocket";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
 import { FC, useEffect, useState } from "react";

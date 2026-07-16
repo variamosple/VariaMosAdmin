@@ -6,7 +6,7 @@ import {
 } from "@/features/permission-management/api/PermissionRepository";
 import { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 

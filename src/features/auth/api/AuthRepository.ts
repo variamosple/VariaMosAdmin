@@ -10,7 +10,7 @@ import {
 } from "@variamosple/variamos-components";
 import axios from "axios";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
-import { handleRepositoryError } from "@/DataProviders/RepositoryUtils";
+import { handleRepositoryError } from "@/shared/api/RepositoryUtils";
 
 export const getSessionInfo = (): Promise<ResponseModel<SessionInfoResponse>> => {
   return ADMIN_CLIENT.get("/auth/session-info", {

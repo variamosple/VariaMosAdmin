@@ -2,7 +2,7 @@ import { FC, useState } from "react";
 import { Button, Form, InputGroup, Modal, Spinner } from "react-bootstrap";
 import { Clipboard, ClipboardCheck } from "react-bootstrap-icons";
 import { User } from "@/features/user-management/domain/Entity/User";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { generateRecoveryLink } from "@/features/user-management/api/UserRepository";
 
 interface RecoveryLinkModalProps {

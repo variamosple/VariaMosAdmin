@@ -13,10 +13,10 @@ import { FC, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
 import { useParams } from "react-router-dom";
-import ConfirmationModal from "@/UI/Components/ConfirmationModal";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { RolePermissionForm } from "../components/RolePermissionForm";
 import { RolePermissionList } from "../components/RolePermissionList";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 
 const RoleDetailsPageComponent: FC<unknown> = () => {
   const { pushToast, removeToast } = useToast();

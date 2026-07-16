@@ -5,7 +5,7 @@ import {
 } from "@/features/project-management/api/ProjectRepository";
 import { Project } from "@/features/project-management/domain/Entity/Project";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
-import { useToast } from "@/UI/Context/ToastContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 

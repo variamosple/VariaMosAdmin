@@ -1,7 +1,7 @@
-import ConfirmationModal from "@/UI/Components/ConfirmationModal";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { PermissionFormModal } from "@/features/permission-management/components/PermissionFormModal";
 import { PermissionList } from "@/features/permission-management/components/PermissionList";
-import { SearchForm } from "@/UI/Components/SearchForm";
+import { SearchForm } from "@/shared/components/SearchForm";
 import { withPageVisit } from "@variamosple/variamos-components";
 import { FC } from "react";
 import { Button, Container } from "react-bootstrap";
