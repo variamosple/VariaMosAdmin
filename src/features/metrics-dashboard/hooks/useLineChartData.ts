@@ -1,4 +1,4 @@
-import { Metric } from "@/Domain/Metric/Metric";
+import { Metric } from "../domain/Entity/Metric";
 import { useMemo, useState } from "react";
 
 interface ChartAxes {

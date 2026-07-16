@@ -1,5 +1,5 @@
-import { Metric } from "@/Domain/Metric/Metric";
-import { useChart } from "@/UI/Hooks/useChart";
+import { Metric } from "../../domain/Entity/Metric";
+import { useChart } from "../../hooks/useChart";
 import { FC } from "react";
 import { Chart } from "react-google-charts";
 

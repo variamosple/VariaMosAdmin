@@ -1,8 +1,8 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { Metric } from "@/Domain/Metric/Metric";
-import { MetricsFilter } from "@/Domain/Metric/MetricsFilter";
+import { Metric } from "../domain/Entity/Metric";
+import { MetricsFilter } from "../domain/Entity/MetricsFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryMetrics = (): Promise<ResponseModel<Metric[]>> => {

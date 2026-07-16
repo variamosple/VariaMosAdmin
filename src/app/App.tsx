@@ -9,7 +9,7 @@ import {
   requestSignInAsGuest,
   requestSignUp,
 } from "@/features/auth";
-import { registerVisit } from "@/DataProviders/VisitsRepository";
+import { registerVisit } from "@/features/metrics-dashboard/api/VisitsRepository";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { RouterProvider } from "@/UI/Context/RouterContext";
 import { ToastProvider } from "@/UI/Context/ToastContext";

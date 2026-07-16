@@ -1,4 +1,4 @@
-import { useChartContext, ChartDateFormProperties } from "@/UI/Context/ChartContext";
+import { useChartContext, ChartDateFormProperties } from "../../context/ChartContext";
 import { FC, useRef, useState } from "react";
 import { Button, Overlay, Popover } from "react-bootstrap";
 import { Funnel } from "react-bootstrap-icons";

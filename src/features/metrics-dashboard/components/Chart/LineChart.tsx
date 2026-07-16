@@ -1,7 +1,7 @@
-import { useLineChartData } from "@/UI/Hooks/useLineChartData";
+import { useLineChartData } from "../../hooks/useLineChartData";
 import { FC } from "react";
 
-import { useChartContext, withChartContextWrapper } from "@/UI/Context/ChartContext";
+import { useChartContext, withChartContextWrapper } from "../../context/ChartContext";
 import { Spinner } from "react-bootstrap";
 import Chart from "react-google-charts";
 import { ChartDateFilter } from "./ChartDateFilter";

@@ -1,5 +1,5 @@
-import { Metric } from "@/Domain/Metric/Metric";
-import { useGeoChartData } from "@/UI/Hooks/useGeoChartData";
+import { Metric } from "../../domain/Entity/Metric";
+import { useGeoChartData } from "../../hooks/useGeoChartData";
 import { FC } from "react";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
 import { Chart } from "react-google-charts";

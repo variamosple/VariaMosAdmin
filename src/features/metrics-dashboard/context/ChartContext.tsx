@@ -1,9 +1,9 @@
-import { queryMetric } from "@/DataProviders/MetricsRepository";
-import { Metric } from "@/Domain/Metric/Metric";
-import { MetricsFilter } from "@/Domain/Metric/MetricsFilter";
+import { queryMetric } from "../api/MetricsRepository";
+import { Metric } from "../domain/Entity/Metric";
+import { MetricsFilter } from "../domain/Entity/MetricsFilter";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { createContext, FC, useCallback, useContext, useState } from "react";
-import { useToast } from "./ToastContext";
+import { useToast } from "@/UI/Context/ToastContext";
 
 export interface ChartDateFormProperties {
   fromDate: string;

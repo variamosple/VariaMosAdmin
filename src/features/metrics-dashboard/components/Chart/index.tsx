@@ -1,4 +1,4 @@
-import { Metric } from "@/Domain/Metric/Metric";
+import { Metric } from "../../domain/Entity/Metric";
 import { FC } from "react";
 import { GeoChart } from "./GeoChart";
 import { LineChart } from "./LineChart";
