@@ -7,7 +7,7 @@ import { MainLayout } from "@/UI/Layouts/MainLayout";
 import { SignInLayout } from "@/UI/Layouts/SignInLayout";
 import { ForgotPasswordPage, LoginPage, MyAccountPage, ResetPasswordPage } from "@/features/auth";
 import { HomePage } from "@/UI/Pages/Home";
-import { LanguageListPage } from "@/UI/Pages/LanguageListPage";
+import { LanguageListPage } from "@/features/language-management";
 import { MetricsPage } from "@/UI/Pages/Metrics";
 import { MicroServiceListPage } from "@/UI/Pages/MicroServiceList";
 import { ModelListPage } from "@/features/model-management";

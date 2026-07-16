@@ -1,8 +1,8 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { Language } from "@/Domain/Language/Language";
-import { LanguagesFilter } from "@/Domain/Language/LanguageFilter";
+import { Language } from "../domain/Entity/Language";
+import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
 import { LANGUAGES_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryLanguages = (filter: LanguagesFilter): Promise<ResponseModel<Language[]>> => {

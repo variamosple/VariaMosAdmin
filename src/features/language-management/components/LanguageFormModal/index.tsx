@@ -1,4 +1,4 @@
-import { Language } from "@/Domain/Language/Language";
+import { Language } from "../../domain/Entity/Language";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";

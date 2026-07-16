@@ -1,6 +1,6 @@
-import { deleteLanguage, queryLanguages, updateLanguage } from "@/DataProviders/LanguageRepository";
-import { Language } from "@/Domain/Language/Language";
-import { LanguagesFilter } from "@/Domain/Language/LanguageFilter";
+import { deleteLanguage, queryLanguages, updateLanguage } from "../api/LanguageRepository";
+import { Language } from "../domain/Entity/Language";
+import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
 import { useToast } from "@/UI/Context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";

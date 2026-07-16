@@ -1,4 +1,4 @@
-import { Language } from "@/Domain/Language/Language";
+import { Language } from "../../domain/Entity/Language";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";

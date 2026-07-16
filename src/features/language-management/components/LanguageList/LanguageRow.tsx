@@ -1,4 +1,4 @@
-import { Language } from "@/Domain/Language/Language";
+import { Language } from "../../domain/Entity/Language";
 import { formatDate, formatDateTime } from "@/shared/constants";
 import { FC, useMemo, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
