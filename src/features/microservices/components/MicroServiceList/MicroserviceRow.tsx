@@ -1,5 +1,5 @@
-import { watchMicroserviceLogs } from "@/DataProviders/MicroServiceRepository";
-import { MicroService } from "@/Domain/MicroService/MicroService";
+import { watchMicroserviceLogs } from "../../api/MicroServiceRepository";
+import { MicroService } from "../../domain/Entity/MicroService";
 import { formatDateTime } from "@/shared/constants";
 import { useLineBuffer } from "@/UI/Hooks/useLineBuffer";
 import { useSocket } from "@/UI/Hooks/useSocket";

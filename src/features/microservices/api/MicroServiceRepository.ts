@@ -1,8 +1,8 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { MicroService } from "@/Domain/MicroService/MicroService";
-import { MicroServiceFilter } from "@/Domain/MicroService/MicroServiceFilter";
+import { MicroService } from "../domain/Entity/MicroService";
+import { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 

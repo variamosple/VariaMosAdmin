@@ -1,4 +1,4 @@
-import { MicroService } from "@/Domain/MicroService/MicroService";
+import { MicroService } from "../../domain/Entity/MicroService";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";
