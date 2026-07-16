@@ -1,8 +1,8 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { Model } from "@/Domain/Model/Model";
-import { ModelsFilter } from "@/Domain/Model/ModelFilter";
+import { Model } from "@/features/model-management/domain/Entity/Model";
+import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
 import { PROJECTS_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryModels = (filter: ModelsFilter): Promise<ResponseModel<Model[]>> => {

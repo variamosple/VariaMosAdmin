@@ -1,4 +1,4 @@
-import { ModelsFilter } from "@/Domain/Model/ModelFilter";
+import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
 import { FC, useCallback, useEffect, useRef } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";

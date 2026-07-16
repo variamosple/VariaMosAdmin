@@ -1,4 +1,4 @@
-import { Model } from "@/Domain/Model/Model";
+import { Model } from "@/features/model-management/domain/Entity/Model";
 import { FC, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
 import { DashCircle, PencilFill, PlusCircle } from "react-bootstrap-icons";

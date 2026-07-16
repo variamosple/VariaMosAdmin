@@ -10,7 +10,7 @@ import { HomePage } from "@/UI/Pages/Home";
 import { LanguageListPage } from "@/UI/Pages/LanguageListPage";
 import { MetricsPage } from "@/UI/Pages/Metrics";
 import { MicroServiceListPage } from "@/UI/Pages/MicroServiceList";
-import { ModelListPage } from "@/UI/Pages/ModelListPage";
+import { ModelListPage } from "@/features/model-management";
 import { PermissionListPage } from "@/features/permission-management";
 import { ProjectListPage } from "@/features/project-management";
 import { RoleDetailsPage, RoleListPage } from "@/features/role-management";

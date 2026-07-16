@@ -1,11 +1,11 @@
-import { ModelFormModal } from "@/UI/Components/ModelFormModal";
-import { ModelList } from "@/UI/Components/ModelList";
-import { ModelSearchForm } from "@/UI/Components/ModelSearchForm";
+import { ModelFormModal } from "@/features/model-management/components/ModelFormModal";
+import { ModelList } from "@/features/model-management/components/ModelList";
+import { ModelSearchForm } from "@/features/model-management/components/ModelSearchForm";
 import { withPageVisit } from "@variamosple/variamos-components";
 import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import { FC } from "react";
 import { Container } from "react-bootstrap";
-import { useModelList } from "./useModelList";
+import { useModelList } from "../../hooks/useModelList";
 
 const ModelListPageComponent: FC = () => {
   const {

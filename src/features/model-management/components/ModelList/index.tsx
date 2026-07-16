@@ -1,4 +1,4 @@
-import { Model } from "@/Domain/Model/Model";
+import { Model } from "@/features/model-management/domain/Entity/Model";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";
