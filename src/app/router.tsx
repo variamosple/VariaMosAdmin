@@ -12,7 +12,7 @@ import { MetricsPage } from "@/UI/Pages/Metrics";
 import { MicroServiceListPage } from "@/UI/Pages/MicroServiceList";
 import { ModelListPage } from "@/UI/Pages/ModelListPage";
 import { PermissionListPage } from "@/features/permission-management";
-import { ProjectListPage } from "@/UI/Pages/ProjectListPage";
+import { ProjectListPage } from "@/features/project-management";
 import { RoleDetailsPage, RoleListPage } from "@/features/role-management";
 import { SignUpPage } from "@/UI/Pages/SignUpPage";
 import { UserDetailsPage, UserListPage } from "@/features/user-management";

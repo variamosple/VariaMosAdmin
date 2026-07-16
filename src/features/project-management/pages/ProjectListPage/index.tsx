@@ -1,11 +1,11 @@
-import { ProjectFormModal } from "@/UI/Components/ProjectFormModal";
-import { ProjectList } from "@/UI/Components/ProjectList";
-import { ProjectSearchForm } from "@/UI/Components/ProjectsSearchForm";
+import { ProjectFormModal } from "@/features/project-management/components/ProjectFormModal";
+import { ProjectList } from "@/features/project-management/components/ProjectList";
+import { ProjectSearchForm } from "@/features/project-management/components/ProjectsSearchForm";
 import { withPageVisit } from "@variamosple/variamos-components";
 import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import { FC } from "react";
 import { Container } from "react-bootstrap";
-import { useProjectList } from "./useProjectsList";
+import { useProjectList } from "../../hooks/useProjectsList";
 
 const ProjectListPageComponent: FC = () => {
   const {

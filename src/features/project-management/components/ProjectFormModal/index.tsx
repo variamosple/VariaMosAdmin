@@ -1,4 +1,4 @@
-import { Project } from "@/Domain/Project/Project";
+import { Project } from "@/features/project-management/domain/Entity/Project";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";

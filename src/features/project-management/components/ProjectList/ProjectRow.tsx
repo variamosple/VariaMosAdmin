@@ -1,4 +1,4 @@
-import { Project } from "@/Domain/Project/Project";
+import { Project } from "@/features/project-management/domain/Entity/Project";
 import { formatBoolean, formatDate } from "@/shared/constants";
 import { FC, useState } from "react";
 import { Accordion, Button, ButtonGroup } from "react-bootstrap";

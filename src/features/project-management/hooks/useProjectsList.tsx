@@ -1,6 +1,10 @@
-import { deleteProject, queryProjects, updateProject } from "@/DataProviders/ProjectRepository";
-import { Project } from "@/Domain/Project/Project";
-import { ProjectsFilter } from "@/Domain/Project/ProjectFilter";
+import {
+  deleteProject,
+  queryProjects,
+  updateProject,
+} from "@/features/project-management/api/ProjectRepository";
+import { Project } from "@/features/project-management/domain/Entity/Project";
+import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/UI/Context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";

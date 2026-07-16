@@ -1,4 +1,4 @@
-import { Project } from "@/Domain/Project/Project";
+import { Project } from "@/features/project-management/domain/Entity/Project";
 import { PaginationControlsProps } from "@/UI/HOC/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
 import { FC } from "react";
