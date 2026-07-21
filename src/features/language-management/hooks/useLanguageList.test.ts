@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useLanguageList } from "./useLanguageList";
 import * as LanguageRepository from "../api/LanguageRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
@@ -124,5 +124,42 @@ describe("useLanguageList Hook", () => {
         message: "Language deleted successfully",
       }),
     );
+  });
+
+  it("should handle performEditLanguage failure", async () => {
+    const { result } = renderHook(() => useLanguageList());
+    updateLanguageSpy.mockResolvedValueOnce({ errorCode: 500, message: "Edit failed" } as any);
+
+    await act(async () => {
+      await result.current.performEditLanguage({
+        id: 1,
+        name: "Language One Edited",
+        stateAccept: "ACTIVE",
+      });
+    });
+
+    expect(mockPushToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Language edit",
+        message: "Edit failed",
+        variant: "danger",
+      }),
+    );
+    expect(result.current.isEditing).toBe(false);
+  });
+
+  it("should handle query error toast on loadData", async () => {
+    mockLoadData.mockResolvedValueOnce({ errorCode: 500, message: "Query failed" });
+    renderHook(() => useLanguageList());
+
+    await waitFor(() => {
+      expect(mockPushToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Language query error",
+          message: "Query failed",
+          variant: "danger",
+        }),
+      );
+    });
   });
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BugListPage } from "./BugListPage";
 import { server } from "@/shared/tests/mocks/server";
@@ -200,5 +200,116 @@ describe("BugListPage Component", () => {
     expect(
       screen.getByText("This discussion is closed. Please use GitHub to communicate."),
     ).toBeInTheDocument();
+  });
+
+  it("opens approval modal for a local bug, modifies fields and submits successfully", async () => {
+    const user = userEvent.setup();
+    render(<BugListPage />);
+
+    // Wait for initial load
+    expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
+
+    // Switch to Local tab
+    const localTab = screen.getByRole("tab", { name: /local inbox/i });
+    await user.click(localTab);
+
+    // Wait for the local bug's approve button to appear
+    const approveBtns = await screen.findAllByRole("button", { name: /approve/i });
+    await user.click(approveBtns[0]);
+
+    // Verify modal elements are populated
+    expect(screen.getByText("Review and Approve Local Bug")).toBeInTheDocument();
+    expect(screen.getByLabelText(/title \*/i)).toHaveValue("Local Bug");
+    expect(screen.getByLabelText(/description \*/i)).toHaveValue("Desc");
+
+    // Modify fields
+    await user.clear(screen.getByLabelText(/title \*/i));
+    await user.type(screen.getByLabelText(/title \*/i), "Updated Local Bug Title");
+
+    await user.clear(screen.getByLabelText(/description \*/i));
+    await user.type(screen.getByLabelText(/description \*/i), "Updated Desc");
+
+    // Use userEvent.selectOptions for select elements
+    await user.selectOptions(screen.getByLabelText(/target repository/i), "repo-a");
+    await user.selectOptions(screen.getByLabelText(/category \*/i), "cat-1");
+    await user.selectOptions(screen.getByLabelText(/priority \*/i), "high");
+
+    const commentField = screen.getByPlaceholderText(/add details about why this bug is approved/i);
+    await user.type(commentField, "Approval comment");
+
+    // Click submit button
+    const submitBtn = screen.getByRole("button", { name: /approve & send to github/i });
+    await user.click(submitBtn);
+
+    // Modal should close
+    await waitFor(() => {
+      expect(screen.queryByText("Review and Approve Local Bug")).not.toBeInTheDocument();
+    });
+  });
+
+  it("closes the approval modal and resets selected bug state when cancelled", async () => {
+    const user = userEvent.setup();
+    render(<BugListPage />);
+
+    expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
+
+    // Switch to Local tab
+    const localTab = screen.getByRole("tab", { name: /local inbox/i });
+    await user.click(localTab);
+
+    // Wait for the local bug's approve button to appear
+    const approveBtns = await screen.findAllByRole("button", { name: /approve/i });
+    await user.click(approveBtns[0]);
+
+    expect(screen.getByText("Review and Approve Local Bug")).toBeInTheDocument();
+
+    // Click Cancel
+    const cancelBtn = screen.getByRole("button", { name: /cancel/i });
+    await user.click(cancelBtn);
+
+    // Modal should close
+    await waitFor(() => {
+      expect(screen.queryByText("Review and Approve Local Bug")).not.toBeInTheDocument();
+    });
+  });
+
+  it("shows error alert and keeps modal open when API submission fails with 500", async () => {
+    const user = userEvent.setup();
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    server.use(
+      http.post("*/bugs/:bugId/status", () => {
+        return HttpResponse.json(
+          { errorCode: "500", message: "Failed to approve bug" },
+          { status: 500 },
+        );
+      }),
+    );
+
+    render(<BugListPage />);
+    expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
+
+    // Switch to Local tab
+    const localTab = screen.getByRole("tab", { name: /local inbox/i });
+    await user.click(localTab);
+
+    // Wait for the local bug's approve button to appear
+    const approveBtns = await screen.findAllByRole("button", { name: /approve/i });
+    await user.click(approveBtns[0]);
+
+    // Fill required fields to submit
+    await user.selectOptions(screen.getByLabelText(/target repository/i), "repo-a");
+    await user.selectOptions(screen.getByLabelText(/category \*/i), "cat-1");
+
+    // Click submit button
+    const submitBtn = screen.getByRole("button", { name: /approve & send to github/i });
+    await user.click(submitBtn);
+
+    // Error message should show inside modal
+    const modal = screen.getByRole("dialog");
+    expect(await within(modal).findByText("Failed to approve bug")).toBeInTheDocument();
+    expect(screen.getByText("Review and Approve Local Bug")).toBeInTheDocument(); // still open
+
+    consoleSpy.mockRestore();
   });
 });

@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useProjectList } from "./useProjectsList";
 import * as ProjectRepository from "../api/ProjectRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
@@ -107,5 +107,38 @@ describe("useProjectList Hook", () => {
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Project delete", message: "Project deleted successfully" }),
     );
+  });
+
+  it("should handle performEditProject failure", async () => {
+    const { result } = renderHook(() => useProjectList());
+    updateProjectSpy.mockResolvedValueOnce({ errorCode: 500, message: "Edit failed" } as any);
+
+    await act(async () => {
+      await result.current.performEditProject({ id: 1, name: "Project One Edited" });
+    });
+
+    expect(mockPushToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Project edit",
+        message: "Edit failed",
+        variant: "danger",
+      }),
+    );
+    expect(result.current.isEditing).toBe(false);
+  });
+
+  it("should handle query error toast on loadData", async () => {
+    mockLoadData.mockResolvedValueOnce({ errorCode: 500, message: "Query failed" });
+    renderHook(() => useProjectList());
+
+    await waitFor(() => {
+      expect(mockPushToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Project query error",
+          message: "Query failed",
+          variant: "danger",
+        }),
+      );
+    });
   });
 });

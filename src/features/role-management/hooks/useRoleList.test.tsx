@@ -168,4 +168,29 @@ describe("useRoleList Hook", () => {
     expect(deleteRoleId).toBe(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
   });
+
+  it("should handle performEditRole failure", async () => {
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    server.use(
+      http.put(apiTarget("/v1/roles/:roleId"), () => {
+        return HttpResponse.json({ errorCode: "500", message: "Edit failed" }, { status: 500 });
+      }),
+    );
+
+    const { result } = renderHook(() => useRoleList());
+
+    await act(async () => {
+      await result.current.performEditRole({ id: 1, name: "Admin Edit" });
+    });
+
+    expect(mockPushToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Role edit",
+        message: "Edit failed",
+        variant: "danger",
+      }),
+    );
+    expect(result.current.isEditing).toBe(false);
+    consoleSpy.mockRestore();
+  });
 });

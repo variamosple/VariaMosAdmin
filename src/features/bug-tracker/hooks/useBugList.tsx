@@ -203,6 +203,7 @@ export const useBugList = () => {
     );
     if (response.errorCode) {
       setError(response.message || "Failed to approve bug");
+      throw new Error(response.message || "Failed to approve bug");
     } else {
       await fetchBugs();
     }
