@@ -4,10 +4,10 @@ import { Spinner } from "react-bootstrap";
 import ReactDOM from "react-dom/client";
 
 import "./index.css";
-import "./Infrastructure/types/global.d.ts";
+import "./shared/types/global.d.ts";
 import reportWebVitals from "./reportWebVitals";
 
-const App = lazy(() => import("./App"));
+const App = lazy(() => import("./app/App"));
 
 const Root = () => (
   <Suspense

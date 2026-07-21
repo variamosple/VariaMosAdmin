@@ -1,1 +1,3 @@
+npm run typecheck
+npm run check-arch
 npx lint-staged

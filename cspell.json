@@ -20,7 +20,14 @@
     "prettier",
     "commitlint",
     "lintstaged",
-    "variamosple"
+    "variamosple",
+    "alertify",
+    "typeless",
+    "defaultuser",
+    "johndoe",
+    "subcomponents",
+    "signups",
+    "paginators"
   ],
   "ignorePaths": [
     "node_modules/**",

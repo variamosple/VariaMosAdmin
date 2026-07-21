@@ -1,0 +1,67 @@
+import { Credentials } from "@/features/user-management/domain/Entity/Credentials";
+import { useSession } from "@variamosple/variamos-components";
+import { FC } from "react";
+import { Button, Form, Spinner } from "react-bootstrap";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+import "./styles.css";
+
+export interface LoginFormProps {
+  onSignIn: (credentials: Credentials) => void;
+}
+
+export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
+  const { isLoading } = useSession();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Credentials>();
+
+  const onSubmit: SubmitHandler<Credentials> = (data) => {
+    if (!isLoading) {
+      onSignIn(data);
+    }
+  };
+
+  return (
+    <Form className="login-form w-100" data-bs-theme="dark" onSubmit={handleSubmit(onSubmit)}>
+      <Form.Group className="w-100" controlId="email">
+        <Form.Label className="form-label align-self-start m-0">Email Address</Form.Label>
+        <Form.Control
+          type="email"
+          className="form-control"
+          placeholder="name@example.com"
+          {...register("email", { required: "Email is required" })}
+          isInvalid={!!errors.email}
+        />
+        <Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback>
+      </Form.Group>
+
+      <Form.Group className="w-100" controlId="password">
+        <Form.Label className="form-label align-self-start m-0">Password</Form.Label>
+        <Form.Control
+          type="password"
+          className="form-control"
+          placeholder="Type your password"
+          {...register("password", { required: "Password is required" })}
+          isInvalid={!!errors.password}
+        />
+        <Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback>
+      </Form.Group>
+
+      <div className="d-flex justify-content-start w-100 mb-3">
+        <Link
+          to="/forgot-password"
+          className="text-decoration-none text-decoration-underline-hover text-primary-small"
+        >
+          Forgot Password?
+        </Link>
+      </div>
+
+      <Button className="w-100" variant="primary" type="submit" disabled={isLoading}>
+        {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : "Sign in"}
+      </Button>
+    </Form>
+  );
+};

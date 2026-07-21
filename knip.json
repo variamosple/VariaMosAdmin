@@ -1,5 +1,9 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": ["src/index.tsx"],
-  "project": ["src/**/*.ts", "src/**/*.tsx"]
+  "project": ["src/**/*.ts", "src/**/*.tsx"],
+  "ignoreDependencies": [
+    "eslint-config-react-app",
+    "@babel/plugin-proposal-private-property-in-object"
+  ]
 }
