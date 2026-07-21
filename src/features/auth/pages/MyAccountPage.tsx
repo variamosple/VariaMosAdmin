@@ -70,7 +70,7 @@ const MyAccountPageComponent: FC<unknown> = () => {
     return (
       <Container fluid="sm" className="my-2">
         <div className="w-100 text-center my-3">
-          <Spinner animation="border" variant="primary" />
+          <Spinner data-testid="loading-spinner" animation="border" variant="primary" />
         </div>
       </Container>
     );

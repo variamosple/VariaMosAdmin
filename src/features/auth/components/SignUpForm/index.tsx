@@ -96,7 +96,11 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
       </Form.Group>
 
       <Button className="w-100" variant="primary" type="submit" disabled={isLoading}>
-        {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : "Sign up"}
+        {isLoading ? (
+          <Spinner data-testid="loading-spinner" animation="border" variant="light" size="sm" />
+        ) : (
+          "Sign up"
+        )}
       </Button>
     </Form>
   );

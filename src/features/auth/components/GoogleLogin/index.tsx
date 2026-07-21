@@ -41,6 +41,7 @@ export const GoogleLogin: FC<GoogleLoginProps> = ({ text = "signin_with" }) => {
   return (
     <div
       id="g_id_signin"
+      data-testid="google-signin-container"
       className="g_id_signin"
       data-locale="en"
       style={{ colorScheme: "normal" }}

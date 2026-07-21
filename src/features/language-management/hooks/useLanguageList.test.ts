@@ -3,9 +3,6 @@ import { useLanguageList } from "./useLanguageList";
 import * as LanguageRepository from "../api/LanguageRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 
-// Mock dependencies
-jest.mock("../api/LanguageRepository");
-
 const mockPushToast = jest.fn();
 jest.mock("@/shared/context/ToastContext", () => ({
   useToast: () => ({
@@ -45,12 +42,19 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("useLanguageList Hook", () => {
-  const updateLanguageMock = LanguageRepository.updateLanguage as jest.Mock;
-  const deleteLanguageMock = LanguageRepository.deleteLanguage as jest.Mock;
+  let updateLanguageSpy: jest.SpyInstance;
+  let deleteLanguageSpy: jest.SpyInstance;
   const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    updateLanguageSpy = jest
+      .spyOn(LanguageRepository, "updateLanguage")
+      .mockResolvedValue({ errorCode: null } as any);
+    deleteLanguageSpy = jest
+      .spyOn(LanguageRepository, "deleteLanguage")
+      .mockResolvedValue({ errorCode: null } as any);
 
     mockLoadData.mockResolvedValue({ data: [] });
 
@@ -64,6 +68,11 @@ describe("useLanguageList Hook", () => {
     });
   });
 
+  afterEach(() => {
+    updateLanguageSpy.mockRestore();
+    deleteLanguageSpy.mockRestore();
+  });
+
   it("should initialize with values from query hook", () => {
     const { result } = renderHook(() => useLanguageList());
 
@@ -75,7 +84,6 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle performEditLanguage successfully", async () => {
-    updateLanguageMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useLanguageList());
 
     await act(async () => {
@@ -86,7 +94,7 @@ describe("useLanguageList Hook", () => {
       });
     });
 
-    expect(updateLanguageMock).toHaveBeenCalledWith({
+    expect(updateLanguageSpy).toHaveBeenCalledWith({
       id: 1,
       name: "Language One Edited",
       stateAccept: "ACTIVE",
@@ -98,7 +106,6 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle performDeleteLanguage successfully", async () => {
-    deleteLanguageMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useLanguageList());
 
     await act(async () => {
@@ -109,7 +116,7 @@ describe("useLanguageList Hook", () => {
       });
     });
 
-    expect(deleteLanguageMock).toHaveBeenCalledWith(1);
+    expect(deleteLanguageSpy).toHaveBeenCalledWith(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({

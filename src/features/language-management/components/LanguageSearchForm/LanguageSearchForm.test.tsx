@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { LanguageSearchForm } from "./index";
 
 describe("LanguageSearchForm Component", () => {
@@ -24,8 +25,8 @@ describe("LanguageSearchForm Component", () => {
       />,
     );
 
-    expect(screen.getByPlaceholderText("Search by language name")).toBeDefined();
-    expect(screen.getByLabelText("Access level")).toBeDefined();
+    expect(screen.getByPlaceholderText("Search by language name")).toBeInTheDocument();
+    expect(screen.getByLabelText("Access level")).toBeInTheDocument();
   });
 
   it("triggers debounced onSubmit when typing in search field", async () => {
@@ -40,7 +41,8 @@ describe("LanguageSearchForm Component", () => {
     const input = screen.getByPlaceholderText("Search by language name");
 
     // Simulate typing
-    fireEvent.change(input, { target: { value: "my-query" } });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.type(input, "my-query");
 
     // Ensure it hasn't fired immediately
     expect(mockOnSubmit).not.toHaveBeenCalled();
@@ -53,7 +55,7 @@ describe("LanguageSearchForm Component", () => {
     expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: "my-query" }));
   });
 
-  it("resets search filter when trash button is clicked", () => {
+  it("resets search filter when trash button is clicked", async () => {
     render(
       <LanguageSearchForm
         onSubmit={mockOnSubmit}
@@ -63,10 +65,11 @@ describe("LanguageSearchForm Component", () => {
     );
 
     const input = screen.getByPlaceholderText("Search by language name");
-    fireEvent.change(input, { target: { value: "temp" } });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.type(input, "temp");
 
     const clearButton = screen.getByTitle("Clear results");
-    fireEvent.click(clearButton);
+    await user.click(clearButton);
 
     expect(mockOnSearchReset).toHaveBeenCalledTimes(1);
     expect((input as HTMLInputElement).value).toBe("");

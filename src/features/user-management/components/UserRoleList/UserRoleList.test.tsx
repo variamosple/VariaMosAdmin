@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { UserRoleList } from "./index";
 import { Role } from "@/features/role-management/domain/Entity/Role";
 
@@ -32,11 +33,12 @@ describe("UserRoleList Component", () => {
       />,
     );
 
-    expect(screen.getByText("Admin")).toBeDefined();
-    expect(screen.getByText("User")).toBeDefined();
+    expect(screen.getByText("Admin")).toBeInTheDocument();
+    expect(screen.getByText("User")).toBeInTheDocument();
   });
 
-  it("triggers onRoleDelete when the delete button is clicked", () => {
+  it("triggers onRoleDelete when the delete button is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <UserRoleList
         items={mockRoles}
@@ -48,7 +50,7 @@ describe("UserRoleList Component", () => {
     );
 
     const deleteButtons = screen.getAllByTitle("Delete user role");
-    fireEvent.click(deleteButtons[0]);
+    await user.click(deleteButtons[0]);
 
     expect(mockOnRoleDelete).toHaveBeenCalledWith(mockRoles[0]);
   });

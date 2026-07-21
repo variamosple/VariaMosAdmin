@@ -47,11 +47,7 @@ export const createBug = (
     formData.append("file", file);
   }
 
-  return ADMIN_CLIENT.post("/bugs", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  })
+  return ADMIN_CLIENT.post("/bugs", formData)
     .then((response) => response.data)
     .catch((error) => {
       if (axios.isAxiosError(error)) {
@@ -291,11 +287,7 @@ export const restoreLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
 export const uploadAttachment = (bugId: string, file: File): Promise<ResponseModel<any>> => {
   const formData = new FormData();
   formData.append("file", file);
-  return ADMIN_CLIENT.post(`/bugs/${bugId}/attachments`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  })
+  return ADMIN_CLIENT.post(`/bugs/${bugId}/attachments`, formData)
     .then((response) => response.data)
     .catch((error) => {
       if (axios.isAxiosError(error)) {

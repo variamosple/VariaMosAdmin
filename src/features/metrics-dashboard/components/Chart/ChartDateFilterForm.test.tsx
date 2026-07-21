@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { ChartDateFilterForm } from "./ChartDateFilterForm";
 
 const mockFilterSubmit = jest.fn();
@@ -34,14 +35,15 @@ describe("ChartDateFilterForm Component", () => {
     const fromInput = screen.getByLabelText("From") as HTMLInputElement;
     const toInput = screen.getByLabelText("To") as HTMLInputElement;
 
-    fireEvent.change(fromInput, { target: { value: "" } });
-    fireEvent.change(toInput, { target: { value: "" } });
+    const user = userEvent.setup();
+    await user.clear(fromInput);
+    await user.clear(toInput);
 
     const submitBtn = screen.getByText("Apply");
-    fireEvent.click(submitBtn);
+    await user.click(submitBtn);
 
-    expect(await screen.findByText("From date is required")).toBeDefined();
-    expect(await screen.findByText("To date is required")).toBeDefined();
+    expect(await screen.findByText("From date is required")).toBeInTheDocument();
+    expect(await screen.findByText("To date is required")).toBeInTheDocument();
     expect(mockFilterSubmit).not.toHaveBeenCalled();
   });
 
@@ -51,11 +53,14 @@ describe("ChartDateFilterForm Component", () => {
     const fromInput = screen.getByLabelText("From") as HTMLInputElement;
     const toInput = screen.getByLabelText("To") as HTMLInputElement;
 
-    fireEvent.change(fromInput, { target: { value: "2026-06-01" } });
-    fireEvent.change(toInput, { target: { value: "2026-06-15" } });
+    const user = userEvent.setup();
+    await user.clear(fromInput);
+    await user.type(fromInput, "2026-06-01");
+    await user.clear(toInput);
+    await user.type(toInput, "2026-06-15");
 
     const submitBtn = screen.getByText("Apply");
-    fireEvent.click(submitBtn);
+    await user.click(submitBtn);
 
     await waitFor(() => {
       expect(mockFilterSubmit).toHaveBeenCalledWith({

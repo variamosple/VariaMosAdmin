@@ -3,9 +3,6 @@ import { useProjectList } from "./useProjectsList";
 import * as ProjectRepository from "../api/ProjectRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 
-// Mock dependencies
-jest.mock("../api/ProjectRepository");
-
 const mockPushToast = jest.fn();
 jest.mock("@/shared/context/ToastContext", () => ({
   useToast: () => ({
@@ -45,12 +42,19 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("useProjectList Hook", () => {
-  const updateProjectMock = ProjectRepository.updateProject as jest.Mock;
-  const deleteProjectMock = ProjectRepository.deleteProject as jest.Mock;
+  let updateProjectSpy: jest.SpyInstance;
+  let deleteProjectSpy: jest.SpyInstance;
   const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    updateProjectSpy = jest
+      .spyOn(ProjectRepository, "updateProject")
+      .mockResolvedValue({ errorCode: null } as any);
+    deleteProjectSpy = jest
+      .spyOn(ProjectRepository, "deleteProject")
+      .mockResolvedValue({ errorCode: null } as any);
 
     mockLoadData.mockResolvedValue({ data: [] });
 
@@ -64,6 +68,11 @@ describe("useProjectList Hook", () => {
     });
   });
 
+  afterEach(() => {
+    updateProjectSpy.mockRestore();
+    deleteProjectSpy.mockRestore();
+  });
+
   it("should initialize with values from query hook", () => {
     const { result } = renderHook(() => useProjectList());
 
@@ -73,14 +82,13 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle performEditProject successfully", async () => {
-    updateProjectMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useProjectList());
 
     await act(async () => {
       await result.current.performEditProject({ id: 1, name: "Project One Edited" });
     });
 
-    expect(updateProjectMock).toHaveBeenCalledWith({ id: 1, name: "Project One Edited" });
+    expect(updateProjectSpy).toHaveBeenCalledWith({ id: 1, name: "Project One Edited" });
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Project edit", variant: "success" }),
@@ -88,14 +96,13 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle performDeleteProject successfully", async () => {
-    deleteProjectMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useProjectList());
 
     await act(async () => {
       await result.current.performDeleteProject({ id: 1, name: "Project One" });
     });
 
-    expect(deleteProjectMock).toHaveBeenCalledWith(1);
+    expect(deleteProjectSpy).toHaveBeenCalledWith(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Project delete", message: "Project deleted successfully" }),

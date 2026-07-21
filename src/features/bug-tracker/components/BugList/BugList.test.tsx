@@ -1,5 +1,7 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import "@testing-library/jest-dom";
 import { BugList } from "./index";
 import { Bug } from "../../domain/Bug";
 
@@ -40,37 +42,38 @@ describe("BugList Component", () => {
     render(<BugList items={mockBugs} onViewDetails={mockOnViewDetails} activeTab="github" />);
 
     // Check titles are rendered
-    expect(screen.getByText("Test Bug 1")).toBeDefined();
-    expect(screen.getByText("Test Bug 2")).toBeDefined();
+    expect(screen.getByText("Test Bug 1")).toBeInTheDocument();
+    expect(screen.getByText("Test Bug 2")).toBeInTheDocument();
 
     // Check issue number / link is rendered for GitHub bug
-    expect(screen.getByText("#42")).toBeDefined();
+    expect(screen.getByText("#42")).toBeInTheDocument();
 
     // Check priority and status badges
-    expect(screen.getByText("High")).toBeDefined();
-    expect(screen.getByText("Medium")).toBeDefined();
-    expect(screen.getByText("Open")).toBeDefined();
-    expect(screen.getByText("Closed")).toBeDefined();
+    expect(screen.getByText("High")).toBeInTheDocument();
+    expect(screen.getByText("Medium")).toBeInTheDocument();
+    expect(screen.getByText("Open")).toBeInTheDocument();
+    expect(screen.getByText("Closed")).toBeInTheDocument();
   });
 
   it("displays empty status message when there are no bugs", () => {
     render(<BugList items={[]} onViewDetails={mockOnViewDetails} activeTab="github" />);
 
-    expect(screen.getByText("No bugs found.")).toBeDefined();
+    expect(screen.getByText("No bugs found.")).toBeInTheDocument();
   });
 
-  it("calls onViewDetails when clicking the details button", () => {
+  it("calls onViewDetails when clicking the details button", async () => {
     render(<BugList items={mockBugs} onViewDetails={mockOnViewDetails} activeTab="github" />);
 
     const detailsButtons = screen.getAllByRole("button", { name: /details/i });
-    expect(detailsButtons.length).toBe(2);
+    expect(detailsButtons).toHaveLength(2);
 
-    fireEvent.click(detailsButtons[0]);
+    const user = userEvent.setup();
+    await user.click(detailsButtons[0]);
     expect(mockOnViewDetails).toHaveBeenCalledTimes(1);
     expect(mockOnViewDetails).toHaveBeenCalledWith(mockBugs[0]);
   });
 
-  it("renders Approve and Reject buttons and triggers handlers on local tab", () => {
+  it("renders Approve and Reject buttons and triggers handlers on local tab", async () => {
     render(
       <BugList
         items={mockBugs}
@@ -84,19 +87,20 @@ describe("BugList Component", () => {
     const approveButtons = screen.getAllByRole("button", { name: /approve/i });
     const rejectButtons = screen.getAllByRole("button", { name: /reject/i });
 
-    expect(approveButtons.length).toBe(2);
-    expect(rejectButtons.length).toBe(2);
+    expect(approveButtons).toHaveLength(2);
+    expect(rejectButtons).toHaveLength(2);
 
-    fireEvent.click(approveButtons[0]);
+    const user = userEvent.setup();
+    await user.click(approveButtons[0]);
     expect(mockOnApprove).toHaveBeenCalledTimes(1);
     expect(mockOnApprove).toHaveBeenCalledWith(mockBugs[0]);
 
-    fireEvent.click(rejectButtons[1]);
+    await user.click(rejectButtons[1]);
     expect(mockOnReject).toHaveBeenCalledTimes(1);
     expect(mockOnReject).toHaveBeenCalledWith(mockBugs[1].id);
   });
 
-  it("renders Restore button and triggers handler on trash tab", () => {
+  it("renders Restore button and triggers handler on trash tab", async () => {
     render(
       <BugList
         items={mockBugs}
@@ -107,9 +111,10 @@ describe("BugList Component", () => {
     );
 
     const restoreButtons = screen.getAllByRole("button", { name: /restore/i });
-    expect(restoreButtons.length).toBe(2);
+    expect(restoreButtons).toHaveLength(2);
 
-    fireEvent.click(restoreButtons[0]);
+    const user = userEvent.setup();
+    await user.click(restoreButtons[0]);
     expect(mockOnRestore).toHaveBeenCalledTimes(1);
     expect(mockOnRestore).toHaveBeenCalledWith(mockBugs[0].id);
   });

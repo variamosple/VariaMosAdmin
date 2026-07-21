@@ -24,7 +24,10 @@
     "alertify",
     "typeless",
     "defaultuser",
-    "johndoe"
+    "johndoe",
+    "subcomponents",
+    "signups",
+    "paginators"
   ],
   "ignorePaths": [
     "node_modules/**",

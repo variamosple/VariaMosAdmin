@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ConfirmationModal from "./index";
 
 describe("ConfirmationModal Component", () => {
@@ -20,12 +21,13 @@ describe("ConfirmationModal Component", () => {
       />,
     );
 
-    expect(screen.getByText("Test confirmation message")).toBeDefined();
-    expect(screen.getByText("Accept")).toBeDefined();
-    expect(screen.getByText("Cancel")).toBeDefined();
+    expect(screen.getByText("Test confirmation message")).toBeInTheDocument();
+    expect(screen.getByText("Accept")).toBeInTheDocument();
+    expect(screen.getByText("Cancel")).toBeInTheDocument();
   });
 
-  it("should call onConfirm when Accept is clicked", () => {
+  it("should call onConfirm when Accept is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <ConfirmationModal
         show={true}
@@ -35,11 +37,12 @@ describe("ConfirmationModal Component", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("Accept"));
+    await user.click(screen.getByText("Accept"));
     expect(mockOnConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it("should call onCancel when Cancel is clicked", () => {
+  it("should call onCancel when Cancel is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <ConfirmationModal
         show={true}
@@ -49,7 +52,7 @@ describe("ConfirmationModal Component", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("Cancel"));
+    await user.click(screen.getByText("Cancel"));
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
   });
 });

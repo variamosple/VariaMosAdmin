@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { LanguageFormModal } from "./index";
 import { ResponseModel } from "@variamosple/variamos-components";
 
@@ -39,9 +40,9 @@ describe("LanguageFormModal Component", () => {
     );
 
     expect(screen.getAllByText("Edit Language")).toHaveLength(2);
-    expect(screen.getByPlaceholderText("Language name")).toBeDefined();
-    expect(screen.getByDisplayValue("DSL-1")).toBeDefined();
-    expect(screen.getByDisplayValue("Pending")).toBeDefined();
+    expect(screen.getByPlaceholderText("Language name")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("DSL-1")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Pending")).toBeInTheDocument();
   });
 
   it("submits the form and calls onLanguageSubmit with inputs when valid", async () => {
@@ -58,10 +59,11 @@ describe("LanguageFormModal Component", () => {
     );
 
     const nameInput = screen.getByPlaceholderText("Language name");
-    fireEvent.change(nameInput, { target: { value: "NewDSL" } });
+    const user = userEvent.setup();
+    await user.type(nameInput, "NewDSL");
 
     const submitButton = screen.getByText("Edit Language");
-    fireEvent.click(submitButton);
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith(
@@ -74,6 +76,7 @@ describe("LanguageFormModal Component", () => {
   });
 
   it("triggers validation message when name is empty", async () => {
+    const user = userEvent.setup();
     render(
       <LanguageFormModal
         modalTitle="Create Language"
@@ -85,9 +88,9 @@ describe("LanguageFormModal Component", () => {
     );
 
     const submitButton = screen.getByText("Edit Language");
-    fireEvent.click(submitButton);
+    await user.click(submitButton);
 
-    expect(await screen.findByText("Language name is required")).toBeDefined();
+    expect(await screen.findByText("Language name is required")).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 });

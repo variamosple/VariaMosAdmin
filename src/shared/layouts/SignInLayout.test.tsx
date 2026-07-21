@@ -50,8 +50,8 @@ describe("SignInLayout", () => {
       </SignInLayout>,
     );
 
-    expect(screen.getByTestId("test-child")).toBeDefined();
-    expect(screen.getByTestId("about-component")).toBeDefined();
+    expect(screen.getByTestId("test-child")).toBeInTheDocument();
+    expect(screen.getByTestId("about-component")).toBeInTheDocument();
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 

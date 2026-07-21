@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { PermissionList } from "./index";
 import { Permission } from "../../domain/Entity/Permission";
 
@@ -36,13 +37,14 @@ describe("PermissionList Component", () => {
     );
 
     // Check permissions are rendered
-    expect(screen.getByText("read:users")).toBeDefined();
-    expect(screen.getByText("write:users")).toBeDefined();
-    expect(screen.getByText("1")).toBeDefined();
-    expect(screen.getByText("2")).toBeDefined();
+    expect(screen.getByText("read:users")).toBeInTheDocument();
+    expect(screen.getByText("write:users")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
   });
 
-  it("triggers onPermissionEdit when the edit button is clicked", () => {
+  it("triggers onPermissionEdit when the edit button is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <PermissionList
         items={mockPermissions}
@@ -56,13 +58,14 @@ describe("PermissionList Component", () => {
 
     // Find and click the edit button for the first permission
     const editButtons = screen.getAllByTitle("Edit permission");
-    fireEvent.click(editButtons[0]);
+    await user.click(editButtons[0]);
 
     expect(mockOnPermissionEdit).toHaveBeenCalledTimes(1);
     expect(mockOnPermissionEdit).toHaveBeenCalledWith(mockPermissions[0]);
   });
 
-  it("triggers onPermissionDelete when the delete button is clicked", () => {
+  it("triggers onPermissionDelete when the delete button is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <PermissionList
         items={mockPermissions}
@@ -76,7 +79,7 @@ describe("PermissionList Component", () => {
 
     // Find and click the delete button for the second permission
     const deleteButtons = screen.getAllByTitle("Delete permission");
-    fireEvent.click(deleteButtons[1]);
+    await user.click(deleteButtons[1]);
 
     expect(mockOnPermissionDelete).toHaveBeenCalledTimes(1);
     expect(mockOnPermissionDelete).toHaveBeenCalledWith(mockPermissions[1]);

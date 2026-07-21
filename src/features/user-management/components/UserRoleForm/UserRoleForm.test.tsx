@@ -1,5 +1,5 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { UserRoleForm } from "./index";
 
 jest.mock("@/shared/hooks/useIntersectionObserver", () => {
@@ -87,18 +87,19 @@ describe("UserRoleForm Component", () => {
     render(<UserRoleForm onUserRoleSubmit={mockOnUserRoleSubmit} isLoading={false} />);
 
     const select = await screen.findByTestId("infinite-select");
-    expect(select).toBeDefined();
-    expect(screen.getByText("Add role")).toBeDefined();
+    expect(select).toBeInTheDocument();
+    expect(screen.getByText("Add role")).toBeInTheDocument();
   });
 
   it("submits the selected role when form is submitted", async () => {
     render(<UserRoleForm onUserRoleSubmit={mockOnUserRoleSubmit} isLoading={false} />);
 
     const select = await screen.findByTestId("infinite-select");
-    fireEvent.change(select, { target: { value: "1" } });
+    const user = userEvent.setup();
+    await user.selectOptions(select, "1");
 
     const submitButton = screen.getByRole("button", { name: "Add role" });
-    fireEvent.click(submitButton);
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(mockOnUserRoleSubmit).toHaveBeenCalledWith(expect.objectContaining({ roleId: 1 }));

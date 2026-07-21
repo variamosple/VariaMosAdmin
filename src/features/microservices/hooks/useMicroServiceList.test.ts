@@ -3,9 +3,6 @@ import { useMicroServiceList } from "./useMicroServiceList";
 import * as MicroServiceRepository from "../api/MicroServiceRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 
-// Mock dependencies
-jest.mock("../api/MicroServiceRepository");
-
 const mockLoadData = jest.fn();
 const mockOnPageChange = jest.fn();
 
@@ -38,13 +35,23 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("useMicroServiceList Hook", () => {
-  const startMicroserviceMock = MicroServiceRepository.startMicroservice as jest.Mock;
-  const restartMicroserviceMock = MicroServiceRepository.restartMicroservice as jest.Mock;
-  const stopMicroserviceMock = MicroServiceRepository.stopMicroservice as jest.Mock;
+  let startMicroserviceSpy: jest.SpyInstance;
+  let restartMicroserviceSpy: jest.SpyInstance;
+  let stopMicroserviceSpy: jest.SpyInstance;
   const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    startMicroserviceSpy = jest
+      .spyOn(MicroServiceRepository, "startMicroservice")
+      .mockResolvedValue({ errorCode: null } as any);
+    restartMicroserviceSpy = jest
+      .spyOn(MicroServiceRepository, "restartMicroservice")
+      .mockResolvedValue({ errorCode: null } as any);
+    stopMicroserviceSpy = jest
+      .spyOn(MicroServiceRepository, "stopMicroservice")
+      .mockResolvedValue({ errorCode: null } as any);
 
     mockLoadData.mockResolvedValue({ data: [] });
 
@@ -67,6 +74,12 @@ describe("useMicroServiceList Hook", () => {
     });
   });
 
+  afterEach(() => {
+    startMicroserviceSpy.mockRestore();
+    restartMicroserviceSpy.mockRestore();
+    stopMicroserviceSpy.mockRestore();
+  });
+
   it("should initialize with values from query hook", () => {
     const { result } = renderHook(() => useMicroServiceList());
 
@@ -84,7 +97,6 @@ describe("useMicroServiceList Hook", () => {
   });
 
   it("should handle startMicroservice successfully", async () => {
-    startMicroserviceMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useMicroServiceList());
 
     await act(async () => {
@@ -98,12 +110,11 @@ describe("useMicroServiceList Hook", () => {
       });
     });
 
-    expect(startMicroserviceMock).toHaveBeenCalledWith("1");
+    expect(startMicroserviceSpy).toHaveBeenCalledWith("1");
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
   });
 
   it("should handle restartMicroservice successfully", async () => {
-    restartMicroserviceMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useMicroServiceList());
 
     await act(async () => {
@@ -117,12 +128,11 @@ describe("useMicroServiceList Hook", () => {
       });
     });
 
-    expect(restartMicroserviceMock).toHaveBeenCalledWith("1");
+    expect(restartMicroserviceSpy).toHaveBeenCalledWith("1");
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
   });
 
   it("should handle stopMicroservice successfully", async () => {
-    stopMicroserviceMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useMicroServiceList());
 
     await act(async () => {
@@ -136,7 +146,7 @@ describe("useMicroServiceList Hook", () => {
       });
     });
 
-    expect(stopMicroserviceMock).toHaveBeenCalledWith("1");
+    expect(stopMicroserviceSpy).toHaveBeenCalledWith("1");
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
   });
 });

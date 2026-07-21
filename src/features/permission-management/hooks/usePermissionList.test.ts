@@ -1,10 +1,14 @@
 import { renderHook, act } from "@testing-library/react";
 import { usePermissionList } from "./usePermissionList";
-import * as PermissionRepository from "../api/PermissionRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
+import { server } from "@/shared/tests/mocks/server";
+import { http, HttpResponse } from "msw";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
-// Mock the dependencies
-jest.mock("../api/PermissionRepository");
+const apiTarget = (path: string) => {
+  const base = AppConfig.ADMIN_API_URL || "";
+  return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+};
 
 const mockPushToast = jest.fn();
 jest.mock("@/shared/context/ToastContext", () => ({
@@ -45,9 +49,6 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("usePermissionList Hook", () => {
-  const createPermissionMock = PermissionRepository.createPermission as jest.Mock;
-  const updatePermissionMock = PermissionRepository.updatePermission as jest.Mock;
-  const deletePermissionMock = PermissionRepository.deletePermission as jest.Mock;
   const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
 
   beforeEach(() => {
@@ -75,14 +76,21 @@ describe("usePermissionList Hook", () => {
   });
 
   it("should handle onPermissionCreate successfully", async () => {
-    createPermissionMock.mockResolvedValue({ errorCode: null });
+    let createPayload: any = null;
+    server.use(
+      http.post(apiTarget("/v1/permissions"), async ({ request }) => {
+        createPayload = await request.json();
+        return HttpResponse.json({ errorCode: null });
+      }),
+    );
+
     const { result } = renderHook(() => usePermissionList());
 
     await act(async () => {
       await result.current.onPermissionCreate({ name: "write:roles" });
     });
 
-    expect(createPermissionMock).toHaveBeenCalledWith({ name: "write:roles" });
+    expect(createPayload).toEqual({ name: "write:roles" });
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Permission create", variant: "success" }),
@@ -90,7 +98,12 @@ describe("usePermissionList Hook", () => {
   });
 
   it("should handle onPermissionCreate error", async () => {
-    createPermissionMock.mockResolvedValue({ errorCode: 500, message: "Create Failed" });
+    server.use(
+      http.post(apiTarget("/v1/permissions"), () => {
+        return HttpResponse.json({ errorCode: 500, message: "Create Failed" });
+      }),
+    );
+
     const { result } = renderHook(() => usePermissionList());
 
     await act(async () => {
@@ -107,14 +120,24 @@ describe("usePermissionList Hook", () => {
   });
 
   it("should handle performEditPermission successfully", async () => {
-    updatePermissionMock.mockResolvedValue({ errorCode: null });
+    let editPayload: any = null;
+    let editPermissionId: string | null = null;
+    server.use(
+      http.put(apiTarget("/v1/permissions/:id"), async ({ request, params }) => {
+        editPermissionId = params.id as string;
+        editPayload = await request.json();
+        return HttpResponse.json({ errorCode: null });
+      }),
+    );
+
     const { result } = renderHook(() => usePermissionList());
 
     await act(async () => {
       await result.current.performEditPermission({ id: 1, name: "read:users-edited" });
     });
 
-    expect(updatePermissionMock).toHaveBeenCalledWith({ id: 1, name: "read:users-edited" });
+    expect(editPermissionId).toBe("1");
+    expect(editPayload).toEqual({ id: 1, name: "read:users-edited" });
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Permission edit", variant: "success" }),
@@ -122,14 +145,21 @@ describe("usePermissionList Hook", () => {
   });
 
   it("should handle performDeletePermission successfully", async () => {
-    deletePermissionMock.mockResolvedValue({ errorCode: null });
+    let deletePermissionId: string | null = null;
+    server.use(
+      http.delete(apiTarget("/v1/permissions/:id"), ({ params }) => {
+        deletePermissionId = params.id as string;
+        return HttpResponse.json({ errorCode: null });
+      }),
+    );
+
     const { result } = renderHook(() => usePermissionList());
 
     await act(async () => {
       await result.current.performDeletePermission({ id: 1, name: "read:users" });
     });
 
-    expect(deletePermissionMock).toHaveBeenCalledWith(1);
+    expect(deletePermissionId).toBe("1");
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({

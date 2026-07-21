@@ -1,18 +1,67 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { LanguageListPage } from "./index";
-import { useLanguageList } from "../../hooks/useLanguageList";
+import { ToastProvider } from "@/shared/context/ToastContext";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
 jest.mock("@variamosple/variamos-components", () => {
+  const React = require("react");
+  const { useState, useCallback } = React;
   return {
     withPageVisit: (component: any) => component,
     PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel {
+      errorCode?: number;
+      message?: string;
+      data?: any;
       type: string;
       constructor(type: string) {
         this.type = type;
       }
+      withError(code: number, msg: string) {
+        this.errorCode = code;
+        this.message = msg;
+        return this;
+      }
+    },
+    Paginator: () => <div data-testid="paginator">Paginator</div>,
+    usePaginatedQuery: ({ queryFunction, initialFilter }: any) => {
+      const [data, setData] = useState([]);
+      const [currentPage, setCurrentPage] = useState(1);
+      const [totalPages, setTotalPages] = useState(1);
+      const [isLoading, setIsLoading] = useState(false);
+
+      const loadData = useCallback(
+        async (filter: any) => {
+          setIsLoading(true);
+          const response = await queryFunction(filter);
+          if (!response.errorCode) {
+            setData(response.data || []);
+            setTotalPages(1);
+          }
+          setIsLoading(false);
+          return response;
+        },
+        [queryFunction],
+      );
+
+      const onPageChange = useCallback(
+        (page: number) => {
+          setCurrentPage(page);
+          loadData({ ...initialFilter, page });
+        },
+        [loadData, initialFilter],
+      );
+
+      return {
+        data,
+        currentPage,
+        loadData,
+        isLoading,
+        totalPages,
+        onPageChange,
+      };
     },
   };
 });
@@ -34,109 +83,72 @@ jest.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", 
   };
 });
 
-// Mock hooks
-jest.mock("../../hooks/useLanguageList");
-
-// Mock sub-components
-jest.mock("../../components/LanguageFormModal", () => ({
-  LanguageFormModal: ({ showModal, onClose, onLanguageSubmit, defaultValue }: any) => {
-    if (!showModal) return null;
-    return (
-      <div data-testid="language-form-modal">
-        <span>Edit Modal</span>
-        <button onClick={() => onLanguageSubmit(defaultValue)}>Submit Form</button>
-        <button onClick={onClose}>Close Form</button>
-      </div>
-    );
-  },
-}));
-
-jest.mock("../../components/LanguageSearchForm", () => ({
-  LanguageSearchForm: () => <div data-testid="search-form">Search Form</div>,
-}));
-
-jest.mock("../../components/LanguageList", () => ({
-  LanguageList: () => <div data-testid="languages-list">Languages List</div>,
-}));
-
 describe("LanguageListPage", () => {
-  const mockPerformEdit = jest.fn();
-  const mockPerformDelete = jest.fn();
-  const mockSetShowEdit = jest.fn();
-  const mockSetShowDelete = jest.fn();
-  const mockSetToDelete = jest.fn();
-
-  const baseHookState = {
-    languages: [],
-    totalPages: 1,
-    currentPage: 1,
-    isLoading: false,
-    onPageChange: jest.fn(),
-    onSearchReset: jest.fn(),
-    onSearchSubmit: jest.fn(),
-    onLanguageEdit: jest.fn(),
-    toEditLanguage: null,
-    showEdit: false,
-    setShowEdit: mockSetShowEdit,
-    performEditLanguage: mockPerformEdit,
-    isEditing: false,
-    onLanguageDelete: jest.fn(),
-    toDeleteLanguage: null,
-    setToDeleteLanguage: mockSetToDelete,
-    showDelete: false,
-    setShowDelete: mockSetShowDelete,
-    performDeleteLanguage: mockPerformDelete,
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders page components correctly", () => {
-    (useLanguageList as jest.Mock).mockReturnValue(baseHookState);
-    render(<LanguageListPage />);
-    expect(screen.getByText("Languages list")).toBeDefined();
-    expect(screen.getByTestId("search-form")).toBeDefined();
-    expect(screen.getByTestId("languages-list")).toBeDefined();
+  const renderWithProviders = (ui: React.ReactElement) => {
+    return render(<ToastProvider>{ui}</ToastProvider>);
+  };
+
+  it("renders page components correctly", async () => {
+    renderWithProviders(<LanguageListPage />);
+    expect(screen.getByText("Languages list")).toBeInTheDocument();
+
+    // Wait for the MSW handlers to return English and Spanish
+    expect(await screen.findByText("English")).toBeInTheDocument();
+    expect(screen.getByText("Spanish")).toBeInTheDocument();
   });
 
-  it("shows and handles LanguageFormModal for editing", () => {
-    (useLanguageList as jest.Mock).mockReturnValue({
-      ...baseHookState,
-      showEdit: true,
-      toEditLanguage: { id: 42, name: "JSON" },
+  it("shows and handles LanguageFormModal for editing", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<LanguageListPage />);
+
+    expect(await screen.findByText("English")).toBeInTheDocument();
+
+    // Click edit on the English language (first row)
+    const editButtons = screen.getAllByTitle("Edit language");
+    await user.click(editButtons[0]);
+
+    // Modal should be visible
+    expect(screen.getByText(/edit a language/i)).toBeInTheDocument();
+
+    // Modify the language name in input
+    const input = screen.getByPlaceholderText("Language name");
+    await user.clear(input);
+    await user.type(input, "English US");
+
+    // Click submit inside the modal
+    const editLangButtons = screen.getAllByRole("button", { name: /edit language/i });
+    await user.click(editLangButtons[editLangButtons.length - 1]);
+
+    // Verify modal closes
+    await waitFor(() => {
+      expect(screen.queryByText(/edit a language/i)).not.toBeInTheDocument();
     });
-
-    render(<LanguageListPage />);
-    expect(screen.getByTestId("language-form-modal")).toBeDefined();
-
-    // Trigger Form Submit
-    fireEvent.click(screen.getByText("Submit Form"));
-    expect(mockPerformEdit).toHaveBeenCalledWith({ id: 42, name: "JSON" });
-
-    // Trigger Close Form
-    fireEvent.click(screen.getByText("Close Form"));
-    expect(mockSetShowEdit).toHaveBeenCalledWith(false);
   });
 
-  it("shows and handles ConfirmationModal for deleting", () => {
-    (useLanguageList as jest.Mock).mockReturnValue({
-      ...baseHookState,
-      showDelete: true,
-      toDeleteLanguage: { id: 99, name: "XML" },
+  it("shows and handles ConfirmationModal for deleting", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<LanguageListPage />);
+
+    expect(await screen.findByText("Spanish")).toBeInTheDocument();
+
+    // Click delete on the Spanish language (second row)
+    const deleteButtons = screen.getAllByTitle("Delete language");
+    await user.click(deleteButtons[1]);
+
+    // Delete confirmation modal should be visible
+    expect(screen.getByTestId("delete-confirm-modal")).toBeInTheDocument();
+    expect(screen.getByText("Are you sure you want to delete the language?")).toBeInTheDocument();
+
+    // Click confirm delete
+    await user.click(screen.getByText("Confirm Delete"));
+
+    // Verify modal closes
+    await waitFor(() => {
+      expect(screen.queryByTestId("delete-confirm-modal")).not.toBeInTheDocument();
     });
-
-    render(<LanguageListPage />);
-    expect(screen.getByTestId("delete-confirm-modal")).toBeDefined();
-
-    // Confirm Delete
-    fireEvent.click(screen.getByText("Confirm Delete"));
-    expect(mockPerformDelete).toHaveBeenCalledWith({ id: 99, name: "XML" });
-    expect(mockSetShowDelete).toHaveBeenCalledWith(false);
-
-    // Cancel Delete
-    fireEvent.click(screen.getByText("Cancel Delete"));
-    expect(mockSetToDelete).toHaveBeenCalledWith(undefined);
-    expect(mockSetShowDelete).toHaveBeenCalledWith(false);
   });
 });

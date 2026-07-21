@@ -1,7 +1,8 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MetricsPage } from "./MetricsPage";
-import { queryMetrics } from "../api/MetricsRepository";
+import { server } from "@/shared/tests/mocks/server";
+import { http, HttpResponse } from "msw";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
 jest.mock("@variamosple/variamos-components", () => {
@@ -10,17 +11,19 @@ jest.mock("@variamosple/variamos-components", () => {
     PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel {
       type: string;
+      errorCode?: number;
+      message?: string;
       constructor(type: string) {
         this.type = type;
+      }
+      withError(code: number, msg: string) {
+        this.errorCode = code;
+        this.message = msg;
+        return this;
       }
     },
   };
 });
-
-// Mock queryMetrics repository call
-jest.mock("../api/MetricsRepository", () => ({
-  queryMetrics: jest.fn(),
-}));
 
 // Mock react-bootstrap Spinner to have a reliable test ID
 jest.mock("react-bootstrap", () => {
@@ -37,38 +40,31 @@ jest.mock("../components/Chart", () => ({
 }));
 
 describe("MetricsPage", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it("renders the spinner while metrics are loading, then displays chart components", async () => {
-    let resolvePromise: any;
-    const promise = new Promise((resolve) => {
-      resolvePromise = resolve;
-    });
-    (queryMetrics as jest.Mock).mockReturnValue(promise);
+    server.use(
+      http.get("*/v1/metrics", () => {
+        return HttpResponse.json({
+          data: [
+            { title: "Metric One", type: "line" },
+            { title: "Metric Two", type: "geo" },
+          ],
+        });
+      }),
+    );
 
     render(<MetricsPage />);
 
     // Assert spinner is shown (uses findByTestId to wait for useEffect state update to flush)
     const spinner = await screen.findByTestId("loading-spinner");
-    expect(spinner).toBeDefined();
-
-    // Resolve API promise
-    resolvePromise({
-      data: [
-        { title: "Metric One", type: "line" },
-        { title: "Metric Two", type: "geo" },
-      ],
-    });
+    expect(spinner).toBeInTheDocument();
 
     // Assert spinner disappears and charts render
     await waitFor(() => {
       expect(screen.queryByTestId("loading-spinner")).toBeNull();
     });
 
-    expect(screen.getByText("Metric One")).toBeDefined();
-    expect(screen.getByText("Metric Two")).toBeDefined();
+    expect(screen.getByText("Metric One")).toBeInTheDocument();
+    expect(screen.getByText("Metric Two")).toBeInTheDocument();
     expect(screen.getAllByTestId("chart-comp")).toHaveLength(2);
   });
 });

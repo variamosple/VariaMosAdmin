@@ -48,7 +48,6 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
       }
 
       socket.onopen = () => {
-        console.log("WebSocket connection established");
         socket.send(JSON.stringify({ microserviceId: microService.id }));
       };
 
@@ -58,7 +57,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
       };
 
       socket.onclose = (event) => {
-        console.log("WebSocket connection closed:", event.code, event.reason);
+        // WebSocket connection closed
       };
 
       socket.onerror = (error) => {

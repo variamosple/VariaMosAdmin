@@ -1,7 +1,10 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MicroServiceList } from "./index";
 import { MicroService } from "../../domain/Entity/MicroService";
+
+import * as MicroServiceRepository from "../../api/MicroServiceRepository";
 
 const mockMicroservices: MicroService[] = [
   { id: "1", names: ["micro-1"], state: "exited", status: "down", created: new Date(), labels: {} },
@@ -12,6 +15,20 @@ const mockMicroservices: MicroService[] = [
 jest.mock("@variamosple/variamos-components", () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
+    ResponseModel: class ResponseModel {
+      errorCode?: number;
+      message?: string;
+      data?: any;
+      type: string;
+      constructor(type: string) {
+        this.type = type;
+      }
+      withError(code: number, msg: string) {
+        this.errorCode = code;
+        this.message = msg;
+        return this;
+      }
+    },
   };
 });
 
@@ -22,24 +39,21 @@ jest.mock("@patternfly/react-log-viewer", () => {
   };
 });
 
-// Mock watchMicroserviceLogs
-jest.mock("../../api/MicroServiceRepository", () => {
-  return {
-    watchMicroserviceLogs: () => {
-      return {
-        close: jest.fn(),
-      };
-    },
-  };
-});
-
 describe("MicroServiceList Component", () => {
   const mockOnStart = jest.fn();
   const mockOnRestart = jest.fn();
   const mockOnStop = jest.fn();
+  let watchLogsSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    watchLogsSpy = jest.spyOn(MicroServiceRepository, "watchMicroserviceLogs").mockReturnValue({
+      close: jest.fn(),
+    } as any);
+  });
+
+  afterEach(() => {
+    watchLogsSpy.mockRestore();
   });
 
   it("renders a list of microservices correctly", () => {
@@ -55,11 +69,12 @@ describe("MicroServiceList Component", () => {
       />,
     );
 
-    expect(screen.getByText("micro-1")).toBeDefined();
-    expect(screen.getByText("micro-2")).toBeDefined();
+    expect(screen.getByText("micro-1")).toBeInTheDocument();
+    expect(screen.getByText("micro-2")).toBeInTheDocument();
   });
 
-  it("triggers start/restart/stop calls appropriately", () => {
+  it("triggers start/restart/stop calls appropriately", async () => {
+    const user = userEvent.setup();
     render(
       <MicroServiceList
         items={mockMicroservices}
@@ -74,16 +89,16 @@ describe("MicroServiceList Component", () => {
 
     // micro-1 is exited, so it has a start button
     const startButton = screen.getByTitle("Start Microservice");
-    fireEvent.click(startButton);
+    await user.click(startButton);
     expect(mockOnStart).toHaveBeenCalledWith(mockMicroservices[0]);
 
     // micro-2 is running, so it has restart and stop buttons
     const restartButton = screen.getByTitle("Restart Microservice");
-    fireEvent.click(restartButton);
+    await user.click(restartButton);
     expect(mockOnRestart).toHaveBeenCalledWith(mockMicroservices[1]);
 
     const stopButton = screen.getByTitle("Stop Microservice");
-    fireEvent.click(stopButton);
+    await user.click(stopButton);
     expect(mockOnStop).toHaveBeenCalledWith(mockMicroservices[1]);
   });
 });

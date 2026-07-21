@@ -3,9 +3,6 @@ import { useModelList } from "./useModelList";
 import * as ModelRepository from "../api/ModelRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 
-// Mock dependencies
-jest.mock("../api/ModelRepository");
-
 const mockPushToast = jest.fn();
 jest.mock("@/shared/context/ToastContext", () => ({
   useToast: () => ({
@@ -45,12 +42,19 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("useModelList Hook", () => {
-  const updateModelMock = ModelRepository.updateModel as jest.Mock;
-  const deleteModelMock = ModelRepository.deleteModel as jest.Mock;
+  let updateModelSpy: jest.SpyInstance;
+  let deleteModelSpy: jest.SpyInstance;
   const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    updateModelSpy = jest
+      .spyOn(ModelRepository, "updateModel")
+      .mockResolvedValue({ errorCode: null } as any);
+    deleteModelSpy = jest
+      .spyOn(ModelRepository, "deleteModel")
+      .mockResolvedValue({ errorCode: null } as any);
 
     mockLoadData.mockResolvedValue({ data: [] });
 
@@ -64,6 +68,11 @@ describe("useModelList Hook", () => {
     });
   });
 
+  afterEach(() => {
+    updateModelSpy.mockRestore();
+    deleteModelSpy.mockRestore();
+  });
+
   it("should initialize with values from query hook", () => {
     const { result } = renderHook(() => useModelList());
 
@@ -73,14 +82,13 @@ describe("useModelList Hook", () => {
   });
 
   it("should handle performEditModel successfully", async () => {
-    updateModelMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useModelList());
 
     await act(async () => {
       await result.current.performEditModel({ id: "1", projectId: "p1", name: "Model One Edited" });
     });
 
-    expect(updateModelMock).toHaveBeenCalledWith({
+    expect(updateModelSpy).toHaveBeenCalledWith({
       id: "1",
       projectId: "p1",
       name: "Model One Edited",
@@ -92,14 +100,13 @@ describe("useModelList Hook", () => {
   });
 
   it("should handle performDeleteModel successfully", async () => {
-    deleteModelMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useModelList());
 
     await act(async () => {
       await result.current.performDeleteModel({ id: "1", projectId: "p1", name: "Model One" });
     });
 
-    expect(deleteModelMock).toHaveBeenCalledWith("1");
+    expect(deleteModelSpy).toHaveBeenCalledWith("1");
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Model delete", message: "Model deleted successfully" }),

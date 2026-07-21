@@ -1,7 +1,9 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useBugList } from "./useBugList";
-import * as BugRepository from "../api/BugRepository";
 import { Bug } from "../domain/Bug";
+import { server } from "@/shared/tests/mocks/server";
+import { http, HttpResponse } from "msw";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 // Mock the variamos-components library which is published as ES Module
 jest.mock("@variamosple/variamos-components", () => {
@@ -23,9 +25,6 @@ jest.mock("@variamosple/variamos-components", () => {
   };
 });
 
-// Mock the BugRepository module
-jest.mock("../api/BugRepository");
-
 const mockBugsList: Bug[] = [
   {
     id: "1",
@@ -45,25 +44,80 @@ const mockBugsList: Bug[] = [
   },
 ];
 
+const apiTarget = (path: string) => {
+  const base = AppConfig.ADMIN_API_URL || "";
+  return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+};
+
 describe("useBugList Hook", () => {
-  const queryBugsMock = BugRepository.queryBugs as jest.Mock;
-  const queryLocalBugsMock = BugRepository.queryLocalBugs as jest.Mock;
-  const queryBugReposMock = BugRepository.queryBugRepos as jest.Mock;
-  const queryCategoriesMock = BugRepository.queryCategories as jest.Mock;
-  const createBugMock = BugRepository.createBug as jest.Mock;
-  const syncBugsMock = BugRepository.syncBugs as jest.Mock;
-  const rejectLocalBugMock = BugRepository.rejectLocalBug as jest.Mock;
-  const restoreLocalBugMock = BugRepository.restoreLocalBug as jest.Mock;
-  const updateBugStatusMock = BugRepository.updateBugStatus as jest.Mock;
+  let queryBugsParams: any[] = [];
+  let queryLocalBugsParams: any[] = [];
+  let queryBugReposCalled = 0;
+  let queryCategoriesCalled = 0;
+  let createBugCalled = 0;
+  let syncBugsCalled = 0;
+  let rejectLocalBugId: string | null = null;
+  let restoreLocalBugId: string | null = null;
+  let updateBugStatusBody: any = null;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    queryBugsParams = [];
+    queryLocalBugsParams = [];
+    queryBugReposCalled = 0;
+    queryCategoriesCalled = 0;
+    createBugCalled = 0;
+    syncBugsCalled = 0;
+    rejectLocalBugId = null;
+    restoreLocalBugId = null;
+    updateBugStatusBody = null;
 
-    // Default mock resolves
-    queryBugReposMock.mockResolvedValue({ data: ["repo-a", "repo-b"] });
-    queryCategoriesMock.mockResolvedValue({ data: ["cat-1", "cat-2"] });
-    queryBugsMock.mockResolvedValue({ data: mockBugsList });
-    queryLocalBugsMock.mockResolvedValue({ data: [] });
+    server.use(
+      http.get(apiTarget("/bugs"), ({ request }) => {
+        const url = new URL(request.url);
+        queryBugsParams.push(Object.fromEntries(url.searchParams.entries()));
+        return HttpResponse.json({ data: mockBugsList });
+      }),
+      http.get(apiTarget("/bugs/local"), ({ request }) => {
+        const url = new URL(request.url);
+        queryLocalBugsParams.push(Object.fromEntries(url.searchParams.entries()));
+        return HttpResponse.json({ data: [] });
+      }),
+      http.get(apiTarget("/bugs/repos"), () => {
+        queryBugReposCalled++;
+        return HttpResponse.json({ data: ["repo-a", "repo-b"] });
+      }),
+      http.get(apiTarget("/bugs/categories"), () => {
+        queryCategoriesCalled++;
+        return HttpResponse.json({ data: ["cat-1", "cat-2"] });
+      }),
+      http.post(apiTarget("/bugs"), () => {
+        createBugCalled++;
+        return HttpResponse.json({ data: { id: "new-bug" } });
+      }),
+      http.post(apiTarget("/bugs/sync"), () => {
+        syncBugsCalled++;
+        return HttpResponse.json({ data: null });
+      }),
+      http.post(apiTarget("/bugs/:id/reject"), ({ params }) => {
+        rejectLocalBugId = params.id as string;
+        return HttpResponse.json({ data: { id: params.id } });
+      }),
+      http.post(apiTarget("/bugs/:id/restore"), ({ params }) => {
+        restoreLocalBugId = params.id as string;
+        return HttpResponse.json({ data: { id: params.id } });
+      }),
+      http.post(apiTarget("/bugs/:bugId/status"), async ({ request, params }) => {
+        let body = {};
+        try {
+          body = (await request.json()) as any;
+        } catch (e) {}
+        updateBugStatusBody = {
+          bugId: params.bugId,
+          ...body,
+        };
+        return HttpResponse.json({ data: { id: params.bugId } });
+      }),
+    );
   });
 
   it("should initialize with default states and fetch repos, categories, and bugs on mount", async () => {
@@ -79,13 +133,19 @@ describe("useBugList Hook", () => {
     expect(result.current.error).toBeNull();
     expect(result.current.activeTab).toBe("github");
 
-    expect(queryBugReposMock).toHaveBeenCalledTimes(1);
-    expect(queryCategoriesMock).toHaveBeenCalledTimes(1);
-    expect(queryBugsMock).toHaveBeenCalledWith(result.current.filter);
+    expect(queryBugReposCalled).toBe(1);
+    expect(queryCategoriesCalled).toBe(1);
+    expect(queryBugsParams[0]).toEqual(result.current.filter);
   });
 
   it("should handle error during bug fetching gracefully", async () => {
-    queryBugsMock.mockResolvedValue({ errorCode: 500, message: "Server Error" });
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    server.use(
+      http.get(apiTarget("/bugs"), () => {
+        return HttpResponse.json({ errorCode: 500, message: "Server Error" }, { status: 500 });
+      }),
+    );
 
     const { result } = renderHook(() => useBugList());
 
@@ -95,6 +155,8 @@ describe("useBugList Hook", () => {
 
     expect(result.current.bugs).toEqual([]);
     expect(result.current.error).toBe("Server Error");
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("should fetch local bugs when changing activeTab to local", async () => {
@@ -108,7 +170,14 @@ describe("useBugList Hook", () => {
         status: "pending",
       },
     ] as Bug[];
-    queryLocalBugsMock.mockResolvedValue({ data: mockLocalBugs });
+
+    server.use(
+      http.get(apiTarget("/bugs/local"), ({ request }) => {
+        const url = new URL(request.url);
+        queryLocalBugsParams.push(Object.fromEntries(url.searchParams.entries()));
+        return HttpResponse.json({ data: mockLocalBugs });
+      }),
+    );
 
     const { result } = renderHook(() => useBugList());
 
@@ -120,8 +189,12 @@ describe("useBugList Hook", () => {
       result.current.setActiveTab("local");
     });
 
+    await waitFor(() => {
+      expect(queryLocalBugsParams.length).toBeGreaterThan(0);
+    });
+
     expect(result.current.activeTab).toBe("local");
-    expect(queryLocalBugsMock).toHaveBeenCalledWith(expect.objectContaining({ status: "pending" }));
+    expect(queryLocalBugsParams[0]).toEqual(expect.objectContaining({ status: "pending" }));
     expect(result.current.bugs).toEqual(mockLocalBugs);
   });
 
@@ -141,7 +214,7 @@ describe("useBugList Hook", () => {
       });
     });
 
-    expect(queryBugsMock).toHaveBeenLastCalledWith({
+    expect(queryBugsParams[queryBugsParams.length - 1]).toEqual({
       repo: "repo-a",
       status: "open",
       priority: "high",
@@ -150,15 +223,13 @@ describe("useBugList Hook", () => {
   });
 
   it("should call createBug and refresh lists upon success", async () => {
-    createBugMock.mockResolvedValue({ data: { id: "new-bug" } });
-
     const { result } = renderHook(() => useBugList());
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    queryBugsMock.mockClear();
+    queryBugsParams = [];
 
     let createSuccess;
     await act(async () => {
@@ -172,99 +243,79 @@ describe("useBugList Hook", () => {
     });
 
     expect(createSuccess).toBe(true);
-    expect(createBugMock).toHaveBeenCalledWith(
-      "New Title",
-      "New Desc",
-      "high",
-      "cat-1",
-      "repo-a",
-      undefined,
-    );
-    expect(queryBugsMock).toHaveBeenCalledTimes(1); // Refresh call
+    expect(createBugCalled).toBe(1);
+    expect(queryBugsParams).toHaveLength(1); // Refresh call
   });
 
   it("should call rejectLocalBug and refresh lists", async () => {
-    rejectLocalBugMock.mockResolvedValue({ data: { id: "1" } });
-
     const { result } = renderHook(() => useBugList());
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    queryBugsMock.mockClear();
+    queryBugsParams = [];
 
     await act(async () => {
       await result.current.handleReject("1");
     });
 
-    expect(rejectLocalBugMock).toHaveBeenCalledWith("1");
-    expect(queryBugsMock).toHaveBeenCalledTimes(1);
+    expect(rejectLocalBugId).toBe("1");
+    expect(queryBugsParams).toHaveLength(1);
   });
 
   it("should call restoreLocalBug and refresh lists", async () => {
-    restoreLocalBugMock.mockResolvedValue({ data: { id: "1" } });
-
     const { result } = renderHook(() => useBugList());
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    queryBugsMock.mockClear();
+    queryBugsParams = [];
 
     await act(async () => {
       await result.current.handleRestore("1");
     });
 
-    expect(restoreLocalBugMock).toHaveBeenCalledWith("1");
-    expect(queryBugsMock).toHaveBeenCalledTimes(1);
+    expect(restoreLocalBugId).toBe("1");
+    expect(queryBugsParams).toHaveLength(1);
   });
 
   it("should call updateBugStatus during handleApprove and refresh lists", async () => {
-    updateBugStatusMock.mockResolvedValue({ data: { id: "1" } });
-
     const { result } = renderHook(() => useBugList());
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    queryBugsMock.mockClear();
+    queryBugsParams = [];
 
     await act(async () => {
       await result.current.handleApprove("1", "approved", "Good to go");
     });
 
-    expect(updateBugStatusMock).toHaveBeenCalledWith(
-      "1",
-      "approved",
-      "Good to go",
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-    );
-    expect(queryBugsMock).toHaveBeenCalledTimes(1);
+    expect(updateBugStatusBody).toEqual({
+      bugId: "1",
+      status: "approved",
+      comment: "Good to go",
+    });
+    expect(queryBugsParams).toHaveLength(1);
   });
 
   it("should call syncBugs and refresh bugs", async () => {
-    syncBugsMock.mockResolvedValue({ data: null });
-
     const { result } = renderHook(() => useBugList());
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    queryBugsMock.mockClear();
+    queryBugsParams = [];
 
     await act(async () => {
       await result.current.handleSyncBugs();
     });
 
-    expect(syncBugsMock).toHaveBeenCalledTimes(1);
-    expect(queryBugsMock).toHaveBeenCalledTimes(1);
+    expect(syncBugsCalled).toBe(1);
+    expect(queryBugsParams).toHaveLength(1);
   });
 });

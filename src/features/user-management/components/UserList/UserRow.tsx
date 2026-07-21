@@ -126,7 +126,7 @@ export const UserRowComponent: FC<UserRowProps> = ({
         <tr>
           <td colSpan={8}>
             <div className="w-100 text-center my-3">
-              <Spinner animation="border" variant="primary" />
+              <Spinner data-testid="loading-spinner" animation="border" variant="primary" />
             </div>
           </td>
         </tr>
@@ -152,7 +152,7 @@ const RolesDetails: FC<RolesDetailsProps> = ({ isLoading, roles }) => {
   if (isLoading) {
     return (
       <div className="w-100 text-center my-3">
-        <Spinner animation="border" variant="primary" />
+        <Spinner data-testid="loading-spinner" animation="border" variant="primary" />
       </div>
     );
   }

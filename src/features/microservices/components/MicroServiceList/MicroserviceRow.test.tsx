@@ -1,7 +1,10 @@
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MicroServiceRowComponent } from "./MicroserviceRow";
 import { MicroService } from "../../domain/Entity/MicroService";
+
+import * as MicroServiceRepository from "../../api/MicroServiceRepository";
 
 const mockMicroservice: MicroService = {
   id: "test-id",
@@ -11,6 +14,26 @@ const mockMicroservice: MicroService = {
   created: new Date(),
   labels: {},
 };
+
+// Mock @variamosple/variamos-components to avoid ESM syntax errors
+jest.mock("@variamosple/variamos-components", () => {
+  return {
+    ResponseModel: class ResponseModel {
+      errorCode?: number;
+      message?: string;
+      data?: any;
+      type: string;
+      constructor(type: string) {
+        this.type = type;
+      }
+      withError(code: number, msg: string) {
+        this.errorCode = code;
+        this.message = msg;
+        return this;
+      }
+    },
+  };
+});
 
 // Mock patternfly log viewer
 jest.mock("@patternfly/react-log-viewer", () => {
@@ -29,25 +52,29 @@ const mockWebSocket = {
   onerror: null,
 };
 
-jest.mock("../../api/MicroServiceRepository", () => {
-  return {
-    watchMicroserviceLogs: () => mockWebSocket,
-  };
-});
-
 describe("MicroServiceRowComponent WebSocket Logging", () => {
   const mockOnStart = jest.fn();
   const mockOnRestart = jest.fn();
   const mockOnStop = jest.fn();
+
+  let watchLogsSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (mockWebSocket as any).onopen = null;
     (mockWebSocket as any).onmessage = null;
     (mockWebSocket as any).onclose = null;
+    watchLogsSpy = jest
+      .spyOn(MicroServiceRepository, "watchMicroserviceLogs")
+      .mockReturnValue(mockWebSocket as any);
+  });
+
+  afterEach(() => {
+    watchLogsSpy.mockRestore();
   });
 
   it("opens websocket and streams logs when Show/Hide logs button is toggled", async () => {
+    const user = userEvent.setup();
     render(
       <table>
         <tbody>
@@ -63,7 +90,7 @@ describe("MicroServiceRowComponent WebSocket Logging", () => {
 
     const logButton = screen.getByTitle("Show/Hide logs");
 
-    fireEvent.click(logButton);
+    await user.click(logButton);
 
     // Simulate websocket open
     await act(async () => {
@@ -85,7 +112,7 @@ describe("MicroServiceRowComponent WebSocket Logging", () => {
     expect(screen.getByTestId("log-viewer").textContent).toBe("log line 1\n");
 
     // Close logs
-    fireEvent.click(logButton);
+    await user.click(logButton);
     expect(mockWebSocket.close).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { ProjectList } from "./index";
 import { Project } from "../../domain/Entity/Project";
 
@@ -36,11 +37,12 @@ describe("ProjectList Component", () => {
     );
 
     // Check project names are rendered
-    expect(screen.getByText("Project One")).toBeDefined();
-    expect(screen.getByText("Project Two")).toBeDefined();
+    expect(screen.getByText("Project One")).toBeInTheDocument();
+    expect(screen.getByText("Project Two")).toBeInTheDocument();
   });
 
-  it("triggers onProjectEdit when the edit button is clicked", () => {
+  it("triggers onProjectEdit when the edit button is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <ProjectList
         items={mockProjects}
@@ -54,13 +56,14 @@ describe("ProjectList Component", () => {
 
     // Find and click the edit button
     const editButtons = screen.getAllByTitle("Edit project");
-    fireEvent.click(editButtons[0]);
+    await user.click(editButtons[0]);
 
     expect(mockOnProjectEdit).toHaveBeenCalledTimes(1);
     expect(mockOnProjectEdit).toHaveBeenCalledWith(mockProjects[0]);
   });
 
-  it("triggers onProjectDelete when the delete button is clicked", () => {
+  it("triggers onProjectDelete when the delete button is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <ProjectList
         items={mockProjects}
@@ -74,7 +77,7 @@ describe("ProjectList Component", () => {
 
     // Find and click the delete button
     const deleteButtons = screen.getAllByTitle("Delete project");
-    fireEvent.click(deleteButtons[1]);
+    await user.click(deleteButtons[1]);
 
     expect(mockOnProjectDelete).toHaveBeenCalledTimes(1);
     expect(mockOnProjectDelete).toHaveBeenCalledWith(mockProjects[1]);

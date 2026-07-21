@@ -115,7 +115,12 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
 
             <Button variant="primary" type="submit" disabled={isLoading}>
               {isLoading ? (
-                <Spinner animation="border" variant="light" size="sm" />
+                <Spinner
+                  data-testid="loading-spinner"
+                  animation="border"
+                  variant="light"
+                  size="sm"
+                />
               ) : (
                 "Update Password"
               )}

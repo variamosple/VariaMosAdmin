@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { SearchForm } from "./index";
 
 describe("SearchForm Component", () => {
@@ -25,7 +26,7 @@ describe("SearchForm Component", () => {
       />,
     );
 
-    expect(screen.getByPlaceholderText("Filter list")).toBeDefined();
+    expect(screen.getByPlaceholderText("Filter list")).toBeInTheDocument();
   });
 
   it("triggers onSubmit with a 500ms debounce when user types", async () => {
@@ -34,8 +35,9 @@ describe("SearchForm Component", () => {
     );
 
     const input = screen.getByPlaceholderText("Search");
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
-    fireEvent.change(input, { target: { value: "react" } });
+    await user.type(input, "react");
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
 
@@ -52,10 +54,11 @@ describe("SearchForm Component", () => {
     );
 
     const input = screen.getByPlaceholderText("Search");
-    fireEvent.change(input, { target: { value: "delete-me" } });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.type(input, "delete-me");
 
     const clearButton = screen.getByTitle("Clear results");
-    fireEvent.click(clearButton);
+    await user.click(clearButton);
 
     expect(mockOnSearchReset).toHaveBeenCalledTimes(1);
     expect((input as HTMLInputElement).value).toBe("");

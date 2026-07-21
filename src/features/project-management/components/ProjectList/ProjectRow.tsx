@@ -122,7 +122,10 @@ const ProjectDetails: FC<ProjectDetailsProps> = ({ project }) => {
 
           <Accordion.Body>
             <Accordion alwaysOpen flush>
-              <Accordion.Item key={productLine.id} eventKey={`${productLine.id}-domainEngineering`}>
+              <Accordion.Item
+                key={`${productLine.id}-domainEngineering`}
+                eventKey={`${productLine.id}-domainEngineering`}
+              >
                 <Accordion.Header>Domain Engineering - Models</Accordion.Header>
                 <Accordion.Body>
                   <div
@@ -142,7 +145,7 @@ const ProjectDetails: FC<ProjectDetailsProps> = ({ project }) => {
               </Accordion.Item>
 
               <Accordion.Item
-                key={productLine.id}
+                key={`${productLine.id}-applicationEngineering`}
                 eventKey={`${productLine.id}-applicationEngineering`}
               >
                 <Accordion.Header>Application Engineering - Models</Accordion.Header>

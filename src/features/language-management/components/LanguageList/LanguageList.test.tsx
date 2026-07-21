@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { LanguageList } from "./index";
 import { Language } from "../../domain/Entity/Language";
 
@@ -49,11 +50,12 @@ describe("LanguageList Component", () => {
       />,
     );
 
-    expect(screen.getByText("Language One")).toBeDefined();
-    expect(screen.getByText("Language Two")).toBeDefined();
+    expect(screen.getByText("Language One")).toBeInTheDocument();
+    expect(screen.getByText("Language Two")).toBeInTheDocument();
   });
 
-  it("triggers onLanguageEdit when the edit button is clicked", () => {
+  it("triggers onLanguageEdit when the edit button is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <LanguageList
         items={mockLanguages}
@@ -66,7 +68,7 @@ describe("LanguageList Component", () => {
     );
 
     const editButtons = screen.getAllByTitle("Edit language");
-    fireEvent.click(editButtons[0]);
+    await user.click(editButtons[0]);
 
     expect(mockOnLanguageEdit).toHaveBeenCalledTimes(1);
     expect(mockOnLanguageEdit).toHaveBeenCalledWith(mockLanguages[0]);

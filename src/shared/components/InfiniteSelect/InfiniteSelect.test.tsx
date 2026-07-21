@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { InfiniteSelect } from "./index";
 import { SelectOptionProps } from "./index.types";
 
@@ -30,10 +31,10 @@ describe("InfiniteSelect Component", () => {
       />,
     );
 
-    expect(screen.getByText("Choose language")).toBeDefined();
+    expect(screen.getByText("Choose language")).toBeInTheDocument();
   });
 
-  it("should toggle dropdown and render options on click", () => {
+  it("should toggle dropdown and render options on click", async () => {
     render(
       <InfiniteSelect
         options={mockOptions}
@@ -46,15 +47,17 @@ describe("InfiniteSelect Component", () => {
     );
 
     // Open dropdown
+    const user = userEvent.setup();
     const trigger = screen.getByRole("button");
-    fireEvent.click(trigger);
+    await user.click(trigger);
 
-    expect(screen.getByText("Option 1")).toBeDefined();
-    expect(screen.getByText("Option 2")).toBeDefined();
-    expect(screen.getByText("Option 3")).toBeDefined();
+    expect(screen.getByText("Option 1")).toBeInTheDocument();
+    expect(screen.getByText("Option 2")).toBeInTheDocument();
+    expect(screen.getByText("Option 3")).toBeInTheDocument();
   });
 
-  it("should call handleSelect and close dropdown when an option is clicked", () => {
+  it("should call handleSelect and close dropdown when an option is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <InfiniteSelect
         options={mockOptions}
@@ -66,17 +69,18 @@ describe("InfiniteSelect Component", () => {
     );
 
     const trigger = screen.getByRole("button");
-    fireEvent.click(trigger);
+    await user.click(trigger);
 
     const optionBtn = screen.getByText("Option 2");
-    fireEvent.click(optionBtn);
+    await user.click(optionBtn);
 
     expect(mockHandleSelect).toHaveBeenCalledWith({ label: "Option 2", value: "val-2" });
     // Verify dropdown was closed
     expect(screen.queryByText("Option 1")).toBeNull();
   });
 
-  it("should render spinner when isFetchingOptions is true and options are empty", () => {
+  it("should render spinner when isFetchingOptions is true and options are empty", async () => {
+    const user = userEvent.setup();
     render(
       <InfiniteSelect
         options={[]}
@@ -89,12 +93,13 @@ describe("InfiniteSelect Component", () => {
 
     // Open dropdown
     const trigger = screen.getByRole("button");
-    fireEvent.click(trigger);
+    await user.click(trigger);
 
-    expect(screen.getByRole("status")).toBeDefined();
+    expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
-  it("should render 'No options available' when list is empty and not loading", () => {
+  it("should render 'No options available' when list is empty and not loading", async () => {
+    const user = userEvent.setup();
     render(
       <InfiniteSelect
         options={[]}
@@ -106,12 +111,12 @@ describe("InfiniteSelect Component", () => {
     );
 
     const trigger = screen.getByRole("button");
-    fireEvent.click(trigger);
+    await user.click(trigger);
 
-    expect(screen.getByText("No options available")).toBeDefined();
+    expect(screen.getByText("No options available")).toBeInTheDocument();
   });
 
-  it("should support searchable input field and call setSearchInput on change", () => {
+  it("should support searchable input field and call setSearchInput on change", async () => {
     render(
       <InfiniteSelect
         options={mockOptions}
@@ -127,11 +132,13 @@ describe("InfiniteSelect Component", () => {
     const input = screen.getByPlaceholderText("Select");
     expect((input as HTMLInputElement).value).toBe("test-query");
 
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(input, { target: { value: "new-query" } });
     expect(mockSetSearchInput).toHaveBeenCalledWith("new-query");
   });
 
-  it("should attach lastOptionRef to the last option element", () => {
+  it("should attach lastOptionRef to the last option element", async () => {
+    const user = userEvent.setup();
     render(
       <InfiniteSelect
         options={mockOptions}
@@ -143,7 +150,7 @@ describe("InfiniteSelect Component", () => {
     );
 
     const trigger = screen.getByRole("button");
-    fireEvent.click(trigger);
+    await user.click(trigger);
 
     expect(mockLastOptionRef).toHaveBeenCalled();
   });

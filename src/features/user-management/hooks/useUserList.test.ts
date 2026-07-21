@@ -1,11 +1,10 @@
 import { renderHook, act } from "@testing-library/react";
 import { useUserList } from "./useUserList";
-import * as UserRepository from "../api/UserRepository";
 import { User } from "../domain/Entity/User";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
-
-// Mock the dependencies
-jest.mock("../api/UserRepository");
+import { server } from "@/shared/tests/mocks/server";
+import { http, HttpResponse } from "msw";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 const mockPushToast = jest.fn();
 jest.mock("@/shared/context/ToastContext", () => ({
@@ -45,10 +44,12 @@ jest.mock("@variamosple/variamos-components", () => {
   };
 });
 
+const apiTarget = (path: string) => {
+  const base = AppConfig.ADMIN_API_URL || "";
+  return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+};
+
 describe("useUserList Hook", () => {
-  const disableUserMock = UserRepository.disableUser as jest.Mock;
-  const enableUserMock = UserRepository.enableUser as jest.Mock;
-  const deleteUserMock = UserRepository.deleteUser as jest.Mock;
   const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
 
   const dummyUser: User = {
@@ -61,8 +62,17 @@ describe("useUserList Hook", () => {
     createdAt: new Date(),
   };
 
+  let disableUserCalled = 0;
+  let enableUserCalled = 0;
+  let deleteUserCalled = 0;
+  let disableUserError = false;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    disableUserCalled = 0;
+    enableUserCalled = 0;
+    deleteUserCalled = 0;
+    disableUserError = false;
 
     mockLoadData.mockResolvedValue({ errorCode: null });
 
@@ -74,6 +84,24 @@ describe("useUserList Hook", () => {
       totalPages: 1,
       onPageChange: mockOnPageChange,
     });
+
+    server.use(
+      http.put(apiTarget("/v1/users/:userId/disable"), () => {
+        disableUserCalled++;
+        if (disableUserError) {
+          return HttpResponse.json({ errorCode: 500, message: "Disable failed" }, { status: 500 });
+        }
+        return HttpResponse.json({ errorCode: null });
+      }),
+      http.put(apiTarget("/v1/users/:userId/enable"), () => {
+        enableUserCalled++;
+        return HttpResponse.json({ errorCode: null });
+      }),
+      http.delete(apiTarget("/v1/users/:userId"), () => {
+        deleteUserCalled++;
+        return HttpResponse.json({ errorCode: null });
+      }),
+    );
   });
 
   it("should initialize with expected values and load user list on mount", () => {
@@ -98,14 +126,13 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDisableUser successfully", async () => {
-    disableUserMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useUserList());
 
     await act(async () => {
       await result.current.performDisableUser(dummyUser);
     });
 
-    expect(disableUserMock).toHaveBeenCalledWith("123");
+    expect(disableUserCalled).toBe(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(result.current.showDisable).toBe(false);
     expect(mockPushToast).toHaveBeenCalledWith(
@@ -118,7 +145,8 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDisableUser error", async () => {
-    disableUserMock.mockResolvedValue({ errorCode: 500, message: "Disable failed" });
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    disableUserError = true;
     const { result } = renderHook(() => useUserList());
 
     await act(async () => {
@@ -132,17 +160,18 @@ describe("useUserList Hook", () => {
         variant: "danger",
       }),
     );
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("should handle performEnableUser successfully", async () => {
-    enableUserMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useUserList());
 
     await act(async () => {
       await result.current.performEnableUser(dummyUser);
     });
 
-    expect(enableUserMock).toHaveBeenCalledWith("123");
+    expect(enableUserCalled).toBe(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(result.current.showEnable).toBe(false);
     expect(mockPushToast).toHaveBeenCalledWith(
@@ -155,14 +184,13 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDeleteUser successfully", async () => {
-    deleteUserMock.mockResolvedValue({ errorCode: null });
     const { result } = renderHook(() => useUserList());
 
     await act(async () => {
       await result.current.performDeleteUser(dummyUser);
     });
 
-    expect(deleteUserMock).toHaveBeenCalledWith("123");
+    expect(deleteUserCalled).toBe(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(result.current.showDelete).toBe(false);
     expect(mockPushToast).toHaveBeenCalledWith(

@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { ModelList } from "./index";
 import { Model } from "../../domain/Entity/Model";
 
@@ -35,11 +36,12 @@ describe("ModelList Component", () => {
       />,
     );
 
-    expect(screen.getByText("Model One")).toBeDefined();
-    expect(screen.getByText("Model Two")).toBeDefined();
+    expect(screen.getByText("Model One")).toBeInTheDocument();
+    expect(screen.getByText("Model Two")).toBeInTheDocument();
   });
 
-  it("triggers onModelEdit when the edit button is clicked", () => {
+  it("triggers onModelEdit when the edit button is clicked", async () => {
+    const user = userEvent.setup();
     render(
       <ModelList
         items={mockModels}
@@ -52,7 +54,7 @@ describe("ModelList Component", () => {
     );
 
     const editButtons = screen.getAllByTitle("Edit model");
-    fireEvent.click(editButtons[0]);
+    await user.click(editButtons[0]);
 
     expect(mockOnModelEdit).toHaveBeenCalledTimes(1);
     expect(mockOnModelEdit).toHaveBeenCalledWith(mockModels[0]);
