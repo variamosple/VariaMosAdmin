@@ -21,7 +21,10 @@
     "commitlint",
     "lintstaged",
     "variamosple",
-    "alertify"
+    "alertify",
+    "typeless",
+    "defaultuser",
+    "johndoe"
   ],
   "ignorePaths": [
     "node_modules/**",
