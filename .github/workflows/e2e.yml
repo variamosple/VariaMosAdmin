@@ -1,0 +1,100 @@
+name: Frontend Real E2E CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  e2e-real:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: variamos_db
+          POSTGRES_USER: variamos_admin
+          POSTGRES_PASSWORD: variamos_db_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout VariaMosAdmin (frontend)
+      uses: actions/checkout@v4
+
+    - name: Checkout variamos_ms_admin (backend)
+      uses: actions/checkout@v4
+      with:
+        repository: variamosple/variamos_ms_admin
+        path: ../variamos_ms_admin
+
+    - name: Initialize PostgreSQL database schema
+      run: |
+        PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -f cypress/support/db/VariamosDB.sql
+        PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -f cypress/support/db/config.sql
+        PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -f cypress/support/db/seeds.sql
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: package-lock.json
+
+    - name: Install backend dependencies
+      run: |
+        npm ci
+      working-directory: ../variamos_ms_admin
+
+    - name: Start Backend microservice
+      run: |
+        npm run dev &
+      working-directory: ../variamos_ms_admin
+      env:
+        NODE_ENV: development
+        DB_USER: variamos_admin
+        DB_PASSWORD: variamos_db_password
+        DB_HOST: localhost
+        DB_DATABASE: variamos_db
+        DB_PORT: 5432
+        DB_SCHEMA: variamos
+        PORT: 4000
+        HOST: localhost
+        VARIAMOS_PRIVATE_KEY_PATH: ./jwtRS256.key
+        VARIAMOS_PUBLIC_KEY_PATH: ./jwtRS256.key.pub
+        VARIAMOS_JWT_EXP_IN_SECONDS: 900
+        BCRYPT_SALT_ROUNDS: 10
+
+    - name: Install frontend dependencies
+      run: |
+        npm ci
+
+    - name: Run Real E2E Tests (Cypress)
+      uses: cypress-io/github-action@v6
+      with:
+        start: npm start
+        wait-on: 'http://localhost:3000, http://localhost:4000/auth/session-info'
+        command: npm run cypress:run:real
+      env:
+        DB_USER: variamos_admin
+        DB_PASSWORD: variamos_db_password
+        DB_HOST: localhost
+        DB_DATABASE: variamos_db
+        DB_PORT: 5432
+        DB_SCHEMA: variamos
+
+    - name: Upload Cypress Screenshots and Videos
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-real-screenshots-and-videos
+        path: |
+          cypress/screenshots
+          cypress/videos
+        retention-days: 7

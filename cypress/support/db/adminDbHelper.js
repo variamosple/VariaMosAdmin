@@ -18,7 +18,7 @@ let dbConfig = {
   user: 'variamos_admin',
   host: 'localhost',
   database: 'variamos_db',
-  password: 'mon_mot_de_passe_secret',
+  password: 'variamos_db_password',
   port: 5432
 };
 
