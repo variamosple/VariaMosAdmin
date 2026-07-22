@@ -4,17 +4,43 @@
 describe("Admin - Bug Tracker E2E Flows", () => {
   const adminEmail = "admin@variamos-test.com";
   const adminPassword = "Password123!";
-  const dbHelperPath = "../support/db/adminDbHelper.js";
-
   beforeEach(() => {
     // Set viewport to a standard desktop width to prevent horizontal scroll issues
     cy.viewport(1280, 720);
 
-    // Reset and seed database state with test profiles using the modular helper
-    cy.task("runModuleDbScript", {
-      scriptPath: dbHelperPath,
-      functionName: "seedTestUsers",
-    });
+    // Mock login and session endpoints to make this spec 100% mocked and independent of live services
+    cy.intercept("POST", "http://localhost:4000/auth/sign-in", {
+      statusCode: 200,
+      body: {
+        data: {
+          user: {
+            id: "1",
+            user: "admin_test",
+            name: "Admin Test",
+            email: "admin@variamos-test.com",
+            roles: ["Admin"],
+            permissions: ["bugs::query", "users::query", "admin::languages::query", "admin::projects::query", "admin::models::query"]
+          },
+          authToken: "fake-jwt-token"
+        }
+      }
+    }).as("signIn");
+
+    cy.intercept("GET", "http://localhost:4000/auth/session-info", {
+      statusCode: 200,
+      body: {
+        data: {
+          user: {
+            id: "1",
+            user: "admin_test",
+            name: "Admin Test",
+            email: "admin@variamos-test.com",
+            roles: ["Admin"],
+            permissions: ["bugs::query", "users::query", "admin::languages::query", "admin::projects::query", "admin::models::query"]
+          }
+        }
+      }
+    }).as("sessionInfo");
 
     // 1. Intercept initial empty or simple GitHub repository lists
     cy.intercept("GET", /\/bugs\/repos$/, {
@@ -44,19 +70,17 @@ describe("Admin - Bug Tracker E2E Flows", () => {
     }).as("getCategories");
   });
 
-  after(() => {
-    // Clean database after tests run
-    cy.task("runModuleDbScript", {
-      scriptPath: dbHelperPath,
-      functionName: "cleanTestUsers",
-    });
-  });
 
   const loginAndGoToBugs = () => {
     cy.visit("http://localhost:3000");
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
+    cy.get("body").then(($body) => {
+      // If we are on the login page, fill it. Otherwise, we are already logged in (redirected)
+      if ($body.find("#email").length > 0) {
+        cy.get('#email').type(adminEmail);
+        cy.get('#password').type(adminPassword);
+        cy.get('button[type="submit"]').click();
+      }
+    });
     cy.get("body").then(($body) => {
       if ($body.find(".modal").length > 0) {
         cy.get(".modal").contains("Cancel").click({ force: true });
@@ -68,10 +92,14 @@ describe("Admin - Bug Tracker E2E Flows", () => {
   it("should log in as admin and navigate to the Bug Tracker dashboard", () => {
     cy.visit("http://localhost:3000");
 
-    // Log in
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
+    cy.get("body").then(($body) => {
+      // If we are on the login page, fill it. Otherwise, we are already logged in
+      if ($body.find("#email").length > 0) {
+        cy.get('#email').type(adminEmail);
+        cy.get('#password').type(adminPassword);
+        cy.get('button[type="submit"]').click();
+      }
+    });
 
     cy.url().should("eq", "http://localhost:3000/");
 
@@ -117,16 +145,7 @@ describe("Admin - Bug Tracker E2E Flows", () => {
     }).as("getFilteredBugs");
 
     // Login and navigate
-    cy.visit("http://localhost:3000");
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
-    cy.get("body").then(($body) => {
-      if ($body.find(".modal").length > 0) {
-        cy.get(".modal").contains("Cancel").click({ force: true });
-      }
-    });
-    cy.contains("Bugs").click();
+    loginAndGoToBugs();
 
     // Verify first tab is selected and contains mock issues
     cy.get(".nav-tabs .nav-link.active").should("contain", "GitHub Bugs");
@@ -200,16 +219,7 @@ describe("Admin - Bug Tracker E2E Flows", () => {
     }).as("rejectBug");
 
     // Login and navigate
-    cy.visit("http://localhost:3000");
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
-    cy.get("body").then(($body) => {
-      if ($body.find(".modal").length > 0) {
-        cy.get(".modal").contains("Cancel").click({ force: true });
-      }
-    });
-    cy.contains("Bugs").click();
+    loginAndGoToBugs();
 
     // Click Local Inbox Tab
     cy.contains("Local Inbox").click();
@@ -272,16 +282,7 @@ describe("Admin - Bug Tracker E2E Flows", () => {
     }).as("restoreBug");
 
     // Login and navigate
-    cy.visit("http://localhost:3000");
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
-    cy.get("body").then(($body) => {
-      if ($body.find(".modal").length > 0) {
-        cy.get(".modal").contains("Cancel").click({ force: true });
-      }
-    });
-    cy.contains("Bugs").click();
+    loginAndGoToBugs();
 
     // Click Trash Bin Tab
     cy.contains("Trash Bin").click();
@@ -319,16 +320,7 @@ describe("Admin - Bug Tracker E2E Flows", () => {
     }).as("createUserBug");
 
     // Login and navigate
-    cy.visit("http://localhost:3000");
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
-    cy.get("body").then(($body) => {
-      if ($body.find(".modal").length > 0) {
-        cy.get(".modal").contains("Cancel").click({ force: true });
-      }
-    });
-    cy.contains("Bugs").click();
+    loginAndGoToBugs();
 
     // Click "Report a Bug" to open modal
     cy.contains("button", "Report a Bug").click();
@@ -399,16 +391,7 @@ describe("Admin - Bug Tracker E2E Flows", () => {
     }).as("createAdminBug");
 
     // Login and navigate
-    cy.visit("http://localhost:3000");
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
-    cy.get("body").then(($body) => {
-      if ($body.find(".modal").length > 0) {
-        cy.get(".modal").contains("Cancel").click({ force: true });
-      }
-    });
-    cy.contains("Bugs").click();
+    loginAndGoToBugs();
 
     // Click "Create GitHub Issue" to open modal
     cy.contains("button", "Create GitHub Issue").click();
@@ -511,16 +494,7 @@ describe("Admin - Bug Tracker E2E Flows", () => {
     }).as("approveBugStatus");
 
     // Login and navigate
-    cy.visit("http://localhost:3000");
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
-    cy.get("body").then(($body) => {
-      if ($body.find(".modal").length > 0) {
-        cy.get(".modal").contains("Cancel").click({ force: true });
-      }
-    });
-    cy.contains("Bugs").click();
+    loginAndGoToBugs();
 
     // Click Local Inbox Tab
     cy.contains("Local Inbox").click();

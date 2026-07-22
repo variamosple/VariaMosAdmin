@@ -144,12 +144,9 @@ describe('Admin - Password Reset Flow', () => {
    * Scenario 3: Usage uniqueness check (Token invalidation after reset)
    */
   it('should invalidate token after first use and prevent reuse', () => {
-    cy.visit('http://localhost:3000');
-    // 1. Log in as admin and generate link
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
-    cy.contains('Users').click();
+    // 1. Log in as admin and navigate to users page
+    cy.login(adminEmail, adminPassword);
+    cy.visit('http://localhost:3000/#/users');
     
     // Use search bar to find target user
     cy.get('input[id="search"]').clear({ force: true }).type(targetUserEmail, { force: true });
@@ -194,12 +191,9 @@ describe('Admin - Password Reset Flow', () => {
    * Scenario 4: User account status restrictions (Disabled & Deleted users)
    */
   it('should not allow password recovery for disabled or deleted accounts', () => {
-    cy.visit('http://localhost:3000');
     // 1. Admin visual check
-    cy.get('input[name="email"]').type(adminEmail);
-    cy.get('input[name="password"]').type(adminPassword);
-    cy.get('button[type="submit"]').click();
-    cy.contains('Users').click();
+    cy.login(adminEmail, adminPassword);
+    cy.visit('http://localhost:3000/#/users');
 
     // Use search bar to find disabled user
     cy.get('input[id="search"]').clear({ force: true }).type(disabledUserEmail, { force: true });
@@ -267,8 +261,12 @@ describe('Admin - Password Reset Flow', () => {
    * Scenario 6: Prevention of duplicate API calls (Double Submit Click)
    */
   it('should prevent double-clicking the submit button', () => {
-    // Intercept with delay to simulate slower API response
-    cy.intercept('POST', '**/auth/forgot-password').as('delayedForgot');
+    // Intercept with delay to simulate slower API response and allow checking the disabled state
+    cy.intercept('POST', '**/auth/forgot-password', (req) => {
+      req.reply((res) => {
+        res.setDelay(1000);
+      });
+    }).as('delayedForgot');
 
     cy.visit('http://localhost:3000/#/forgot-password');
     cy.get('input[type="email"]').type(targetUserEmail);

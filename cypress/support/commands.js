@@ -23,3 +23,14 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('login', (email, password) => {
+  cy.session([email, password], () => {
+    cy.request('POST', 'http://localhost:4000/auth/sign-in', { email, password })
+      .then((response) => {
+        const token = response.body.data.authToken;
+        window.localStorage.setItem('authToken', token);
+      });
+  });
+});
+
