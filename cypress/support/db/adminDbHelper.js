@@ -5,7 +5,15 @@ const dotenv = require('dotenv');
 const crypto = require('crypto');
 
 // Load environment variables from the backend development.env to avoid hardcoding credentials
-const envPath = path.resolve(__dirname, '../../../../../variamos_ms_admin/env/development.env');
+let envPath = path.resolve(__dirname, '../../../../variamos_ms_admin/env/development.env');
+if (!fs.existsSync(envPath)) {
+  // Fallback for when running in a nested git worktree (.worktrees/feature-name)
+  const worktreeEnvPath = path.resolve(__dirname, '../../../../../../variamos_ms_admin/env/development.env');
+  if (fs.existsSync(worktreeEnvPath)) {
+    envPath = worktreeEnvPath;
+  }
+}
+
 let dbConfig = {
   user: 'variamos_admin',
   host: 'localhost',
