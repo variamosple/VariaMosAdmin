@@ -9,7 +9,7 @@ describe('Admin - Password Reset Flow', () => {
   const deletedUserEmail = 'deleted-user@variamos-test.com';
   const newPassword = 'NewSecurePassword123!';
   
-  const dbHelperPath = '../integration/admin/db/adminDbHelper.js';
+  const dbHelperPath = '../support/db/adminDbHelper.js';
 
   beforeEach(() => {
     // Reset and seed database state with test profiles using the modular helper

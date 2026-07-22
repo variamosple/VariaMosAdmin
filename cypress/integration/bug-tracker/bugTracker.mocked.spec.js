@@ -4,7 +4,7 @@
 describe("Admin - Bug Tracker E2E Flows", () => {
   const adminEmail = "admin@variamos-test.com";
   const adminPassword = "Password123!";
-  const dbHelperPath = "../integration/admin/db/adminDbHelper.js";
+  const dbHelperPath = "../support/db/adminDbHelper.js";
 
   beforeEach(() => {
     // Set viewport to a standard desktop width to prevent horizontal scroll issues

@@ -14,7 +14,9 @@
     "check-arch": "dependency-cruiser --config .dependency-cruiser.js src/",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "find-deadcode": "knip"
+    "find-deadcode": "knip",
+    "cypress:run:mocked": "cypress run --spec 'cypress/integration/**/*.mocked.spec.js'",
+    "cypress:run:real": "cypress run --spec 'cypress/integration/**/*.real.spec.js'"
   },
   "dependencies": {
     "@patternfly/react-core": "^6.0.0",
