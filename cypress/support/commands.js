@@ -34,3 +34,22 @@ Cypress.Commands.add('login', (email, password) => {
   });
 });
 
+Cypress.Commands.add('disconnect', () => {
+  cy.visit("http://localhost:3000/");
+  cy.get('body').then(($body) => {
+    if ($body.find('a#nav-dropdown').length > 0) {
+      cy.get('a#nav-dropdown').click();
+      cy.contains('a', 'Logout').click();
+    }
+  });
+});
+
+Cypress.Commands.add('loginViaUI', (email, password) => {
+  cy.visit("http://localhost:3000/#/login");
+  cy.get('input[name="email"]').type(email);
+  cy.get('input[name="password"]').type(password);
+  cy.get('button[type="submit"]').click();
+});
+
+
+

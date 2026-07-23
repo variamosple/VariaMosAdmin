@@ -52,6 +52,18 @@ INSERT INTO "user" ("id", "user", "name", "email", "country_code", "is_enabled",
     '2026-07-10 11:00:00+00',
     '2026-07-10 12:00:00+00',
     '$2b$10$Whuu2ydsuycABm8PYr1w1OSbFRdRuMx0zfi5bY.artPYDs3CWexKq'
+),
+(
+    'a0b1c2d3-e4f5-5a6b-7c8d-9e0f1a2b3c4d',
+    'admin',
+    'Admin VariaMos',
+    'admin@variamos.com',
+    'FR',
+    true,
+    false,
+    '2026-07-23 12:00:00+00',
+    NULL,
+    '$2b$10$Whuu2ydsuycABm8PYr1w1OSbFRdRuMx0zfi5bY.artPYDs3CWexKq'
 )
 ON CONFLICT (id) DO NOTHING;
 SET search_path TO variamos;
@@ -440,3 +452,10 @@ INSERT INTO "bugs" (
     '2026-07-15 13:50:00+00',
     '2026-07-15 14:00:00+00'
 );
+
+-- ============================================================================
+-- TABLE: user_role
+-- ============================================================================
+INSERT INTO "user_role" ("user_id", "role_id") VALUES
+('a0b1c2d3-e4f5-5a6b-7c8d-9e0f1a2b3c4d', 1)
+ON CONFLICT (user_id, role_id) DO NOTHING;
