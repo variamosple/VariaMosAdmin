@@ -84,6 +84,13 @@ jobs:
         DB_PORT: 5432
         DB_SCHEMA: variamos
 
+    - name: Print Docker Container Logs on Failure
+      if: failure()
+      run: |
+        docker compose -f docker-compose.test.yml logs
+      env:
+        VARIAMOS_WORKSPACE_DIR: ./
+
     - name: Stop Microservices (Docker Compose)
       if: always()
       run: |
