@@ -1,8 +1,5 @@
 describe("Auth - Login Mocked Flows", () => {
   beforeEach(() => {
-    // Force logout via UI if already connected
-    cy.disconnect();
-
     // Clear all Cypress cached sessions
     Cypress.session.clearAllSavedSessions();
     cy.clearLocalStorage();

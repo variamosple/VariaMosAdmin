@@ -27,11 +27,11 @@ export const GoogleLogin: FC<GoogleLoginProps> = ({ text = "signin_with" }) => {
       });
     };
 
-    if (window.google) {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
       initializeGoogleSignIn();
     } else {
       const intervalId = setInterval(() => {
-        if (window.google) {
+        if (window.google && window.google.accounts && window.google.accounts.id) {
           initializeGoogleSignIn();
           clearInterval(intervalId);
         }

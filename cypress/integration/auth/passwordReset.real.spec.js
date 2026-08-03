@@ -37,8 +37,9 @@ describe('Admin - Password Reset Flow', () => {
     cy.url().should('include', '/users');
 
     // Use search bar to find target user
+    cy.intercept('GET', '**/v1/users?*').as('usersSearch1');
     cy.get('input[id="search"]').clear({ force: true }).type(targetUserEmail, { force: true });
-    cy.wait(600); // Wait for debounced search to trigger
+    cy.wait('@usersSearch1');
 
     // 3. Generate recovery link for the target user
     cy.contains('tr', targetUserEmail).within(() => {
@@ -110,8 +111,7 @@ describe('Admin - Password Reset Flow', () => {
 
     cy.contains('If an account with this email exists, a password reset link has been sent. Please check your inbox!').should('be.visible');
 
-    // Give the backend a brief moment to write the token in BDD
-    cy.wait(500);
+    // The backend has already responded, meaning the token is written.
 
     // 2. Query DB to fetch the generated token (retrieved via helper task)
     cy.task('runModuleDbScript', {
@@ -149,8 +149,9 @@ describe('Admin - Password Reset Flow', () => {
     cy.visit('http://localhost:3000/#/users');
     
     // Use search bar to find target user
+    cy.intercept('GET', '**/v1/users?*').as('usersSearch2');
     cy.get('input[id="search"]').clear({ force: true }).type(targetUserEmail, { force: true });
-    cy.wait(600); // Wait for debounced search to trigger
+    cy.wait('@usersSearch2');
 
     cy.contains('tr', targetUserEmail).within(() => {
       cy.get('button[title="Generate password reset link"]').click();
@@ -196,8 +197,9 @@ describe('Admin - Password Reset Flow', () => {
     cy.visit('http://localhost:3000/#/users');
 
     // Use search bar to find disabled user
+    cy.intercept('GET', '**/v1/users?*').as('usersSearch3');
     cy.get('input[id="search"]').clear({ force: true }).type(disabledUserEmail, { force: true });
-    cy.wait(600);
+    cy.wait('@usersSearch3');
 
     cy.contains('tr', disabledUserEmail).within(() => {
       // Button to reset link should not exist at all for disabled user
@@ -205,8 +207,9 @@ describe('Admin - Password Reset Flow', () => {
     });
 
     // Use search bar to find deleted user
+    cy.intercept('GET', '**/v1/users?*').as('usersSearch4');
     cy.get('input[id="search"]').clear({ force: true }).type(deletedUserEmail, { force: true });
-    cy.wait(600);
+    cy.wait('@usersSearch4');
 
     // For deleted user, the button to reset link should also not exist
     cy.contains('tr', deletedUserEmail).within(() => {

@@ -1,6 +1,5 @@
 describe("Auth - Comprehensive Mocked Flows", () => {
   beforeEach(() => {
-    cy.disconnect();
     Cypress.session.clearAllSavedSessions();
     cy.clearLocalStorage();
     cy.clearCookies();

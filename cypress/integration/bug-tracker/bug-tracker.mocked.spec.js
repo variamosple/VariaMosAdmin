@@ -5,11 +5,16 @@ describe("Admin - Bug Tracker E2E Flows", () => {
   const adminEmail = "admin@variamos-test.com";
   const adminPassword = "Password123!";
   beforeEach(() => {
+    // Clear all Cypress cached sessions to ensure a clean state
+    Cypress.session.clearAllSavedSessions();
+    cy.clearLocalStorage();
+    cy.clearCookies();
+
     // Set viewport to a standard desktop width to prevent horizontal scroll issues
     cy.viewport(1280, 720);
 
     // Mock login and session endpoints to make this spec 100% mocked and independent of live services
-    cy.intercept("POST", "http://localhost:4000/auth/sign-in", {
+    cy.intercept("POST", "**/auth/sign-in", {
       statusCode: 200,
       body: {
         data: {
@@ -26,7 +31,7 @@ describe("Admin - Bug Tracker E2E Flows", () => {
       }
     }).as("signIn");
 
-    cy.intercept("GET", "http://localhost:4000/auth/session-info", {
+    cy.intercept("GET", "**/auth/session-info", {
       statusCode: 200,
       body: {
         data: {
@@ -41,6 +46,46 @@ describe("Admin - Bug Tracker E2E Flows", () => {
         }
       }
     }).as("sessionInfo");
+
+    // Mock configurations menu to render the navigation menu correctly
+    cy.intercept("GET", "**/v1/configurations/menu", {
+      statusCode: 200,
+      body: {
+        transactionId: "getMenu",
+        data: {
+          items: [
+            {
+              title: "Home",
+              type: "location",
+              location: "https://app.variamos.com/"
+            },
+            {
+              title: "Admin",
+              type: "location",
+              location: "https://app.variamos.com/variamos_admin/",
+              allowedPermissions: ["users::query", "roles::query", "permissions::query", "metrics::query", "micro-services::query", "bugs::query"]
+            }
+          ],
+          subMenu: [
+            {
+              accessibleFrom: "/variamos_admin/",
+              items: [
+                { title: "Users", location: "/users", allowedPermissions: ["users::query"] },
+                { title: "Roles", location: "/roles", allowedPermissions: ["roles::query"] },
+                { title: "Permission", location: "/permissions", allowedPermissions: ["permissions::query"] },
+                { title: "Languages", location: "/languages", allowedPermissions: ["admin::languages::query"] },
+                { title: "Projects", location: "/projects", allowedPermissions: ["admin::projects::query"] },
+                { title: "Models", location: "/models", allowedPermissions: ["admin::models::query"] },
+                { title: "Metrics", location: "/metrics", allowedPermissions: ["metrics::query"] },
+                { title: "Monitoring", location: "/monitoring", allowedPermissions: ["micro-services::query"] },
+                { title: "Bugs", location: "/bugs", allowedPermissions: ["bugs::query"] }
+              ]
+            }
+          ],
+          options: []
+        }
+      }
+    }).as("getMenuConfig");
 
     // 1. Intercept initial empty or simple GitHub repository lists
     cy.intercept("GET", /\/bugs\/repos$/, {
@@ -72,7 +117,13 @@ describe("Admin - Bug Tracker E2E Flows", () => {
 
 
   const loginAndGoToBugs = () => {
-    cy.visit("http://localhost:3000");
+    cy.visit("http://localhost:3000", {
+      onBeforeLoad: (win) => {
+        win.localStorage.setItem("authToken", "fake-jwt-token");
+      }
+    });
+    cy.wait("@sessionInfo");
+    cy.wait("@getMenuConfig");
     cy.get("body").then(($body) => {
       // If we are on the login page, fill it. Otherwise, we are already logged in (redirected)
       if ($body.find("#email").length > 0) {
@@ -90,7 +141,13 @@ describe("Admin - Bug Tracker E2E Flows", () => {
   };
 
   it("should log in as admin and navigate to the Bug Tracker dashboard", () => {
-    cy.visit("http://localhost:3000");
+    cy.visit("http://localhost:3000", {
+      onBeforeLoad: (win) => {
+        win.localStorage.setItem("authToken", "fake-jwt-token");
+      }
+    });
+    cy.wait("@sessionInfo");
+    cy.wait("@getMenuConfig");
 
     cy.get("body").then(($body) => {
       // If we are on the login page, fill it. Otherwise, we are already logged in

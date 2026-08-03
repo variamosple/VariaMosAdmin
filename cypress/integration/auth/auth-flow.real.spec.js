@@ -48,6 +48,38 @@ describe("Auth - Real E2E Flows", () => {
     cy.contains("Country:").parent().should("contain", "Andorra");
   });
 
+  it("should allow a new user to sign up, and then log in successfully with the new credentials", () => {
+    const signupEmail = "new-signup-user@variamos-test.com";
+    const signupName = "New Signed Up User";
+    const signupPassword = "Password123!";
+
+    cy.visit("http://localhost:3000/#/sign-up");
+
+    // Fill in sign-up details
+    cy.get('input[name="name"]').type(signupName);
+    cy.get('input[name="email"]').type(signupEmail);
+    cy.get('input[name="password"]').type(signupPassword);
+    cy.get('input[name="passwordConfirmation"]').type(signupPassword);
+
+    // Submit
+    cy.get('button[type="submit"]').click();
+
+    // Check for success message or alert
+    cy.get('.alert-success').should('be.visible');
+
+    // Click link to navigate to sign-in page
+    cy.contains("Sign in").click();
+    cy.url().should("include", "/login");
+
+    // Login with new credentials
+    cy.get('input[name="email"]').type(signupEmail);
+    cy.get('input[name="password"]').type(signupPassword);
+    cy.get('button[type="submit"]').click();
+
+    // Verify successful login (dashboard page)
+    cy.url().should("eq", "http://localhost:3000/");
+  });
+
   after(() => {
     // Cleanup
     cy.task("runModuleDbScript", {

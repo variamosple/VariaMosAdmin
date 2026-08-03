@@ -34,6 +34,18 @@ jobs:
         repository: variamosple/variamos_ms_admin
         path: ../variamos_ms_admin
 
+    - name: Checkout variamos_ms_languages
+      uses: actions/checkout@v4
+      with:
+        repository: variamosple/variamos_ms_languages
+        path: ../variamos_ms_languages
+
+    - name: Checkout vms_projects
+      uses: actions/checkout@v4
+      with:
+        repository: variamosple/vms_projects
+        path: ../vms_projects
+
     - name: Initialize PostgreSQL database schema
       run: |
         PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -f cypress/support/db/VariamosDB.sql
@@ -47,40 +59,21 @@ jobs:
         cache: 'npm'
         cache-dependency-path: package-lock.json
 
-    - name: Install backend dependencies
-      run: |
-        npm ci
-      working-directory: ../variamos_ms_admin
-
-    - name: Start Backend microservice
-      run: |
-        npm run dev &
-      working-directory: ../variamos_ms_admin
-      env:
-        NODE_ENV: development
-        DB_USER: variamos_admin
-        DB_PASSWORD: variamos_db_password
-        DB_HOST: localhost
-        DB_DATABASE: variamos_db
-        DB_PORT: 5432
-        DB_SCHEMA: variamos
-        PORT: 4000
-        HOST: localhost
-        VARIAMOS_PRIVATE_KEY_PATH: ./jwtRS256.key
-        VARIAMOS_PUBLIC_KEY_PATH: ./jwtRS256.key.pub
-        VARIAMOS_JWT_EXP_IN_SECONDS: 900
-        BCRYPT_SALT_ROUNDS: 10
-
     - name: Install frontend dependencies
       run: |
         npm ci
+
+    - name: Start Microservices (Docker Compose)
+      run: |
+        npm run docker:test:up
 
     - name: Run Real E2E Tests (Cypress)
       uses: cypress-io/github-action@v6
       with:
         start: npm start
         wait-on: 'http://localhost:3000, http://localhost:4000/auth/session-info'
-        command: npm run cypress:run:real
+        wait-on-timeout: 120
+        command: npx cypress run --spec "cypress/integration/**/*.real.spec.js"
       env:
         DB_USER: variamos_admin
         DB_PASSWORD: variamos_db_password
@@ -88,6 +81,11 @@ jobs:
         DB_DATABASE: variamos_db
         DB_PORT: 5432
         DB_SCHEMA: variamos
+
+    - name: Stop Microservices (Docker Compose)
+      if: always()
+      run: |
+        npm run docker:test:down
 
     - name: Upload Cypress Screenshots and Videos
       if: failure()

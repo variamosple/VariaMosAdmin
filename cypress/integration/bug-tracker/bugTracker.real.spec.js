@@ -11,7 +11,7 @@ describe("Bug Tracker - Real DB E2E Flows", () => {
     });
   });
 
-  it("should persist a new bug in the database", () => {
+  it("should persist a new bug in the database and support commenting in the details view", () => {
     // 1. Visit and perform login via UI helper
     cy.loginViaUI(adminEmail, adminPassword);
 
@@ -42,6 +42,35 @@ describe("Bug Tracker - Real DB E2E Flows", () => {
     // 6. Check that the bug appears in the Local Inbox
     cy.contains("Local Inbox").click();
     cy.get(".tab-pane.active").contains("table tbody tr", bugTitle).should("be.visible");
+
+    // 7. Click Details to open comments/audit logs view
+    cy.get(".tab-pane.active").contains("tr", bugTitle).within(() => {
+      cy.contains("button", "Details").click();
+    });
+
+    // Verify modal elements are visible
+    cy.contains("h5", "Comments & Audit Logs").should("be.visible");
+    cy.contains("No comments or logs recorded yet.").should("be.visible");
+
+    // 8. Post a new comment
+    const testComment = "Verification comment for database persistence " + Date.now();
+    cy.get('textarea[placeholder="Write a comment..."]').type(testComment);
+    cy.get("button").contains("Add Comment").click();
+
+    // Verify it is added to the list
+    cy.contains(testComment).should("be.visible");
+
+    // Close the details modal
+    cy.get(".modal-footer").contains("button", "Close").click();
+
+    // Reopen details and verify persistence
+    cy.get(".tab-pane.active").contains("tr", bugTitle).within(() => {
+      cy.contains("button", "Details").click();
+    });
+    cy.contains(testComment).should("be.visible");
+
+    // Close details modal
+    cy.get(".modal-footer").contains("button", "Close").click();
   });
 
   after(() => {

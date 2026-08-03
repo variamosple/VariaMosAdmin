@@ -36,19 +36,20 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
 
   const onSubmit: SubmitHandler<Project> = (data) => {
     if (!isLoading) {
-      const isTemplate: string = data?.template as any;
-
-      let template = undefined;
-
-      if (isTemplate === "true") {
-        template = true;
-      } else if (isTemplate === "false") {
-        template = false;
+      let template = false;
+      if (data?.template !== undefined && data?.template !== null) {
+        template = String(data.template) === "true";
+      } else if (defaultValue?.template !== undefined) {
+        template = defaultValue.template;
       }
 
-      data.template = template;
+      const updatedProject: Project = {
+        ...defaultValue,
+        ...data,
+        template,
+      };
 
-      onProjectSubmit(data).then((response) => {
+      onProjectSubmit(updatedProject).then((response) => {
         if (!response.errorCode) {
           reset();
         }
