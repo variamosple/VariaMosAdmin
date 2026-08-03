@@ -49,8 +49,7 @@ jobs:
     - name: Initialize PostgreSQL database schema
       run: |
         PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -v ON_ERROR_STOP=1 -f cypress/support/db/VariamosDB.sql
-        PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -v ON_ERROR_STOP=1 -f cypress/support/db/config.sql
-        PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -v ON_ERROR_STOP=1 -f cypress/support/db/seeds.sql
+        PGPASSWORD=variamos_db_password PGOPTIONS="-c search_path=variamos,public" psql -h localhost -U variamos_admin -d variamos_db -v ON_ERROR_STOP=1 -f cypress/support/db/config.sql
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
