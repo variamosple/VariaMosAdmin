@@ -32,19 +32,19 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: variamosple/variamos_ms_admin
-        path: ../variamos_ms_admin
+        path: variamos_ms_admin
 
     - name: Checkout variamos_ms_languages
       uses: actions/checkout@v4
       with:
         repository: variamosple/variamos_ms_languages
-        path: ../variamos_ms_languages
+        path: variamos_ms_languages
 
     - name: Checkout vms_projects
       uses: actions/checkout@v4
       with:
         repository: variamosple/vms_projects
-        path: ../vms_projects
+        path: vms_projects
 
     - name: Initialize PostgreSQL database schema
       run: |
@@ -66,6 +66,8 @@ jobs:
     - name: Start Microservices (Docker Compose)
       run: |
         npm run docker:test:up
+      env:
+        VARIAMOS_WORKSPACE_DIR: ./
 
     - name: Run Real E2E Tests (Cypress)
       uses: cypress-io/github-action@v6
@@ -75,6 +77,7 @@ jobs:
         wait-on-timeout: 120
         command: npx cypress run --spec "cypress/integration/**/*.real.spec.js"
       env:
+        VARIAMOS_WORKSPACE_DIR: ./
         DB_USER: variamos_admin
         DB_PASSWORD: variamos_db_password
         DB_HOST: localhost
@@ -86,6 +89,8 @@ jobs:
       if: always()
       run: |
         npm run docker:test:down
+      env:
+        VARIAMOS_WORKSPACE_DIR: ./
 
     - name: Upload Cypress Screenshots and Videos
       if: failure()
