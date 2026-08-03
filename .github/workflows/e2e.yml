@@ -75,7 +75,7 @@ jobs:
         start: npm start
         wait-on: 'http://localhost:3000, http://localhost:4000/version'
         wait-on-timeout: 120
-        command: npx cypress run --spec "cypress/integration/**/*.real.spec.js"
+        command: npx cypress run --spec cypress/integration/**/*.real.spec.js
       env:
         VARIAMOS_WORKSPACE_DIR: ./
         DB_USER: variamos_admin
