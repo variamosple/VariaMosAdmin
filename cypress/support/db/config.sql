@@ -1,7 +1,7 @@
 -- Adminer 5.4.2 PostgreSQL 14.8 dump
 
 
-DROP TABLE IF EXISTS "permission";
+DROP TABLE IF EXISTS "permission" CASCADE;
 DROP SEQUENCE IF EXISTS "variamos".permission_id_seq;
 CREATE SEQUENCE "variamos".permission_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
 
@@ -57,7 +57,7 @@ INSERT INTO "permission" ("id", "name") VALUES
 (42,	'languages::manage-collaborators::own'),
 (43,	'languages::manage-collaborators::all');
 
-DROP TABLE IF EXISTS "role";
+DROP TABLE IF EXISTS "role" CASCADE;
 CREATE TABLE "variamos"."role" (
     "id" integer DEFAULT GENERATED ALWAYS AS IDENTITY NOT NULL,
     "name" text NOT NULL,
@@ -72,7 +72,7 @@ INSERT INTO "role" ("id", "name") VALUES
 (4,	'Language director'),
 (6,	'Guest');
 
-DROP TABLE IF EXISTS "role_permission";
+DROP TABLE IF EXISTS "role_permission" CASCADE;
 CREATE TABLE "variamos"."role_permission" (
     "role_id" integer NOT NULL,
     "permission_id" integer NOT NULL,
@@ -148,5 +148,6 @@ INSERT INTO "role_permission" ("role_id", "permission_id") VALUES
 
 ALTER TABLE ONLY "variamos"."role_permission" ADD CONSTRAINT "permission_fkey" FOREIGN KEY (permission_id) REFERENCES permission(id);
 ALTER TABLE ONLY "variamos"."role_permission" ADD CONSTRAINT "role_fkey" FOREIGN KEY (role_id) REFERENCES role(id);
+ALTER TABLE ONLY "variamos"."user_role" ADD CONSTRAINT "user_role_role_id_fkey" FOREIGN KEY (role_id) REFERENCES role(id);
 
 -- 2026-07-22 19:46:30 UTC
