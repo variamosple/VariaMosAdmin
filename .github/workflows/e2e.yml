@@ -73,7 +73,7 @@ jobs:
       uses: cypress-io/github-action@v6
       with:
         start: npm start
-        wait-on: 'http://localhost:3000, http://localhost:4000/auth/session-info'
+        wait-on: 'http://localhost:3000, http://localhost:4000/version'
         wait-on-timeout: 120
         command: npx cypress run --spec "cypress/integration/**/*.real.spec.js"
       env:
