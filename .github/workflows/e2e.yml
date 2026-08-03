@@ -46,6 +46,15 @@ jobs:
         repository: variamosple/vms_projects
         path: vms_projects
 
+    - name: Generate E2E Test Credentials & Keys
+      run: |
+        # Generate RS256 private and public keys for token authentication
+        openssl genrsa -out ./variamos_ms_admin/jwtRS256.key 2048
+        openssl rsa -in ./variamos_ms_admin/jwtRS256.key -pubout -out ./variamos_ms_admin/jwtRS256.key.pub
+        
+        # Create dummy credentials.json for projects microservice
+        echo '{}' > ./vms_projects/credentials.json
+
     - name: Initialize PostgreSQL database schema
       run: |
         PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -v ON_ERROR_STOP=1 -f cypress/support/db/VariamosDB.sql
