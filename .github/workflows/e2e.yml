@@ -25,6 +25,11 @@ jobs:
           --health-retries 5
 
     steps:
+    - name: Disable pre-installed PostgreSQL service
+      run: |
+        sudo systemctl stop postgresql
+        sudo systemctl disable postgresql
+
     - name: Checkout VariaMosAdmin (frontend)
       uses: actions/checkout@v4
 
