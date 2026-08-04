@@ -17,7 +17,7 @@ jobs:
           POSTGRES_USER: variamos_admin
           POSTGRES_PASSWORD: variamos_db_password
         ports:
-          - 5432:5432
+          - 5439:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -62,8 +62,8 @@ jobs:
 
     - name: Initialize PostgreSQL database schema
       run: |
-        PGPASSWORD=variamos_db_password psql -h 127.0.0.1 -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/VariamosDB.sql
-        PGPASSWORD=variamos_db_password PGOPTIONS="-c search_path=variamos,public" psql -h 127.0.0.1 -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/config.sql
+        PGPASSWORD=variamos_db_password psql -h 127.0.0.1 -p 5439 -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/VariamosDB.sql
+        PGPASSWORD=variamos_db_password PGOPTIONS="-c search_path=variamos,public" psql -h 127.0.0.1 -p 5439 -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/config.sql
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -95,7 +95,7 @@ jobs:
         DB_PASSWORD: variamos_db_password
         DB_HOST: 127.0.0.1
         DB_DATABASE: VariamosDB
-        DB_PORT: 5432
+        DB_PORT: 5439
         DB_SCHEMA: variamos
 
     - name: Print Docker Container Logs on Failure
