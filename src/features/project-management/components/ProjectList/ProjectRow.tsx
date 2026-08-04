@@ -61,7 +61,7 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
           {project.source}
         </td>
 
-        <td>{project.date && formatDate(new Date(project.date))}</td>
+        <td>{project.date && formatDate(project.date)}</td>
 
         <td>{formatBoolean(project.template, "Public", "Private")}</td>
 
