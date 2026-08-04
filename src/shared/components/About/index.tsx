@@ -764,7 +764,7 @@ fd_labeling(L).`}
                             title="VariaMos Language Definition"
                             src="https://drive.google.com/file/d/1oC-HvJy9aAnMnBzVkZGAFohtlOslGzRc/preview"
                             allow="autoplay"
-                            allowFullScreen={"true" as any}
+                            allowFullScreen={true}
                           ></iframe>
                         </div>
                       </div>
@@ -779,7 +779,7 @@ fd_labeling(L).`}
                             title="Collaborative Project Creation"
                             src="https://drive.google.com/file/d/1Q8lwzOfPucU8r-Z6dNKK-g6T6kIo7bkR/preview"
                             allow="autoplay"
-                            allowFullScreen={"true" as any}
+                            allowFullScreen={true}
                           ></iframe>
                         </div>
                       </div>
@@ -794,7 +794,7 @@ fd_labeling(L).`}
                             title="Collaborative Project Creation with GenAI"
                             src="https://drive.google.com/file/d/1j8BGIKWBbEnOGGR2zMV7uwUdGW6-t8vF/preview"
                             allow="autoplay"
-                            allowFullScreen={"true" as any}
+                            allowFullScreen={true}
                           ></iframe>
                         </div>
                       </div>
@@ -808,7 +808,7 @@ fd_labeling(L).`}
                             title="Generating the scope of a product line"
                             src="https://drive.google.com/file/d/1Jj00ZAyh0nbsX4boykkhjCipgrokTTDj/preview"
                             allow="autoplay"
-                            allowFullScreen={"true" as any}
+                            allowFullScreen={true}
                           ></iframe>
                         </div>
                       </div>

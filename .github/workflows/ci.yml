@@ -52,3 +52,17 @@ jobs:
       with:
         path: ./
 
+    - name: Run Mocked E2E Tests (Cypress in Docker)
+      run: |
+        npm run cypress:run:mocked
+
+    - name: Upload Cypress Screenshots and Videos
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-mocked-screenshots-and-videos
+        path: |
+          cypress/screenshots
+          cypress/videos
+        retention-days: 7
+

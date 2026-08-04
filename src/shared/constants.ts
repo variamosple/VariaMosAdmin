@@ -11,7 +11,6 @@ export const formatDateTime = (date: Date | string | number | null | undefined):
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   }).format(parsedDate);
 };
 
@@ -25,7 +24,6 @@ export const formatDate = (date: Date | string | number | null | undefined): str
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   }).format(parsedDate);
 };
 

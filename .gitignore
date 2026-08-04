@@ -28,3 +28,7 @@ yarn-error.log*
 # cypress
 /cypress/screenshots
 /cypress/videos
+
+# git worktrees
+.worktrees/
+

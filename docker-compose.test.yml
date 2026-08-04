@@ -1,0 +1,80 @@
+services:
+  variamos-ms-admin:
+    build:
+      context: ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin
+      dockerfile: Dockerfile
+    container_name: variamos-ms-admin-test
+    ports:
+      - "4000:4000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key:/variaMosAdminService/jwtRS256.key
+      - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key.pub:/variaMosAdminService/jwtRS256.key.pub
+    command: ["node", "-r", "module-alias/register", "./dist", "--env=development"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - DB_USER=variamos_admin
+      - DB_PASSWORD=variamos_db_password
+      - DB_HOST=host.docker.internal
+      - DB_DATABASE=VariamosDB
+      - DB_PORT=5432
+      - DB_SSL=false
+      - DB_SCHEMA=variamos
+      - VARIAMOS_PRIVATE_KEY_PATH=/variaMosAdminService/jwtRS256.key
+      - VARIAMOS_PUBLIC_KEY_PATH=/variaMosAdminService/jwtRS256.key.pub
+      - CORS_ALLOWED_ORIGINS_PATTERNS=http://localhost:3000
+      - COOKIE_DOMAIN=localhost
+      - SECURE_COOKIE=false
+      - DOCKER_SOCKET_PATH=/var/run/docker.sock
+    user: root
+
+  variamos-ms-languages:
+    build:
+      context: ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_languages
+      dockerfile: Dockerfile
+    container_name: variamos-ms-languages-test
+    ports:
+      - "5000:4000"
+    volumes:
+      - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key.pub:/variaMosLenguageService/jwtRS256.key.pub
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DB_USER=variamos_admin
+      - DB_PASSWORD=variamos_db_password
+      - DB_HOST=host.docker.internal
+      - DB_DATABASE=VariamosDB
+      - DB_PORT=5432
+      - DB_SSL=false
+      - DB_SCHEMA=variamos
+      - VARIAMOS_PUBLIC_KEY_PATH=/variaMosLenguageService/jwtRS256.key.pub
+      - CORS_ALLOWED_ORIGINS_PATTERNS=http://localhost:3000
+      - SECURE_COOKIE=false
+
+  variamos-ms-projects:
+    build:
+      context: ${VARIAMOS_WORKSPACE_DIR:-../}vms_projects
+      dockerfile: Dockerfile
+    container_name: variamos-ms-projects-test
+    ports:
+      - "10000:10000"
+    volumes:
+      - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key.pub:/service/jwtRS256.key.pub
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NODE_ENV=test
+      - VARIAMOS_MS_LANGUAGES_DB_USER=variamos_admin
+      - VARIAMOS_MS_LANGUAGES_DB_PASSWORD=variamos_db_password
+      - VARIAMOS_MS_LANGUAGES_DB_DATABASE=VariamosDB
+      - VARIAMOS_MS_LANGUAGES_DB_HOST=host.docker.internal
+      - VARIAMOS_MS_LANGUAGES_DB_PORT=5432
+      - VARIAMOS_MS_LANGUAGES_DB_SCHEMA=variamos
+      - VARIAMOS_PUBLIC_KEY_PATH=/service/jwtRS256.key.pub
+      - VARIAMOS_CORS_ALLOWED_ORIGINS_PATTERNS=http://localhost:3000
+
