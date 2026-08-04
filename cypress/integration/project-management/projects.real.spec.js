@@ -25,8 +25,12 @@ describe("Project Management - Real E2E Flows", () => {
     cy.url().should("eq", "http://localhost:3000/");
 
     // 2. Navigate to Projects page
+    cy.intercept('GET', '**/v1/admin/projects*').as('getProjects');
     cy.contains("Projects").click();
     cy.url().should("include", "/projects");
+    cy.wait('@getProjects').then((interception) => {
+      cy.log('API PROJECTS RESPONSE:', JSON.stringify(interception.response.body));
+    });
 
     // Verify seeded project exists
     cy.contains("tr", "Test Custom Project").should("be.visible");
