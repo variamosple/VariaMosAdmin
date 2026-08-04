@@ -28,9 +28,7 @@ describe("Model Management - Real E2E Flows", () => {
     cy.intercept('GET', '**/v1/admin/models*').as('getModels');
     cy.contains("button.p-0.nav-link", "Models").click();
     cy.url().should("include", "/models");
-    cy.wait('@getModels').then((interception) => {
-      cy.task('log', 'API MODELS RESPONSE: ' + JSON.stringify(interception.response.body));
-    });
+    cy.wait('@getModels');
 
     // Verify seeded model exists
     cy.contains("tr", "Test Custom Model").should("be.visible");
