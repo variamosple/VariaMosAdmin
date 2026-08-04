@@ -76,3 +76,5 @@ services:
       - VARIAMOS_MS_LANGUAGES_DB_PORT=5432
       - VARIAMOS_MS_LANGUAGES_DB_SCHEMA=variamos
       - VARIAMOS_PUBLIC_KEY_PATH=/service/jwtRS256.key.pub
+      - VARIAMOS_CORS_ALLOWED_ORIGINS_PATTERNS=http://localhost:3000
+
