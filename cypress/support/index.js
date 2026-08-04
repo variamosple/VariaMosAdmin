@@ -16,3 +16,13 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+Cypress.on('window:before:load', (win) => {
+  cy.stub(win.console, 'error').callsFake((...args) => {
+    cy.task('log', 'BROWSER CONSOLE ERROR: ' + args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' '));
+  });
+  cy.stub(win.console, 'warn').callsFake((...args) => {
+    cy.task('log', 'BROWSER CONSOLE WARN: ' + args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' '));
+  });
+});
+
+
