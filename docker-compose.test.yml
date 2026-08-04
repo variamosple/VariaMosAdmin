@@ -19,7 +19,7 @@ services:
       - DB_USER=variamos_admin
       - DB_PASSWORD=variamos_db_password
       - DB_HOST=host.docker.internal
-      - DB_DATABASE=variamos_db
+      - DB_DATABASE=VariamosDB
       - DB_PORT=5432
       - DB_SSL=false
       - DB_SCHEMA=variamos
@@ -28,6 +28,7 @@ services:
       - CORS_ALLOWED_ORIGINS_PATTERNS=http://localhost:3000
       - COOKIE_DOMAIN=localhost
       - SECURE_COOKIE=false
+      - DOCKER_SOCKET_PATH=/var/run/docker.sock
     user: root
 
   variamos-ms-languages:
@@ -47,7 +48,7 @@ services:
       - DB_USER=variamos_admin
       - DB_PASSWORD=variamos_db_password
       - DB_HOST=host.docker.internal
-      - DB_DATABASE=variamos_db
+      - DB_DATABASE=VariamosDB
       - DB_PORT=5432
       - DB_SSL=false
       - DB_SCHEMA=variamos
@@ -70,7 +71,7 @@ services:
       - NODE_ENV=test
       - VARIAMOS_MS_LANGUAGES_DB_USER=variamos_admin
       - VARIAMOS_MS_LANGUAGES_DB_PASSWORD=variamos_db_password
-      - VARIAMOS_MS_LANGUAGES_DB_DATABASE=variamos_db
+      - VARIAMOS_MS_LANGUAGES_DB_DATABASE=VariamosDB
       - VARIAMOS_MS_LANGUAGES_DB_HOST=host.docker.internal
       - VARIAMOS_MS_LANGUAGES_DB_PORT=5432
       - VARIAMOS_MS_LANGUAGES_DB_SCHEMA=variamos

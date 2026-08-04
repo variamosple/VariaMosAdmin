@@ -17,7 +17,7 @@ if (!fs.existsSync(envPath)) {
 let dbConfig = {
   user: 'variamos_admin',
   host: 'localhost',
-  database: 'variamos_db',
+  database: 'VariamosDB',
   password: 'variamos_db_password',
   port: 5432
 };
@@ -372,7 +372,7 @@ module.exports = {
       if (adminId) {
         await client.query(`
           INSERT INTO "variamos"."user_language" ("user_id", "language_id", "access_level")
-          VALUES ($1, $2, 'OWNER')
+          VALUES ($1, $2, 'owner')
         `, [adminId, activeLangId]);
       }
 
@@ -444,7 +444,7 @@ module.exports = {
       // Link User Project
       await client.query(`
         INSERT INTO "variamos"."user_project" ("user_id", "project_id", "role")
-        VALUES ($1, $2, 'OWNER')
+        VALUES ($1, $2, 'owner')
       `, [adminId, projectId]);
 
       // Insert Model

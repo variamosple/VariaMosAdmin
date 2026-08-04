@@ -13,7 +13,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: variamos_db
+          POSTGRES_DB: VariamosDB
           POSTGRES_USER: variamos_admin
           POSTGRES_PASSWORD: variamos_db_password
         ports:
@@ -57,8 +57,8 @@ jobs:
 
     - name: Initialize PostgreSQL database schema
       run: |
-        PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d variamos_db -v ON_ERROR_STOP=1 -f cypress/support/db/VariamosDB.sql
-        PGPASSWORD=variamos_db_password PGOPTIONS="-c search_path=variamos,public" psql -h localhost -U variamos_admin -d variamos_db -v ON_ERROR_STOP=1 -f cypress/support/db/config.sql
+        PGPASSWORD=variamos_db_password psql -h localhost -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/VariamosDB.sql
+        PGPASSWORD=variamos_db_password PGOPTIONS="-c search_path=variamos,public" psql -h localhost -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/config.sql
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -89,7 +89,7 @@ jobs:
         DB_USER: variamos_admin
         DB_PASSWORD: variamos_db_password
         DB_HOST: localhost
-        DB_DATABASE: variamos_db
+        DB_DATABASE: VariamosDB
         DB_PORT: 5432
         DB_SCHEMA: variamos
 
