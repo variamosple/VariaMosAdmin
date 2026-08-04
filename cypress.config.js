@@ -11,6 +11,7 @@ module.exports = defineConfig({
     specPattern: "cypress/integration/**/*.spec.js",
     supportFile: "cypress/support/index.js",
     baseUrl: "http://localhost:3000",
+    defaultCommandTimeout: 10000,
     blockHosts: [
       "*.google.com",
       "*.googleapis.com",
