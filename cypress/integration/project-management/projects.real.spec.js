@@ -29,7 +29,7 @@ describe("Project Management - Real E2E Flows", () => {
     cy.contains("Projects").click();
     cy.url().should("include", "/projects");
     cy.wait('@getProjects').then((interception) => {
-      cy.log('API PROJECTS RESPONSE:', JSON.stringify(interception.response.body));
+      cy.task('log', 'API PROJECTS RESPONSE: ' + JSON.stringify(interception.response.body));
     });
 
     // Verify seeded project exists

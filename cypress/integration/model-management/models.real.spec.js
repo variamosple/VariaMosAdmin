@@ -29,7 +29,7 @@ describe("Model Management - Real E2E Flows", () => {
     cy.contains("button.p-0.nav-link", "Models").click();
     cy.url().should("include", "/models");
     cy.wait('@getModels').then((interception) => {
-      cy.log('API MODELS RESPONSE:', JSON.stringify(interception.response.body));
+      cy.task('log', 'API MODELS RESPONSE: ' + JSON.stringify(interception.response.body));
     });
 
     // Verify seeded model exists

@@ -37,6 +37,10 @@ module.exports = (on, config) => {
         console.error(`Error executing database task "${functionName}" on script "${scriptPath}":`, error);
         throw error;
       }
+    },
+    log(message) {
+      console.log(message);
+      return null;
     }
   });
 
