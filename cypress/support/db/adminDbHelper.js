@@ -19,7 +19,7 @@ let dbConfig = {
   host: '127.0.0.1',
   database: 'VariamosDB',
   password: 'variamos_db_password',
-  port: 5439
+  port: 5432
 };
 
 if (fs.existsSync(envPath)) {

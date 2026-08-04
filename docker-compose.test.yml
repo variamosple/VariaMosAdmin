@@ -20,7 +20,7 @@ services:
       - DB_PASSWORD=variamos_db_password
       - DB_HOST=host.docker.internal
       - DB_DATABASE=VariamosDB
-      - DB_PORT=5439
+      - DB_PORT=5432
       - DB_SSL=false
       - DB_SCHEMA=variamos
       - VARIAMOS_PRIVATE_KEY_PATH=/variaMosAdminService/jwtRS256.key
@@ -49,7 +49,7 @@ services:
       - DB_PASSWORD=variamos_db_password
       - DB_HOST=host.docker.internal
       - DB_DATABASE=VariamosDB
-      - DB_PORT=5439
+      - DB_PORT=5432
       - DB_SSL=false
       - DB_SCHEMA=variamos
       - VARIAMOS_PUBLIC_KEY_PATH=/variaMosLenguageService/jwtRS256.key.pub
@@ -73,6 +73,6 @@ services:
       - VARIAMOS_MS_LANGUAGES_DB_PASSWORD=variamos_db_password
       - VARIAMOS_MS_LANGUAGES_DB_DATABASE=VariamosDB
       - VARIAMOS_MS_LANGUAGES_DB_HOST=host.docker.internal
-      - VARIAMOS_MS_LANGUAGES_DB_PORT=5439
+      - VARIAMOS_MS_LANGUAGES_DB_PORT=5432
       - VARIAMOS_MS_LANGUAGES_DB_SCHEMA=variamos
       - VARIAMOS_PUBLIC_KEY_PATH=/service/jwtRS256.key.pub
