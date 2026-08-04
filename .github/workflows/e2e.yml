@@ -9,27 +9,22 @@ jobs:
   e2e-real:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: VariamosDB
-          POSTGRES_USER: variamos_admin
-          POSTGRES_PASSWORD: variamos_db_password
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
-    - name: Disable pre-installed PostgreSQL service
+    - name: Stop native PostgreSQL and start test container
       run: |
-        sudo systemctl stop postgresql
-        sudo systemctl disable postgresql
+        # 1. Forcefully stop native host PostgreSQL and free port 5432
+        sudo systemctl stop postgresql || true
+        sudo systemctl disable postgresql || true
         sudo fuser -k 5432/tcp || true
+        
+        # 2. Start PostgreSQL container on port 5432
+        docker run --name postgres -e POSTGRES_USER=variamos_admin -e POSTGRES_PASSWORD=variamos_db_password -e POSTGRES_DB=VariamosDB -p 5432:5432 -d postgres:15
+        
+        # 3. Wait for PostgreSQL container to be ready
+        until docker exec postgres pg_isready -U variamos_admin -d VariamosDB; do
+          echo "Waiting for PostgreSQL container to start..."
+          sleep 1
+        done
 
     - name: Checkout VariaMosAdmin (frontend)
       uses: actions/checkout@v4
