@@ -453,6 +453,16 @@ module.exports = {
         VALUES ($1, $2, 'pl1', 'domain', 'Test Custom Model', 'VariaMos', $3, '{}')
       `, [modelId, projectId, langId]);
 
+      // Diagnostics check
+      const projCheck = await client.query('SELECT id, name, owner_id FROM "variamos"."project"');
+      const modelCheck = await client.query('SELECT id, name, project_id FROM "variamos"."model"');
+      const userProjCheck = await client.query('SELECT user_id, project_id, role FROM "variamos"."user_project"');
+      console.log('--- CI SEED DIAGNOSTICS ---');
+      console.log('PROJECTS IN DB:', projCheck.rows);
+      console.log('MODELS IN DB:', modelCheck.rows);
+      console.log('USER_PROJECTS IN DB:', userProjCheck.rows);
+      console.log('---------------------------');
+
       return { success: true, projectId, modelId };
     } catch (error) {
       console.error('Failed to seed test models:', error);
