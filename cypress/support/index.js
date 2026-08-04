@@ -16,13 +16,29 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+let browserLogs = [];
+
 Cypress.on('window:before:load', (win) => {
-  cy.stub(win.console, 'error').callsFake((...args) => {
-    cy.task('log', 'BROWSER CONSOLE ERROR: ' + args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' '));
-  });
-  cy.stub(win.console, 'warn').callsFake((...args) => {
-    cy.task('log', 'BROWSER CONSOLE WARN: ' + args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' '));
-  });
+  const originalError = win.console.error;
+  const originalWarn = win.console.warn;
+
+  win.console.error = (...args) => {
+    originalError.apply(win.console, args);
+    browserLogs.push('ERROR: ' + args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' '));
+  };
+
+  win.console.warn = (...args) => {
+    originalWarn.apply(win.console, args);
+    browserLogs.push('WARN: ' + args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' '));
+  };
 });
+
+afterEach(() => {
+  if (browserLogs.length > 0) {
+    cy.task('log', '\n--- BROWSER CONSOLE LOGS FROM TEST ---\n' + browserLogs.join('\n') + '\n-------------------------------------\n');
+    browserLogs = [];
+  }
+});
+
 
 
