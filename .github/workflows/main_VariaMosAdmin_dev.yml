@@ -43,7 +43,7 @@ jobs:
           echo "REACT_APP_HOME_PAGE=\"${{vars.REACT_APP_HOME_PAGE}}\"" >> .env
 
       - name: Build and push container image to registry
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
