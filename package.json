@@ -21,7 +21,7 @@
     "cypress:run:real": "npm run docker:test:up && start-server-and-test start http://localhost:3000 \"cypress run --spec 'cypress/integration/**/*.real.spec.js'\" ; status=$?; npm run docker:test:down; exit $status"
   },
   "dependencies": {
-    "@patternfly/react-core": "^6.0.0",
+    "@patternfly/react-core": "^6.6.0",
     "@patternfly/react-log-viewer": "^6.0.0",
     "@variamosple/variamos-components": "^0.0.23",
     "axios": "^1.7.7",
