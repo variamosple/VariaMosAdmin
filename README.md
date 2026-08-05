@@ -1,61 +1,96 @@
-# Getting Started with Create React App
+# VariaMos Admin Dashboard (Frontend)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the admin dashboard frontend for the VariaMos project, built using React, TypeScript, PatternFly, and Bootstrap. The project adheres to Clean Architecture principles to keep components decoupled from the core business logic.
 
-## Available Scripts
+## Technology Stack
 
-In the project directory, you can run:
+- **Framework**: React 18
+- **Language**: TypeScript
+- **UI Components**: PatternFly 6, Bootstrap 5
+- **Testing**: Jest, React Testing Library, Cypress
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Getting Started
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Prerequisites
 
-### `npm test`
+- Node.js version 18 or greater
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Installation
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## End-to-End (E2E) Testing
-
-This repository contains Cypress E2E tests for administrative user workflows (such as password recovery and reset flows).
-
-To run the Cypress test suite:
-1. Ensure the frontend is running (`npm start` on port 3000) and the backend API (`variamos_ms_admin`) is running on port 4000.
-2. Run the tests in headless mode:
+1. Clone the repository and navigate to the project directory:
    ```bash
-   npx cypress run --spec "cypress/integration/admin/passwordReset.spec.js"
+   cd VariaMosAdmin
    ```
-3. Or open the Cypress test runner GUI:
+2. Install dependencies:
    ```bash
-   npx cypress open
+   npm install
    ```
 
-## Learn More
+### Running the Application
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- To start the development server locally (runs on port 3000 by default):
+   ```bash
+   npm start
+   ```
+- To build the application for production:
+   ```bash
+   npm run build
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+
+## Testing Guide
+
+The testing suite consists of unit tests (Jest/React Testing Library) and End-to-End (E2E) tests (Cypress).
+
+### 1. Unit Tests
+
+Unit tests focus on component behavior and utility logic.
+- **Run Unit Tests (interactive watch mode)**:
+  ```bash
+  npm run test
+  ```
+- **Generate Coverage Report**:
+  ```bash
+  npm run jest:coverage
+  ```
+  *For a detailed overview of test coverage exclusions and philosophy, see the [Guide des Tests Unitaires & Couverture](README-tests.md).*
+
+### 2. End-to-End (E2E) Tests
+
+We use Cypress for end-to-end user workflow validation. There are two execution modes:
+
+#### A. Mocked E2E Tests (Recommended for CI & Local Development)
+Runs the test suite inside isolated Docker containers using mocked API responses.
+- **Run Mocked E2E Tests**:
+  ```bash
+  npm run cypress:run:mocked
+  ```
+
+#### B. Real E2E Tests (Integration)
+Runs the test suite against a real local PostgreSQL container and dev environment.
+- **Run Real E2E Tests**:
+  ```bash
+  npm run cypress:run:real
+  ```
+
+---
+
+## Code Quality & Architecture
+
+We enforce several linting and architectural boundaries:
+- **Linting & Formatting**: Ensure code adheres to styling guidelines with ESLint and Prettier:
+  ```bash
+  npm run lint
+  ```
+- **Type Checking**: Verify TypeScript types without emitting code:
+  ```bash
+  npm run typecheck
+  ```
+- **Architecture Boundaries**: Ensure Clean Architecture layers (Domain, Infrastructure, EntryPoints) remain decoupled and follow dependency rules:
+  ```bash
+  npm run check-arch
+  ```
+- **Git Hooks**: Pre-commit hooks run automatically on changed files (Prettier, ESLint, CSpell) to prevent formatting errors from entering the repository.
