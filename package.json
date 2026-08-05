@@ -16,8 +16,8 @@
     "typecheck": "tsc --noEmit",
     "find-deadcode": "knip",
     "cypress:run:mocked": "bash ./scripts/run-mocked-docker.sh",
-    "docker:test:up": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-../../../../} docker compose -f docker-compose.test.yml up -d",
-    "docker:test:down": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-../../../../} docker compose -f docker-compose.test.yml down && docker image prune -f",
+    "docker:test:up": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml up -d",
+    "docker:test:down": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml down && docker image prune -f",
     "cypress:run:real": "npm run docker:test:up && start-server-and-test start http://localhost:3000 \"cypress run --spec 'cypress/integration/**/*.real.spec.js'\" ; status=$?; npm run docker:test:down; exit $status"
   },
   "dependencies": {
