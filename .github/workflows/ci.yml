@@ -84,7 +84,7 @@ jobs:
 
     - name: Upload Cypress Screenshots and Videos
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: cypress-mocked-screenshots-and-videos
         path: |
