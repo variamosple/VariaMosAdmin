@@ -15,7 +15,7 @@ This is the admin dashboard frontend for the VariaMos project, built using React
 
 ### Prerequisites
 
-- Node.js version 18 or greater
+- Node.js version 24 or greater
 
 ### Installation
 
