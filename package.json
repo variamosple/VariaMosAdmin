@@ -69,7 +69,7 @@
     "pg": "^8.22.0",
     "prettier": "^3.9.4",
     "start-server-and-test": "^3.0.12",
-    "undici": "^7.28.0"
+    "undici": "^8.10.0"
   },
   "browserslist": {
     "production": [
