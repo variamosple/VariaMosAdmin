@@ -6,13 +6,13 @@ import { server } from "@/shared/tests/mocks/server";
 import { http, HttpResponse } from "msw";
 
 // Mock only @variamosple/variamos-components to avoid page visit tracker external side effects
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   withPageVisit: (component: any) => component,
 }));
 
 describe("BugListPage Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders correctly with initial state", async () => {
@@ -35,7 +35,7 @@ describe("BugListPage Component", () => {
   });
 
   it("shows error alert when error is present", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/bugs", () => {
         return HttpResponse.json(
@@ -275,7 +275,7 @@ describe("BugListPage Component", () => {
 
   it("shows error alert and keeps modal open when API submission fails with 500", async () => {
     const user = userEvent.setup();
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     server.use(
       http.post("*/bugs/:bugId/status", () => {

@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { ProjectSearchForm } from "./index";
 
 // Mock the variamos-components library which is imported by ProjectsFilter
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     PagedModel: class PagedModel {
       pageNumber?: number;
@@ -18,16 +18,16 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("ProjectSearchForm Component", () => {
-  const mockOnSubmit = jest.fn();
-  const mockOnSearchReset = jest.fn();
+  const mockOnSubmit = vi.fn();
+  const mockOnSearchReset = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("renders form fields correctly", () => {
@@ -54,13 +54,13 @@ describe("ProjectSearchForm Component", () => {
     );
 
     const nameInput = screen.getByLabelText("Name");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(nameInput, "My Project");
 
     // Since we are changing values, we must trigger form state isDirty by typing
     // Let's check: the useEffect depends on values, isDirty, handleSubmit, submit.
     // Jest timer should be advanced.
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalled();
@@ -83,10 +83,10 @@ describe("ProjectSearchForm Component", () => {
     );
 
     const select = screen.getByLabelText("Access level");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.selectOptions(select, "true");
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalled();
@@ -109,7 +109,7 @@ describe("ProjectSearchForm Component", () => {
     );
 
     const nameInput = screen.getByLabelText("Name") as HTMLInputElement;
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(nameInput, "Dirty Value");
 
     const resetButton = screen.getByTitle("Clear results");

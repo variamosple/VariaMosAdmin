@@ -11,12 +11,12 @@ const mockOptions: SelectOptionProps<string>[] = [
 ];
 
 describe("InfiniteSelect Component", () => {
-  const mockHandleSelect = jest.fn();
-  const mockSetSearchInput = jest.fn();
-  const mockLastOptionRef = jest.fn();
+  const mockHandleSelect = vi.fn();
+  const mockSetSearchInput = vi.fn();
+  const mockLastOptionRef = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render placeholder when no option is selected", () => {

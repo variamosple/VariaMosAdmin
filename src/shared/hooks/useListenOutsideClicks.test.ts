@@ -2,10 +2,10 @@ import { renderHook } from "@testing-library/react";
 import useListenOutsideClicks from "./useListenOutsideClicks";
 
 describe("useListenOutsideClicks hook", () => {
-  const mockOnOutsideClick = jest.fn();
+  const mockOnOutsideClick = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should trigger callback when clicking outside element", () => {
@@ -48,7 +48,7 @@ describe("useListenOutsideClicks hook", () => {
   });
 
   it("should remove click listener from document on unmount", () => {
-    const removeSpy = jest.spyOn(document, "removeEventListener");
+    const removeSpy = vi.spyOn(document, "removeEventListener");
 
     const { unmount } = renderHook(() => useListenOutsideClicks(mockOnOutsideClick));
 

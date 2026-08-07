@@ -8,13 +8,13 @@ import { useSession } from "@variamosple/variamos-components";
 import { MemoryRouter } from "react-router-dom";
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => ({
-  useSession: jest.fn(),
+vi.mock("@variamosple/variamos-components", async () => ({
+  useSession: vi.fn(),
   PagedModel: class PagedModel {},
 }));
 
 // Mock Subcomponents
-jest.mock("../components/SignUpForm", () => ({
+vi.mock("../components/SignUpForm", async () => ({
   SignUpForm: ({ onSignUp }: any) => (
     <button data-testid="mock-signup-form" onClick={() => onSignUp({ email: "test@example.com" })}>
       Submit SignUp
@@ -22,16 +22,16 @@ jest.mock("../components/SignUpForm", () => ({
   ),
 }));
 
-jest.mock("../components/GoogleLogin", () => ({
+vi.mock("../components/GoogleLogin", async () => ({
   GoogleLogin: ({ text }: any) => <div data-testid="mock-google-login">Google Login: {text}</div>,
 }));
 
 describe("SignUpPage Page Component", () => {
-  const mockSignUp = jest.fn();
+  const mockSignUp = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSession as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSession as import('vitest').Mock).mockReturnValue({
       signUp: mockSignUp,
     });
   });

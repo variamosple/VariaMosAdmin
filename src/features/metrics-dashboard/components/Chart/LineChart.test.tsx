@@ -11,7 +11,7 @@ const mockUseChartContext = {
   isLoading: false,
 };
 
-jest.mock("../../context/ChartContext", () => ({
+vi.mock("../../context/ChartContext", async () => ({
   useChartContext: () => mockUseChartContext,
   withChartContextWrapper: (Component: any) => (props: any) => <Component {...props} />,
 }));
@@ -26,12 +26,12 @@ const mockUseLineChartData = {
   options: { title: "Daily Signups" },
 };
 
-jest.mock("../../hooks/useLineChartData", () => ({
+vi.mock("../../hooks/useLineChartData", async () => ({
   useLineChartData: () => mockUseLineChartData,
 }));
 
 // Mock react-google-charts to avoid JSDOM charting errors
-jest.mock("react-google-charts", () => ({
+vi.mock("react-google-charts", async () => ({
   __esModule: true,
   default: ({ chartType, data }: any) => (
     <div data-testid="mock-google-chart" data-chart-type={chartType}>
@@ -41,13 +41,13 @@ jest.mock("react-google-charts", () => ({
 }));
 
 // Mock ChartDateFilter component
-jest.mock("./ChartDateFilter", () => ({
+vi.mock("./ChartDateFilter", async () => ({
   ChartDateFilter: ({ id }: any) => <div data-testid="mock-date-filter">Filter: {id}</div>,
 }));
 
 describe("LineChart Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseChartContext.metric = {
       title: "Project Signups",
       data: null,

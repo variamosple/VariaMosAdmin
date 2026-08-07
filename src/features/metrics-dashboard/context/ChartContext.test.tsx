@@ -11,7 +11,7 @@ const apiTarget = (path: string) => {
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 };
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -30,8 +30,8 @@ jest.mock("@variamosple/variamos-components", () => {
   };
 });
 
-const mockPushToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
   }),
@@ -62,12 +62,12 @@ const TestComponent = () => {
 
 describe("ChartContext", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should throw error when useChartContext is used outside ChartContextProvider", () => {
     // Suppress console.error in jest output for this test block
-    const spy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<TestComponent />)).toThrow(
       "useChartContext must be used within a ChartContextProvider",
     );

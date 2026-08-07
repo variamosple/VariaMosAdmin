@@ -7,7 +7,7 @@ import { server } from "@/shared/tests/mocks/server";
 import { http, HttpResponse } from "msw";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   const { useState, useCallback } = React;
   return {
@@ -69,7 +69,7 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock patternfly log viewer to prevent Jest ESM syntax errors
-jest.mock("@patternfly/react-log-viewer", () => {
+vi.mock("@patternfly/react-log-viewer", async () => {
   return {
     LogViewer: ({ data }: { data: string }) => <div data-testid="log-viewer">{data}</div>,
   };
@@ -77,7 +77,7 @@ jest.mock("@patternfly/react-log-viewer", () => {
 
 describe("MicroServiceListPage Integration", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     server.use(
       http.get("*/v1/micro-services", () => {

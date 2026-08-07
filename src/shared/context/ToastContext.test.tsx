@@ -26,7 +26,7 @@ const BadComponent = () => {
 describe("ToastContext & useToast", () => {
   it("throws error when used outside ToastProvider", () => {
     // Suppress console.error for clean output during expected throw
-    const spy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<BadComponent />)).toThrow("useToast must be used within a ToastProvider");
     spy.mockRestore();
   });

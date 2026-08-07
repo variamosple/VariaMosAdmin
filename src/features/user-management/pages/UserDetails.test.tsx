@@ -10,13 +10,13 @@ import { http, HttpResponse } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 // Mock router-related hooks & components
-jest.mock("react-router-dom", () => ({
-  useParams: jest.fn(),
+vi.mock("react-router-dom", async () => ({
+  useParams: vi.fn(),
 }));
 
-const mockPushToast = jest.fn();
-const mockRemoveToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+const mockRemoveToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
     removeToast: mockRemoveToast,
@@ -24,11 +24,11 @@ jest.mock("@/shared/context/ToastContext", () => ({
 }));
 
 // Mock @variamosple/variamos-components completely
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     withPageVisit: (component: any) => component,
-    useRouter: jest.fn(),
-    usePaginatedQuery: jest.fn(),
+    useRouter: vi.fn(),
+    usePaginatedQuery: vi.fn(),
     PagedModel: class PagedModel {
       pageNumber?: number;
       pageSize?: number;
@@ -49,8 +49,8 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock react-bootstrap components
-jest.mock("react-bootstrap", () => {
-  const original = jest.requireActual("react-bootstrap");
+vi.mock("react-bootstrap", async () => {
+  const original = await vi.importActual("react-bootstrap");
   return {
     ...original,
     Spinner: (props: any) => <div data-testid="spinner" {...props} />,
@@ -58,11 +58,11 @@ jest.mock("react-bootstrap", () => {
 });
 
 // Mock sub-components
-jest.mock("@/features/user-management/components/UserDetails", () => ({
+vi.mock("@/features/user-management/components/UserDetails", async () => ({
   UserDetails: ({ user }: any) => <div data-testid="user-details">User: {user?.name}</div>,
 }));
 
-jest.mock("../components/UserRoleForm", () => ({
+vi.mock("../components/UserRoleForm", async () => ({
   UserRoleForm: ({ onUserRoleSubmit, isLoading }: any) => (
     <div data-testid="user-role-form">
       <span>Role Form (Loading: {isLoading ? "true" : "false"})</span>
@@ -71,7 +71,7 @@ jest.mock("../components/UserRoleForm", () => ({
   ),
 }));
 
-jest.mock("../components/UserRoleList", () => ({
+vi.mock("../components/UserRoleList", async () => ({
   UserRoleList: ({ items, onRoleDelete }: any) => (
     <div data-testid="user-role-list">
       {items?.map((item: any) => (
@@ -84,7 +84,7 @@ jest.mock("../components/UserRoleList", () => ({
   ),
 }));
 
-jest.mock("@/shared/components/ConfirmationModal", () => {
+vi.mock("@/shared/components/ConfirmationModal", async () => {
   return {
     __esModule: true,
     default: ({ show, message, onConfirm, onCancel }: any) => {
@@ -106,13 +106,13 @@ const apiTarget = (path: string) => {
 };
 
 describe("UserDetailsPage Component", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
-  const useRouterMock = useRouter as jest.Mock;
-  const useParamsMock = useParams as jest.Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
+  const useRouterMock = useRouter as import('vitest').Mock;
+  const useParamsMock = useParams as import('vitest').Mock;
 
-  const mockNavigate = jest.fn();
-  const mockLoadUserRoles = jest.fn();
-  const mockOnUserRolesPageChange = jest.fn();
+  const mockNavigate = vi.fn();
+  const mockLoadUserRoles = vi.fn();
+  const mockOnUserRolesPageChange = vi.fn();
 
   const basePaginatedState = {
     data: [{ id: "role-1", name: "Administrator" }],
@@ -131,7 +131,7 @@ describe("UserDetailsPage Component", () => {
   let deleteUserRoleParams: any = null;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delayUserQuery = false;
     createUserRoleCalled = 0;
     deleteUserRoleCalled = 0;

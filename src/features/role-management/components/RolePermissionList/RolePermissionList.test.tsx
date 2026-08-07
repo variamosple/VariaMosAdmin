@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 import { RolePermissionList } from "./index";
 
 // Mock dependencies
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: function DummyPaginator({ currentPage, totalPages, onPageChange }: any) {
       return (
@@ -19,8 +19,8 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("RolePermissionList", () => {
-  const mockOnPageChange = jest.fn();
-  const mockOnPermissionDelete = jest.fn();
+  const mockOnPageChange = vi.fn();
+  const mockOnPermissionDelete = vi.fn();
 
   const items = [
     { id: 1, name: "Permission One" },
@@ -28,7 +28,7 @@ describe("RolePermissionList", () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render table headers and permission items correctly", () => {

@@ -6,10 +6,10 @@ import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
 import { http, HttpResponse } from "msw";
 
-const mockNavigate = jest.fn();
+const mockNavigate = vi.fn();
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   const { useState, useCallback } = React;
   return {
@@ -75,7 +75,7 @@ jest.mock("@variamosple/variamos-components", () => {
 
 describe("RoleListPage", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
@@ -186,7 +186,7 @@ describe("RoleListPage", () => {
   });
 
   it("shows error toast when API fails to load roles", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/roles", () => {
         return HttpResponse.json(

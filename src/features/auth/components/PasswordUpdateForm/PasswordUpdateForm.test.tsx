@@ -6,7 +6,7 @@ import { PasswordUpdateForm } from "./index";
 import { ResponseModel } from "@variamosple/variamos-components";
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   ResponseModel: class ResponseModel {
     errorCode: any;
     constructor(errorCode: any) {
@@ -17,11 +17,11 @@ jest.mock("@variamosple/variamos-components", () => ({
 }));
 
 describe("PasswordUpdateForm Component", () => {
-  const mockOnUpdatePasswordSubmit = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockOnUpdatePasswordSubmit = vi.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders nothing when showModal is false", () => {

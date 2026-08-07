@@ -7,7 +7,7 @@ import { server } from "@/shared/tests/mocks/server";
 import { http, HttpResponse } from "msw";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   const { useState, useCallback } = React;
   return {
@@ -69,7 +69,7 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-jest.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", () => {
+vi.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", async () => {
   return {
     __esModule: true,
     default: ({ show, message, onConfirm, onCancel }: any) => {
@@ -87,7 +87,7 @@ jest.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", 
 
 describe("ProjectListPage Integration", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
@@ -175,7 +175,7 @@ describe("ProjectListPage Integration", () => {
   });
 
   it("shows error toast when API fails to load projects", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/projects", () => {
         return HttpResponse.json(

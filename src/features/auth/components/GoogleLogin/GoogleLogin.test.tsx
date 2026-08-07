@@ -5,20 +5,20 @@ import { GoogleLogin } from "./index";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 describe("GoogleLogin Component", () => {
-  let mockInitialize: jest.Mock;
-  let mockRenderButton: jest.Mock;
+  let mockInitialize: import('vitest').Mock;
+  let mockRenderButton: import('vitest').Mock;
   let originalGoogle: any;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     originalGoogle = (window as any).google;
-    mockInitialize = jest.fn();
-    mockRenderButton = jest.fn();
+    mockInitialize = vi.fn();
+    mockRenderButton = vi.fn();
   });
 
   afterEach(() => {
     (window as any).google = originalGoogle;
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("renders the sign-in container div", () => {
@@ -80,7 +80,7 @@ describe("GoogleLogin Component", () => {
     };
 
     // Fast-forward interval timer
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
 
     expect(mockInitialize).toHaveBeenCalled();
     expect(mockRenderButton).toHaveBeenCalled();

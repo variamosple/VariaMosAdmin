@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 import { PermissionFormModal } from "./index";
 
 // Mock dependencies
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -24,8 +24,8 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("PermissionFormModal Component", () => {
-  const mockOnPermissionSubmit = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockOnPermissionSubmit = vi.fn();
+  const mockOnClose = vi.fn();
 
   const defaultProps = {
     modalTitle: "Create Permission",
@@ -36,7 +36,7 @@ describe("PermissionFormModal Component", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render modal with title and cancel/submit buttons", () => {

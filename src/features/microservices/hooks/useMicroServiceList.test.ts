@@ -3,10 +3,10 @@ import { useMicroServiceList } from "./useMicroServiceList";
 import * as MicroServiceRepository from "../api/MicroServiceRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 
-const mockLoadData = jest.fn();
-const mockOnPageChange = jest.fn();
+const mockLoadData = vi.fn();
+const mockOnPageChange = vi.fn();
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -30,18 +30,18 @@ jest.mock("@variamosple/variamos-components", () => {
         this.pageSize = pageSize;
       }
     },
-    usePaginatedQuery: jest.fn(),
+    usePaginatedQuery: vi.fn(),
   };
 });
 
 describe("useMicroServiceList Hook", () => {
-  let startMicroserviceSpy: jest.SpyInstance;
-  let restartMicroserviceSpy: jest.SpyInstance;
-  let stopMicroserviceSpy: jest.SpyInstance;
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
+  let startMicroserviceSpy: import('vitest').MockInstance;
+  let restartMicroserviceSpy: import('vitest').MockInstance;
+  let stopMicroserviceSpy: import('vitest').MockInstance;
+  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     startMicroserviceSpy = jest
       .spyOn(MicroServiceRepository, "startMicroservice")

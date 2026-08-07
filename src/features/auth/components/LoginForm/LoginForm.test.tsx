@@ -8,17 +8,17 @@ import { useSession } from "@variamosple/variamos-components";
 import { MemoryRouter } from "react-router-dom";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => ({
-  useSession: jest.fn(),
+vi.mock("@variamosple/variamos-components", async () => ({
+  useSession: vi.fn(),
   PagedModel: class PagedModel {},
 }));
 
 describe("LoginForm Component", () => {
-  const mockOnSignIn = jest.fn();
+  const mockOnSignIn = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSession as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSession as import('vitest').Mock).mockReturnValue({
       isLoading: false,
     });
   });
@@ -67,7 +67,7 @@ describe("LoginForm Component", () => {
   });
 
   it("disables submit button and shows loading spinner when session is loading", () => {
-    (useSession as jest.Mock).mockReturnValue({
+    (useSession as import('vitest').Mock).mockReturnValue({
       isLoading: true,
     });
     renderLoginForm();

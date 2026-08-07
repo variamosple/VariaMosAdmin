@@ -9,7 +9,7 @@ import { http, HttpResponse } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors when BugRepository is loaded
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     withPageVisit: (component: any) => component,
     ResponseModel: class ResponseModel {
@@ -35,8 +35,8 @@ const apiTarget = (path: string) => {
 };
 
 describe("BugApprovalModal Component", () => {
-  const mockOnConfirmApprove = jest.fn();
-  const mockOnHide = jest.fn();
+  const mockOnConfirmApprove = vi.fn();
+  const mockOnHide = vi.fn();
   const sampleRepos = ["repo1", "repo2"];
   const sampleCategories = ["UI", "Backend", "Other"];
 
@@ -56,7 +56,7 @@ describe("BugApprovalModal Component", () => {
   let deleteAttachmentParams: any[] = [];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     uploadAttachmentParams = [];
     deleteAttachmentParams = [];
 
@@ -245,7 +245,7 @@ describe("BugApprovalModal Component", () => {
   });
 
   it("shows error alert if upload or deletion fails", async () => {
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     server.use(
       http.post(apiTarget("/bugs/:bugId/attachments"), () => {

@@ -10,18 +10,18 @@ const mockProjects: Project[] = [
 ];
 
 // Mock the variamos-components library which has Paginator
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
   };
 });
 
 describe("ProjectList Component", () => {
-  const mockOnProjectEdit = jest.fn();
-  const mockOnProjectDelete = jest.fn();
+  const mockOnProjectEdit = vi.fn();
+  const mockOnProjectDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of projects correctly", () => {
@@ -30,7 +30,7 @@ describe("ProjectList Component", () => {
         items={mockProjects}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onProjectEdit={mockOnProjectEdit}
         onProjectDelete={mockOnProjectDelete}
       />,
@@ -48,7 +48,7 @@ describe("ProjectList Component", () => {
         items={mockProjects}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onProjectEdit={mockOnProjectEdit}
         onProjectDelete={mockOnProjectDelete}
       />,
@@ -69,7 +69,7 @@ describe("ProjectList Component", () => {
         items={mockProjects}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onProjectEdit={mockOnProjectEdit}
         onProjectDelete={mockOnProjectDelete}
       />,

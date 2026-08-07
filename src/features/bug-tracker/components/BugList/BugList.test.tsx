@@ -29,13 +29,13 @@ const mockBugs: Bug[] = [
 ];
 
 describe("BugList Component", () => {
-  const mockOnViewDetails = jest.fn();
-  const mockOnReject = jest.fn();
-  const mockOnRestore = jest.fn();
-  const mockOnApprove = jest.fn();
+  const mockOnViewDetails = vi.fn();
+  const mockOnReject = vi.fn();
+  const mockOnRestore = vi.fn();
+  const mockOnApprove = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of bugs correctly", () => {

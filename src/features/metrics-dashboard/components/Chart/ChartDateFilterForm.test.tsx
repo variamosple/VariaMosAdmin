@@ -3,9 +3,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ChartDateFilterForm } from "./ChartDateFilterForm";
 
-const mockFilterSubmit = jest.fn();
+const mockFilterSubmit = vi.fn();
 
-jest.mock("../../context/ChartContext", () => {
+vi.mock("../../context/ChartContext", async () => {
   return {
     useChartContext: () => ({
       isLoading: false,
@@ -16,7 +16,7 @@ jest.mock("../../context/ChartContext", () => {
 
 describe("ChartDateFilterForm Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render default values from context", () => {

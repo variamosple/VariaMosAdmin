@@ -10,24 +10,24 @@ import { useNavigate, useLocation, useParams, useSearchParams } from "react-rout
 let mockNavigateListeners: any[] = [];
 
 // Mock react-router-dom hooks
-jest.mock("react-router-dom", () => ({
-  useNavigate: jest.fn(),
-  useParams: jest.fn(),
-  useLocation: jest.fn(),
-  useSearchParams: jest.fn(),
+vi.mock("react-router-dom", async () => ({
+  useNavigate: vi.fn(),
+  useParams: vi.fn(),
+  useLocation: vi.fn(),
+  useSearchParams: vi.fn(),
 }));
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   const ReactContext = require("react").createContext(null);
 
   return {
     RouterContext: ReactContext,
     Events: {
-      subscribe: jest.fn((event: string, callback: Function) => {
+      subscribe: vi.fn((event: string, callback: Function) => {
         mockNavigateListeners.push(callback);
       }),
-      unsubscribe: jest.fn((event: string, callback: Function) => {
+      unsubscribe: vi.fn((event: string, callback: Function) => {
         mockNavigateListeners = mockNavigateListeners.filter((cb: any) => cb !== callback);
       }),
     },
@@ -60,7 +60,7 @@ const ConsumerComponent = () => {
 };
 
 describe("RouterContext & RouterProvider", () => {
-  const mockNavigate = jest.fn();
+  const mockNavigate = vi.fn();
   const mockLocation = { pathname: "/current-page" };
   const mockParams = { id: "123" };
   const mockSearchParams = [new URLSearchParams("?q=test")];
@@ -68,24 +68,24 @@ describe("RouterContext & RouterProvider", () => {
   let originalLocation: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockNavigateListeners = [];
 
-    (Events.subscribe as jest.Mock).mockImplementation((event: string, callback: Function) => {
+    (Events.subscribe as import('vitest').Mock).mockImplementation((event: string, callback: Function) => {
       mockNavigateListeners.push(callback);
     });
 
-    (Events.unsubscribe as jest.Mock).mockImplementation((event: string, callback: Function) => {
+    (Events.unsubscribe as import('vitest').Mock).mockImplementation((event: string, callback: Function) => {
       mockNavigateListeners = mockNavigateListeners.filter((cb: any) => cb !== callback);
     });
 
-    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
-    (useLocation as jest.Mock).mockReturnValue(mockLocation);
-    (useParams as jest.Mock).mockReturnValue(mockParams);
-    (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
+    (useNavigate as import('vitest').Mock).mockReturnValue(mockNavigate);
+    (useLocation as import('vitest').Mock).mockReturnValue(mockLocation);
+    (useParams as import('vitest').Mock).mockReturnValue(mockParams);
+    (useSearchParams as import('vitest').Mock).mockReturnValue(mockSearchParams);
 
     originalWindowOpen = window.open;
-    window.open = jest.fn();
+    window.open = vi.fn();
 
     // Mock window.location.origin
     originalLocation = window.location;

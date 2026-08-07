@@ -5,10 +5,10 @@ import "@testing-library/jest-dom";
 import { ResetPasswordForm } from "./index";
 
 describe("ResetPasswordForm Component", () => {
-  const mockOnSubmitPassword = jest.fn();
+  const mockOnSubmitPassword = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders form elements correctly", () => {

@@ -6,9 +6,9 @@ import { PersonalInformationUpdateForModal } from "./index";
 import { useQuery } from "@variamosple/variamos-components";
 
 // Mock @variamosple/variamos-components completely
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
-    useQuery: jest.fn(),
+    useQuery: vi.fn(),
     ResponseModel: class ResponseModel {
       errorCode?: number | null;
       message?: string;
@@ -21,10 +21,10 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("PersonalInformationUpdateForModal Component", () => {
-  const useQueryMock = useQuery as jest.Mock;
-  const mockLoadData = jest.fn();
-  const mockOnSubmit = jest.fn();
-  const mockOnClose = jest.fn();
+  const useQueryMock = useQuery as import('vitest').Mock;
+  const mockLoadData = vi.fn();
+  const mockOnSubmit = vi.fn();
+  const mockOnClose = vi.fn();
 
   const mockCountries = [
     { code: "CO", name: "Colombia" },
@@ -32,7 +32,7 @@ describe("PersonalInformationUpdateForModal Component", () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Default mock implementation for useQuery
     useQueryMock.mockReturnValue({

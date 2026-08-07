@@ -13,13 +13,13 @@ const apiTarget = (path: string) => {
 };
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   withPageVisit: (component: any) => component,
   PagedModel: class PagedModel {},
 }));
 
 // Mock sub-components
-jest.mock("../components/PasswordUpdateForm", () => ({
+vi.mock("../components/PasswordUpdateForm", async () => ({
   PasswordUpdateForm: ({ showModal, onClose, onUpdatePasswordSubmit, isLoading }: any) => {
     if (!showModal) return null;
     return (
@@ -36,7 +36,7 @@ jest.mock("../components/PasswordUpdateForm", () => ({
   },
 }));
 
-jest.mock("@/features/user-management/components/UserInformationUpdateFormModal", () => ({
+vi.mock("@/features/user-management/components/UserInformationUpdateFormModal", async () => ({
   PersonalInformationUpdateForModal: ({
     showModal,
     onClose,

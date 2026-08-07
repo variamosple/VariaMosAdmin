@@ -2,26 +2,26 @@ import { renderHook, act } from "@testing-library/react";
 import useIntersectionObserver from "./useIntersectionObserver";
 
 describe("useIntersectionObserver hook", () => {
-  let mockDisconnect = jest.fn();
-  let mockObserve = jest.fn();
+  let mockDisconnect = vi.fn();
+  let mockObserve = vi.fn();
   let observerCallback: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock the global IntersectionObserver
-    global.IntersectionObserver = jest.fn().mockImplementation((callback) => {
+    global.IntersectionObserver = vi.fn().mockImplementation((callback) => {
       observerCallback = callback;
       return {
         observe: mockObserve,
         disconnect: mockDisconnect,
-        unobserve: jest.fn(),
+        unobserve: vi.fn(),
       };
     });
   });
 
   it("should initialize hook and register intersection observer on node", () => {
-    const mockSetPage = jest.fn();
+    const mockSetPage = vi.fn();
     const { result } = renderHook(() => useIntersectionObserver(false, 1, mockSetPage));
 
     const dummyNode = document.createElement("div");
@@ -35,7 +35,7 @@ describe("useIntersectionObserver hook", () => {
   });
 
   it("should increment page when intersecting and hasMore is true", () => {
-    const mockSetPage = jest.fn();
+    const mockSetPage = vi.fn();
     const { result } = renderHook(() => useIntersectionObserver(false, 1, mockSetPage));
 
     const dummyNode = document.createElement("div");
@@ -52,7 +52,7 @@ describe("useIntersectionObserver hook", () => {
   });
 
   it("should not increment page if isDataLoading is true", () => {
-    const mockSetPage = jest.fn();
+    const mockSetPage = vi.fn();
     const { result } = renderHook(() => useIntersectionObserver(true, 1, mockSetPage));
 
     const dummyNode = document.createElement("div");

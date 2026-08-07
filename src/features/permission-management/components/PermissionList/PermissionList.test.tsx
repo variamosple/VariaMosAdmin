@@ -10,18 +10,18 @@ const mockPermissions: Permission[] = [
 ];
 
 // Mock the variamos-components library which has Paginator
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
   };
 });
 
 describe("PermissionList Component", () => {
-  const mockOnPermissionEdit = jest.fn();
-  const mockOnPermissionDelete = jest.fn();
+  const mockOnPermissionEdit = vi.fn();
+  const mockOnPermissionDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of permissions correctly", () => {
@@ -30,7 +30,7 @@ describe("PermissionList Component", () => {
         items={mockPermissions}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onPermissionEdit={mockOnPermissionEdit}
         onPermissionDelete={mockOnPermissionDelete}
       />,
@@ -50,7 +50,7 @@ describe("PermissionList Component", () => {
         items={mockPermissions}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onPermissionEdit={mockOnPermissionEdit}
         onPermissionDelete={mockOnPermissionDelete}
       />,
@@ -71,7 +71,7 @@ describe("PermissionList Component", () => {
         items={mockPermissions}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onPermissionEdit={mockOnPermissionEdit}
         onPermissionDelete={mockOnPermissionDelete}
       />,

@@ -5,7 +5,7 @@ import "@testing-library/jest-dom";
 import { ModelFormModal } from "./index";
 
 // Mock @variamosple/variamos-components completely
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number | null;
@@ -19,11 +19,11 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("ModelFormModal Component", () => {
-  const mockOnSubmit = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockOnSubmit = vi.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("does not render when showModal is false", () => {

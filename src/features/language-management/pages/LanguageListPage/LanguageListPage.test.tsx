@@ -5,7 +5,7 @@ import { LanguageListPage } from "./index";
 import { ToastProvider } from "@/shared/context/ToastContext";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   const { useState, useCallback } = React;
   return {
@@ -67,7 +67,7 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-jest.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", () => {
+vi.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", async () => {
   return {
     __esModule: true,
     default: ({ show, message, onConfirm, onCancel }: any) => {
@@ -85,7 +85,7 @@ jest.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", 
 
 describe("LanguageListPage", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {

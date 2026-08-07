@@ -3,17 +3,17 @@ import { useProjectList } from "./useProjectsList";
 import * as ProjectRepository from "../api/ProjectRepository";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 
-const mockPushToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
   }),
 }));
 
-const mockLoadData = jest.fn();
-const mockOnPageChange = jest.fn();
+const mockLoadData = vi.fn();
+const mockOnPageChange = vi.fn();
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -37,17 +37,17 @@ jest.mock("@variamosple/variamos-components", () => {
         this.pageSize = pageSize;
       }
     },
-    usePaginatedQuery: jest.fn(),
+    usePaginatedQuery: vi.fn(),
   };
 });
 
 describe("useProjectList Hook", () => {
-  let updateProjectSpy: jest.SpyInstance;
-  let deleteProjectSpy: jest.SpyInstance;
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
+  let updateProjectSpy: import('vitest').MockInstance;
+  let deleteProjectSpy: import('vitest').MockInstance;
+  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     updateProjectSpy = jest
       .spyOn(ProjectRepository, "updateProject")

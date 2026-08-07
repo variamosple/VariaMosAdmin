@@ -5,16 +5,16 @@ import { RolePermissionForm } from "./index";
 import { usePaginatedQuery, useDebouncedValue } from "@variamosple/variamos-components";
 
 // Mock dependencies
-jest.mock("@/shared/hooks/useIntersectionObserver", () => {
+vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
   return () => ({
-    lastEntryRef: jest.fn(),
-    setHasMore: jest.fn(),
+    lastEntryRef: vi.fn(),
+    setHasMore: vi.fn(),
     page: 1,
   });
 });
 
-jest.mock("react-bootstrap", () => {
-  const original = jest.requireActual("react-bootstrap");
+vi.mock("react-bootstrap", async () => {
+  const original = await vi.importActual("react-bootstrap");
   return {
     ...original,
     Spinner: function DummySpinner() {
@@ -23,10 +23,10 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
-    useDebouncedValue: jest.fn((val) => [val]),
-    usePaginatedQuery: jest.fn(),
+    useDebouncedValue: vi.fn((val) => [val]),
+    usePaginatedQuery: vi.fn(),
     PagedModel: class PagedModel {
       pageNumber?: number;
       pageSize?: number;
@@ -52,7 +52,7 @@ jest.mock("@variamosple/variamos-components", () => {
   };
 });
 
-jest.mock("@/shared/components/InfiniteSelect", () => {
+vi.mock("@/shared/components/InfiniteSelect", async () => {
   return {
     InfiniteSelect: function DummyInfiniteSelect({ options, handleSelect, placeholder }: any) {
       return (
@@ -81,15 +81,15 @@ jest.mock("@/shared/components/InfiniteSelect", () => {
 });
 
 describe("RolePermissionForm", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
-  const useDebouncedValueMock = useDebouncedValue as jest.Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
+  const useDebouncedValueMock = useDebouncedValue as import('vitest').Mock;
 
-  const mockLoadData = jest.fn();
-  const mockSetCurrentPage = jest.fn();
-  const mockOnRolePermissionSubmit = jest.fn();
+  const mockLoadData = vi.fn();
+  const mockSetCurrentPage = vi.fn();
+  const mockOnRolePermissionSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useDebouncedValueMock.mockImplementation((val) => [val]);
 

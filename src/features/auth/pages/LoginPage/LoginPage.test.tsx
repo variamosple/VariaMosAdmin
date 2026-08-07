@@ -17,19 +17,19 @@ const apiTarget = (path: string) => {
 };
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   withPageVisit: (component: any) => component,
-  useRouter: jest.fn(),
-  useSession: jest.fn(),
+  useRouter: vi.fn(),
+  useSession: vi.fn(),
   PagedModel: class PagedModel {},
 }));
 
 // Mock Subcomponents
-jest.mock("../../components/GoogleLogin", () => ({
+vi.mock("../../components/GoogleLogin", async () => ({
   GoogleLogin: () => <div data-testid="mock-google-login">Google Login</div>,
 }));
 
-jest.mock("../../components/LoginForm", () => ({
+vi.mock("../../components/LoginForm", async () => ({
   LoginForm: ({ onSignIn }: any) => (
     <button
       data-testid="mock-login-form"
@@ -41,21 +41,21 @@ jest.mock("../../components/LoginForm", () => ({
 }));
 
 describe("LoginPage Page Component", () => {
-  const mockNavigate = jest.fn();
-  const mockSignIn = jest.fn();
-  const mockSignInAsGuest = jest.fn();
+  const mockNavigate = vi.fn();
+  const mockSignIn = vi.fn();
+  const mockSignInAsGuest = vi.fn();
   let mockQueryParams: URLSearchParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockQueryParams = new URLSearchParams();
 
-    (useRouter as jest.Mock).mockReturnValue({
+    (useRouter as import('vitest').Mock).mockReturnValue({
       queryParams: mockQueryParams,
       navigate: mockNavigate,
     });
 
-    (useSession as jest.Mock).mockReturnValue({
+    (useSession as import('vitest').Mock).mockReturnValue({
       signIn: mockSignIn,
       signInAsGuest: mockSignInAsGuest,
       isLoading: false,

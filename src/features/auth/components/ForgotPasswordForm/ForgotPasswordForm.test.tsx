@@ -5,10 +5,10 @@ import "@testing-library/jest-dom";
 import { ForgotPasswordForm } from "./index";
 
 describe("ForgotPasswordForm Component", () => {
-  const mockOnSubmitEmail = jest.fn();
+  const mockOnSubmitEmail = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders form elements correctly", () => {

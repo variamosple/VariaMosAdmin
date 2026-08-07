@@ -4,11 +4,11 @@ import userEvent from "@testing-library/user-event";
 import ConfirmationModal from "./index";
 
 describe("ConfirmationModal Component", () => {
-  const mockOnConfirm = jest.fn();
-  const mockOnCancel = jest.fn();
+  const mockOnConfirm = vi.fn();
+  const mockOnCancel = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render message and buttons when show is true", () => {

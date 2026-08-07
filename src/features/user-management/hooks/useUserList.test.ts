@@ -6,17 +6,17 @@ import { server } from "@/shared/tests/mocks/server";
 import { http, HttpResponse } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
-const mockPushToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
   }),
 }));
 
-const mockLoadData = jest.fn();
-const mockOnPageChange = jest.fn();
+const mockLoadData = vi.fn();
+const mockOnPageChange = vi.fn();
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -40,7 +40,7 @@ jest.mock("@variamosple/variamos-components", () => {
         this.pageSize = pageSize;
       }
     },
-    usePaginatedQuery: jest.fn(),
+    usePaginatedQuery: vi.fn(),
   };
 });
 
@@ -50,7 +50,7 @@ const apiTarget = (path: string) => {
 };
 
 describe("useUserList Hook", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
 
   const dummyUser: User = {
     id: "123",
@@ -68,7 +68,7 @@ describe("useUserList Hook", () => {
   let disableUserError = false;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     disableUserCalled = 0;
     enableUserCalled = 0;
     deleteUserCalled = 0;
@@ -145,7 +145,7 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDisableUser error", async () => {
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     disableUserError = true;
     const { result } = renderHook(() => useUserList());
 

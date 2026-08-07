@@ -10,18 +10,18 @@ const mockModels: Model[] = [
 ];
 
 // Mock the variamos-components library which has Paginator
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
   };
 });
 
 describe("ModelList Component", () => {
-  const mockOnModelEdit = jest.fn();
-  const mockOnModelDelete = jest.fn();
+  const mockOnModelEdit = vi.fn();
+  const mockOnModelDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of models correctly", () => {
@@ -30,7 +30,7 @@ describe("ModelList Component", () => {
         items={mockModels}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onModelEdit={mockOnModelEdit}
         onModelDelete={mockOnModelDelete}
       />,
@@ -47,7 +47,7 @@ describe("ModelList Component", () => {
         items={mockModels}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onModelEdit={mockOnModelEdit}
         onModelDelete={mockOnModelDelete}
       />,

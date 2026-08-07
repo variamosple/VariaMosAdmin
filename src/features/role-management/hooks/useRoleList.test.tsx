@@ -5,19 +5,19 @@ import { server } from "@/shared/tests/mocks/server";
 import { http, HttpResponse } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
-const mockPushToast = jest.fn();
-const mockRemoveToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+const mockRemoveToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
     removeToast: mockRemoveToast,
   }),
 }));
 
-const mockLoadData = jest.fn();
-const mockOnPageChange = jest.fn();
+const mockLoadData = vi.fn();
+const mockOnPageChange = vi.fn();
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -41,7 +41,7 @@ jest.mock("@variamosple/variamos-components", () => {
         this.pageSize = pageSize;
       }
     },
-    usePaginatedQuery: jest.fn(),
+    usePaginatedQuery: vi.fn(),
   };
 });
 
@@ -51,7 +51,7 @@ const apiTarget = (path: string) => {
 };
 
 describe("useRoleList Hook", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
 
   let createRoleCalled = 0;
   let updateRoleCalled = 0;
@@ -61,7 +61,7 @@ describe("useRoleList Hook", () => {
   let deleteRoleId: any = null;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     createRoleCalled = 0;
     updateRoleCalled = 0;
     deleteRoleCalled = 0;
@@ -170,7 +170,7 @@ describe("useRoleList Hook", () => {
   });
 
   it("should handle performEditRole failure", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.put(apiTarget("/v1/roles/:roleId"), () => {
         return HttpResponse.json({ errorCode: "500", message: "Edit failed" }, { status: 500 });

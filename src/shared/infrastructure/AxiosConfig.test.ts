@@ -4,11 +4,11 @@ import { server } from "../tests/mocks/server";
 import { http, HttpResponse } from "msw";
 
 describe("AxiosConfig Interceptors", () => {
-  let navigateMock: jest.Mock;
+  let navigateMock: import('vitest').Mock;
   let testClient: any;
 
   beforeEach(() => {
-    navigateMock = jest.fn();
+    navigateMock = vi.fn();
     testClient = axios.create({
       baseURL: "http://api.test",
     });

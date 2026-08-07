@@ -4,16 +4,16 @@ import userEvent from "@testing-library/user-event";
 import { LanguageSearchForm } from "./index";
 
 describe("LanguageSearchForm Component", () => {
-  const mockOnSubmit = jest.fn();
-  const mockOnSearchReset = jest.fn();
+  const mockOnSubmit = vi.fn();
+  const mockOnSearchReset = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("renders search inputs correctly", () => {
@@ -41,7 +41,7 @@ describe("LanguageSearchForm Component", () => {
     const input = screen.getByPlaceholderText("Search by language name");
 
     // Simulate typing
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(input, "my-query");
 
     // Ensure it hasn't fired immediately
@@ -49,7 +49,7 @@ describe("LanguageSearchForm Component", () => {
 
     // Advance time by 500ms
     await act(async () => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
 
     expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: "my-query" }));
@@ -65,7 +65,7 @@ describe("LanguageSearchForm Component", () => {
     );
 
     const input = screen.getByPlaceholderText("Search by language name");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(input, "temp");
 
     const clearButton = screen.getByTitle("Clear results");

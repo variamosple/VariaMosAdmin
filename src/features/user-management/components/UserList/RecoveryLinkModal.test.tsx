@@ -7,7 +7,7 @@ import { http, HttpResponse } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 // Mock @variamosple/variamos-components to prevent ESM SyntaxError
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -27,8 +27,8 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock ToastContext
-const mockPushToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
   }),
@@ -40,7 +40,7 @@ const apiTarget = (path: string) => {
 };
 
 describe("RecoveryLinkModal Component", () => {
-  const mockOnHide = jest.fn();
+  const mockOnHide = vi.fn();
   const mockUser = {
     id: "user-123",
     user: "bob",
@@ -57,14 +57,14 @@ describe("RecoveryLinkModal Component", () => {
   let isRecoveryError = false;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     recoveryLinkCalled = 0;
     delayRecoveryQuery = false;
     isRecoveryError = false;
 
     // Mock navigator.clipboard using Object.defineProperty
     const mockClipboard = {
-      writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+      writeText: vi.fn().mockImplementation(() => Promise.resolve()),
     };
     Object.defineProperty(navigator, "clipboard", {
       value: mockClipboard,
@@ -134,7 +134,7 @@ describe("RecoveryLinkModal Component", () => {
 
   it("handles copy to clipboard functionality", async () => {
     const user = userEvent.setup();
-    const writeTextSpy = jest.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined);
+    const writeTextSpy = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined);
 
     render(<RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />);
 

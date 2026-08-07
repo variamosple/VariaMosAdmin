@@ -6,7 +6,7 @@ import { ProjectFormModal } from "./index";
 import { ResponseModel } from "@variamosple/variamos-components";
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -21,11 +21,11 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("ProjectFormModal Component", () => {
-  const mockOnClose = jest.fn();
-  const mockOnSubmit = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the modal when showModal is true", () => {

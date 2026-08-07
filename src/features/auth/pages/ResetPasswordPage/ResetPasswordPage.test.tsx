@@ -14,14 +14,14 @@ const apiTarget = (path: string) => {
 };
 
 // Mock react-router-dom hooks
-jest.mock("react-router-dom", () => ({
-  useSearchParams: jest.fn(),
-  useNavigate: jest.fn(),
+vi.mock("react-router-dom", async () => ({
+  useSearchParams: vi.fn(),
+  useNavigate: vi.fn(),
   Link: ({ to, children }: any) => <a href={to}>{children}</a>,
 }));
 
 // Mock components
-jest.mock("../../components/ResetPasswordForm", () => ({
+vi.mock("../../components/ResetPasswordForm", async () => ({
   ResetPasswordForm: ({ onSubmitPassword, isLoading }: any) => (
     <div>
       <span>Loading: {isLoading ? "Yes" : "No"}</span>
@@ -33,25 +33,25 @@ jest.mock("../../components/ResetPasswordForm", () => ({
 }));
 
 // Mock components module to prevent ESM errors
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   withPageVisit: (component: any) => component,
   PagedModel: class PagedModel {},
 }));
 
 describe("ResetPasswordPage Component", () => {
-  const mockNavigate = jest.fn();
+  const mockNavigate = vi.fn();
   let mockSearchParams: URLSearchParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     mockSearchParams = new URLSearchParams();
-    (useSearchParams as jest.Mock).mockReturnValue([mockSearchParams]);
-    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+    (useSearchParams as import('vitest').Mock).mockReturnValue([mockSearchParams]);
+    (useNavigate as import('vitest').Mock).mockReturnValue(mockNavigate);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("shows invalid token message if token is missing in URL", async () => {
@@ -80,7 +80,7 @@ describe("ResetPasswordPage Component", () => {
   });
 
   it("shows invalid token message if token verification throws error", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     let verifyTokenCalledWith: string | null = null;
     server.use(
       http.get(apiTarget("/auth/verify-token"), ({ request }) => {
@@ -134,7 +134,7 @@ describe("ResetPasswordPage Component", () => {
     render(<ResetPasswordPage />);
 
     await screen.findByTestId("mock-reset-form");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.click(screen.getByTestId("mock-reset-form"));
 
     expect(
@@ -146,7 +146,7 @@ describe("ResetPasswordPage Component", () => {
     });
 
     // Fast-forward 3 seconds for the navigate redirection timer
-    jest.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(3000);
     expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 
@@ -168,7 +168,7 @@ describe("ResetPasswordPage Component", () => {
     render(<ResetPasswordPage />);
 
     await screen.findByTestId("mock-reset-form");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.click(screen.getByTestId("mock-reset-form"));
 
     expect(
@@ -194,14 +194,14 @@ describe("ResetPasswordPage Component", () => {
     render(<ResetPasswordPage />);
 
     await screen.findByTestId("mock-reset-form");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.click(screen.getByTestId("mock-reset-form"));
 
     expect(await screen.findByText("Generic error")).toBeInTheDocument();
   });
 
   it("handles exception thrown by resetPassword", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     server.use(
       http.get(apiTarget("/auth/verify-token"), () => {
@@ -217,7 +217,7 @@ describe("ResetPasswordPage Component", () => {
     render(<ResetPasswordPage />);
 
     await screen.findByTestId("mock-reset-form");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.click(screen.getByTestId("mock-reset-form"));
 
     expect(

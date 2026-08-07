@@ -5,17 +5,17 @@ import "@testing-library/jest-dom";
 import { BugSearchForm } from "./index";
 
 describe("BugSearchForm Component", () => {
-  const mockOnSubmit = jest.fn();
-  const mockOnSearchReset = jest.fn();
+  const mockOnSubmit = vi.fn();
+  const mockOnSearchReset = vi.fn();
   const sampleRepos = ["repo-a", "repo-b"];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("renders basic search fields on local/trash tab", () => {
@@ -66,7 +66,7 @@ describe("BugSearchForm Component", () => {
     );
 
     const nameInput = screen.getByPlaceholderText("Search by name");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(nameInput, "Test Query");
     expect(nameInput).toHaveValue("Test Query");
 
@@ -88,7 +88,7 @@ describe("BugSearchForm Component", () => {
     );
 
     const nameInput = screen.getByPlaceholderText("Search by name");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(nameInput, "Glitch");
 
     const clearNameBtn = screen.getByTitle("Clear name filter");
@@ -114,7 +114,7 @@ describe("BugSearchForm Component", () => {
     const nameInput = screen.getByPlaceholderText("Search by name");
 
     // Simulate typing
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(nameInput, "Performance issue");
 
     // Initially not submitted (within 500ms debounce window)
@@ -122,13 +122,13 @@ describe("BugSearchForm Component", () => {
 
     // Advance timers by 400ms - still shouldn't submit
     act(() => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
     expect(mockOnSubmit).not.toHaveBeenCalled();
 
     // Advance by remaining 100ms - should trigger submit
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     await waitFor(() => {

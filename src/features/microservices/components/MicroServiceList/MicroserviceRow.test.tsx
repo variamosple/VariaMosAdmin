@@ -16,7 +16,7 @@ const mockMicroservice: MicroService = {
 };
 
 // Mock @variamosple/variamos-components to avoid ESM syntax errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -36,7 +36,7 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock patternfly log viewer
-jest.mock("@patternfly/react-log-viewer", () => {
+vi.mock("@patternfly/react-log-viewer", async () => {
   return {
     LogViewer: ({ data }: { data: string }) => <div data-testid="log-viewer">{data}</div>,
   };
@@ -44,8 +44,8 @@ jest.mock("@patternfly/react-log-viewer", () => {
 
 // Mock watchMicroserviceLogs API to return a mock WebSocket object
 const mockWebSocket = {
-  send: jest.fn(),
-  close: jest.fn(),
+  send: vi.fn(),
+  close: vi.fn(),
   onopen: null,
   onmessage: null,
   onclose: null,
@@ -53,14 +53,14 @@ const mockWebSocket = {
 };
 
 describe("MicroServiceRowComponent WebSocket Logging", () => {
-  const mockOnStart = jest.fn();
-  const mockOnRestart = jest.fn();
-  const mockOnStop = jest.fn();
+  const mockOnStart = vi.fn();
+  const mockOnRestart = vi.fn();
+  const mockOnStop = vi.fn();
 
-  let watchLogsSpy: jest.SpyInstance;
+  let watchLogsSpy: import('vitest').MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     (mockWebSocket as any).onopen = null;
     (mockWebSocket as any).onmessage = null;
     (mockWebSocket as any).onclose = null;

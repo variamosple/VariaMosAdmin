@@ -5,11 +5,11 @@ import { ProjectRowComponent } from "./ProjectRow";
 import { Project } from "../../domain/Entity/Project";
 
 // Jest mock of variamos-components (just in case)
-jest.mock("@variamosple/variamos-components", () => ({}));
+vi.mock("@variamosple/variamos-components", async () => ({}));
 
 describe("ProjectRowComponent", () => {
-  const mockOnProjectEdit = jest.fn();
-  const mockOnProjectDelete = jest.fn();
+  const mockOnProjectEdit = vi.fn();
+  const mockOnProjectDelete = vi.fn();
 
   const sampleProject: Project = {
     id: 42,
@@ -41,7 +41,7 @@ describe("ProjectRowComponent", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (project: Project = sampleProject) => {

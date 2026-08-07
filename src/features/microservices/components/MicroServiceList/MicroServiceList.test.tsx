@@ -12,7 +12,7 @@ const mockMicroservices: MicroService[] = [
 ];
 
 // Mock the variamos-components library which has Paginator
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
     ResponseModel: class ResponseModel {
@@ -33,22 +33,22 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock the patternfly log viewer to avoid importing style files or complex web socket interactions
-jest.mock("@patternfly/react-log-viewer", () => {
+vi.mock("@patternfly/react-log-viewer", async () => {
   return {
     LogViewer: () => <div data-testid="log-viewer">LogViewer</div>,
   };
 });
 
 describe("MicroServiceList Component", () => {
-  const mockOnStart = jest.fn();
-  const mockOnRestart = jest.fn();
-  const mockOnStop = jest.fn();
-  let watchLogsSpy: jest.SpyInstance;
+  const mockOnStart = vi.fn();
+  const mockOnRestart = vi.fn();
+  const mockOnStop = vi.fn();
+  let watchLogsSpy: import('vitest').MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    watchLogsSpy = jest.spyOn(MicroServiceRepository, "watchMicroserviceLogs").mockReturnValue({
-      close: jest.fn(),
+    vi.clearAllMocks();
+    watchLogsSpy = vi.spyOn(MicroServiceRepository, "watchMicroserviceLogs").mockReturnValue({
+      close: vi.fn(),
     } as any);
   });
 
@@ -62,7 +62,7 @@ describe("MicroServiceList Component", () => {
         items={mockMicroservices}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onMicroServiceStart={mockOnStart}
         onMicroServiceRestart={mockOnRestart}
         onMicroServiceStop={mockOnStop}
@@ -80,7 +80,7 @@ describe("MicroServiceList Component", () => {
         items={mockMicroservices}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onMicroServiceStart={mockOnStart}
         onMicroServiceRestart={mockOnRestart}
         onMicroServiceStop={mockOnStop}

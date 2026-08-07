@@ -3,13 +3,13 @@ import { useSocket } from "./useSocket";
 
 describe("useSocket Hook", () => {
   let mockWebSocket: any;
-  let mockSocketFunction: jest.Mock;
+  let mockSocketFunction: import('vitest').Mock;
 
   beforeEach(() => {
     mockWebSocket = {
-      close: jest.fn(),
+      close: vi.fn(),
     };
-    mockSocketFunction = jest.fn().mockReturnValue(mockWebSocket);
+    mockSocketFunction = vi.fn().mockReturnValue(mockWebSocket);
   });
 
   it("should not connect on mount if connectOnMount is false", () => {
@@ -43,7 +43,7 @@ describe("useSocket Hook", () => {
   });
 
   it("should handle error when socketFunction throws", () => {
-    const spyConsole = jest.spyOn(console, "error").mockImplementation(() => {});
+    const spyConsole = vi.spyOn(console, "error").mockImplementation(() => {});
     mockSocketFunction.mockImplementation(() => {
       throw new Error("Socket connection failed");
     });

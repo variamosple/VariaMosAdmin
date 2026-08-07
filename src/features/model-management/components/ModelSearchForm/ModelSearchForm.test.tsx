@@ -8,7 +8,7 @@ import { ModelSearchForm } from "./index";
 import { act } from "react";
 
 // Mock @variamosple/variamos-components before any other imports that might use it
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     PagedModel: class PagedModel {
       pageNumber?: number;
@@ -22,16 +22,16 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("ModelSearchForm Component", () => {
-  const mockOnSubmit = jest.fn();
-  const mockOnSearchReset = jest.fn();
+  const mockOnSubmit = vi.fn();
+  const mockOnSearchReset = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("renders correctly with initial values", () => {
@@ -70,7 +70,7 @@ describe("ModelSearchForm Component", () => {
     );
 
     const input = screen.getByPlaceholderText("Search by model name or project name");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(input, "Test Query");
     expect(input).toHaveValue("Test Query");
 
@@ -93,11 +93,11 @@ describe("ModelSearchForm Component", () => {
     const input = screen.getByPlaceholderText("Search by model name or project name");
 
     // Change input
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(input, "A");
     // Fast-forward 200ms
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
     expect(mockOnSubmit).not.toHaveBeenCalled();
 
@@ -105,13 +105,13 @@ describe("ModelSearchForm Component", () => {
     await user.type(input, "B"); // Since we type B, it appends to A -> AB
     // Fast-forward another 300ms
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
     expect(mockOnSubmit).not.toHaveBeenCalled();
 
     // Fast-forward another 200ms (total 500ms from last change)
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     await waitFor(() => {

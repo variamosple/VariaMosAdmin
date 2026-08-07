@@ -6,8 +6,8 @@ import { ModelRowComponent } from "./ModelRow";
 import { Model } from "@/features/model-management/domain/Entity/Model";
 
 describe("ModelRowComponent", () => {
-  const mockOnModelEdit = jest.fn();
-  const mockOnModelDelete = jest.fn();
+  const mockOnModelEdit = vi.fn();
+  const mockOnModelDelete = vi.fn();
 
   const sampleModel: Model = {
     id: "model-1",
@@ -26,7 +26,7 @@ describe("ModelRowComponent", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (model: Model = sampleModel) => {

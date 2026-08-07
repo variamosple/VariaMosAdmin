@@ -5,10 +5,10 @@ import { useSession, useRouter } from "@variamosple/variamos-components";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
-    useSession: jest.fn(),
-    useRouter: jest.fn(),
+    useSession: vi.fn(),
+    useRouter: vi.fn(),
     PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel {
       type: string;
@@ -20,27 +20,27 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock About component to simplify render
-jest.mock("../components/About", () => ({
+vi.mock("../components/About", async () => ({
   About: () => <div data-testid="about-component">About Component</div>,
 }));
 
 describe("SignInLayout", () => {
-  const mockNavigate = jest.fn();
+  const mockNavigate = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    (useRouter as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    (useRouter as import('vitest').Mock).mockReturnValue({
       navigate: mockNavigate,
     });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("renders children and About component when user is not authenticated", () => {
-    (useSession as jest.Mock).mockReturnValue({
+    (useSession as import('vitest').Mock).mockReturnValue({
       isAuthenticated: false,
     });
 
@@ -56,7 +56,7 @@ describe("SignInLayout", () => {
   });
 
   it("schedules redirect to Home page and cleans up timeout on unmount if authenticated", () => {
-    (useSession as jest.Mock).mockReturnValue({
+    (useSession as import('vitest').Mock).mockReturnValue({
       isAuthenticated: true,
     });
 
@@ -71,7 +71,7 @@ describe("SignInLayout", () => {
 
     // Fast-forward time
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     expect(mockNavigate).toHaveBeenCalledWith(AppConfig.HOME_PAGE);

@@ -6,17 +6,17 @@ import { SignUpForm } from "./index";
 import { useSession } from "@variamosple/variamos-components";
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => ({
-  useSession: jest.fn(),
+vi.mock("@variamosple/variamos-components", async () => ({
+  useSession: vi.fn(),
   PagedModel: class PagedModel {},
 }));
 
 describe("SignUpForm Component", () => {
-  const mockOnSignUp = jest.fn();
+  const mockOnSignUp = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSession as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSession as import('vitest').Mock).mockReturnValue({
       isLoading: false,
     });
   });
@@ -80,7 +80,7 @@ describe("SignUpForm Component", () => {
   });
 
   it("disables submit button and shows loading spinner when session is loading", () => {
-    (useSession as jest.Mock).mockReturnValue({
+    (useSession as import('vitest').Mock).mockReturnValue({
       isLoading: true,
     });
     render(<SignUpForm onSignUp={mockOnSignUp} />);

@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 import { RoleFormModal } from "./index";
 import { Role } from "@/features/role-management/domain/Entity/Role";
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number | null = null;
@@ -19,12 +19,12 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("RoleFormModal Component", () => {
-  const mockOnClose = jest.fn();
-  const mockOnRoleSubmit = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnRoleSubmit = vi.fn();
   const defaultRole: Role = { id: 1, name: "Admin" };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders correctly when showModal is true", () => {

@@ -2,15 +2,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UserRoleForm } from "./index";
 
-jest.mock("@/shared/hooks/useIntersectionObserver", () => {
+vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
   return () => ({
-    lastEntryRef: jest.fn(),
-    setHasMore: jest.fn(),
+    lastEntryRef: vi.fn(),
+    setHasMore: vi.fn(),
     page: 1,
   });
 });
 
-jest.mock("@/shared/components/InfiniteSelect", () => {
+vi.mock("@/shared/components/InfiniteSelect", async () => {
   return {
     InfiniteSelect: ({ handleSelect, options }: any) => (
       <select
@@ -31,15 +31,15 @@ jest.mock("@/shared/components/InfiniteSelect", () => {
   };
 });
 
-const mockLoadData = jest.fn();
-jest.mock("@variamosple/variamos-components", () => {
+const mockLoadData = vi.fn();
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     useDebouncedValue: (val: any) => [val],
     usePaginatedQuery: () => ({
       loadData: mockLoadData,
       isLoading: false,
       currentPage: 1,
-      setCurrentPage: jest.fn(),
+      setCurrentPage: vi.fn(),
       totalItems: 2,
     }),
     PagedModel: class PagedModel {
@@ -71,10 +71,10 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("UserRoleForm Component", () => {
-  const mockOnUserRoleSubmit = jest.fn();
+  const mockOnUserRoleSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLoadData.mockResolvedValue({
       data: [
         { id: 1, name: "Admin" },

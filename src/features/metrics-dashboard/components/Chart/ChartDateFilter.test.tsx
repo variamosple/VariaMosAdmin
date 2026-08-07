@@ -4,15 +4,15 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { ChartDateFilter } from "./ChartDateFilter";
 
-const mockFilterChartData = jest.fn();
+const mockFilterChartData = vi.fn();
 
-jest.mock("../../context/ChartContext", () => ({
+vi.mock("../../context/ChartContext", async () => ({
   useChartContext: () => ({
     filterChartData: mockFilterChartData,
   }),
 }));
 
-jest.mock("./ChartDateFilterForm", () => ({
+vi.mock("./ChartDateFilterForm", async () => ({
   ChartDateFilterForm: ({ onFilterSubmit }: any) => (
     <div>
       <button
@@ -27,7 +27,7 @@ jest.mock("./ChartDateFilterForm", () => ({
 
 describe("ChartDateFilter Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the funnel button and opens the filter popover on click", async () => {

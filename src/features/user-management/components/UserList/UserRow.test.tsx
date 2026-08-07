@@ -9,15 +9,15 @@ import { http, HttpResponse } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 // Mock router and query hooks from variamos-components
-const mockNavigate = jest.fn();
-const mockLoadData = jest.fn();
+const mockNavigate = vi.fn();
+const mockLoadData = vi.fn();
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     useRouter: () => ({
       navigate: mockNavigate,
     }),
-    useQuery: jest.fn(),
+    useQuery: vi.fn(),
     PagedModel: class PagedModel {
       pageNumber?: number;
       pageSize?: number;
@@ -35,11 +35,11 @@ const apiTarget = (path: string) => {
 };
 
 describe("UserRowComponent", () => {
-  const useQueryMock = useQuery as jest.Mock;
-  const mockOnUserResetLink = jest.fn();
-  const mockOnUserDisable = jest.fn();
-  const mockOnUserEnable = jest.fn();
-  const mockOnUserDelete = jest.fn();
+  const useQueryMock = useQuery as import('vitest').Mock;
+  const mockOnUserResetLink = vi.fn();
+  const mockOnUserDisable = vi.fn();
+  const mockOnUserEnable = vi.fn();
+  const mockOnUserDelete = vi.fn();
 
   const mockUserActive: User = {
     id: "1",
@@ -60,7 +60,7 @@ describe("UserRowComponent", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useQueryMock.mockReturnValue({
       loadData: mockLoadData,

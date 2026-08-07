@@ -15,7 +15,7 @@ const apiTarget = (path: string) => {
 };
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   withPageVisit: (component: any) => component,
   PagedModel: class PagedModel {},
   ResponseModel: class ResponseModel {
@@ -29,7 +29,7 @@ jest.mock("@variamosple/variamos-components", () => ({
 }));
 
 // Mock ForgotPasswordForm
-jest.mock("../../components/ForgotPasswordForm", () => ({
+vi.mock("../../components/ForgotPasswordForm", async () => ({
   ForgotPasswordForm: ({ onSubmitEmail, isLoading }: any) => (
     <div>
       <span>Loading: {isLoading ? "Yes" : "No"}</span>
@@ -113,7 +113,7 @@ describe("ForgotPasswordPage Component", () => {
   });
 
   it("handles exception thrown by requestPasswordReset", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     server.use(
       http.post(apiTarget("/auth/forgot-password"), () => {

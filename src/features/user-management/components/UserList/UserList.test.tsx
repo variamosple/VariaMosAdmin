@@ -4,15 +4,15 @@ import { UserList } from "./index";
 import { User } from "../../domain/Entity/User";
 import { createUserMock } from "@/shared/tests/factories";
 
-const mockNavigate = jest.fn();
-jest.mock("@variamosple/variamos-components", () => {
+const mockNavigate = vi.fn();
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
     useRouter: () => ({
       navigate: mockNavigate,
     }),
     useQuery: () => ({
-      loadData: jest.fn(),
+      loadData: vi.fn(),
       isLoading: false,
       data: [],
       filter: {},
@@ -58,13 +58,13 @@ const mockUsers: User[] = [
 ];
 
 describe("UserList Component", () => {
-  const mockOnUserResetLink = jest.fn();
-  const mockOnUserDisable = jest.fn();
-  const mockOnUserEnable = jest.fn();
-  const mockOnUserDelete = jest.fn();
+  const mockOnUserResetLink = vi.fn();
+  const mockOnUserDisable = vi.fn();
+  const mockOnUserEnable = vi.fn();
+  const mockOnUserDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of users correctly", () => {
@@ -73,7 +73,7 @@ describe("UserList Component", () => {
         items={mockUsers}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onUserResetLink={mockOnUserResetLink}
         onUserDisable={mockOnUserDisable}
         onUserEnable={mockOnUserEnable}
@@ -96,7 +96,7 @@ describe("UserList Component", () => {
         items={mockUsers}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onUserResetLink={mockOnUserResetLink}
         onUserDisable={mockOnUserDisable}
         onUserEnable={mockOnUserEnable}
@@ -117,7 +117,7 @@ describe("UserList Component", () => {
         items={mockUsers}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onUserResetLink={mockOnUserResetLink}
         onUserDisable={mockOnUserDisable}
         onUserEnable={mockOnUserEnable}
@@ -138,7 +138,7 @@ describe("UserList Component", () => {
         items={mockUsers}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onUserResetLink={mockOnUserResetLink}
         onUserDisable={mockOnUserDisable}
         onUserEnable={mockOnUserEnable}
@@ -159,7 +159,7 @@ describe("UserList Component", () => {
         items={mockUsers}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onUserResetLink={mockOnUserResetLink}
         onUserDisable={mockOnUserDisable}
         onUserEnable={mockOnUserEnable}

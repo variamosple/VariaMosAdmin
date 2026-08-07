@@ -6,7 +6,7 @@ import { http, HttpResponse } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 // Mock the variamos-components library which is published as ES Module
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -139,7 +139,7 @@ describe("useBugList Hook", () => {
   });
 
   it("should handle error during bug fetching gracefully", async () => {
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     server.use(
       http.get(apiTarget("/bugs"), () => {

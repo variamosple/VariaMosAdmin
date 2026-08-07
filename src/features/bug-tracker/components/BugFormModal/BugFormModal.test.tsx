@@ -5,13 +5,13 @@ import "@testing-library/jest-dom";
 import { BugFormModal } from "./index";
 
 describe("BugFormModal Component", () => {
-  const mockOnHide = jest.fn();
-  const mockOnSubmit = jest.fn();
+  const mockOnHide = vi.fn();
+  const mockOnSubmit = vi.fn();
   const sampleRepos = ["repo1", "repo2"];
   const sampleCategories = ["UI", "Backend", "Other"];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders nothing when show is false", () => {

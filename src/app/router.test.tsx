@@ -2,61 +2,61 @@ import React from "react";
 import { ROUTES } from "./router";
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   AuthWrapper: ({ children }: any) => <div>{children}</div>,
   NotAuthorized: () => <div>Not Authorized</div>,
   ProtectedRoute: ({ children }: any) => <div>{children}</div>,
 }));
 
 // Mock SecurityWrapper and Layouts
-jest.mock("@/shared/components/SecurityWrapper", () => ({
+vi.mock("@/shared/components/SecurityWrapper", async () => ({
   SecurityWrapper: ({ children }: any) => <div>{children}</div>,
 }));
-jest.mock("@/shared/layouts/MainLayout", () => ({
+vi.mock("@/shared/layouts/MainLayout", async () => ({
   MainLayout: ({ children }: any) => <div>{children}</div>,
 }));
-jest.mock("@/shared/layouts/SignInLayout", () => ({
+vi.mock("@/shared/layouts/SignInLayout", async () => ({
   SignInLayout: ({ children }: any) => <div>{children}</div>,
 }));
 
 // Mock Pages
-jest.mock("@/features/auth", () => ({
+vi.mock("@/features/auth", async () => ({
   ForgotPasswordPage: () => <div>ForgotPasswordPage</div>,
   LoginPage: () => <div>LoginPage</div>,
   MyAccountPage: () => <div>MyAccountPage</div>,
   ResetPasswordPage: () => <div>ResetPasswordPage</div>,
   SignUpPage: () => <div>SignUpPage</div>,
 }));
-jest.mock("@/features/home", () => ({
+vi.mock("@/features/home", async () => ({
   HomePage: () => <div>HomePage</div>,
 }));
-jest.mock("@/features/language-management", () => ({
+vi.mock("@/features/language-management", async () => ({
   LanguageListPage: () => <div>LanguageListPage</div>,
 }));
-jest.mock("@/features/metrics-dashboard", () => ({
+vi.mock("@/features/metrics-dashboard", async () => ({
   MetricsPage: () => <div>MetricsPage</div>,
 }));
-jest.mock("@/features/microservices", () => ({
+vi.mock("@/features/microservices", async () => ({
   MicroServiceListPage: () => <div>MicroServiceListPage</div>,
 }));
-jest.mock("@/features/model-management", () => ({
+vi.mock("@/features/model-management", async () => ({
   ModelListPage: () => <div>ModelListPage</div>,
 }));
-jest.mock("@/features/permission-management", () => ({
+vi.mock("@/features/permission-management", async () => ({
   PermissionListPage: () => <div>PermissionListPage</div>,
 }));
-jest.mock("@/features/project-management", () => ({
+vi.mock("@/features/project-management", async () => ({
   ProjectListPage: () => <div>ProjectListPage</div>,
 }));
-jest.mock("@/features/role-management", () => ({
+vi.mock("@/features/role-management", async () => ({
   RoleDetailsPage: () => <div>RoleDetailsPage</div>,
   RoleListPage: () => <div>RoleListPage</div>,
 }));
-jest.mock("@/features/user-management", () => ({
+vi.mock("@/features/user-management", async () => ({
   UserDetailsPage: () => <div>UserDetailsPage</div>,
   UserListPage: () => <div>UserListPage</div>,
 }));
-jest.mock("@/features/bug-tracker", () => ({
+vi.mock("@/features/bug-tracker", async () => ({
   BugListPage: () => <div>BugListPage</div>,
 }));
 

@@ -3,11 +3,13 @@ import { TransformStream, ReadableStream, WritableStream } from "stream/web";
 
 import "@testing-library/jest-dom";
 
+import { vi } from "vitest";
+
 global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any;
-global.TransformStream = TransformStream as any;
-global.ReadableStream = ReadableStream as any;
-global.WritableStream = WritableStream as any;
+global.TextDecoder = TextDecoder as unknown as typeof global.TextDecoder;
+global.TransformStream = TransformStream as unknown as typeof global.TransformStream;
+global.ReadableStream = ReadableStream as unknown as typeof global.ReadableStream;
+global.WritableStream = WritableStream as unknown as typeof global.WritableStream;
 
 // Use dummy class for BroadcastChannel to prevent open handles while satisfying MSW ws.ts
 class DummyBroadcastChannel {
@@ -21,7 +23,7 @@ class DummyBroadcastChannel {
   close() {}
   unref() {}
 }
-global.BroadcastChannel = DummyBroadcastChannel as any;
+global.BroadcastChannel = DummyBroadcastChannel as unknown as typeof global.BroadcastChannel;
 
 // Use dummy class for MessagePort to prevent open handles while satisfying undici
 class DummyMessagePort {
@@ -31,22 +33,22 @@ class DummyMessagePort {
   start() {}
   close() {}
 }
-global.MessagePort = DummyMessagePort as any;
+global.MessagePort = DummyMessagePort as unknown as typeof global.MessagePort;
 
 const { fetch, Headers, Request, Response } = require("undici");
 
 global.fetch = fetch;
-global.Headers = Headers as any;
-global.Request = Request as any;
-global.Response = Response as any;
+global.Headers = Headers as unknown as typeof global.Headers;
+global.Request = Request as unknown as typeof global.Request;
+global.Response = Response as unknown as typeof global.Response;
 
 // Require server dynamically to prevent ES module import hoisting
 const { server } = require("./shared/tests/mocks/server");
 
 class MockIntersectionObserver {
-  observe = jest.fn();
-  disconnect = jest.fn();
-  unobserve = jest.fn();
+  observe = vi.fn();
+  disconnect = vi.fn();
+  unobserve = vi.fn();
 }
 
 Object.defineProperty(window, "IntersectionObserver", {
