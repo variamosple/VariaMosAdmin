@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "variamos_admin/",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -111,5 +114,11 @@
       "!src/shared/components/About/**",
       "!src/**/*.types.ts"
     ]
+  },
+  "allowScripts": {
+    "core-js@3.40.0": true,
+    "core-js-pure@3.40.0": true,
+    "cypress@15.19.0": true,
+    "msw@2.15.0": true
   }
 }
