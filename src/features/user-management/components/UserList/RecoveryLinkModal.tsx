@@ -1,9 +1,9 @@
-import { FC, useState } from "react";
+import { type FC, useState } from "react";
 import { Button, Form, InputGroup, Modal, Spinner } from "react-bootstrap";
 import { Clipboard, ClipboardCheck } from "react-bootstrap-icons";
-import { User } from "@/features/user-management/domain/Entity/User";
-import { useToast } from "@/shared/context/ToastContext";
 import { generateRecoveryLink } from "@/features/user-management/api/UserRepository";
+import type { User } from "@/features/user-management/domain/Entity/User";
+import { useToast } from "@/shared/context/ToastContext";
 
 interface RecoveryLinkModalProps {
   user: User | undefined;
@@ -11,7 +11,11 @@ interface RecoveryLinkModalProps {
   onHide: () => void;
 }
 
-export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({ user, show, onHide }) => {
+export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
+  user,
+  show,
+  onHide,
+}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [recoveryUrl, setRecoveryUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
@@ -32,7 +36,7 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({ user, show, onHi
           variant: "danger",
         });
       } else {
-        setRecoveryUrl(response.data!.recoveryUrl);
+        setRecoveryUrl(response.data?.recoveryUrl ?? null);
       }
     } catch (error: any) {
       pushToast({
@@ -65,8 +69,9 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({ user, show, onHi
 
       <Modal.Body>
         <p className="text-secondary small">
-          Use this to help <strong>{user?.name}</strong> who has lost access to their email.
-          Generate a unique link and send it to them via a secure channel.
+          Use this to help <strong>{user?.name}</strong> who has lost access to
+          their email. Generate a unique link and send it to them via a secure
+          channel.
         </p>
 
         {!recoveryUrl && !loading && (
@@ -86,7 +91,9 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({ user, show, onHi
 
         {recoveryUrl && (
           <Form.Group className="mt-3">
-            <Form.Label className="form-label align-self-start m-0">Copy this link:</Form.Label>
+            <Form.Label className="form-label align-self-start m-0">
+              Copy this link:
+            </Form.Label>
             <InputGroup>
               <Form.Control
                 type="text"
@@ -101,7 +108,9 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({ user, show, onHi
                 {copied ? <ClipboardCheck /> : <Clipboard />}
               </Button>
             </InputGroup>
-            {copied && <p className="text-success small mt-1">Copied to clipboard!</p>}
+            {copied && (
+              <p className="text-success small mt-1">Copied to clipboard!</p>
+            )}
           </Form.Group>
         )}
       </Modal.Body>

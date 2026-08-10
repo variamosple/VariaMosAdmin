@@ -1,10 +1,10 @@
+import { withPageVisit } from "@variamosple/variamos-components";
+import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
+import type { FC } from "react";
+import { Container } from "react-bootstrap";
 import { ProjectFormModal } from "@/features/project-management/components/ProjectFormModal";
 import { ProjectList } from "@/features/project-management/components/ProjectList";
 import { ProjectSearchForm } from "@/features/project-management/components/ProjectsSearchForm";
-import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
-import { FC } from "react";
-import { Container } from "react-bootstrap";
 import { useProjectList } from "../../hooks/useProjectsList";
 
 const ProjectListPageComponent: FC = () => {
@@ -76,4 +76,7 @@ const ProjectListPageComponent: FC = () => {
   );
 };
 
-export const ProjectListPage = withPageVisit(ProjectListPageComponent, "AdminProjectList");
+export const ProjectListPage = withPageVisit(
+  ProjectListPageComponent,
+  "AdminProjectList",
+);

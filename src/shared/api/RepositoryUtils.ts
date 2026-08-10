@@ -1,5 +1,5 @@
-import axios from "axios";
 import { ResponseModel } from "@variamosple/variamos-components";
+import axios from "axios";
 
 /**
  * Centrally processes Axios and other network errors, mapping them to a standardized ResponseModel.
@@ -13,12 +13,12 @@ export const handleRepositoryError = (
 
     const response = error.response?.data;
 
-    if (!!response) {
+    if (response) {
       return response;
     }
 
     return new ResponseModel("BACK-ERROR").withError(
-      Number.parseInt(error.code || "500"),
+      Number.parseInt(error.code || "500", 10),
       "Error when communicating with the back-end.",
     );
   } else {

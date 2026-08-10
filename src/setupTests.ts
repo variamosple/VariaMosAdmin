@@ -1,13 +1,23 @@
-import { TextEncoder, TextDecoder } from "util";
-import { TransformStream, ReadableStream, WritableStream } from "stream/web";
+import {
+  ReadableStream,
+  TransformStream,
+  WritableStream,
+} from "node:stream/web";
+import { TextDecoder, TextEncoder } from "node:util";
 
 import "@testing-library/jest-dom";
 
+import { vi } from "vitest";
+import { server } from "./shared/tests/mocks/server";
+
 global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any;
-global.TransformStream = TransformStream as any;
-global.ReadableStream = ReadableStream as any;
-global.WritableStream = WritableStream as any;
+global.TextDecoder = TextDecoder as unknown as typeof global.TextDecoder;
+global.TransformStream =
+  TransformStream as unknown as typeof global.TransformStream;
+global.ReadableStream =
+  ReadableStream as unknown as typeof global.ReadableStream;
+global.WritableStream =
+  WritableStream as unknown as typeof global.WritableStream;
 
 // Use dummy class for BroadcastChannel to prevent open handles while satisfying MSW ws.ts
 class DummyBroadcastChannel {
@@ -21,7 +31,8 @@ class DummyBroadcastChannel {
   close() {}
   unref() {}
 }
-global.BroadcastChannel = DummyBroadcastChannel as any;
+global.BroadcastChannel =
+  DummyBroadcastChannel as unknown as typeof global.BroadcastChannel;
 
 // Use dummy class for MessagePort to prevent open handles while satisfying undici
 class DummyMessagePort {
@@ -31,22 +42,28 @@ class DummyMessagePort {
   start() {}
   close() {}
 }
-global.MessagePort = DummyMessagePort as any;
+global.MessagePort = DummyMessagePort as unknown as typeof global.MessagePort;
 
-const { fetch, Headers, Request, Response } = require("undici");
+let getGlobalDispatcher: any = null;
 
-global.fetch = fetch;
-global.Headers = Headers as any;
-global.Request = Request as any;
-global.Response = Response as any;
-
-// Require server dynamically to prevent ES module import hoisting
-const { server } = require("./shared/tests/mocks/server");
+try {
+  const undici = require("undici");
+  global.fetch = undici.fetch;
+  global.Headers = undici.Headers as unknown as typeof global.Headers;
+  global.Request = undici.Request as unknown as typeof global.Request;
+  global.Response = undici.Response as unknown as typeof global.Response;
+  getGlobalDispatcher = undici.getGlobalDispatcher;
+} catch (e) {
+  // Fallback to native fetch if undici fails to load due to node version incompatibilities
+  if (typeof global.fetch === "undefined") {
+    throw e;
+  }
+}
 
 class MockIntersectionObserver {
-  observe = jest.fn();
-  disconnect = jest.fn();
-  unobserve = jest.fn();
+  observe = vi.fn();
+  disconnect = vi.fn();
+  unobserve = vi.fn();
 }
 
 Object.defineProperty(window, "IntersectionObserver", {
@@ -55,14 +72,30 @@ Object.defineProperty(window, "IntersectionObserver", {
   value: MockIntersectionObserver,
 });
 
-const { getGlobalDispatcher } = require("undici");
+// Polyfill window.getComputedStyle to return default transition values in JSDOM,
+// preventing NaN timeout warnings in third-party transition helpers (like react-bootstrap)
+const originalGetComputedStyle = window.getComputedStyle;
+window.getComputedStyle = function (elt, ...args) {
+  const style = originalGetComputedStyle.call(this, elt, ...args);
+  if (style) {
+    if (!style.transitionDuration) {
+      style.transitionDuration = "0s";
+    }
+    if (!style.transitionDelay) {
+      style.transitionDelay = "0s";
+    }
+  }
+  return style;
+};
 
 beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
 afterEach(() => server.resetHandlers());
 afterAll(async () => {
   server.close();
-  const dispatcher = getGlobalDispatcher();
-  if (dispatcher && typeof dispatcher.destroy === "function") {
-    await dispatcher.destroy();
+  if (getGlobalDispatcher) {
+    const dispatcher = getGlobalDispatcher();
+    if (dispatcher && typeof dispatcher.destroy === "function") {
+      await dispatcher.destroy();
+    }
   }
 });

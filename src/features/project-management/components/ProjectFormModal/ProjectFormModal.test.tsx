@@ -1,12 +1,11 @@
 import "@testing-library/jest-dom";
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ProjectFormModal } from "./index";
 import { ResponseModel } from "@variamosple/variamos-components";
+import { ProjectFormModal } from "./index";
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -21,11 +20,11 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("ProjectFormModal Component", () => {
-  const mockOnClose = jest.fn();
-  const mockOnSubmit = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the modal when showModal is true", () => {
@@ -43,7 +42,9 @@ describe("ProjectFormModal Component", () => {
     expect(screen.getByPlaceholderText("Project name")).toBeInTheDocument();
     expect(screen.getByLabelText("Access level")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Project author")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Project description")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Project description"),
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Project source")).toBeInTheDocument();
   });
 
@@ -84,7 +85,9 @@ describe("ProjectFormModal Component", () => {
 
     expect(screen.getByDisplayValue("Super Project")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Nathan")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("My project description")).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue("My project description"),
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue("Open source")).toBeInTheDocument();
     expect(screen.getByLabelText("Access level")).toHaveValue("true");
   });
@@ -105,7 +108,9 @@ describe("ProjectFormModal Component", () => {
     const submitBtn = screen.getByText("Save");
     await user.click(submitBtn);
 
-    expect(await screen.findByText("Project name is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Project name is required"),
+    ).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
@@ -124,9 +129,15 @@ describe("ProjectFormModal Component", () => {
     );
 
     const user = userEvent.setup();
-    await user.type(screen.getByPlaceholderText("Project name"), "Test Project");
+    await user.type(
+      screen.getByPlaceholderText("Project name"),
+      "Test Project",
+    );
     await user.selectOptions(screen.getByLabelText("Access level"), "true");
-    await user.type(screen.getByPlaceholderText("Project author"), "Author Name");
+    await user.type(
+      screen.getByPlaceholderText("Project author"),
+      "Author Name",
+    );
 
     const submitBtn = screen.getByText("Save");
     await user.click(submitBtn);

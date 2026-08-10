@@ -1,9 +1,9 @@
-import { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
-import { PASSWORD_REGEXP } from "@/shared/constants";
 import { useSession } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
+import { PASSWORD_REGEXP } from "@/shared/constants";
 import "./styles.css";
 
 export interface SignUpFormProps {
@@ -32,9 +32,15 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
   };
 
   return (
-    <Form className="sign-up-form w-100" data-bs-theme="dark" onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      className="sign-up-form w-100"
+      data-bs-theme="dark"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Form.Group className="w-100" controlId="name">
-        <Form.Label className="form-label align-self-start m-0">Full Name</Form.Label>
+        <Form.Label className="form-label align-self-start m-0">
+          Full Name
+        </Form.Label>
         <Form.Control
           type="text"
           className="form-control"
@@ -44,11 +50,15 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           })}
           isInvalid={!!errors.name}
         />
-        <Form.Control.Feedback type="invalid">{errors.name?.message}</Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">
+          {errors.name?.message}
+        </Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="w-100" controlId="email">
-        <Form.Label className="form-label align-self-start m-0">Email Address</Form.Label>
+        <Form.Label className="form-label align-self-start m-0">
+          Email Address
+        </Form.Label>
         <Form.Control
           type="email"
           className="form-control"
@@ -56,11 +66,15 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           {...register("email", { required: "Email is required" })}
           isInvalid={!!errors.email}
         />
-        <Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">
+          {errors.email?.message}
+        </Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="w-100" controlId="password">
-        <Form.Label className="form-label align-self-start m-0">Password</Form.Label>
+        <Form.Label className="form-label align-self-start m-0">
+          Password
+        </Form.Label>
         <Form.Control
           type="password"
           className="form-control"
@@ -75,11 +89,15 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           })}
           isInvalid={!!errors.password}
         />
-        <Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">
+          {errors.password?.message}
+        </Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="w-100" controlId="passwordConfirm">
-        <Form.Label className="form-label align-self-start m-0">Confirm Password</Form.Label>
+        <Form.Label className="form-label align-self-start m-0">
+          Confirm Password
+        </Form.Label>
         <Form.Control
           type="password"
           className="form-control"
@@ -95,9 +113,19 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
         </Form.Control.Feedback>
       </Form.Group>
 
-      <Button className="w-100" variant="primary" type="submit" disabled={isLoading}>
+      <Button
+        className="w-100"
+        variant="primary"
+        type="submit"
+        disabled={isLoading}
+      >
         {isLoading ? (
-          <Spinner data-testid="loading-spinner" animation="border" variant="light" size="sm" />
+          <Spinner
+            data-testid="loading-spinner"
+            animation="border"
+            variant="light"
+            size="sm"
+          />
         ) : (
           "Sign up"
         )}

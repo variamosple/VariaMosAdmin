@@ -1,11 +1,12 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-
-import { Language } from "../domain/Entity/Language";
-import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
 import { LANGUAGES_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { Language } from "../domain/Entity/Language";
+import type { LanguagesFilter } from "../domain/Entity/LanguageFilter";
 
-export const queryLanguages = (filter: LanguagesFilter): Promise<ResponseModel<Language[]>> => {
+export const queryLanguages = (
+  filter: LanguagesFilter,
+): Promise<ResponseModel<Language[]>> => {
   return LANGUAGES_CLIENT.get("/v1/admin/languages", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -14,12 +15,12 @@ export const queryLanguages = (filter: LanguagesFilter): Promise<ResponseModel<L
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -33,7 +34,9 @@ export const queryLanguages = (filter: LanguagesFilter): Promise<ResponseModel<L
     });
 };
 
-export const deleteLanguage = (languageId: number): Promise<ResponseModel<void>> => {
+export const deleteLanguage = (
+  languageId: number,
+): Promise<ResponseModel<void>> => {
   return LANGUAGES_CLIENT.delete(`/v1/admin/languages/${languageId}`)
     .then((response) => response.data)
     .catch((error) => {
@@ -42,12 +45,12 @@ export const deleteLanguage = (languageId: number): Promise<ResponseModel<void>>
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -90,7 +93,9 @@ export const deleteLanguage = (languageId: number): Promise<ResponseModel<void>>
 //     });
 // };
 
-export const updateLanguage = (request: Partial<Language>): Promise<ResponseModel<Language>> => {
+export const updateLanguage = (
+  request: Partial<Language>,
+): Promise<ResponseModel<Language>> => {
   return LANGUAGES_CLIENT.put(`/v1/admin/languages/${request.id}`, request)
     .then((response) => response.data)
     .catch((error) => {
@@ -99,12 +104,12 @@ export const updateLanguage = (request: Partial<Language>): Promise<ResponseMode
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

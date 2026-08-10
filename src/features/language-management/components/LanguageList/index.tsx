@@ -1,8 +1,8 @@
-import { Language } from "../../domain/Entity/Language";
-import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Table } from "react-bootstrap";
+import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { Language } from "../../domain/Entity/Language";
 import { LanguageRowComponent } from "./LanguageRow";
 
 export interface LanguageListProps extends PaginationControlsProps {
@@ -21,7 +21,11 @@ export const LanguageList: FC<LanguageListProps> = ({
 }) => {
   return (
     <>
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
       <Table striped bordered hover responsive>
         <thead>
@@ -54,7 +58,11 @@ export const LanguageList: FC<LanguageListProps> = ({
         </tbody>
       </Table>
 
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

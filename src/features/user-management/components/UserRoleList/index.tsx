@@ -1,9 +1,9 @@
-import { Role } from "@/features/role-management/domain/Entity/Role";
-import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { TrashFill } from "react-bootstrap-icons";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
+import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 
 export interface UserRoleListParameters extends PaginationControlsProps {
   items: Role[];
@@ -19,7 +19,11 @@ export const UserRoleList: FC<UserRoleListParameters> = ({
 }) => {
   return (
     <>
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
       <Table striped bordered hover>
         <thead>
@@ -55,7 +59,11 @@ export const UserRoleList: FC<UserRoleListParameters> = ({
         </tbody>
       </Table>
 
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

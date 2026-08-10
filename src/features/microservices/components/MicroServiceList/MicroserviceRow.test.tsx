@@ -1,10 +1,8 @@
-import React from "react";
-import { render, screen, act } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MicroServiceRowComponent } from "./MicroserviceRow";
-import { MicroService } from "../../domain/Entity/MicroService";
-
 import * as MicroServiceRepository from "../../api/MicroServiceRepository";
+import type { MicroService } from "../../domain/Entity/MicroService";
+import { MicroServiceRowComponent } from "./MicroserviceRow";
 
 const mockMicroservice: MicroService = {
   id: "test-id",
@@ -16,7 +14,7 @@ const mockMicroservice: MicroService = {
 };
 
 // Mock @variamosple/variamos-components to avoid ESM syntax errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -36,16 +34,18 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock patternfly log viewer
-jest.mock("@patternfly/react-log-viewer", () => {
+vi.mock("@patternfly/react-log-viewer", async () => {
   return {
-    LogViewer: ({ data }: { data: string }) => <div data-testid="log-viewer">{data}</div>,
+    LogViewer: ({ data }: { data: string }) => (
+      <div data-testid="log-viewer">{data}</div>
+    ),
   };
 });
 
 // Mock watchMicroserviceLogs API to return a mock WebSocket object
 const mockWebSocket = {
-  send: jest.fn(),
-  close: jest.fn(),
+  send: vi.fn(),
+  close: vi.fn(),
   onopen: null,
   onmessage: null,
   onclose: null,
@@ -53,18 +53,18 @@ const mockWebSocket = {
 };
 
 describe("MicroServiceRowComponent WebSocket Logging", () => {
-  const mockOnStart = jest.fn();
-  const mockOnRestart = jest.fn();
-  const mockOnStop = jest.fn();
+  const mockOnStart = vi.fn();
+  const mockOnRestart = vi.fn();
+  const mockOnStop = vi.fn();
 
-  let watchLogsSpy: jest.SpyInstance;
+  let watchLogsSpy: import("vitest").MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     (mockWebSocket as any).onopen = null;
     (mockWebSocket as any).onmessage = null;
     (mockWebSocket as any).onclose = null;
-    watchLogsSpy = jest
+    watchLogsSpy = vi
       .spyOn(MicroServiceRepository, "watchMicroserviceLogs")
       .mockReturnValue(mockWebSocket as any);
   });
@@ -99,12 +99,16 @@ describe("MicroServiceRowComponent WebSocket Logging", () => {
       }
     });
 
-    expect(mockWebSocket.send).toHaveBeenCalledWith(JSON.stringify({ microserviceId: "test-id" }));
+    expect(mockWebSocket.send).toHaveBeenCalledWith(
+      JSON.stringify({ microserviceId: "test-id" }),
+    );
 
     // Simulate receiving message
     await act(async () => {
       if (mockWebSocket.onmessage) {
-        (mockWebSocket.onmessage as (ev: any) => void)({ data: "log line 1\n" });
+        (mockWebSocket.onmessage as (ev: any) => void)({
+          data: "log line 1\n",
+        });
       }
     });
 

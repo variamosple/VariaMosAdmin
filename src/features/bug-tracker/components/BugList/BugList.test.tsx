@@ -1,9 +1,8 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import type { Bug } from "../../domain/Bug";
 import { BugList } from "./index";
-import { Bug } from "../../domain/Bug";
 
 const mockBugs: Bug[] = [
   {
@@ -29,17 +28,23 @@ const mockBugs: Bug[] = [
 ];
 
 describe("BugList Component", () => {
-  const mockOnViewDetails = jest.fn();
-  const mockOnReject = jest.fn();
-  const mockOnRestore = jest.fn();
-  const mockOnApprove = jest.fn();
+  const mockOnViewDetails = vi.fn();
+  const mockOnReject = vi.fn();
+  const mockOnRestore = vi.fn();
+  const mockOnApprove = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of bugs correctly", () => {
-    render(<BugList items={mockBugs} onViewDetails={mockOnViewDetails} activeTab="github" />);
+    render(
+      <BugList
+        items={mockBugs}
+        onViewDetails={mockOnViewDetails}
+        activeTab="github"
+      />,
+    );
 
     // Check titles are rendered
     expect(screen.getByText("Test Bug 1")).toBeInTheDocument();
@@ -56,13 +61,25 @@ describe("BugList Component", () => {
   });
 
   it("displays empty status message when there are no bugs", () => {
-    render(<BugList items={[]} onViewDetails={mockOnViewDetails} activeTab="github" />);
+    render(
+      <BugList
+        items={[]}
+        onViewDetails={mockOnViewDetails}
+        activeTab="github"
+      />,
+    );
 
     expect(screen.getByText("No bugs found.")).toBeInTheDocument();
   });
 
   it("calls onViewDetails when clicking the details button", async () => {
-    render(<BugList items={mockBugs} onViewDetails={mockOnViewDetails} activeTab="github" />);
+    render(
+      <BugList
+        items={mockBugs}
+        onViewDetails={mockOnViewDetails}
+        activeTab="github"
+      />,
+    );
 
     const detailsButtons = screen.getAllByRole("button", { name: /details/i });
     expect(detailsButtons).toHaveLength(2);

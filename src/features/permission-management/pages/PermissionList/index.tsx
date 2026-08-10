@@ -1,10 +1,10 @@
-import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { withPageVisit } from "@variamosple/variamos-components";
+import type { FC } from "react";
+import { Button, Container } from "react-bootstrap";
 import { PermissionFormModal } from "@/features/permission-management/components/PermissionFormModal";
 import { PermissionList } from "@/features/permission-management/components/PermissionList";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { SearchForm } from "@/shared/components/SearchForm";
-import { withPageVisit } from "@variamosple/variamos-components";
-import { FC } from "react";
-import { Button, Container } from "react-bootstrap";
 import { usePermissionList } from "../../hooks/usePermissionList";
 
 const PermissionListPageComponent: FC<unknown> = () => {
@@ -96,4 +96,7 @@ const PermissionListPageComponent: FC<unknown> = () => {
   );
 };
 
-export const PermissionListPage = withPageVisit(PermissionListPageComponent, "PermissionList");
+export const PermissionListPage = withPageVisit(
+  PermissionListPageComponent,
+  "PermissionList",
+);

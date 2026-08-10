@@ -1,8 +1,8 @@
-import { LanguagesFilter } from "../../domain/Entity/LanguageFilter";
-import { FC, useCallback, useEffect, useRef } from "react";
+import { type FC, useCallback, useEffect, useRef } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import type { LanguagesFilter } from "../../domain/Entity/LanguageFilter";
 
 export interface LanguageSearchFormProps {
   onSubmit: (search?: LanguagesFilter) => void;
@@ -23,7 +23,7 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
     watch,
   } = useForm<LanguagesFilter>();
 
-  const values = watch();
+  const _values = watch();
 
   const onReset = () => {
     reset({ name: "", status: "" });
@@ -54,7 +54,7 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [values, isDirty, handleSubmit, submit]);
+  }, [isDirty, handleSubmit, submit]);
 
   return (
     <Form onSubmit={handleSubmit(submit)}>

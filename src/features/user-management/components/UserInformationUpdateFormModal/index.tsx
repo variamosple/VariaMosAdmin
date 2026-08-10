@@ -1,10 +1,10 @@
-import { queryCountries } from "@/shared/api/CountriesRepository";
-import { Country } from "@/shared/domain/Entity/Country";
-import { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
-import { ResponseModel, useQuery } from "@variamosple/variamos-components";
-import { FC, useEffect } from "react";
+import { type ResponseModel, useQuery } from "@variamosple/variamos-components";
+import { type FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
+import { queryCountries } from "@/shared/api/CountriesRepository";
+import type { Country } from "@/shared/domain/Entity/Country";
 
 export interface PersonalInformationUpdateForModalProps {
   onUpdatePersonalInformationSubmit: (
@@ -16,7 +16,9 @@ export interface PersonalInformationUpdateForModalProps {
   defaultValue?: PersonalInformationUpdate;
 }
 
-export const PersonalInformationUpdateForModal: FC<PersonalInformationUpdateForModalProps> = ({
+export const PersonalInformationUpdateForModal: FC<
+  PersonalInformationUpdateForModalProps
+> = ({
   onUpdatePersonalInformationSubmit,
   showModal,
   onClose,
@@ -68,14 +70,20 @@ export const PersonalInformationUpdateForModal: FC<PersonalInformationUpdateForM
   }, [showModal, defaultValue, reset]);
 
   return (
-    <Modal show={showModal} backdrop={isLoading ? "static" : true} onHide={onCloseModal}>
+    <Modal
+      show={showModal}
+      backdrop={isLoading ? "static" : true}
+      onHide={onCloseModal}
+    >
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title>PersonalInformation update</Modal.Title>
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">
           <Form.Group className="w-100" controlId="countryCode">
-            <Form.Label className="form-label align-self-start m-0">Country</Form.Label>
+            <Form.Label className="form-label align-self-start m-0">
+              Country
+            </Form.Label>
 
             {isLoadingCountries ? (
               <span className="d-block">Loading Countries...</span>
@@ -102,7 +110,12 @@ export const PersonalInformationUpdateForModal: FC<PersonalInformationUpdateForM
           </Form.Group>
 
           <Modal.Footer>
-            <Button type="button" variant="secondary" disabled={isLoading} onClick={onCloseModal}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={isLoading}
+              onClick={onCloseModal}
+            >
               Cancel
             </Button>
 

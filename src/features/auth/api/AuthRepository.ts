@@ -1,18 +1,20 @@
-import { Credentials } from "@/features/user-management/domain/Entity/Credentials";
-import { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
-import { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
-import { User } from "@/features/user-management/domain/Entity/User";
-import { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
 import {
   ResponseModel,
-  SessionInfoResponse,
-  singInResponse,
+  type SessionInfoResponse,
+  type singInResponse,
 } from "@variamosple/variamos-components";
 import axios from "axios";
-import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
+import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
+import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
+import type { User } from "@/features/user-management/domain/Entity/User";
+import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
 import { handleRepositoryError } from "@/shared/api/RepositoryUtils";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
-export const getSessionInfo = (): Promise<ResponseModel<SessionInfoResponse>> => {
+export const getSessionInfo = (): Promise<
+  ResponseModel<SessionInfoResponse>
+> => {
   return ADMIN_CLIENT.get("/auth/session-info", {
     headers: {
       "Cache-Control": "no-cache",
@@ -26,12 +28,12 @@ export const getSessionInfo = (): Promise<ResponseModel<SessionInfoResponse>> =>
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -54,12 +56,12 @@ export const requestLogout = (): Promise<ResponseModel<void>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -73,7 +75,9 @@ export const requestLogout = (): Promise<ResponseModel<void>> => {
     });
 };
 
-export const requestSignIn = (request: Credentials): Promise<ResponseModel<singInResponse>> => {
+export const requestSignIn = (
+  request: Credentials,
+): Promise<ResponseModel<singInResponse>> => {
   return ADMIN_CLIENT.post("/auth/sign-in", request)
     .then((response) => response.data)
     .catch((error) => {
@@ -82,12 +86,12 @@ export const requestSignIn = (request: Credentials): Promise<ResponseModel<singI
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -112,12 +116,12 @@ export const requestSignInAsGuest = (
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -131,7 +135,9 @@ export const requestSignInAsGuest = (
     });
 };
 
-export const requestSignUp = (request: UserRegistration): Promise<ResponseModel<unknown>> => {
+export const requestSignUp = (
+  request: UserRegistration,
+): Promise<ResponseModel<unknown>> => {
   return ADMIN_CLIENT.post("/auth/sign-up", request)
     .then((response) => response.data)
     .catch((error) => {
@@ -140,12 +146,12 @@ export const requestSignUp = (request: UserRegistration): Promise<ResponseModel<
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -168,12 +174,12 @@ export const getMyAccount = (): Promise<ResponseModel<User>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -198,12 +204,12 @@ export const updatePersonalInformation = (
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -228,12 +234,12 @@ export const updateUserPassword = (
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -256,12 +262,12 @@ export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Error when communicating with the back-end.",
         );
       } else {
@@ -275,7 +281,9 @@ export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
     });
 };
 
-export const requestPasswordReset = (email: string): Promise<ResponseModel<void>> => {
+export const requestPasswordReset = (
+  email: string,
+): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/auth/forgot-password", { email })
     .then((response) => response.data)
     .catch((error) =>
@@ -286,11 +294,24 @@ export const requestPasswordReset = (email: string): Promise<ResponseModel<void>
     );
 };
 
-export const verifyPasswordResetToken = (token: string): Promise<ResponseModel<void>> => {
-  return ADMIN_CLIENT.get(`/auth/verify-token?token=${token}`)
+export const verifyPasswordResetToken = (
+  token: string,
+): Promise<ResponseModel<void>> => {
+  return ADMIN_CLIENT.get(
+    `/auth/verify-token?token=${token}&_t=${Date.now()}`,
+    {
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    },
+  )
     .then((response) => response.data)
     .catch((error) =>
-      handleRepositoryError(error, "Error when trying to verify token, please try again later."),
+      handleRepositoryError(
+        error,
+        "Error when trying to verify token, please try again later.",
+      ),
     );
 };
 
@@ -304,6 +325,9 @@ export const resetPassword = (
   })
     .then((response) => response.data)
     .catch((error) =>
-      handleRepositoryError(error, "Error when trying to reset password, please try again later."),
+      handleRepositoryError(
+        error,
+        "Error when trying to reset password, please try again later.",
+      ),
     );
 };

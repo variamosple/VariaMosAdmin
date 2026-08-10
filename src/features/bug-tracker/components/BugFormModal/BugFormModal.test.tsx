@@ -1,17 +1,16 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { BugFormModal } from "./index";
 
 describe("BugFormModal Component", () => {
-  const mockOnHide = jest.fn();
-  const mockOnSubmit = jest.fn();
+  const mockOnHide = vi.fn();
+  const mockOnSubmit = vi.fn();
   const sampleRepos = ["repo1", "repo2"];
   const sampleCategories = ["UI", "Backend", "Other"];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders nothing when show is false", () => {
@@ -44,7 +43,9 @@ describe("BugFormModal Component", () => {
     expect(screen.getByLabelText(/Title \*/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Description \*/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Category \*/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Target Repository/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/Target Repository/i),
+    ).not.toBeInTheDocument();
   });
 
   it("renders correctly in admin mode", () => {
@@ -62,7 +63,9 @@ describe("BugFormModal Component", () => {
     expect(screen.getByText("Report a GitHub Bug")).toBeInTheDocument();
     expect(screen.getByLabelText(/Title \*/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Description \*/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Target Repository \(GitHub\) \*/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/Target Repository \(GitHub\) \*/i),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/Priority \*/i)).toBeInTheDocument();
     expect(screen.queryByLabelText(/Category \*/i)).not.toBeInTheDocument();
   });
@@ -83,7 +86,9 @@ describe("BugFormModal Component", () => {
     fireEvent.submit(screen.getByRole("button", { name: "Report Bug" }));
 
     expect(await screen.findByText("Title is required")).toBeInTheDocument();
-    expect(await screen.findByText("Description is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Description is required"),
+    ).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
@@ -103,8 +108,12 @@ describe("BugFormModal Component", () => {
     fireEvent.submit(screen.getByRole("button", { name: "Report Bug" }));
 
     expect(await screen.findByText("Title is required")).toBeInTheDocument();
-    expect(await screen.findByText("Description is required")).toBeInTheDocument();
-    expect(await screen.findByText("Target repository is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Description is required"),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("Target repository is required"),
+    ).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
@@ -123,7 +132,10 @@ describe("BugFormModal Component", () => {
 
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/Title \*/i), "Test Bug Title");
-    await user.type(screen.getByLabelText(/Description \*/i), "Test Description content");
+    await user.type(
+      screen.getByLabelText(/Description \*/i),
+      "Test Description content",
+    );
     await user.selectOptions(screen.getByLabelText(/Category \*/i), "Backend");
 
     fireEvent.submit(screen.getByRole("button", { name: "Report Bug" }));
@@ -155,9 +167,14 @@ describe("BugFormModal Component", () => {
 
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/Title \*/i), "Test Bug Title");
-    await user.type(screen.getByLabelText(/Description \*/i), "Test Description content");
+    await user.type(
+      screen.getByLabelText(/Description \*/i),
+      "Test Description content",
+    );
 
-    const file = new File(["dummy content"], "screenshot.png", { type: "image/png" });
+    const file = new File(["dummy content"], "screenshot.png", {
+      type: "image/png",
+    });
     const fileInput = screen.getByLabelText(/Attachment \(Optional\)/i);
 
     // Simulate file upload

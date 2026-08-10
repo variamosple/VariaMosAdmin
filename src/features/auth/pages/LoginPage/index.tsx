@@ -1,12 +1,12 @@
-import { registerRedirect } from "../../api/AuthRepository";
-import { Credentials } from "@/features/user-management/domain/Entity/Credentials";
-import { AppConfig } from "@/shared/infrastructure/AppConfig";
-import { GoogleLogin } from "../../components/GoogleLogin";
-import { LoginForm } from "../../components/LoginForm";
 import { useRouter, useSession } from "@variamosple/variamos-components";
-import { FC, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { registerRedirect } from "../../api/AuthRepository";
+import { GoogleLogin } from "../../components/GoogleLogin";
+import { LoginForm } from "../../components/LoginForm";
 
 export const LoginPage: FC<unknown> = () => {
   const { queryParams, navigate } = useRouter();
@@ -39,7 +39,9 @@ export const LoginPage: FC<unknown> = () => {
     }
 
     if (queryParams.has("redirectTo")) {
-      const decodedRedirectTo = decodeURIComponent(queryParams.get("redirectTo") || "");
+      const decodedRedirectTo = decodeURIComponent(
+        queryParams.get("redirectTo") || "",
+      );
 
       registerRedirect(decodedRedirectTo).then();
     }
@@ -51,7 +53,11 @@ export const LoginPage: FC<unknown> = () => {
       style={{ width: 350 }}
       data-bs-theme="dark"
     >
-      <img src="./images/VariaMosLogo.png" alt="Variamos logo" className="img-fluid" />
+      <img
+        src="./images/VariaMosLogo.png"
+        alt="Variamos logo"
+        className="img-fluid"
+      />
 
       <LoginForm onSignIn={onSignIn} />
 

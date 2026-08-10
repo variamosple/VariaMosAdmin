@@ -1,13 +1,12 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import type { Model } from "@/features/model-management/domain/Entity/Model";
 import { ModelRowComponent } from "./ModelRow";
-import { Model } from "@/features/model-management/domain/Entity/Model";
 
 describe("ModelRowComponent", () => {
-  const mockOnModelEdit = jest.fn();
-  const mockOnModelDelete = jest.fn();
+  const mockOnModelEdit = vi.fn();
+  const mockOnModelDelete = vi.fn();
 
   const sampleModel: Model = {
     id: "model-1",
@@ -26,7 +25,7 @@ describe("ModelRowComponent", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (model: Model = sampleModel) => {
@@ -47,7 +46,9 @@ describe("ModelRowComponent", () => {
     renderComponent();
 
     expect(screen.getByText("Standard Model")).toBeInTheDocument();
-    expect(screen.getByText("A very descriptive model description")).toBeInTheDocument();
+    expect(
+      screen.getByText("A very descriptive model description"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Jane Doe")).toBeInTheDocument();
     expect(screen.getByText("External source")).toBeInTheDocument();
     expect(screen.getByText("Domain Engineering")).toBeInTheDocument();

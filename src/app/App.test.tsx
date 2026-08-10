@@ -1,10 +1,9 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import App from "./App";
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   return {
     AnalyticsProvider: ({ children }: any) => (
@@ -13,14 +12,19 @@ jest.mock("@variamosple/variamos-components", () => {
     SessionProvider: ({ children }: any) => (
       <div data-testid="mock-session-provider">{children}</div>
     ),
-    AuthWrapper: ({ children }: any) => <div data-testid="mock-auth-wrapper">{children}</div>,
-    ProtectedRoute: ({ children }: any) => <div data-testid="mock-protected-route">{children}</div>,
+    AuthWrapper: ({ children }: any) => (
+      <div data-testid="mock-auth-wrapper">{children}</div>
+    ),
+    ProtectedRoute: ({ children }: any) => (
+      <div data-testid="mock-protected-route">{children}</div>
+    ),
     RouterContext: React.createContext(null),
     getBasePath: () => "/vms",
-    isAbsoluteUrl: (url: string) => url.startsWith("http://") || url.startsWith("https://"),
+    isAbsoluteUrl: (url: string) =>
+      url.startsWith("http://") || url.startsWith("https://"),
     Events: {
-      subscribe: jest.fn(),
-      unsubscribe: jest.fn(),
+      subscribe: vi.fn(),
+      unsubscribe: vi.fn(),
     },
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -40,16 +44,16 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock feature APIs
-jest.mock("@/features/auth", () => ({
-  getSessionInfo: jest.fn(),
-  requestLogout: jest.fn(),
-  requestSignIn: jest.fn(),
-  requestSignInAsGuest: jest.fn(),
-  requestSignUp: jest.fn(),
+vi.mock("@/features/auth", async () => ({
+  getSessionInfo: vi.fn(),
+  requestLogout: vi.fn(),
+  requestSignIn: vi.fn(),
+  requestSignInAsGuest: vi.fn(),
+  requestSignUp: vi.fn(),
 }));
 
 // Mock the router configuration to avoid importing real pages and layouts (which cause ESM errors)
-jest.mock("./router", () => {
+vi.mock("./router", async () => {
   const React = require("react");
   return {
     ROUTES: [
@@ -74,6 +78,8 @@ describe("App Component", () => {
     expect(screen.getByTestId("mock-session-provider")).toBeInTheDocument();
 
     // The default route is "/" which maps to our mock element
-    expect(screen.getByTestId("mock-home-page")).toHaveTextContent("HomePage Content");
+    expect(screen.getByTestId("mock-home-page")).toHaveTextContent(
+      "HomePage Content",
+    );
   });
 });

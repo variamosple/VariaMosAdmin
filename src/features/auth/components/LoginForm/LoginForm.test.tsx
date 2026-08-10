@@ -1,31 +1,31 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { LoginForm } from "./index";
 import { useSession } from "@variamosple/variamos-components";
-
 import { MemoryRouter } from "react-router-dom";
+import { LoginForm } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => ({
-  useSession: jest.fn(),
+vi.mock("@variamosple/variamos-components", async () => ({
+  useSession: vi.fn(),
   PagedModel: class PagedModel {},
 }));
 
 describe("LoginForm Component", () => {
-  const mockOnSignIn = jest.fn();
+  const mockOnSignIn = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSession as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSession as import("vitest").Mock).mockReturnValue({
       isLoading: false,
     });
   });
 
   const renderLoginForm = () =>
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
         <LoginForm onSignIn={mockOnSignIn} />
       </MemoryRouter>,
     );
@@ -34,7 +34,9 @@ describe("LoginForm Component", () => {
     renderLoginForm();
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Forgot Password?")).toBeInTheDocument();
   });
 
@@ -53,7 +55,10 @@ describe("LoginForm Component", () => {
     renderLoginForm();
 
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
     await user.type(screen.getByLabelText(/password/i), "password123");
 
     await user.click(screen.getByRole("button", { name: /sign in/i }));
@@ -67,13 +72,15 @@ describe("LoginForm Component", () => {
   });
 
   it("disables submit button and shows loading spinner when session is loading", () => {
-    (useSession as jest.Mock).mockReturnValue({
+    (useSession as import("vitest").Mock).mockReturnValue({
       isLoading: true,
     });
     renderLoginForm();
 
     const submitBtn = screen.getByRole("button");
     expect(submitBtn).toBeDisabled();
-    expect(screen.queryByRole("button", { name: /sign in/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /sign in/i }),
+    ).not.toBeInTheDocument();
   });
 });

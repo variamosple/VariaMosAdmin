@@ -1,18 +1,30 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MicroServiceList } from "./index";
-import { MicroService } from "../../domain/Entity/MicroService";
-
 import * as MicroServiceRepository from "../../api/MicroServiceRepository";
+import type { MicroService } from "../../domain/Entity/MicroService";
+import { MicroServiceList } from "./index";
 
 const mockMicroservices: MicroService[] = [
-  { id: "1", names: ["micro-1"], state: "exited", status: "down", created: new Date(), labels: {} },
-  { id: "2", names: ["micro-2"], state: "running", status: "up", created: new Date(), labels: {} },
+  {
+    id: "1",
+    names: ["micro-1"],
+    state: "exited",
+    status: "down",
+    created: new Date(),
+    labels: {},
+  },
+  {
+    id: "2",
+    names: ["micro-2"],
+    state: "running",
+    status: "up",
+    created: new Date(),
+    labels: {},
+  },
 ];
 
 // Mock the variamos-components library which has Paginator
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
     ResponseModel: class ResponseModel {
@@ -33,23 +45,25 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock the patternfly log viewer to avoid importing style files or complex web socket interactions
-jest.mock("@patternfly/react-log-viewer", () => {
+vi.mock("@patternfly/react-log-viewer", async () => {
   return {
     LogViewer: () => <div data-testid="log-viewer">LogViewer</div>,
   };
 });
 
 describe("MicroServiceList Component", () => {
-  const mockOnStart = jest.fn();
-  const mockOnRestart = jest.fn();
-  const mockOnStop = jest.fn();
-  let watchLogsSpy: jest.SpyInstance;
+  const mockOnStart = vi.fn();
+  const mockOnRestart = vi.fn();
+  const mockOnStop = vi.fn();
+  let watchLogsSpy: import("vitest").MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    watchLogsSpy = jest.spyOn(MicroServiceRepository, "watchMicroserviceLogs").mockReturnValue({
-      close: jest.fn(),
-    } as any);
+    vi.clearAllMocks();
+    watchLogsSpy = vi
+      .spyOn(MicroServiceRepository, "watchMicroserviceLogs")
+      .mockReturnValue({
+        close: vi.fn(),
+      } as any);
   });
 
   afterEach(() => {
@@ -62,7 +76,7 @@ describe("MicroServiceList Component", () => {
         items={mockMicroservices}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onMicroServiceStart={mockOnStart}
         onMicroServiceRestart={mockOnRestart}
         onMicroServiceStop={mockOnStop}
@@ -80,7 +94,7 @@ describe("MicroServiceList Component", () => {
         items={mockMicroservices}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onMicroServiceStart={mockOnStart}
         onMicroServiceRestart={mockOnRestart}
         onMicroServiceStop={mockOnStop}

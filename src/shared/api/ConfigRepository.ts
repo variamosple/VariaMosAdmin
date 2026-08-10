@@ -1,4 +1,4 @@
-import { Menu, ResponseModel } from "@variamosple/variamos-components";
+import { type Menu, ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
@@ -12,12 +12,12 @@ export const requestMenuConfig = (): Promise<ResponseModel<Menu>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

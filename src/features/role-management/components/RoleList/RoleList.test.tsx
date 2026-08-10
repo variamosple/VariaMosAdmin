@@ -1,13 +1,12 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Role } from "../../domain/Entity/Role";
 import { RoleList } from "./index";
-import { Role } from "../../domain/Entity/Role";
 
-const mockNavigate = jest.fn();
+const mockNavigate = vi.fn();
 
 // Mock the variamos-components library completely
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: ({ currentPage, totalPages, onPageChange }: any) => (
       <div data-testid="mock-paginator">
@@ -24,9 +23,9 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("RoleList Component", () => {
-  const mockOnRoleEdit = jest.fn();
-  const mockOnRoleDelete = jest.fn();
-  const mockOnPageChange = jest.fn();
+  const mockOnRoleEdit = vi.fn();
+  const mockOnRoleDelete = vi.fn();
+  const mockOnPageChange = vi.fn();
 
   const mockRoles: Role[] = [
     { id: 1, name: "Administrator" },
@@ -34,7 +33,7 @@ describe("RoleList Component", () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (items: Role[] = mockRoles) => {

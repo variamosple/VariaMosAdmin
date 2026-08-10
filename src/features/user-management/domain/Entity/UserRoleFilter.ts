@@ -14,7 +14,11 @@ export class UserRoleFilter extends PagedModel {
   }
 
   public static build(builder: UserRoleFilterBuilder): UserRoleFilter {
-    return new UserRoleFilter(builder.userId, builder.pageNumber, builder.pageSize);
+    return new UserRoleFilter(
+      builder.userId,
+      builder.pageNumber,
+      builder.pageSize,
+    );
   }
 }
 

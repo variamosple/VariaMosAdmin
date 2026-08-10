@@ -1,18 +1,19 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
-import { SecurityWrapper } from "./index";
 import * as AxiosConfig from "@/shared/infrastructure/AxiosConfig";
+import { SecurityWrapper } from "./index";
 
-const mockNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => ({
   useNavigate: () => mockNavigate,
 }));
 
 describe("SecurityWrapper Component", () => {
-  let setupSpy: jest.SpyInstance;
+  let setupSpy: import("vitest").MockInstance;
 
   beforeEach(() => {
-    setupSpy = jest.spyOn(AxiosConfig, "setupAxiosInterceptors").mockReturnValue(999);
+    setupSpy = vi
+      .spyOn(AxiosConfig, "setupAxiosInterceptors")
+      .mockReturnValue(999);
   });
 
   afterEach(() => {
@@ -30,10 +31,16 @@ describe("SecurityWrapper Component", () => {
     expect(screen.getByTestId("child").textContent).toBe("Protected Content");
 
     // Verify setupAxiosInterceptors was called
-    expect(setupSpy).toHaveBeenCalledWith(AxiosConfig.ADMIN_CLIENT, mockNavigate);
+    expect(setupSpy).toHaveBeenCalledWith(
+      AxiosConfig.ADMIN_CLIENT,
+      mockNavigate,
+    );
 
     // Spy on the eject function of interceptors
-    const ejectSpy = jest.spyOn(AxiosConfig.ADMIN_CLIENT.interceptors.response, "eject");
+    const ejectSpy = vi.spyOn(
+      AxiosConfig.ADMIN_CLIENT.interceptors.response,
+      "eject",
+    );
 
     // Unmount to trigger cleanup
     unmount();

@@ -1,10 +1,9 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-
-import { MicroService } from "../domain/Entity/MicroService";
-import { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { MicroService } from "../domain/Entity/MicroService";
+import type { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
 
 export const queryMicroServices = (
   filter: MicroServiceFilter,
@@ -17,12 +16,12 @@ export const queryMicroServices = (
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -36,7 +35,9 @@ export const queryMicroServices = (
     });
 };
 
-export const startMicroservice = (microserviceId: string): Promise<ResponseModel<void>> => {
+export const startMicroservice = (
+  microserviceId: string,
+): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/micro-services/${microserviceId}/start`)
     .then((response) => response.data)
     .catch((error) => {
@@ -45,12 +46,12 @@ export const startMicroservice = (microserviceId: string): Promise<ResponseModel
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -64,7 +65,9 @@ export const startMicroservice = (microserviceId: string): Promise<ResponseModel
     });
 };
 
-export const restartMicroservice = (microserviceId: string): Promise<ResponseModel<void>> => {
+export const restartMicroservice = (
+  microserviceId: string,
+): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/micro-services/${microserviceId}/restart`)
     .then((response) => response.data)
     .catch((error) => {
@@ -73,12 +76,12 @@ export const restartMicroservice = (microserviceId: string): Promise<ResponseMod
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -92,7 +95,9 @@ export const restartMicroservice = (microserviceId: string): Promise<ResponseMod
     });
 };
 
-export const stopMicroservice = (microserviceId: string): Promise<ResponseModel<void>> => {
+export const stopMicroservice = (
+  microserviceId: string,
+): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/micro-services/${microserviceId}/stop`)
     .then((response) => response.data)
     .catch((error) => {
@@ -101,12 +106,12 @@ export const stopMicroservice = (microserviceId: string): Promise<ResponseModel<
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

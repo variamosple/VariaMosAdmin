@@ -1,8 +1,8 @@
-import { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
 import { useSession } from "@variamosple/variamos-components";
-import { FC, useState } from "react";
+import { type FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
 import { GoogleLogin } from "../components/GoogleLogin";
 import { SignUpForm } from "../components/SignUpForm";
 
@@ -27,7 +27,11 @@ export const SignUpPage: FC<unknown> = () => {
       style={{ width: 350 }}
       data-bs-theme="dark"
     >
-      <img src="./images/VariaMosLogo.png" alt="Variamos logo" className="img-fluid" />
+      <img
+        src="./images/VariaMosLogo.png"
+        alt="Variamos logo"
+        className="img-fluid"
+      />
       <SignUpForm onSignUp={onSignUp} />
 
       <Alert

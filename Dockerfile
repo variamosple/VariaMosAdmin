@@ -1,4 +1,4 @@
-FROM node:24-alpine as build
+FROM node:24-alpine AS build
 
 # Set the working directory in the container
 WORKDIR /app
@@ -29,7 +29,7 @@ FROM nginx:alpine
 COPY ./etc/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy the built React application from the builder stage
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # Create a symlink to support the homepage 'variamos_admin/' prefix path
 RUN ln -s /usr/share/nginx/html /usr/share/nginx/html/variamos_admin

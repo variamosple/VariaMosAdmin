@@ -1,15 +1,14 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Project } from "../../domain/Entity/Project";
 import { ProjectRowComponent } from "./ProjectRow";
-import { Project } from "../../domain/Entity/Project";
 
 // Jest mock of variamos-components (just in case)
-jest.mock("@variamosple/variamos-components", () => ({}));
+vi.mock("@variamosple/variamos-components", async () => ({}));
 
 describe("ProjectRowComponent", () => {
-  const mockOnProjectEdit = jest.fn();
-  const mockOnProjectDelete = jest.fn();
+  const mockOnProjectEdit = vi.fn();
+  const mockOnProjectDelete = vi.fn();
 
   const sampleProject: Project = {
     id: 42,
@@ -41,7 +40,7 @@ describe("ProjectRowComponent", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (project: Project = sampleProject) => {
@@ -62,7 +61,9 @@ describe("ProjectRowComponent", () => {
     renderComponent();
 
     expect(screen.getByText("Quantum Project")).toBeInTheDocument();
-    expect(screen.getByText("A project exploring quantum mechanics")).toBeInTheDocument();
+    expect(
+      screen.getByText("A project exploring quantum mechanics"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Dr. Schrodinger")).toBeInTheDocument();
     expect(screen.getByText("Local Lab")).toBeInTheDocument();
     // Verify template formatted as Public (template=true)
@@ -75,7 +76,9 @@ describe("ProjectRowComponent", () => {
 
     // Details should not be present initially
     expect(
-      screen.queryByText("Product Line: Superconductors - Type: Hardware - Domain: Physics"),
+      screen.queryByText(
+        "Product Line: Superconductors - Type: Hardware - Domain: Physics",
+      ),
     ).toBeNull();
 
     const toggleBtn = screen.getByTitle("Show/Hide project details");
@@ -83,7 +86,9 @@ describe("ProjectRowComponent", () => {
     // Open Details
     await user.click(toggleBtn);
     expect(
-      screen.getByText("Product Line: Superconductors - Type: Hardware - Domain: Physics"),
+      screen.getByText(
+        "Product Line: Superconductors - Type: Hardware - Domain: Physics",
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText("SQUID Model")).toBeInTheDocument();
     expect(screen.getByText("MRI App Model")).toBeInTheDocument();
@@ -91,7 +96,9 @@ describe("ProjectRowComponent", () => {
     // Close Details
     await user.click(toggleBtn);
     expect(
-      screen.queryByText("Product Line: Superconductors - Type: Hardware - Domain: Physics"),
+      screen.queryByText(
+        "Product Line: Superconductors - Type: Hardware - Domain: Physics",
+      ),
     ).toBeNull();
   });
 

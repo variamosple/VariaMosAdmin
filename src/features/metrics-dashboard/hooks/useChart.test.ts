@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
+import type { Metric } from "../domain/Entity/Metric";
 import { useChart } from "./useChart";
-import { Metric } from "../domain/Entity/Metric";
 
 const mockMetric: Metric = {
   id: "test-metric",

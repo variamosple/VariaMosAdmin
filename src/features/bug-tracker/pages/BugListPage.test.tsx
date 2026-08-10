@@ -1,18 +1,17 @@
-import React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { BugListPage } from "./BugListPage";
+import { HttpResponse, http } from "msw";
 import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { BugListPage } from "./BugListPage";
 
 // Mock only @variamosple/variamos-components to avoid page visit tracker external side effects
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   withPageVisit: (component: any) => component,
 }));
 
 describe("BugListPage Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders correctly with initial state", async () => {
@@ -35,7 +34,7 @@ describe("BugListPage Component", () => {
   });
 
   it("shows error alert when error is present", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/bugs", () => {
         return HttpResponse.json(
@@ -71,7 +70,9 @@ describe("BugListPage Component", () => {
     const localTab = screen.getByRole("tab", { name: /local inbox/i });
     await user.click(localTab);
 
-    expect(screen.queryByRole("button", { name: /sync github/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /sync github/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("opens User Report Modal when clicking Report a Bug and submits it", async () => {
@@ -84,7 +85,10 @@ describe("BugListPage Component", () => {
 
     // Fill form
     await user.type(screen.getByLabelText(/title \*/i), "My Test Bug");
-    await user.type(screen.getByLabelText(/description \*/i), "Something is broken");
+    await user.type(
+      screen.getByLabelText(/description \*/i),
+      "Something is broken",
+    );
 
     // Submit
     await user.click(screen.getByRole("button", { name: /report bug/i }));
@@ -100,20 +104,30 @@ describe("BugListPage Component", () => {
     render(<BugListPage />);
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
-    await user.click(screen.getByRole("button", { name: /create github issue/i }));
+    await user.click(
+      screen.getByRole("button", { name: /create github issue/i }),
+    );
     expect(screen.getByText(/report a github bug/i)).toBeInTheDocument();
 
     // Fill form
     await user.type(screen.getByLabelText(/title \*/i), "My Admin Issue");
-    await user.type(screen.getByLabelText(/description \*/i), "Admin description");
-    await user.selectOptions(screen.getByLabelText(/target repository/i), "repo-a");
+    await user.type(
+      screen.getByLabelText(/description \*/i),
+      "Admin description",
+    );
+    await user.selectOptions(
+      screen.getByLabelText(/target repository/i),
+      "repo-a",
+    );
 
     // Submit
     await user.click(screen.getByRole("button", { name: /report bug/i }));
 
     // Wait for modal to close
     await waitFor(() => {
-      expect(screen.queryByText(/report a github bug/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/report a github bug/i),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -164,7 +178,9 @@ describe("BugListPage Component", () => {
     await user.click(localTab);
 
     // Wait for local bug row details button
-    const detailsButtons = await screen.findAllByRole("button", { name: /details/i });
+    const detailsButtons = await screen.findAllByRole("button", {
+      name: /details/i,
+    });
     await user.click(detailsButtons[0]);
 
     // Modal elements should be visible
@@ -178,7 +194,9 @@ describe("BugListPage Component", () => {
     const textarea = screen.getByPlaceholderText("Write a comment...");
     await user.type(textarea, "New user note");
 
-    const submitCommentBtn = screen.getByRole("button", { name: /add comment/i });
+    const submitCommentBtn = screen.getByRole("button", {
+      name: /add comment/i,
+    });
     await user.click(submitCommentBtn);
 
     await waitFor(() => {
@@ -198,7 +216,9 @@ describe("BugListPage Component", () => {
 
     expect(await screen.findByText(/bug details/i)).toBeInTheDocument();
     expect(
-      screen.getByText("This discussion is closed. Please use GitHub to communicate."),
+      screen.getByText(
+        "This discussion is closed. Please use GitHub to communicate.",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -214,36 +234,52 @@ describe("BugListPage Component", () => {
     await user.click(localTab);
 
     // Wait for the local bug's approve button to appear
-    const approveBtns = await screen.findAllByRole("button", { name: /approve/i });
+    const approveBtns = await screen.findAllByRole("button", {
+      name: /approve/i,
+    });
     await user.click(approveBtns[0]);
 
     // Verify modal elements are populated
-    expect(screen.getByText("Review and Approve Local Bug")).toBeInTheDocument();
+    expect(
+      screen.getByText("Review and Approve Local Bug"),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/title \*/i)).toHaveValue("Local Bug");
     expect(screen.getByLabelText(/description \*/i)).toHaveValue("Desc");
 
     // Modify fields
     await user.clear(screen.getByLabelText(/title \*/i));
-    await user.type(screen.getByLabelText(/title \*/i), "Updated Local Bug Title");
+    await user.type(
+      screen.getByLabelText(/title \*/i),
+      "Updated Local Bug Title",
+    );
 
     await user.clear(screen.getByLabelText(/description \*/i));
     await user.type(screen.getByLabelText(/description \*/i), "Updated Desc");
 
     // Use userEvent.selectOptions for select elements
-    await user.selectOptions(screen.getByLabelText(/target repository/i), "repo-a");
+    await user.selectOptions(
+      screen.getByLabelText(/target repository/i),
+      "repo-a",
+    );
     await user.selectOptions(screen.getByLabelText(/category \*/i), "cat-1");
     await user.selectOptions(screen.getByLabelText(/priority \*/i), "high");
 
-    const commentField = screen.getByPlaceholderText(/add details about why this bug is approved/i);
+    const commentField = screen.getByPlaceholderText(
+      /add details about why this bug is approved/i,
+    );
     await user.type(commentField, "Approval comment");
 
     // Click submit button
-    const submitBtn = screen.getByRole("button", { name: /approve & send to github/i });
+    const submitBtn = screen.getByRole("button", {
+      name: /approve & send to github/i,
+    });
     await user.click(submitBtn);
 
     // Modal should close
     await waitFor(() => {
-      expect(screen.queryByText("Review and Approve Local Bug")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Review and Approve Local Bug"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -258,10 +294,14 @@ describe("BugListPage Component", () => {
     await user.click(localTab);
 
     // Wait for the local bug's approve button to appear
-    const approveBtns = await screen.findAllByRole("button", { name: /approve/i });
+    const approveBtns = await screen.findAllByRole("button", {
+      name: /approve/i,
+    });
     await user.click(approveBtns[0]);
 
-    expect(screen.getByText("Review and Approve Local Bug")).toBeInTheDocument();
+    expect(
+      screen.getByText("Review and Approve Local Bug"),
+    ).toBeInTheDocument();
 
     // Click Cancel
     const cancelBtn = screen.getByRole("button", { name: /cancel/i });
@@ -269,13 +309,15 @@ describe("BugListPage Component", () => {
 
     // Modal should close
     await waitFor(() => {
-      expect(screen.queryByText("Review and Approve Local Bug")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Review and Approve Local Bug"),
+      ).not.toBeInTheDocument();
     });
   });
 
   it("shows error alert and keeps modal open when API submission fails with 500", async () => {
     const user = userEvent.setup();
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     server.use(
       http.post("*/bugs/:bugId/status", () => {
@@ -294,21 +336,32 @@ describe("BugListPage Component", () => {
     await user.click(localTab);
 
     // Wait for the local bug's approve button to appear
-    const approveBtns = await screen.findAllByRole("button", { name: /approve/i });
+    const approveBtns = await screen.findAllByRole("button", {
+      name: /approve/i,
+    });
     await user.click(approveBtns[0]);
 
     // Fill required fields to submit
-    await user.selectOptions(screen.getByLabelText(/target repository/i), "repo-a");
+    await user.selectOptions(
+      screen.getByLabelText(/target repository/i),
+      "repo-a",
+    );
     await user.selectOptions(screen.getByLabelText(/category \*/i), "cat-1");
 
     // Click submit button
-    const submitBtn = screen.getByRole("button", { name: /approve & send to github/i });
+    const submitBtn = screen.getByRole("button", {
+      name: /approve & send to github/i,
+    });
     await user.click(submitBtn);
 
     // Error message should show inside modal
     const modal = screen.getByRole("dialog");
-    expect(await within(modal).findByText("Failed to approve bug")).toBeInTheDocument();
-    expect(screen.getByText("Review and Approve Local Bug")).toBeInTheDocument(); // still open
+    expect(
+      await within(modal).findByText("Failed to approve bug"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Review and Approve Local Bug"),
+    ).toBeInTheDocument(); // still open
 
     consoleSpy.mockRestore();
   });

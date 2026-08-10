@@ -1,10 +1,9 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { LanguageFormModal } from "./index";
 import { ResponseModel } from "@variamosple/variamos-components";
+import { LanguageFormModal } from "./index";
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -19,11 +18,11 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("LanguageFormModal Component", () => {
-  const mockOnClose = jest.fn();
-  const mockOnSubmit = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the modal with fields and defaultValue", () => {
@@ -90,7 +89,9 @@ describe("LanguageFormModal Component", () => {
     const submitButton = screen.getByText("Edit Language");
     await user.click(submitButton);
 
-    expect(await screen.findByText("Language name is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Language name is required"),
+    ).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 });

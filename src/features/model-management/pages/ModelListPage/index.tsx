@@ -1,10 +1,10 @@
+import { withPageVisit } from "@variamosple/variamos-components";
+import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
+import type { FC } from "react";
+import { Container } from "react-bootstrap";
 import { ModelFormModal } from "@/features/model-management/components/ModelFormModal";
 import { ModelList } from "@/features/model-management/components/ModelList";
 import { ModelSearchForm } from "@/features/model-management/components/ModelSearchForm";
-import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
-import { FC } from "react";
-import { Container } from "react-bootstrap";
 import { useModelList } from "../../hooks/useModelList";
 
 const ModelListPageComponent: FC = () => {
@@ -76,4 +76,7 @@ const ModelListPageComponent: FC = () => {
   );
 };
 
-export const ModelListPage = withPageVisit(ModelListPageComponent, "AdminModelList");
+export const ModelListPage = withPageVisit(
+  ModelListPageComponent,
+  "AdminModelList",
+);

@@ -1,10 +1,9 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { UserRoleList } from "./index";
-import { Role } from "@/features/role-management/domain/Entity/Role";
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
   };
@@ -16,10 +15,10 @@ const mockRoles: Role[] = [
 ];
 
 describe("UserRoleList Component", () => {
-  const mockOnRoleDelete = jest.fn();
+  const mockOnRoleDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders user roles table correctly", () => {
@@ -28,7 +27,7 @@ describe("UserRoleList Component", () => {
         items={mockRoles}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onRoleDelete={mockOnRoleDelete}
       />,
     );
@@ -44,7 +43,7 @@ describe("UserRoleList Component", () => {
         items={mockRoles}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onRoleDelete={mockOnRoleDelete}
       />,
     );

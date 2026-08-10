@@ -2,21 +2,25 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UserRoleForm } from "./index";
 
-jest.mock("@/shared/hooks/useIntersectionObserver", () => {
-  return () => ({
-    lastEntryRef: jest.fn(),
-    setHasMore: jest.fn(),
-    page: 1,
-  });
+vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
+  return {
+    default: () => ({
+      lastEntryRef: vi.fn(),
+      setHasMore: vi.fn(),
+      page: 1,
+    }),
+  };
 });
 
-jest.mock("@/shared/components/InfiniteSelect", () => {
+vi.mock("@/shared/components/InfiniteSelect", async () => {
   return {
     InfiniteSelect: ({ handleSelect, options }: any) => (
       <select
         data-testid="infinite-select"
         onChange={(e) => {
-          const opt = options.find((o: any) => String(o.value) === e.target.value);
+          const opt = options.find(
+            (o: any) => String(o.value) === e.target.value,
+          );
           if (opt) handleSelect(opt);
         }}
       >
@@ -31,15 +35,15 @@ jest.mock("@/shared/components/InfiniteSelect", () => {
   };
 });
 
-const mockLoadData = jest.fn();
-jest.mock("@variamosple/variamos-components", () => {
+const mockLoadData = vi.fn();
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     useDebouncedValue: (val: any) => [val],
     usePaginatedQuery: () => ({
       loadData: mockLoadData,
       isLoading: false,
       currentPage: 1,
-      setCurrentPage: jest.fn(),
+      setCurrentPage: vi.fn(),
       totalItems: 2,
     }),
     PagedModel: class PagedModel {
@@ -71,10 +75,10 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("UserRoleForm Component", () => {
-  const mockOnUserRoleSubmit = jest.fn();
+  const mockOnUserRoleSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLoadData.mockResolvedValue({
       data: [
         { id: 1, name: "Admin" },
@@ -84,7 +88,12 @@ describe("UserRoleForm Component", () => {
   });
 
   it("loads and renders the form with role options", async () => {
-    render(<UserRoleForm onUserRoleSubmit={mockOnUserRoleSubmit} isLoading={false} />);
+    render(
+      <UserRoleForm
+        onUserRoleSubmit={mockOnUserRoleSubmit}
+        isLoading={false}
+      />,
+    );
 
     const select = await screen.findByTestId("infinite-select");
     expect(select).toBeInTheDocument();
@@ -92,7 +101,12 @@ describe("UserRoleForm Component", () => {
   });
 
   it("submits the selected role when form is submitted", async () => {
-    render(<UserRoleForm onUserRoleSubmit={mockOnUserRoleSubmit} isLoading={false} />);
+    render(
+      <UserRoleForm
+        onUserRoleSubmit={mockOnUserRoleSubmit}
+        isLoading={false}
+      />,
+    );
 
     const select = await screen.findByTestId("infinite-select");
     const user = userEvent.setup();
@@ -102,7 +116,9 @@ describe("UserRoleForm Component", () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnUserRoleSubmit).toHaveBeenCalledWith(expect.objectContaining({ roleId: 1 }));
+      expect(mockOnUserRoleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ roleId: 1 }),
+      );
     });
   });
 });

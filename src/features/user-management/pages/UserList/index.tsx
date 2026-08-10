@@ -1,10 +1,10 @@
+import { withPageVisit } from "@variamosple/variamos-components";
+import type { FC } from "react";
+import { Container } from "react-bootstrap";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
-import { RecoveryLinkModal } from "../../components/UserList/RecoveryLinkModal";
 import { SearchForm } from "@/shared/components/SearchForm";
 import { UserList } from "../../components/UserList";
-import { withPageVisit } from "@variamosple/variamos-components";
-import { FC } from "react";
-import { Container } from "react-bootstrap";
+import { RecoveryLinkModal } from "../../components/UserList/RecoveryLinkModal";
 import { useUserList } from "../../hooks/useUserList";
 
 const UserListPageComponent: FC<unknown> = () => {

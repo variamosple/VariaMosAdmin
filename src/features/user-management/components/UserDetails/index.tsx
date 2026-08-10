@@ -1,7 +1,7 @@
-import { User } from "@/features/user-management/domain/Entity/User";
-import { formatDateTime } from "@/shared/constants";
-import { FC } from "react";
+import type { FC } from "react";
 import { Col, Row } from "react-bootstrap";
+import type { User } from "@/features/user-management/domain/Entity/User";
+import { formatDateTime } from "@/shared/constants";
 
 export interface RoleListParameters {
   user: User;
@@ -36,7 +36,8 @@ export const UserDetails: FC<RoleListParameters> = ({ user }) => {
         <hr />
 
         <Col className="col-12 col-md-6">
-          <span className="fw-bold">Created At: </span> {formatDateTime(new Date(user?.createdAt))}
+          <span className="fw-bold">Created At: </span>{" "}
+          {formatDateTime(new Date(user?.createdAt))}
         </Col>
 
         <Col className="col-12 col-md-6">
@@ -46,7 +47,11 @@ export const UserDetails: FC<RoleListParameters> = ({ user }) => {
 
         <Col className="col-12 col-md-6">
           <span className="fw-bold">Status: </span>{" "}
-          {user?.isDeleted ? "deleted" : user?.isEnabled ? "active" : "disabled"}
+          {user?.isDeleted
+            ? "deleted"
+            : user?.isEnabled
+              ? "active"
+              : "disabled"}
         </Col>
       </Row>
     </div>

@@ -1,14 +1,14 @@
 import axios from "axios";
-import { setupAxiosInterceptors, ADMIN_CLIENT } from "./AxiosConfig";
+import { HttpResponse, http } from "msw";
 import { server } from "../tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { ADMIN_CLIENT, setupAxiosInterceptors } from "./AxiosConfig";
 
 describe("AxiosConfig Interceptors", () => {
-  let navigateMock: jest.Mock;
+  let navigateMock: import("vitest").Mock;
   let testClient: any;
 
   beforeEach(() => {
-    navigateMock = jest.fn();
+    navigateMock = vi.fn();
     testClient = axios.create({
       baseURL: "http://api.test",
     });
@@ -81,17 +81,22 @@ describe("AxiosConfig Interceptors", () => {
     );
 
     await expect(testClient.get("/secure")).rejects.toThrow();
-    expect(navigateMock).toHaveBeenCalledWith("/login?errorMessage=Token expired");
+    expect(navigateMock).toHaveBeenCalledWith(
+      "/login?errorMessage=Token expired",
+    );
   });
 
   it("should not navigate to login on 401 error if route is public", async () => {
     window.location.hash = "#/login";
     server.use(
       http.get("http://api.test/public-endpoint", () => {
-        return new HttpResponse(JSON.stringify({ message: "Invalid credentials" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new HttpResponse(
+          JSON.stringify({ message: "Invalid credentials" }),
+          {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }),
     );
 

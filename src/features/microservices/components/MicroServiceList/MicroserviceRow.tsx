@@ -1,13 +1,19 @@
-import { watchMicroserviceLogs } from "../../api/MicroServiceRepository";
-import { MicroService } from "../../domain/Entity/MicroService";
 import { formatDateTime } from "@/shared/constants";
 import { useLineBuffer } from "@/shared/hooks/useLineBuffer";
 import { useSocket } from "@/shared/hooks/useSocket";
+import { watchMicroserviceLogs } from "../../api/MicroServiceRepository";
+import type { MicroService } from "../../domain/Entity/MicroService";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
-import { FC, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { Button, ButtonGroup, Spinner } from "react-bootstrap";
-import { ArrowClockwise, DashCircle, PlayFill, Search, StopFill } from "react-bootstrap-icons";
+import {
+  ArrowClockwise,
+  DashCircle,
+  PlayFill,
+  Search,
+  StopFill,
+} from "react-bootstrap-icons";
 
 export interface MicroServiceRowProps {
   microService: MicroService;
@@ -56,7 +62,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         addToLogsBuffer(event.data);
       };
 
-      socket.onclose = (event) => {
+      socket.onclose = (_event) => {
         // WebSocket connection closed
       };
 
@@ -86,7 +92,11 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
         <td>{microService.status}</td>
 
-        <td>{microService.created ? formatDateTime(new Date(microService.created)) : null}</td>
+        <td>
+          {microService.created
+            ? formatDateTime(new Date(microService.created))
+            : null}
+        </td>
 
         <td className="text-center">
           <ButtonGroup size="sm">
@@ -120,7 +130,11 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
               </Button>
             )}
 
-            <Button size="sm" onClick={() => setShow((isShown) => !isShown)} title="Show/Hide logs">
+            <Button
+              size="sm"
+              onClick={() => setShow((isShown) => !isShown)}
+              title="Show/Hide logs"
+            >
               {!show ? <Search /> : <DashCircle />}
             </Button>
           </ButtonGroup>
@@ -166,5 +180,7 @@ const MicroServiceLogs: FC<MicroServiceLogsProps> = ({ isLoading, logs }) => {
     return <div>No logs found</div>;
   }
 
-  return <LogViewer hasLineNumbers={true} height={300} data={logs} theme="dark" />;
+  return (
+    <LogViewer hasLineNumbers={true} height={300} data={logs} theme="dark" />
+  );
 };

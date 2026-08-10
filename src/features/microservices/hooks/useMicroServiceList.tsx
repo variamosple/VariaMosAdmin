@@ -1,21 +1,23 @@
-import { useEffect, useState } from "react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { MicroService } from "../domain/Entity/MicroService";
-import { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
+import { useEffect, useState } from "react";
 import {
   queryMicroServices,
   restartMicroservice,
   startMicroservice,
   stopMicroservice,
 } from "../api/MicroServiceRepository";
+import type { MicroService } from "../domain/Entity/MicroService";
+import { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
 
 export const useMicroServiceList = () => {
   const [showStart, setShowStart] = useState(false);
   const [showRestart, setShowRestart] = useState(false);
   const [showStop, setShowStop] = useState(false);
 
-  const [toStartMicroService, setToStartMicroService] = useState<MicroService>();
-  const [toRestartMicroService, setToRestartMicroService] = useState<MicroService>();
+  const [toStartMicroService, setToStartMicroService] =
+    useState<MicroService>();
+  const [toRestartMicroService, setToRestartMicroService] =
+    useState<MicroService>();
   const [toStopMicroService, setToStopMicroService] = useState<MicroService>();
 
   const {

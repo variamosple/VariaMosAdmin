@@ -1,8 +1,8 @@
-import { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
-import { RolePermissionFilter } from "@/features/role-management/domain/Entity/RolePermissionFilter";
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import type { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
+import type { RolePermissionFilter } from "@/features/role-management/domain/Entity/RolePermissionFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryRolePermissions = (
@@ -18,12 +18,12 @@ export const queryRolePermissions = (
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -48,12 +48,12 @@ export const createRolePermission = (
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -67,8 +67,12 @@ export const createRolePermission = (
     });
 };
 
-export const deleteRolePermission = (request: RolePermission): Promise<ResponseModel<void>> => {
-  return ADMIN_CLIENT.delete(`/v1/roles/${request.roleId}/permissions/${request.permissionId}`)
+export const deleteRolePermission = (
+  request: RolePermission,
+): Promise<ResponseModel<void>> => {
+  return ADMIN_CLIENT.delete(
+    `/v1/roles/${request.roleId}/permissions/${request.permissionId}`,
+  )
     .then((response) => response.data)
     .catch((error) => {
       if (axios.isAxiosError(error)) {
@@ -76,12 +80,12 @@ export const deleteRolePermission = (request: RolePermission): Promise<ResponseM
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

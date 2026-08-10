@@ -12,7 +12,7 @@ describe("Auth - Real E2E Flows", () => {
   });
 
   it("should log in with seeded admin credentials, verify local storage, update country in My Account, and verify persistence after reload", () => {
-    cy.visit("http://localhost:3000");
+    cy.visit("http://localhost:3000/variamos_admin/");
 
     // 1. Log in
     cy.get('input[name="email"]').type(adminEmail);
@@ -20,10 +20,10 @@ describe("Auth - Real E2E Flows", () => {
     cy.get('button[type="submit"]').click();
 
     // Verify successful login
-    cy.url().should("eq", "http://localhost:3000/");
+    cy.url().should("eq", "http://localhost:3000/variamos_admin/#/");
 
     // 2. Navigate to "My Account" page
-    cy.visit("http://localhost:3000/#/my-account");
+    cy.visit("http://localhost:3000/variamos_admin/#/my-account");
     cy.contains("h1", "My account").should("be.visible");
     cy.contains("Email:").parent().should("contain", adminEmail);
 
@@ -53,7 +53,7 @@ describe("Auth - Real E2E Flows", () => {
     const signupName = "New Signed Up User";
     const signupPassword = "Password123!";
 
-    cy.visit("http://localhost:3000/#/sign-up");
+    cy.visit("http://localhost:3000/variamos_admin/#/sign-up");
 
     // Fill in sign-up details
     cy.get('input[name="name"]').type(signupName);
@@ -77,7 +77,7 @@ describe("Auth - Real E2E Flows", () => {
     cy.get('button[type="submit"]').click();
 
     // Verify successful login (dashboard page)
-    cy.url().should("eq", "http://localhost:3000/");
+    cy.url().should("eq", "http://localhost:3000/variamos_admin/#/");
   });
 
   after(() => {

@@ -1,5 +1,8 @@
-import { AnalyticsProvider, SessionProvider } from "@variamosple/variamos-components";
-import { FC } from "react";
+import {
+  AnalyticsProvider,
+  SessionProvider,
+} from "@variamosple/variamos-components";
+import type { FC } from "react";
 import { HashRouter, useRoutes } from "react-router-dom";
 import "./App.css";
 import {
@@ -10,9 +13,9 @@ import {
   requestSignUp,
 } from "@/features/auth";
 import { registerVisit } from "@/features/metrics-dashboard/api/VisitsRepository";
-import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { RouterProvider } from "@/shared/context/RouterContext";
 import { ToastProvider } from "@/shared/context/ToastContext";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { ROUTES } from "./router";
 
 const Routes: FC = () => {
@@ -31,7 +34,9 @@ function App() {
         requestSignInAsGuest={requestSignInAsGuest}
         requestLogout={requestLogout}
       >
-        <HashRouter>
+        <HashRouter
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
           <RouterProvider>
             <Routes />
           </RouterProvider>

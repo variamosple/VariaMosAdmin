@@ -1,13 +1,13 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ProjectListPage } from "./index";
+import { HttpResponse, http } from "msw";
+import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { ProjectListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   const { useState, useCallback } = React;
   return {
@@ -69,25 +69,28 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-jest.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", () => {
-  return {
-    __esModule: true,
-    default: ({ show, message, onConfirm, onCancel }: any) => {
-      if (!show) return null;
-      return (
-        <div data-testid="delete-confirm-modal">
-          <span>{message}</span>
-          <button onClick={onConfirm}>Confirm Delete</button>
-          <button onClick={onCancel}>Cancel Delete</button>
-        </div>
-      );
-    },
-  };
-});
+vi.mock(
+  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
+  async () => {
+    return {
+      __esModule: true,
+      default: ({ show, message, onConfirm, onCancel }: any) => {
+        if (!show) return null;
+        return (
+          <div data-testid="delete-confirm-modal">
+            <span>{message}</span>
+            <button onClick={onConfirm}>Confirm Delete</button>
+            <button onClick={onCancel}>Cancel Delete</button>
+          </div>
+        );
+      },
+    };
+  },
+);
 
 describe("ProjectListPage Integration", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
@@ -123,7 +126,9 @@ describe("ProjectListPage Integration", () => {
     await user.type(input, "Project One Edited");
 
     // Click submit inside the modal
-    const editProjectButtons = screen.getAllByRole("button", { name: /edit project/i });
+    const editProjectButtons = screen.getAllByRole("button", {
+      name: /edit project/i,
+    });
     await user.click(editProjectButtons[editProjectButtons.length - 1]);
 
     // Verify modal closes
@@ -144,14 +149,18 @@ describe("ProjectListPage Integration", () => {
 
     // Delete confirmation modal should be visible
     expect(screen.getByTestId("delete-confirm-modal")).toBeInTheDocument();
-    expect(screen.getByText("Are you sure you want to delete the project?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to delete the project?"),
+    ).toBeInTheDocument();
 
     // Click confirm delete
     await user.click(screen.getByText("Confirm Delete"));
 
     // Verify modal closes
     await waitFor(() => {
-      expect(screen.queryByTestId("delete-confirm-modal")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("delete-confirm-modal"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -175,7 +184,7 @@ describe("ProjectListPage Integration", () => {
   });
 
   it("shows error toast when API fails to load projects", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/projects", () => {
         return HttpResponse.json(
@@ -193,7 +202,9 @@ describe("ProjectListPage Integration", () => {
 
     renderWithProviders(<ProjectListPage />);
     expect(await screen.findByText("Project query error")).toBeInTheDocument();
-    expect(screen.getByText("Network/communication error.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Network/communication error."),
+    ).toBeInTheDocument();
     consoleSpy.mockRestore();
   });
 });

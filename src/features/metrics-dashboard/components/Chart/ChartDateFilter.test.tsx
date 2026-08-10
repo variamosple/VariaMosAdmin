@@ -1,23 +1,24 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { ChartDateFilter } from "./ChartDateFilter";
 
-const mockFilterChartData = jest.fn();
+const mockFilterChartData = vi.fn();
 
-jest.mock("../../context/ChartContext", () => ({
+vi.mock("../../context/ChartContext", async () => ({
   useChartContext: () => ({
     filterChartData: mockFilterChartData,
   }),
 }));
 
-jest.mock("./ChartDateFilterForm", () => ({
+vi.mock("./ChartDateFilterForm", async () => ({
   ChartDateFilterForm: ({ onFilterSubmit }: any) => (
     <div>
       <button
         data-testid="mock-submit-btn"
-        onClick={() => onFilterSubmit({ startDate: "2026-01-01", endDate: "2026-01-10" })}
+        onClick={() =>
+          onFilterSubmit({ startDate: "2026-01-01", endDate: "2026-01-10" })
+        }
       >
         Submit Filter
       </button>
@@ -27,7 +28,7 @@ jest.mock("./ChartDateFilterForm", () => ({
 
 describe("ChartDateFilter Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the funnel button and opens the filter popover on click", async () => {

@@ -1,27 +1,36 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Project } from "../../domain/Entity/Project";
 import { ProjectList } from "./index";
-import { Project } from "../../domain/Entity/Project";
 
 const mockProjects: Project[] = [
-  { id: 1, name: "Project One", template: false, description: "Description One" },
-  { id: 2, name: "Project Two", template: true, description: "Description Two" },
+  {
+    id: 1,
+    name: "Project One",
+    template: false,
+    description: "Description One",
+  },
+  {
+    id: 2,
+    name: "Project Two",
+    template: true,
+    description: "Description Two",
+  },
 ];
 
 // Mock the variamos-components library which has Paginator
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
   };
 });
 
 describe("ProjectList Component", () => {
-  const mockOnProjectEdit = jest.fn();
-  const mockOnProjectDelete = jest.fn();
+  const mockOnProjectEdit = vi.fn();
+  const mockOnProjectDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of projects correctly", () => {
@@ -30,7 +39,7 @@ describe("ProjectList Component", () => {
         items={mockProjects}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onProjectEdit={mockOnProjectEdit}
         onProjectDelete={mockOnProjectDelete}
       />,
@@ -48,7 +57,7 @@ describe("ProjectList Component", () => {
         items={mockProjects}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onProjectEdit={mockOnProjectEdit}
         onProjectDelete={mockOnProjectDelete}
       />,
@@ -69,7 +78,7 @@ describe("ProjectList Component", () => {
         items={mockProjects}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onProjectEdit={mockOnProjectEdit}
         onProjectDelete={mockOnProjectDelete}
       />,

@@ -1,15 +1,15 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { RoleListPage } from "./index";
+import { HttpResponse, http } from "msw";
+import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { RoleListPage } from "./index";
 
-const mockNavigate = jest.fn();
+const mockNavigate = vi.fn();
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   const { useState, useCallback } = React;
   return {
@@ -75,7 +75,7 @@ jest.mock("@variamosple/variamos-components", () => {
 
 describe("RoleListPage", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
@@ -84,8 +84,12 @@ describe("RoleListPage", () => {
 
   it("should render page header, create button, and lists", async () => {
     renderWithProviders(<RoleListPage />);
-    expect(screen.getByRole("heading", { name: "Roles list" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Create Role" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Roles list" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Create Role" }),
+    ).toBeInTheDocument();
 
     // Wait for the real API calls to complete via MSW
     expect(await screen.findByText("Admin")).toBeInTheDocument();
@@ -136,7 +140,9 @@ describe("RoleListPage", () => {
     await user.type(input, "Admin Edited");
 
     // Click submit inside the modal
-    const editRoleButtons = screen.getAllByRole("button", { name: /edit role/i });
+    const editRoleButtons = screen.getAllByRole("button", {
+      name: /edit role/i,
+    });
     await user.click(editRoleButtons[editRoleButtons.length - 1]);
 
     // Verify modal closes
@@ -156,7 +162,9 @@ describe("RoleListPage", () => {
     await user.click(deleteButtons[1]);
 
     // Delete confirmation modal should be visible
-    expect(screen.getByText("Are you sure you want to delete the role?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to delete the role?"),
+    ).toBeInTheDocument();
 
     // Click Accept to confirm delete
     await user.click(screen.getByRole("button", { name: "Accept" }));
@@ -177,7 +185,9 @@ describe("RoleListPage", () => {
     );
 
     renderWithProviders(<RoleListPage />);
-    expect(screen.getByRole("heading", { name: "Roles list" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Roles list" }),
+    ).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.queryByText("Admin")).not.toBeInTheDocument();
@@ -186,7 +196,7 @@ describe("RoleListPage", () => {
   });
 
   it("shows error toast when API fails to load roles", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/roles", () => {
         return HttpResponse.json(
@@ -198,7 +208,9 @@ describe("RoleListPage", () => {
 
     renderWithProviders(<RoleListPage />);
     expect(await screen.findByText("Role query error")).toBeInTheDocument();
-    expect(screen.getByText("Network/communication error.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Network/communication error."),
+    ).toBeInTheDocument();
     consoleSpy.mockRestore();
   });
 });

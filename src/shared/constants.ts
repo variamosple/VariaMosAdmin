@@ -1,7 +1,9 @@
-export const formatDateTime = (date: Date | string | number | null | undefined): string => {
+export const formatDateTime = (
+  date: Date | string | number | null | undefined,
+): string => {
   if (!date) return "N/A";
   const parsedDate = date instanceof Date ? date : new Date(date);
-  if (isNaN(parsedDate.getTime())) {
+  if (Number.isNaN(parsedDate.getTime())) {
     return "N/A";
   }
   return new Intl.DateTimeFormat("en-CA", {
@@ -14,10 +16,12 @@ export const formatDateTime = (date: Date | string | number | null | undefined):
   }).format(parsedDate);
 };
 
-export const formatDate = (date: Date | string | number | null | undefined): string => {
+export const formatDate = (
+  date: Date | string | number | null | undefined,
+): string => {
   if (!date) return "N/A";
   const parsedDate = date instanceof Date ? date : new Date(date);
-  if (isNaN(parsedDate.getTime())) {
+  if (Number.isNaN(parsedDate.getTime())) {
     return "N/A";
   }
   return new Intl.DateTimeFormat("en-CA", {
@@ -27,7 +31,9 @@ export const formatDate = (date: Date | string | number | null | undefined): str
   }).format(parsedDate);
 };
 
-export const PASSWORD_REGEXP = Object.freeze(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,24}$/);
+export const PASSWORD_REGEXP = Object.freeze(
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,24}$/,
+);
 
 export const formatBoolean = (
   value?: boolean,

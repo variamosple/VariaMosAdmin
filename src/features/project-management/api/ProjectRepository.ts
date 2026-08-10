@@ -1,11 +1,13 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { Project } from "@/features/project-management/domain/Entity/Project";
-import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
+import type { Project } from "@/features/project-management/domain/Entity/Project";
+import type { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { PROJECTS_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
-export const queryProjects = (filter: ProjectsFilter): Promise<ResponseModel<Project[]>> => {
+export const queryProjects = (
+  filter: ProjectsFilter,
+): Promise<ResponseModel<Project[]>> => {
   return PROJECTS_CLIENT.get("/v1/admin/projects", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -14,12 +16,12 @@ export const queryProjects = (filter: ProjectsFilter): Promise<ResponseModel<Pro
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -33,7 +35,9 @@ export const queryProjects = (filter: ProjectsFilter): Promise<ResponseModel<Pro
     });
 };
 
-export const deleteProject = (projectId: number): Promise<ResponseModel<void>> => {
+export const deleteProject = (
+  projectId: number,
+): Promise<ResponseModel<void>> => {
   return PROJECTS_CLIENT.delete(`/v1/admin/projects/${projectId}`)
     .then((response) => response.data)
     .catch((error) => {
@@ -42,12 +46,12 @@ export const deleteProject = (projectId: number): Promise<ResponseModel<void>> =
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -90,7 +94,9 @@ export const deleteProject = (projectId: number): Promise<ResponseModel<void>> =
 //     });
 // };
 
-export const updateProject = (request: Project): Promise<ResponseModel<Project>> => {
+export const updateProject = (
+  request: Project,
+): Promise<ResponseModel<Project>> => {
   return PROJECTS_CLIENT.put(`/v1/admin/projects/${request.id}`, request)
     .then((response) => response.data)
     .catch((error) => {
@@ -99,12 +105,12 @@ export const updateProject = (request: Project): Promise<ResponseModel<Project>>
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

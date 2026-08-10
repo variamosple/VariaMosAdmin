@@ -1,8 +1,8 @@
-import { MicroService } from "../../domain/Entity/MicroService";
-import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Table } from "react-bootstrap";
+import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { MicroService } from "../../domain/Entity/MicroService";
 import { MicroServiceRowComponent } from "./MicroserviceRow";
 
 export interface MicroServiceListParameters extends PaginationControlsProps {
@@ -23,9 +23,19 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
 }) => {
   return (
     <>
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
-      <Table striped bordered hover className="w-100" style={{ tableLayout: "fixed" }}>
+      <Table
+        striped
+        bordered
+        hover
+        className="w-100"
+        style={{ tableLayout: "fixed" }}
+      >
         <thead>
           <tr>
             <th>ID</th>
@@ -55,7 +65,11 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
         </tbody>
       </Table>
 
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

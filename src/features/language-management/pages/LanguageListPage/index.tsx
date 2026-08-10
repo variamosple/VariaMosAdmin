@@ -1,10 +1,10 @@
+import { withPageVisit } from "@variamosple/variamos-components";
+import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
+import type { FC } from "react";
+import { Container } from "react-bootstrap";
 import { LanguageFormModal } from "../../components/LanguageFormModal";
 import { LanguageList } from "../../components/LanguageList";
 import { LanguageSearchForm } from "../../components/LanguageSearchForm";
-import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
-import { FC } from "react";
-import { Container } from "react-bootstrap";
 import { useLanguageList } from "../../hooks/useLanguageList";
 
 const LanguageListPageComponent: FC = () => {
@@ -77,4 +77,7 @@ const LanguageListPageComponent: FC = () => {
   );
 };
 
-export const LanguageListPage = withPageVisit(LanguageListPageComponent, "AdminLanguageList");
+export const LanguageListPage = withPageVisit(
+  LanguageListPageComponent,
+  "AdminLanguageList",
+);

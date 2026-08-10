@@ -1,17 +1,16 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import type { Metric } from "../../domain/Entity/Metric";
 import { ChartComponent } from "./index";
-import { Metric } from "../../domain/Entity/Metric";
 
 // Mock google charts to prevent errors during rendering in test environment
-jest.mock("react-google-charts", () => {
+vi.mock("react-google-charts", async () => {
   return {
     Chart: () => <div data-testid="google-chart">Mock Google Chart</div>,
   };
 });
 
 // Mock the context wrapper so line chart doesn't throw
-jest.mock("../../context/ChartContext", () => {
+vi.mock("../../context/ChartContext", async () => {
   return {
     useChartContext: () => ({
       metric: { title: "Test Line Metric", data: [] },

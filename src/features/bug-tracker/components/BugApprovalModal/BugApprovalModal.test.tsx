@@ -1,15 +1,14 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { BugApprovalModal } from "./index";
-import { Bug } from "../../domain/Bug";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import type { Bug } from "../../domain/Bug";
+import { BugApprovalModal } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors when BugRepository is loaded
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     withPageVisit: (component: any) => component,
     ResponseModel: class ResponseModel {
@@ -35,8 +34,8 @@ const apiTarget = (path: string) => {
 };
 
 describe("BugApprovalModal Component", () => {
-  const mockOnConfirmApprove = jest.fn();
-  const mockOnHide = jest.fn();
+  const mockOnConfirmApprove = vi.fn();
+  const mockOnHide = vi.fn();
   const sampleRepos = ["repo1", "repo2"];
   const sampleCategories = ["UI", "Backend", "Other"];
 
@@ -48,7 +47,12 @@ describe("BugApprovalModal Component", () => {
     category: "UI",
     githubRepo: "repo1",
     attachments: [
-      { id: 1, filePath: "/path/to/att1.jpg", fileType: "image/jpeg", bugId: "bug-123" },
+      {
+        id: 1,
+        filePath: "/path/to/att1.jpg",
+        fileType: "image/jpeg",
+        bugId: "bug-123",
+      },
     ],
   };
 
@@ -56,7 +60,7 @@ describe("BugApprovalModal Component", () => {
   let deleteAttachmentParams: any[] = [];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     uploadAttachmentParams = [];
     deleteAttachmentParams = [];
 
@@ -72,10 +76,13 @@ describe("BugApprovalModal Component", () => {
           },
         });
       }),
-      http.delete(apiTarget("/bugs/attachments/:attachmentId"), ({ params }) => {
-        deleteAttachmentParams.push(params.attachmentId);
-        return HttpResponse.json({ data: null });
-      }),
+      http.delete(
+        apiTarget("/bugs/attachments/:attachmentId"),
+        ({ params }) => {
+          deleteAttachmentParams.push(params.attachmentId);
+          return HttpResponse.json({ data: null });
+        },
+      ),
     );
   });
 
@@ -90,7 +97,9 @@ describe("BugApprovalModal Component", () => {
         categories={sampleCategories}
       />,
     );
-    expect(screen.queryByText("Review and Approve Local Bug")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Review and Approve Local Bug"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders nothing when show is false", () => {
@@ -104,7 +113,9 @@ describe("BugApprovalModal Component", () => {
         categories={sampleCategories}
       />,
     );
-    expect(screen.queryByText("Review and Approve Local Bug")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Review and Approve Local Bug"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders correctly with bug details", () => {
@@ -119,9 +130,13 @@ describe("BugApprovalModal Component", () => {
       />,
     );
 
-    expect(screen.getByText("Review and Approve Local Bug")).toBeInTheDocument();
+    expect(
+      screen.getByText("Review and Approve Local Bug"),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/Title \*/i)).toHaveValue("Old Title");
-    expect(screen.getByLabelText(/Description \*/i)).toHaveValue("Old Description");
+    expect(screen.getByLabelText(/Description \*/i)).toHaveValue(
+      "Old Description",
+    );
     expect(screen.getByLabelText(/Target Repository/i)).toHaveValue("repo1");
     expect(screen.getByLabelText(/Priority \*/i)).toHaveValue("low");
     expect(screen.getByLabelText(/Category \*/i)).toHaveValue("UI");
@@ -148,11 +163,17 @@ describe("BugApprovalModal Component", () => {
     await user.clear(screen.getByLabelText(/Description \*/i));
     await user.selectOptions(screen.getByLabelText(/Target Repository/i), "");
 
-    fireEvent.submit(screen.getByRole("button", { name: "Approve & Send to GitHub" }));
+    fireEvent.submit(
+      screen.getByRole("button", { name: "Approve & Send to GitHub" }),
+    );
 
     expect(await screen.findByText("Title is required")).toBeInTheDocument();
-    expect(await screen.findByText("Description is required")).toBeInTheDocument();
-    expect(await screen.findByText("GitHub repository is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Description is required"),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("GitHub repository is required"),
+    ).toBeInTheDocument();
     expect(mockOnConfirmApprove).not.toHaveBeenCalled();
   });
 
@@ -174,9 +195,14 @@ describe("BugApprovalModal Component", () => {
     const user = userEvent.setup();
     await user.clear(screen.getByLabelText(/Title \*/i));
     await user.type(screen.getByLabelText(/Title \*/i), "Approved Title");
-    await user.type(screen.getByLabelText(/Status Change Comment/i), "Review note");
+    await user.type(
+      screen.getByLabelText(/Status Change Comment/i),
+      "Review note",
+    );
 
-    fireEvent.submit(screen.getByRole("button", { name: "Approve & Send to GitHub" }));
+    fireEvent.submit(
+      screen.getByRole("button", { name: "Approve & Send to GitHub" }),
+    );
 
     await waitFor(() => {
       expect(mockOnConfirmApprove).toHaveBeenCalledWith(
@@ -209,7 +235,9 @@ describe("BugApprovalModal Component", () => {
     );
 
     const file = new File(["foo"], "att2.png", { type: "image/png" });
-    const fileInput = screen.getByLabelText(/Add Attachment/i) as HTMLInputElement;
+    const fileInput = screen.getByLabelText(
+      /Add Attachment/i,
+    ) as HTMLInputElement;
 
     // Trigger upload
     const user = userEvent.setup();
@@ -240,12 +268,16 @@ describe("BugApprovalModal Component", () => {
     expect(deleteAttachmentParams[0]).toBe("1");
 
     await waitFor(() => {
-      expect(screen.queryByText("att1.jpg (image/jpeg)")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("att1.jpg (image/jpeg)"),
+      ).not.toBeInTheDocument();
     });
   });
 
   it("shows error alert if upload or deletion fails", async () => {
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     server.use(
       http.post(apiTarget("/bugs/:bugId/attachments"), () => {
@@ -268,12 +300,16 @@ describe("BugApprovalModal Component", () => {
     );
 
     const file = new File(["foo"], "att2.png", { type: "image/png" });
-    const fileInput = screen.getByLabelText(/Add Attachment/i) as HTMLInputElement;
+    const fileInput = screen.getByLabelText(
+      /Add Attachment/i,
+    ) as HTMLInputElement;
 
     const user = userEvent.setup();
     await user.upload(fileInput, file);
 
-    expect(await screen.findByText("Server error occurred")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Server error occurred"),
+    ).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
   });

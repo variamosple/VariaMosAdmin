@@ -7,69 +7,72 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "TZ=UTC react-scripts test",
-    "jest:coverage": "TZ=UTC react-scripts test --coverage --watchAll=false",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "postinstall": "patch-package",
     "prepare": "husky",
     "check-arch": "dependency-cruiser --config .dependency-cruiser.js src/",
-    "lint": "eslint src/",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write --unsafe src/",
     "typecheck": "tsc --noEmit",
     "find-deadcode": "knip",
+    "check-updates": "taze",
     "cypress:run:mocked": "bash ./scripts/run-mocked-docker.sh",
     "docker:test:up": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml up -d",
     "docker:test:down": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml down && docker image prune -f",
     "cypress:run:real": "npm run docker:test:up && start-server-and-test start http://localhost:3000 \"cypress run --spec 'cypress/integration/**/*.real.spec.js'\" ; status=$?; npm run docker:test:down; exit $status"
   },
   "dependencies": {
-    "@patternfly/react-core": "^6.6.0",
-    "@patternfly/react-log-viewer": "^6.0.0",
+    "@patternfly/react-core": "^6.6.1",
+    "@patternfly/react-log-viewer": "^6.5.0",
     "@variamosple/variamos-components": "^0.0.23",
-    "axios": "^1.7.7",
+    "axios": "^1.19.0",
     "bootstrap": "^5.3.8",
     "react": "^18.3.1",
-    "react-bootstrap": "^2.10.4",
-    "react-bootstrap-icons": "^1.11.4",
+    "react-bootstrap": "^2.10.10",
+    "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^18.3.1",
     "react-google-charts": "^5.2.1",
     "react-hook-form": "^7.84.0",
-    "react-router-dom": "^6.26.1",
-    "react-scripts": "^5.0.1",
-    "typescript": "^4.9.5",
+    "react-router-dom": "^6.30.4",
+    "typescript": "^6.0.3",
     "uuid": "^11.1.1",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@commitlint/cli": "^19.3.0",
+    "@biomejs/biome": "^2.5.7",
+    "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^21.2.0",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/vitest-runner": "^9.6.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.10.0",
     "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^16.18.107",
-    "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0",
-    "cspell": "^8.8.4",
-    "cypress": "^15.19.0",
-    "dependency-cruiser": "^17.4.3",
+    "@testing-library/user-event": "^14.6.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^18.3.31",
+    "@types/react-bootstrap": "^0.32.37",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.0.5",
+    "@vitest/coverage-v8": "^4.1.10",
+    "cspell": "^8.19.4",
+    "cypress": "^15.20.0",
+    "dependency-cruiser": "^18.1.1",
     "dotenv": "^17.4.2",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-jest": "^25.7.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "eslint-plugin-testing-library": "^5.11.0",
     "husky": "^9.1.7",
-    "knip": "^6.31.0",
-    "lint-staged": "^16.4.0",
+    "jsdom": "^26.1.0",
+    "knip": "^6.32.0",
+    "lint-staged": "^17.3.0",
     "msw": "^2.15.0",
-    "patch-package": "^8.0.0",
+    "patch-package": "^8.0.1",
     "pg": "^8.22.0",
-    "prettier": "^3.9.4",
     "start-server-and-test": "^3.0.12",
-    "undici": "^8.10.0"
+    "taze": "^0.18.0",
+    "undici": "^8.10.0",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   },
   "browserslist": {
     "production": [
@@ -84,41 +87,21 @@
     ]
   },
   "overrides": {
-    "nth-check": "^2.0.1",
     "@tootallnate/once": "^2.0.1",
-    "postcss": "^8.4.31",
-    "serialize-javascript": "^7.0.5",
+    "nth-check": "^2.1.1",
+    "postcss": "^8.5.26",
+    "serialize-javascript": "^7.0.7",
+    "svgo": "^3.3.4",
     "underscore": "^1.13.8",
-    "uuid": "^11.1.1",
     "sockjs": {
       "uuid": "^11.1.1"
-    },
-    "svgo": "^3.3.4"
-  },
-  "jest": {
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(@open-draft|rettime|until-async)/).+\\.(js|jsx|mjs|cjs|ts|tsx)$"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!src/**/*.d.ts",
-      "!src/**/domain/Entity/**",
-      "!src/**/index.ts",
-      "!src/index.tsx",
-      "!src/reportWebVitals.ts",
-      "!src/**/types/**",
-      "!src/shared/constants.ts",
-      "!src/shared/components/About/**",
-      "!src/**/*.types.ts"
-    ]
+    }
   },
   "allowScripts": {
     "core-js@3.40.0": true,
     "core-js-pure@3.40.0": true,
     "cypress@15.19.0": true,
-    "msw@2.15.0": true
+    "msw@2.15.0": true,
+    "@biomejs/biome@2.5.7": true
   }
 }

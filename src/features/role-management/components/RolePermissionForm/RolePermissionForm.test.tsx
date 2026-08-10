@@ -1,32 +1,27 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import {
+  useDebouncedValue,
+  usePaginatedQuery,
+} from "@variamosple/variamos-components";
 import { RolePermissionForm } from "./index";
-import { usePaginatedQuery, useDebouncedValue } from "@variamosple/variamos-components";
 
 // Mock dependencies
-jest.mock("@/shared/hooks/useIntersectionObserver", () => {
-  return () => ({
-    lastEntryRef: jest.fn(),
-    setHasMore: jest.fn(),
-    page: 1,
-  });
-});
-
-jest.mock("react-bootstrap", () => {
-  const original = jest.requireActual("react-bootstrap");
+vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
   return {
-    ...original,
-    Spinner: function DummySpinner() {
-      return <div data-testid="loading-spinner">Spinner</div>;
-    },
+    default: () => ({
+      lastEntryRef: vi.fn(),
+      setHasMore: vi.fn(),
+      page: 1,
+    }),
   };
 });
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
-    useDebouncedValue: jest.fn((val) => [val]),
-    usePaginatedQuery: jest.fn(),
+    useDebouncedValue: vi.fn((val) => [val]),
+    usePaginatedQuery: vi.fn(),
     PagedModel: class PagedModel {
       pageNumber?: number;
       pageSize?: number;
@@ -52,9 +47,13 @@ jest.mock("@variamosple/variamos-components", () => {
   };
 });
 
-jest.mock("@/shared/components/InfiniteSelect", () => {
+vi.mock("@/shared/components/InfiniteSelect", async () => {
   return {
-    InfiniteSelect: function DummyInfiniteSelect({ options, handleSelect, placeholder }: any) {
+    InfiniteSelect: function DummyInfiniteSelect({
+      options,
+      handleSelect,
+      placeholder,
+    }: any) {
       return (
         <div data-testid="infinite-select">
           <span>{placeholder}</span>
@@ -81,15 +80,15 @@ jest.mock("@/shared/components/InfiniteSelect", () => {
 });
 
 describe("RolePermissionForm", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
-  const useDebouncedValueMock = useDebouncedValue as jest.Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
+  const useDebouncedValueMock = useDebouncedValue as import("vitest").Mock;
 
-  const mockLoadData = jest.fn();
-  const mockSetCurrentPage = jest.fn();
-  const mockOnRolePermissionSubmit = jest.fn();
+  const mockLoadData = vi.fn();
+  const mockSetCurrentPage = vi.fn();
+  const mockOnRolePermissionSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useDebouncedValueMock.mockImplementation((val) => [val]);
 
@@ -111,7 +110,10 @@ describe("RolePermissionForm", () => {
 
   it("should render selection input and submit button", async () => {
     render(
-      <RolePermissionForm onRolePermissionSubmit={mockOnRolePermissionSubmit} isLoading={false} />,
+      <RolePermissionForm
+        onRolePermissionSubmit={mockOnRolePermissionSubmit}
+        isLoading={false}
+      />,
     );
 
     await waitFor(() => {
@@ -119,13 +121,18 @@ describe("RolePermissionForm", () => {
     });
 
     expect(screen.getByTestId("infinite-select")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add permission" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Add permission" }),
+    ).toBeInTheDocument();
   });
 
   it("should show validation error if submitted without selection", async () => {
     const user = userEvent.setup();
     render(
-      <RolePermissionForm onRolePermissionSubmit={mockOnRolePermissionSubmit} isLoading={false} />,
+      <RolePermissionForm
+        onRolePermissionSubmit={mockOnRolePermissionSubmit}
+        isLoading={false}
+      />,
     );
 
     await waitFor(() => {
@@ -143,7 +150,10 @@ describe("RolePermissionForm", () => {
 
   it("should call onRolePermissionSubmit when valid selection is submitted", async () => {
     render(
-      <RolePermissionForm onRolePermissionSubmit={mockOnRolePermissionSubmit} isLoading={false} />,
+      <RolePermissionForm
+        onRolePermissionSubmit={mockOnRolePermissionSubmit}
+        isLoading={false}
+      />,
     );
 
     const select = screen.getByTestId("select-element");
@@ -166,7 +176,10 @@ describe("RolePermissionForm", () => {
 
   it("should render spinner and disable button if isLoading is true", async () => {
     render(
-      <RolePermissionForm onRolePermissionSubmit={mockOnRolePermissionSubmit} isLoading={true} />,
+      <RolePermissionForm
+        onRolePermissionSubmit={mockOnRolePermissionSubmit}
+        isLoading={true}
+      />,
     );
 
     await waitFor(() => {

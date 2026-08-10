@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 import { PermissionFormModal } from "./index";
 
 // Mock dependencies
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -24,8 +24,8 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("PermissionFormModal Component", () => {
-  const mockOnPermissionSubmit = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockOnPermissionSubmit = vi.fn();
+  const mockOnClose = vi.fn();
 
   const defaultProps = {
     modalTitle: "Create Permission",
@@ -36,16 +36,20 @@ describe("PermissionFormModal Component", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render modal with title and cancel/submit buttons", () => {
     render(<PermissionFormModal {...defaultProps} />);
 
-    expect(screen.getByText("Create Permission", { selector: ".modal-title" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Create Permission", { selector: ".modal-title" }),
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Permission name")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /create permission/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /create permission/i }),
+    ).toBeInTheDocument();
   });
 
   it("should call onPermissionSubmit on form submission with valid input", async () => {
@@ -57,11 +61,15 @@ describe("PermissionFormModal Component", () => {
     const user = userEvent.setup();
     await user.type(input, "READ_PRIVILEGE");
 
-    const submitBtn = screen.getByRole("button", { name: /create permission/i });
+    const submitBtn = screen.getByRole("button", {
+      name: /create permission/i,
+    });
     await user.click(submitBtn);
 
     await waitFor(() => {
-      expect(mockOnPermissionSubmit).toHaveBeenCalledWith({ name: "READ_PRIVILEGE" });
+      expect(mockOnPermissionSubmit).toHaveBeenCalledWith({
+        name: "READ_PRIVILEGE",
+      });
     });
   });
 
@@ -69,10 +77,14 @@ describe("PermissionFormModal Component", () => {
     const user = userEvent.setup();
     render(<PermissionFormModal {...defaultProps} />);
 
-    const submitBtn = screen.getByRole("button", { name: /create permission/i });
+    const submitBtn = screen.getByRole("button", {
+      name: /create permission/i,
+    });
     await user.click(submitBtn);
 
-    expect(await screen.findByText("Permission name is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Permission name is required"),
+    ).toBeInTheDocument();
     expect(mockOnPermissionSubmit).not.toHaveBeenCalled();
   });
 
@@ -87,9 +99,13 @@ describe("PermissionFormModal Component", () => {
       />,
     );
 
-    expect(screen.getByText("Edit Permission", { selector: ".modal-title" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Edit Permission", { selector: ".modal-title" }),
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue("WRITE_PRIVILEGE")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /edit permission/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /edit permission/i }),
+    ).toBeInTheDocument();
   });
 
   it("should show spinner and disable buttons when isLoading is true", () => {

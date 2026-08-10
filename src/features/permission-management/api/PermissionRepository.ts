@@ -1,8 +1,8 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { Permission } from "../domain/Entity/Permission";
-import { PermissionsFilter } from "../domain/Entity/PermissionsFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { Permission } from "../domain/Entity/Permission";
+import type { PermissionsFilter } from "../domain/Entity/PermissionsFilter";
 
 export const queryPermissions = (
   filter: PermissionsFilter,
@@ -15,12 +15,12 @@ export const queryPermissions = (
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -34,7 +34,9 @@ export const queryPermissions = (
     });
 };
 
-export const createPermission = (request: Permission): Promise<ResponseModel<Permission>> => {
+export const createPermission = (
+  request: Permission,
+): Promise<ResponseModel<Permission>> => {
   return ADMIN_CLIENT.post("/v1/permissions", request)
     .then((response) => response.data)
     .catch((error) => {
@@ -43,12 +45,12 @@ export const createPermission = (request: Permission): Promise<ResponseModel<Per
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -62,7 +64,9 @@ export const createPermission = (request: Permission): Promise<ResponseModel<Per
     });
 };
 
-export const deletePermission = (permissionId: number): Promise<ResponseModel<void>> => {
+export const deletePermission = (
+  permissionId: number,
+): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.delete(`/v1/permissions/${permissionId}`)
     .then((response) => response.data)
     .catch((error) => {
@@ -71,12 +75,12 @@ export const deletePermission = (permissionId: number): Promise<ResponseModel<vo
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -119,7 +123,9 @@ export const deletePermission = (permissionId: number): Promise<ResponseModel<vo
 //     });
 // };
 
-export const updatePermission = (request: Permission): Promise<ResponseModel<Permission>> => {
+export const updatePermission = (
+  request: Permission,
+): Promise<ResponseModel<Permission>> => {
   return ADMIN_CLIENT.put(`/v1/permissions/${request.id}`, request)
     .then((response) => response.data)
     .catch((error) => {
@@ -128,12 +134,12 @@ export const updatePermission = (request: Permission): Promise<ResponseModel<Per
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

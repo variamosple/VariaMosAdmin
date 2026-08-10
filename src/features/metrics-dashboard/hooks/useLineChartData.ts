@@ -1,5 +1,5 @@
-import { Metric } from "../domain/Entity/Metric";
 import { useMemo, useState } from "react";
+import type { Metric } from "../domain/Entity/Metric";
 
 interface ChartAxes {
   xAxis: string[];

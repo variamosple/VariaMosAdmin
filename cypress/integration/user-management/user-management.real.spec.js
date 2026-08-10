@@ -13,13 +13,13 @@ describe("User Management - Real E2E Flows", () => {
   });
 
   it("should toggle active/disabled states for a test user, verifying UI updates and database persistence", () => {
-    cy.visit("http://localhost:3000");
+    cy.visit("http://localhost:3000/variamos_admin/");
 
     // 1. Log in as admin
     cy.get('input[name="email"]').type(adminEmail);
     cy.get('input[name="password"]').type(adminPassword);
     cy.get('button[type="submit"]').click();
-    cy.url().should("eq", "http://localhost:3000/");
+    cy.url().should("eq", "http://localhost:3000/variamos_admin/#/");
 
     // 2. Navigate to user list page
     cy.contains("Users").click();

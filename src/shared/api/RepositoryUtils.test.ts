@@ -1,7 +1,7 @@
 import axios from "axios";
 import { handleRepositoryError } from "./RepositoryUtils";
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -21,10 +21,10 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("RepositoryUtils handleRepositoryError", () => {
-  let consoleSpy: jest.SpyInstance;
+  let consoleSpy: import("vitest").MockInstance;
 
   beforeAll(() => {
-    consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterAll(() => {
@@ -43,7 +43,7 @@ describe("RepositoryUtils handleRepositoryError", () => {
         data: mockResponseData,
       },
     };
-    jest.spyOn(axios, "isAxiosError").mockReturnValue(true);
+    vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
 
     const result = handleRepositoryError(mockAxiosError, "Fallback msg");
     expect(result).toEqual(mockResponseData);
@@ -55,7 +55,7 @@ describe("RepositoryUtils handleRepositoryError", () => {
       message: "Network Error",
       code: "503",
     };
-    jest.spyOn(axios, "isAxiosError").mockReturnValue(true);
+    vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
 
     const result = handleRepositoryError(mockAxiosError, "Fallback msg") as any;
     expect(result.type).toBe("BACK-ERROR");
@@ -64,10 +64,13 @@ describe("RepositoryUtils handleRepositoryError", () => {
   });
 
   it("should return APP-ERROR for non-Axios generic errors", () => {
-    jest.spyOn(axios, "isAxiosError").mockReturnValue(false);
+    vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
     const genericError = new Error("Generic fail");
 
-    const result = handleRepositoryError(genericError, "Fallback fallback") as any;
+    const result = handleRepositoryError(
+      genericError,
+      "Fallback fallback",
+    ) as any;
     expect(result.type).toBe("APP-ERROR");
     expect(result.errorCode).toBe(500);
     expect(result.message).toBe("Fallback fallback");

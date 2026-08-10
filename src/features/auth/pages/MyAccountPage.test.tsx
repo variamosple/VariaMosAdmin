@@ -1,11 +1,10 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { MyAccountPage } from "./MyAccountPage";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { MyAccountPage } from "./MyAccountPage";
 
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
@@ -13,20 +12,30 @@ const apiTarget = (path: string) => {
 };
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => ({
+vi.mock("@variamosple/variamos-components", async () => ({
   withPageVisit: (component: any) => component,
   PagedModel: class PagedModel {},
 }));
 
 // Mock sub-components
-jest.mock("../components/PasswordUpdateForm", () => ({
-  PasswordUpdateForm: ({ showModal, onClose, onUpdatePasswordSubmit, isLoading }: any) => {
+vi.mock("../components/PasswordUpdateForm", async () => ({
+  PasswordUpdateForm: ({
+    showModal,
+    onClose,
+    onUpdatePasswordSubmit,
+    isLoading,
+  }: any) => {
     if (!showModal) return null;
     return (
       <div data-testid="password-update-form">
         <span>Loading: {isLoading ? "Yes" : "No"}</span>
         <button
-          onClick={() => onUpdatePasswordSubmit({ currentPassword: "123", newPassword: "456" })}
+          onClick={() =>
+            onUpdatePasswordSubmit({
+              currentPassword: "123",
+              newPassword: "456",
+            })
+          }
         >
           Submit Password Update
         </button>
@@ -36,27 +45,34 @@ jest.mock("../components/PasswordUpdateForm", () => ({
   },
 }));
 
-jest.mock("@/features/user-management/components/UserInformationUpdateFormModal", () => ({
-  PersonalInformationUpdateForModal: ({
-    showModal,
-    onClose,
-    onUpdatePersonalInformationSubmit,
-    defaultValue,
-    isLoading,
-  }: any) => {
-    if (!showModal) return null;
-    return (
-      <div data-testid="info-update-form">
-        <span>Loading: {isLoading ? "Yes" : "No"}</span>
-        <span>Country: {defaultValue?.countryCode}</span>
-        <button onClick={() => onUpdatePersonalInformationSubmit({ countryCode: "FR" })}>
-          Submit Info Update
-        </button>
-        <button onClick={onClose}>Close Info Modal</button>
-      </div>
-    );
-  },
-}));
+vi.mock(
+  "@/features/user-management/components/UserInformationUpdateFormModal",
+  async () => ({
+    PersonalInformationUpdateForModal: ({
+      showModal,
+      onClose,
+      onUpdatePersonalInformationSubmit,
+      defaultValue,
+      isLoading,
+    }: any) => {
+      if (!showModal) return null;
+      return (
+        <div data-testid="info-update-form">
+          <span>Loading: {isLoading ? "Yes" : "No"}</span>
+          <span>Country: {defaultValue?.countryCode}</span>
+          <button
+            onClick={() =>
+              onUpdatePersonalInformationSubmit({ countryCode: "FR" })
+            }
+          >
+            Submit Info Update
+          </button>
+          <button onClick={onClose}>Close Info Modal</button>
+        </div>
+      );
+    },
+  }),
+);
 
 describe("MyAccountPage Component", () => {
   const mockUser = {
@@ -134,7 +150,9 @@ describe("MyAccountPage Component", () => {
         newPassword: "456",
       });
     });
-    expect(screen.queryByTestId("password-update-form")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("password-update-form"),
+    ).not.toBeInTheDocument();
   });
 
   it("handles personal information update submission successfully", async () => {
@@ -145,10 +163,13 @@ describe("MyAccountPage Component", () => {
         getMyAccountCalledCount++;
         return HttpResponse.json({ data: mockUser });
       }),
-      http.put(apiTarget("/auth/my-account/information"), async ({ request }) => {
-        updatePersonalInformationPayload = await request.json();
-        return HttpResponse.json({ errorCode: null });
-      }),
+      http.put(
+        apiTarget("/auth/my-account/information"),
+        async ({ request }) => {
+          updatePersonalInformationPayload = await request.json();
+          return HttpResponse.json({ errorCode: null });
+        },
+      ),
     );
 
     render(<MyAccountPage />);
@@ -180,7 +201,9 @@ describe("MyAccountPage Component", () => {
     // Test password modal close
     await user.click(screen.getByRole("button", { name: /update/i }));
     await user.click(screen.getByText("Close Password Modal"));
-    expect(screen.queryByTestId("password-update-form")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("password-update-form"),
+    ).not.toBeInTheDocument();
 
     // Test info modal close
     await user.click(screen.getByRole("button", { name: /edit information/i }));

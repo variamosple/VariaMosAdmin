@@ -1,22 +1,22 @@
-import { renderHook, act } from "@testing-library/react";
-import { useUserList } from "./useUserList";
-import { User } from "../domain/Entity/User";
+import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import type { User } from "../domain/Entity/User";
+import { useUserList } from "./useUserList";
 
-const mockPushToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
   }),
 }));
 
-const mockLoadData = jest.fn();
-const mockOnPageChange = jest.fn();
+const mockLoadData = vi.fn();
+const mockOnPageChange = vi.fn();
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -40,7 +40,7 @@ jest.mock("@variamosple/variamos-components", () => {
         this.pageSize = pageSize;
       }
     },
-    usePaginatedQuery: jest.fn(),
+    usePaginatedQuery: vi.fn(),
   };
 });
 
@@ -50,7 +50,7 @@ const apiTarget = (path: string) => {
 };
 
 describe("useUserList Hook", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
 
   const dummyUser: User = {
     id: "123",
@@ -68,7 +68,7 @@ describe("useUserList Hook", () => {
   let disableUserError = false;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     disableUserCalled = 0;
     enableUserCalled = 0;
     deleteUserCalled = 0;
@@ -89,7 +89,10 @@ describe("useUserList Hook", () => {
       http.put(apiTarget("/v1/users/:userId/disable"), () => {
         disableUserCalled++;
         if (disableUserError) {
-          return HttpResponse.json({ errorCode: 500, message: "Disable failed" }, { status: 500 });
+          return HttpResponse.json(
+            { errorCode: 500, message: "Disable failed" },
+            { status: 500 },
+          );
         }
         return HttpResponse.json({ errorCode: null });
       }),
@@ -145,7 +148,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDisableUser error", async () => {
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     disableUserError = true;
     const { result } = renderHook(() => useUserList());
 
@@ -209,7 +214,9 @@ describe("useUserList Hook", () => {
       result.current.onSearchSubmit("john");
     });
 
-    expect(mockLoadData).toHaveBeenLastCalledWith(expect.objectContaining({ search: "john" }));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: "john" }),
+    );
   });
 
   it("should trigger loadData on search reset", async () => {
@@ -219,6 +226,8 @@ describe("useUserList Hook", () => {
       result.current.onSearchReset();
     });
 
-    expect(mockLoadData).toHaveBeenLastCalledWith(expect.objectContaining({ search: undefined }));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: undefined }),
+    );
   });
 });

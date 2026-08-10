@@ -1,8 +1,7 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Language } from "../../domain/Entity/Language";
 import { LanguageList } from "./index";
-import { Language } from "../../domain/Entity/Language";
 
 const mockLanguages: Language[] = [
   {
@@ -24,18 +23,18 @@ const mockLanguages: Language[] = [
 ];
 
 // Mock the variamos-components library which has Paginator
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
   };
 });
 
 describe("LanguageList Component", () => {
-  const mockOnLanguageEdit = jest.fn();
-  const mockOnLanguageDelete = jest.fn();
+  const mockOnLanguageEdit = vi.fn();
+  const mockOnLanguageDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of languages correctly", () => {
@@ -44,7 +43,7 @@ describe("LanguageList Component", () => {
         items={mockLanguages}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onLanguageEdit={mockOnLanguageEdit}
         onLanguageDelete={mockOnLanguageDelete}
       />,
@@ -61,7 +60,7 @@ describe("LanguageList Component", () => {
         items={mockLanguages}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onLanguageEdit={mockOnLanguageEdit}
         onLanguageDelete={mockOnLanguageDelete}
       />,

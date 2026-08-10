@@ -1,8 +1,8 @@
-import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
-import { FC, useCallback, useEffect, useRef } from "react";
+import { type FC, useCallback, useEffect, useRef } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import type { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
 
 export interface ModelSearchFormProps {
   onSubmit: (search?: ModelsFilter) => void;
@@ -23,7 +23,7 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
     watch,
   } = useForm<ModelsFilter>();
 
-  const values = watch();
+  const _values = watch();
 
   const onReset = () => {
     reset({ name: "" });
@@ -54,7 +54,7 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [values, isDirty, handleSubmit, submit]);
+  }, [isDirty, handleSubmit, submit]);
 
   return (
     <Form onSubmit={handleSubmit(submit)}>

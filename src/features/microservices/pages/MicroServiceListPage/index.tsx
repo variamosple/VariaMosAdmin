@@ -1,9 +1,9 @@
+import { withPageVisit } from "@variamosple/variamos-components";
+import type { FC } from "react";
+import { Container } from "react-bootstrap";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
 import { useMicroServiceList } from "../../hooks/useMicroServiceList";
-import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@/shared/components/ConfirmationModal";
-import { FC } from "react";
-import { Container } from "react-bootstrap";
 
 const MicroServiceListPageComponent: FC<unknown> = () => {
   const {
@@ -90,4 +90,7 @@ const MicroServiceListPageComponent: FC<unknown> = () => {
   );
 };
 
-export const MicroServiceListPage = withPageVisit(MicroServiceListPageComponent, "Monitoring");
+export const MicroServiceListPage = withPageVisit(
+  MicroServiceListPageComponent,
+  "Monitoring",
+);

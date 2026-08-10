@@ -1,8 +1,8 @@
-import { Project } from "@/features/project-management/domain/Entity/Project";
-import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Table } from "react-bootstrap";
+import type { Project } from "@/features/project-management/domain/Entity/Project";
+import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { ProjectRowComponent } from "./ProjectRow";
 
 export interface ProjectListProps extends PaginationControlsProps {
@@ -21,7 +21,11 @@ export const ProjectList: FC<ProjectListProps> = ({
 }) => {
   return (
     <>
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
       <Table striped bordered hover responsive>
         <thead>
@@ -54,7 +58,11 @@ export const ProjectList: FC<ProjectListProps> = ({
         </tbody>
       </Table>
 
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

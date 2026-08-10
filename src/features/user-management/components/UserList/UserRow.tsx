@@ -1,10 +1,5 @@
-import { queryUserRolesDetails } from "@/features/user-management/api/UserRoleRepository";
-import { RoleDetails } from "@/features/role-management/domain/Entity/Role";
-import { User } from "@/features/user-management/domain/Entity/User";
-import { UserRoleFilter } from "@/features/user-management/domain/Entity/UserRoleFilter";
-import { formatDateTime } from "@/shared/constants";
 import { useQuery, useRouter } from "@variamosple/variamos-components";
-import { FC, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { Accordion, Button, ButtonGroup, Spinner } from "react-bootstrap";
 import {
   Ban,
@@ -15,6 +10,11 @@ import {
   Search,
   TrashFill,
 } from "react-bootstrap-icons";
+import type { RoleDetails } from "@/features/role-management/domain/Entity/Role";
+import { queryUserRolesDetails } from "@/features/user-management/api/UserRoleRepository";
+import type { User } from "@/features/user-management/domain/Entity/User";
+import { UserRoleFilter } from "@/features/user-management/domain/Entity/UserRoleFilter";
+import { formatDateTime } from "@/shared/constants";
 
 export interface UserRowProps {
   user: User;
@@ -66,11 +66,15 @@ export const UserRowComponent: FC<UserRowProps> = ({
 
         <td>{user.email}</td>
 
-        <td>{user.isDeleted ? "deleted" : user.isEnabled ? "active" : "disabled"}</td>
+        <td>
+          {user.isDeleted ? "deleted" : user.isEnabled ? "active" : "disabled"}
+        </td>
 
         <td>{formatDateTime(new Date(user.createdAt))}</td>
 
-        <td>{user.lastLogin ? formatDateTime(new Date(user.lastLogin)) : "N/A"}</td>
+        <td>
+          {user.lastLogin ? formatDateTime(new Date(user.lastLogin)) : "N/A"}
+        </td>
 
         <td className="text-center">
           <ButtonGroup size="sm">
@@ -93,19 +97,31 @@ export const UserRowComponent: FC<UserRowProps> = ({
             )}
 
             {user.isEnabled && !user.isDeleted && (
-              <Button variant="warning" onClick={() => onUserDisable(user)} title="Disable user">
+              <Button
+                variant="warning"
+                onClick={() => onUserDisable(user)}
+                title="Disable user"
+              >
                 <Ban />
               </Button>
             )}
 
             {!user.isEnabled && !user.isDeleted && (
-              <Button variant="success" onClick={() => onUserEnable(user)} title="Enable user">
+              <Button
+                variant="success"
+                onClick={() => onUserEnable(user)}
+                title="Enable user"
+              >
                 <CheckCircle />
               </Button>
             )}
 
             {!user.isDeleted && (
-              <Button variant="danger" onClick={() => onUserDelete(user)} title="Delete user">
+              <Button
+                variant="danger"
+                onClick={() => onUserDelete(user)}
+                title="Delete user"
+              >
                 <TrashFill />
               </Button>
             )}
@@ -126,7 +142,11 @@ export const UserRowComponent: FC<UserRowProps> = ({
         <tr>
           <td colSpan={8}>
             <div className="w-100 text-center my-3">
-              <Spinner data-testid="loading-spinner" animation="border" variant="primary" />
+              <Spinner
+                data-testid="loading-spinner"
+                animation="border"
+                variant="primary"
+              />
             </div>
           </td>
         </tr>
@@ -152,7 +172,11 @@ const RolesDetails: FC<RolesDetailsProps> = ({ isLoading, roles }) => {
   if (isLoading) {
     return (
       <div className="w-100 text-center my-3">
-        <Spinner data-testid="loading-spinner" animation="border" variant="primary" />
+        <Spinner
+          data-testid="loading-spinner"
+          animation="border"
+          variant="primary"
+        />
       </div>
     );
   }
@@ -174,7 +198,7 @@ const RolesDetails: FC<RolesDetailsProps> = ({ isLoading, roles }) => {
                 gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
               }}
             >
-              {role.permissions!.map((permission) => (
+              {role.permissions?.map((permission) => (
                 <div key={permission.id}>{permission.name}</div>
               ))}
             </div>

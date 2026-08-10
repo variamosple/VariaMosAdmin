@@ -1,9 +1,13 @@
-import { deleteLanguage, queryLanguages, updateLanguage } from "../api/LanguageRepository";
-import { Language } from "../domain/Entity/Language";
-import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
-import { useToast } from "@/shared/context/ToastContext";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
+import { useToast } from "@/shared/context/ToastContext";
+import {
+  deleteLanguage,
+  queryLanguages,
+  updateLanguage,
+} from "../api/LanguageRepository";
+import type { Language } from "../domain/Entity/Language";
+import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
 
 export const useLanguageList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -117,15 +121,17 @@ export const useLanguageList = () => {
   };
 
   const onSearchSubmit = (search?: LanguagesFilter) => {
-    loadData(new LanguagesFilter(search?.name, search?.status)).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Language query error",
-          message: response.message!,
-          variant: "danger",
-        });
-      }
-    });
+    loadData(new LanguagesFilter(search?.name, search?.status)).then(
+      (response) => {
+        if (response.errorCode) {
+          pushToast({
+            title: "Language query error",
+            message: response.message!,
+            variant: "danger",
+          });
+        }
+      },
+    );
   };
 
   return {

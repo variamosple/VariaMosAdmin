@@ -18,13 +18,13 @@ describe("Role & Permission Management - Real E2E Flows", () => {
   });
 
   it("should create a new role, assign two permissions, and verify they persist on reload", () => {
-    cy.visit("http://localhost:3000");
+    cy.visit("http://localhost:3000/variamos_admin/");
 
     // 1. Log in as admin
     cy.get('input[name="email"]').type(adminEmail);
     cy.get('input[name="password"]').type(adminPassword);
     cy.get('button[type="submit"]').click();
-    cy.url().should("eq", "http://localhost:3000/");
+    cy.url().should("eq", "http://localhost:3000/variamos_admin/#/");
 
     // 2. Navigate to Roles page
     cy.contains("Roles").click();

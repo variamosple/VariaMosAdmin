@@ -4,9 +4,13 @@ import "@testing-library/jest-dom";
 import { RolePermissionList } from "./index";
 
 // Mock dependencies
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
-    Paginator: function DummyPaginator({ currentPage, totalPages, onPageChange }: any) {
+    Paginator: function DummyPaginator({
+      currentPage,
+      totalPages,
+      onPageChange,
+    }: any) {
       return (
         <div data-testid="paginator">
           <span data-testid="current-page">{currentPage}</span>
@@ -19,8 +23,8 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("RolePermissionList", () => {
-  const mockOnPageChange = jest.fn();
-  const mockOnPermissionDelete = jest.fn();
+  const mockOnPageChange = vi.fn();
+  const mockOnPermissionDelete = vi.fn();
 
   const items = [
     { id: 1, name: "Permission One" },
@@ -28,7 +32,7 @@ describe("RolePermissionList", () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render table headers and permission items correctly", () => {
@@ -64,7 +68,9 @@ describe("RolePermissionList", () => {
       />,
     );
 
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete role permission" });
+    const deleteButtons = screen.getAllByRole("button", {
+      name: "Delete role permission",
+    });
     expect(deleteButtons).toHaveLength(2);
 
     await user.click(deleteButtons[0]);

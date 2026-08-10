@@ -1,10 +1,9 @@
-import { Navigate, Outlet, RouteObject } from "react-router-dom";
-
-import { AppConfig } from "@/shared/infrastructure/AppConfig";
-import { AuthWrapper, NotAuthorized, ProtectedRoute } from "@variamosple/variamos-components";
-import { SecurityWrapper } from "@/shared/components/SecurityWrapper";
-import { MainLayout } from "@/shared/layouts/MainLayout";
-import { SignInLayout } from "@/shared/layouts/SignInLayout";
+import {
+  AuthWrapper,
+  NotAuthorized,
+  ProtectedRoute,
+} from "@variamosple/variamos-components";
+import { Navigate, Outlet, type RouteObject } from "react-router-dom";
 import {
   ForgotPasswordPage,
   LoginPage,
@@ -12,6 +11,7 @@ import {
   ResetPasswordPage,
   SignUpPage,
 } from "@/features/auth";
+import { BugListPage } from "@/features/bug-tracker";
 import { HomePage } from "@/features/home";
 import { LanguageListPage } from "@/features/language-management";
 import { MetricsPage } from "@/features/metrics-dashboard";
@@ -21,8 +21,10 @@ import { PermissionListPage } from "@/features/permission-management";
 import { ProjectListPage } from "@/features/project-management";
 import { RoleDetailsPage, RoleListPage } from "@/features/role-management";
 import { UserDetailsPage, UserListPage } from "@/features/user-management";
-
-import { BugListPage } from "@/features/bug-tracker";
+import { SecurityWrapper } from "@/shared/components/SecurityWrapper";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { MainLayout } from "@/shared/layouts/MainLayout";
+import { SignInLayout } from "@/shared/layouts/SignInLayout";
 
 const NOT_AUTHORIZED_PATH = "/403";
 
@@ -43,7 +45,10 @@ export const ROUTES: RouteObject[] = [
         path: "",
         index: true,
         element: (
-          <ProtectedRoute notAuthorizedPath={NOT_AUTHORIZED_PATH} allowedPermissions={[]}>
+          <ProtectedRoute
+            notAuthorizedPath={NOT_AUTHORIZED_PATH}
+            allowedPermissions={[]}
+          >
             <HomePage />
           </ProtectedRoute>
         ),
@@ -51,7 +56,10 @@ export const ROUTES: RouteObject[] = [
       {
         path: "my-account",
         element: (
-          <ProtectedRoute notAuthorizedPath={NOT_AUTHORIZED_PATH} allowedPermissions={[]}>
+          <ProtectedRoute
+            notAuthorizedPath={NOT_AUTHORIZED_PATH}
+            allowedPermissions={[]}
+          >
             <MyAccountPage />
           </ProtectedRoute>
         ),
@@ -278,6 +286,10 @@ export const ROUTES: RouteObject[] = [
         <NotAuthorized homePath="/" />
       </MainLayout>
     ),
+  },
+  {
+    path: "/variamos_admin",
+    element: <Navigate to="/" replace />,
   },
   {
     path: "*",

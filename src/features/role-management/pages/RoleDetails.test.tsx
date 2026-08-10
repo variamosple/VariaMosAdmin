@@ -1,35 +1,37 @@
-import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { RoleDetailsPage } from "./RoleDetails";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { RoleDetailsPage } from "./RoleDetails";
 
 // Mock router hooks & params
-const mockNavigate = jest.fn();
+const mockNavigate = vi.fn();
 const mockParams = { roleId: "123" };
 
 // Mock react-bootstrap Spinner
-jest.mock("react-bootstrap", () => {
-  const original = jest.requireActual("react-bootstrap");
+vi.mock("react-bootstrap", async (importOriginal) => {
+  const original = await importOriginal<typeof import("react-bootstrap")>();
   return {
     ...original,
     Spinner: () => <div data-testid="loading-spinner">Spinner</div>,
   };
 });
 
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useParams: () => mockParams,
-}));
+vi.mock("react-router-dom", async (importOriginal) => {
+  const original = await importOriginal<typeof import("react-router-dom")>();
+  return {
+    ...original,
+    useParams: () => mockParams,
+  };
+});
 
 // Mock ToastContext
-const mockPushToast = jest.fn();
-const mockRemoveToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+const mockRemoveToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
     removeToast: mockRemoveToast,
@@ -37,15 +39,15 @@ jest.mock("@/shared/context/ToastContext", () => ({
 }));
 
 // Mock @variamosple/variamos-components
-const mockLoadData = jest.fn();
-const mockOnPageChange = jest.fn();
-jest.mock("@variamosple/variamos-components", () => {
+const mockLoadData = vi.fn();
+const mockOnPageChange = vi.fn();
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     withPageVisit: (component: any) => component,
     useRouter: () => ({
       navigate: mockNavigate,
     }),
-    usePaginatedQuery: jest.fn(),
+    usePaginatedQuery: vi.fn(),
     useDebouncedValue: (val: any) => [val],
     Paginator: () => <div data-testid="paginator" />,
     ResponseModel: class ResponseModel {
@@ -62,15 +64,21 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 // Mock sub-components
-jest.mock("@/features/role-management/components/RolePermissionForm", () => ({
-  RolePermissionForm: ({ onRolePermissionSubmit, isLoading }: any) => (
-    <div data-testid="role-permission-form">
-      <button onClick={() => onRolePermissionSubmit({ permissionId: 42 })} disabled={isLoading}>
-        Add permission
-      </button>
-    </div>
-  ),
-}));
+vi.mock(
+  "@/features/role-management/components/RolePermissionForm",
+  async () => ({
+    RolePermissionForm: ({ onRolePermissionSubmit, isLoading }: any) => (
+      <div data-testid="role-permission-form">
+        <button
+          onClick={() => onRolePermissionSubmit({ permissionId: 42 })}
+          disabled={isLoading}
+        >
+          Add permission
+        </button>
+      </div>
+    ),
+  }),
+);
 
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
@@ -78,7 +86,7 @@ const apiTarget = (path: string) => {
 };
 
 describe("RoleDetailsPage Component", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
 
   const mockPermissions = [
     { id: 1, name: "READ_PRIVILEGES" },
@@ -93,7 +101,7 @@ describe("RoleDetailsPage Component", () => {
   let deleteRolePermissionParams: any = null;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delayRoleQuery = false;
     createRolePermissionCalled = 0;
     deleteRolePermissionCalled = 0;
@@ -124,16 +132,22 @@ describe("RoleDetailsPage Component", () => {
           data: { id: 123, name: "Admin" },
         });
       }),
-      http.post(apiTarget("/v1/roles/:roleId/permissions"), async ({ request }) => {
-        createRolePermissionCalled++;
-        createRolePermissionPayload = await request.json();
-        return HttpResponse.json({ errorCode: null });
-      }),
-      http.delete(apiTarget("/v1/roles/:roleId/permissions/:permissionId"), ({ params }) => {
-        deleteRolePermissionCalled++;
-        deleteRolePermissionParams = params;
-        return HttpResponse.json({ errorCode: null });
-      }),
+      http.post(
+        apiTarget("/v1/roles/:roleId/permissions"),
+        async ({ request }) => {
+          createRolePermissionCalled++;
+          createRolePermissionPayload = await request.json();
+          return HttpResponse.json({ errorCode: null });
+        },
+      ),
+      http.delete(
+        apiTarget("/v1/roles/:roleId/permissions/:permissionId"),
+        ({ params }) => {
+          deleteRolePermissionCalled++;
+          deleteRolePermissionParams = params;
+          return HttpResponse.json({ errorCode: null });
+        },
+      ),
     );
   });
 
@@ -168,7 +182,9 @@ describe("RoleDetailsPage Component", () => {
     render(<RoleDetailsPage />);
     expect(await screen.findByText("Admin Role")).toBeInTheDocument();
 
-    const backButton = screen.getByRole("button", { name: /Back To Role List/i });
+    const backButton = screen.getByRole("button", {
+      name: /Back To Role List/i,
+    });
     await user.click(backButton);
 
     expect(mockNavigate).toHaveBeenCalledWith("/roles");
@@ -186,7 +202,10 @@ describe("RoleDetailsPage Component", () => {
     await waitFor(() => {
       expect(createRolePermissionCalled).toBe(1);
     });
-    expect(createRolePermissionPayload).toEqual({ permissionId: 42, roleId: 123 });
+    expect(createRolePermissionPayload).toEqual({
+      permissionId: 42,
+      roleId: 123,
+    });
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Permission assignment",

@@ -1,14 +1,13 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { PersonalInformationUpdateForModal } from "./index";
 import { useQuery } from "@variamosple/variamos-components";
+import { PersonalInformationUpdateForModal } from "./index";
 
 // Mock @variamosple/variamos-components completely
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
-    useQuery: jest.fn(),
+    useQuery: vi.fn(),
     ResponseModel: class ResponseModel {
       errorCode?: number | null;
       message?: string;
@@ -21,10 +20,10 @@ jest.mock("@variamosple/variamos-components", () => {
 });
 
 describe("PersonalInformationUpdateForModal Component", () => {
-  const useQueryMock = useQuery as jest.Mock;
-  const mockLoadData = jest.fn();
-  const mockOnSubmit = jest.fn();
-  const mockOnClose = jest.fn();
+  const useQueryMock = useQuery as import("vitest").Mock;
+  const mockLoadData = vi.fn();
+  const mockOnSubmit = vi.fn();
+  const mockOnClose = vi.fn();
 
   const mockCountries = [
     { code: "CO", name: "Colombia" },
@@ -32,7 +31,7 @@ describe("PersonalInformationUpdateForModal Component", () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Default mock implementation for useQuery
     useQueryMock.mockReturnValue({
@@ -111,7 +110,9 @@ describe("PersonalInformationUpdateForModal Component", () => {
       />,
     );
 
-    const select = screen.getByRole("combobox", { name: /select your country/i });
+    const select = screen.getByRole("combobox", {
+      name: /select your country/i,
+    });
     expect(select).toBeInTheDocument();
     expect(select).toHaveValue("US");
 
@@ -121,10 +122,14 @@ describe("PersonalInformationUpdateForModal Component", () => {
     expect(select).toHaveValue("CO");
 
     // Submit
-    fireEvent.submit(screen.getByRole("button", { name: /update information/i }));
+    fireEvent.submit(
+      screen.getByRole("button", { name: /update information/i }),
+    );
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({ countryCode: "CO" }));
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ countryCode: "CO" }),
+      );
     });
   });
 

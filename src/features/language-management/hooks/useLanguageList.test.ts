@@ -1,19 +1,19 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { useLanguageList } from "./useLanguageList";
-import * as LanguageRepository from "../api/LanguageRepository";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
+import * as LanguageRepository from "../api/LanguageRepository";
+import { useLanguageList } from "./useLanguageList";
 
-const mockPushToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
   }),
 }));
 
-const mockLoadData = jest.fn();
-const mockOnPageChange = jest.fn();
+const mockLoadData = vi.fn();
+const mockOnPageChange = vi.fn();
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -37,22 +37,22 @@ jest.mock("@variamosple/variamos-components", () => {
         this.pageSize = pageSize;
       }
     },
-    usePaginatedQuery: jest.fn(),
+    usePaginatedQuery: vi.fn(),
   };
 });
 
 describe("useLanguageList Hook", () => {
-  let updateLanguageSpy: jest.SpyInstance;
-  let deleteLanguageSpy: jest.SpyInstance;
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
+  let updateLanguageSpy: import("vitest").MockInstance;
+  let deleteLanguageSpy: import("vitest").MockInstance;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    updateLanguageSpy = jest
+    updateLanguageSpy = vi
       .spyOn(LanguageRepository, "updateLanguage")
       .mockResolvedValue({ errorCode: null } as any);
-    deleteLanguageSpy = jest
+    deleteLanguageSpy = vi
       .spyOn(LanguageRepository, "deleteLanguage")
       .mockResolvedValue({ errorCode: null } as any);
 
@@ -128,7 +128,10 @@ describe("useLanguageList Hook", () => {
 
   it("should handle performEditLanguage failure", async () => {
     const { result } = renderHook(() => useLanguageList());
-    updateLanguageSpy.mockResolvedValueOnce({ errorCode: 500, message: "Edit failed" } as any);
+    updateLanguageSpy.mockResolvedValueOnce({
+      errorCode: 500,
+      message: "Edit failed",
+    } as any);
 
     await act(async () => {
       await result.current.performEditLanguage({
@@ -149,7 +152,10 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle query error toast on loadData", async () => {
-    mockLoadData.mockResolvedValueOnce({ errorCode: 500, message: "Query failed" });
+    mockLoadData.mockResolvedValueOnce({
+      errorCode: 500,
+      message: "Query failed",
+    });
     renderHook(() => useLanguageList());
 
     await waitFor(() => {

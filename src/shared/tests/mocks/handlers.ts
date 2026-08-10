@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 const apiTarget = (path: string) => {
@@ -128,7 +128,12 @@ export const handlers = [
 
   http.post(apiTarget("/bugs/:bugId/attachments"), () => {
     return HttpResponse.json({
-      data: { id: "2", filePath: "/path/to/att2.png", fileType: "image/png", bugId: "123" },
+      data: {
+        id: "2",
+        filePath: "/path/to/att2.png",
+        fileType: "image/png",
+        bugId: "123",
+      },
     });
   }),
 
@@ -285,8 +290,20 @@ export const handlers = [
   http.get(languagesApiTarget("/v1/admin/languages"), () => {
     return HttpResponse.json({
       data: [
-        { id: 1, name: "English", code: "en", isEnabled: true, isDefault: true },
-        { id: 2, name: "Spanish", code: "es", isEnabled: false, isDefault: false },
+        {
+          id: 1,
+          name: "English",
+          code: "en",
+          isEnabled: true,
+          isDefault: true,
+        },
+        {
+          id: 2,
+          name: "Spanish",
+          code: "es",
+          isEnabled: false,
+          isDefault: false,
+        },
       ],
     });
   }),
@@ -295,18 +312,21 @@ export const handlers = [
     return HttpResponse.json({ data: null });
   }),
 
-  http.put(languagesApiTarget("/v1/admin/languages/:languageId"), async ({ request }) => {
-    const body = (await request.json()) as any;
-    return HttpResponse.json({
-      data: {
-        id: body.id || 1,
-        name: body.name || "English",
-        code: body.code || "en",
-        isEnabled: body.isEnabled !== false,
-        isDefault: !!body.isDefault,
-      },
-    });
-  }),
+  http.put(
+    languagesApiTarget("/v1/admin/languages/:languageId"),
+    async ({ request }) => {
+      const body = (await request.json()) as any;
+      return HttpResponse.json({
+        data: {
+          id: body.id || 1,
+          name: body.name || "English",
+          code: body.code || "en",
+          isEnabled: body.isEnabled !== false,
+          isDefault: !!body.isDefault,
+        },
+      });
+    },
+  ),
 
   // Permission Management
   http.get(apiTarget("/v1/permissions"), () => {
@@ -322,8 +342,18 @@ export const handlers = [
   http.get(apiTarget("/v1/micro-services"), () => {
     return HttpResponse.json({
       data: [
-        { id: "1", name: "Service A", status: "running", url: "http://service-a" },
-        { id: "2", name: "Service B", status: "stopped", url: "http://service-b" },
+        {
+          id: "1",
+          name: "Service A",
+          status: "running",
+          url: "http://service-a",
+        },
+        {
+          id: "2",
+          name: "Service B",
+          status: "stopped",
+          url: "http://service-b",
+        },
       ],
     });
   }),
@@ -331,8 +361,18 @@ export const handlers = [
   http.get(apiTarget("/v1/microservices"), () => {
     return HttpResponse.json({
       data: [
-        { id: "1", name: "Service A", status: "running", url: "http://service-a" },
-        { id: "2", name: "Service B", status: "stopped", url: "http://service-b" },
+        {
+          id: "1",
+          name: "Service A",
+          status: "running",
+          url: "http://service-a",
+        },
+        {
+          id: "2",
+          name: "Service B",
+          status: "stopped",
+          url: "http://service-b",
+        },
       ],
     });
   }),
@@ -380,15 +420,21 @@ export const handlers = [
     });
   }),
 
-  http.put(projectsApiTarget("/v1/admin/projects/:projectId"), async ({ request }) => {
-    const body = (await request.json()) as any;
-    return HttpResponse.json({ data: body });
-  }),
+  http.put(
+    projectsApiTarget("/v1/admin/projects/:projectId"),
+    async ({ request }) => {
+      const body = (await request.json()) as any;
+      return HttpResponse.json({ data: body });
+    },
+  ),
 
-  http.put(projectsApiTarget("/v1/projects/:projectId"), async ({ request }) => {
-    const body = (await request.json()) as any;
-    return HttpResponse.json({ data: body });
-  }),
+  http.put(
+    projectsApiTarget("/v1/projects/:projectId"),
+    async ({ request }) => {
+      const body = (await request.json()) as any;
+      return HttpResponse.json({ data: body });
+    },
+  ),
 
   http.delete(projectsApiTarget("/v1/admin/projects/:projectId"), () => {
     return HttpResponse.json({ data: null });
@@ -417,10 +463,13 @@ export const handlers = [
     });
   }),
 
-  http.put(projectsApiTarget("/v1/admin/models/:modelId"), async ({ request }) => {
-    const body = (await request.json()) as any;
-    return HttpResponse.json({ data: body });
-  }),
+  http.put(
+    projectsApiTarget("/v1/admin/models/:modelId"),
+    async ({ request }) => {
+      const body = (await request.json()) as any;
+      return HttpResponse.json({ data: body });
+    },
+  ),
 
   http.put(projectsApiTarget("/v1/models/:modelId"), async ({ request }) => {
     const body = (await request.json()) as any;
@@ -492,7 +541,12 @@ export const handlers = [
   http.get(apiTarget("/v1/countries"), () => {
     return HttpResponse.json({
       data: [
-        { code: "US", name: "United States", latitude: 37.0902, longitude: -95.7129 },
+        {
+          code: "US",
+          name: "United States",
+          latitude: 37.0902,
+          longitude: -95.7129,
+        },
         { code: "FR", name: "France", latitude: 46.2276, longitude: 2.2137 },
       ],
     });

@@ -1,9 +1,9 @@
-import { Role } from "@/features/role-management/domain/Entity/Role";
-import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator, useRouter } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, Search, TrashFill } from "react-bootstrap-icons";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
+import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 
 export interface RoleListParameters extends PaginationControlsProps {
   items: Role[];
@@ -22,7 +22,11 @@ export const RoleList: FC<RoleListParameters> = ({
   const { navigate } = useRouter();
   return (
     <>
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
       <Table striped bordered hover>
         <thead>
@@ -52,11 +56,19 @@ export const RoleList: FC<RoleListParameters> = ({
                     <Search />
                   </Button>
 
-                  <Button variant="primary" onClick={() => onRoleEdit(role)} title="Edit role">
+                  <Button
+                    variant="primary"
+                    onClick={() => onRoleEdit(role)}
+                    title="Edit role"
+                  >
                     <PencilFill />
                   </Button>
 
-                  <Button variant="danger" onClick={() => onRoleDelete(role)} title="Delete role">
+                  <Button
+                    variant="danger"
+                    onClick={() => onRoleDelete(role)}
+                    title="Delete role"
+                  >
                     <TrashFill />
                   </Button>
                 </ButtonGroup>
@@ -66,7 +78,11 @@ export const RoleList: FC<RoleListParameters> = ({
         </tbody>
       </Table>
 
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

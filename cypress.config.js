@@ -10,7 +10,7 @@ module.exports = defineConfig({
     },
     specPattern: "cypress/integration/**/*.spec.js",
     supportFile: "cypress/support/index.js",
-    baseUrl: "http://localhost:3000",
+    baseUrl: "http://localhost:3000/variamos_admin/",
     defaultCommandTimeout: 10000,
     blockHosts: [
       "*.google.com",

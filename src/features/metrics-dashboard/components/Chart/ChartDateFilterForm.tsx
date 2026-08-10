@@ -1,18 +1,20 @@
-import {
-  useChartContext,
-  ChartDateFormProperties,
-  ChartDateFilterFormProperties,
-} from "../../context/ChartContext";
-import { FC } from "react";
+import type { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import {
+  type ChartDateFilterFormProperties,
+  type ChartDateFormProperties,
+  useChartContext,
+} from "../../context/ChartContext";
 
 const formControlsStyle: React.CSSProperties = {
   backgroundImage: "none",
   paddingRight: "0",
 };
 
-export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({ onFilterSubmit }) => {
+export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
+  onFilterSubmit,
+}) => {
   const { isLoading, chartFilter } = useChartContext();
   const {
     register,
@@ -37,7 +39,9 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({ onFilte
             isInvalid={!!errors.fromDate}
             style={formControlsStyle}
           />
-          <Form.Control.Feedback type="invalid">{errors.fromDate?.message}</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            {errors.fromDate?.message}
+          </Form.Control.Feedback>
         </Form.Group>
 
         <Form.Group controlId="toDate">
@@ -50,13 +54,25 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({ onFilte
             isInvalid={!!errors.toDate}
             style={formControlsStyle}
           />
-          <Form.Control.Feedback type="invalid">{errors.toDate?.message}</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            {errors.toDate?.message}
+          </Form.Control.Feedback>
         </Form.Group>
       </fieldset>
 
       <div className="w-100 text-end mt-2">
-        <Button className="w-auto" variant="primary" type="submit" size="sm" disabled={isLoading}>
-          {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : "Apply"}
+        <Button
+          className="w-auto"
+          variant="primary"
+          type="submit"
+          size="sm"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Spinner animation="border" variant="light" size="sm" />
+          ) : (
+            "Apply"
+          )}
         </Button>
       </div>
     </Form>

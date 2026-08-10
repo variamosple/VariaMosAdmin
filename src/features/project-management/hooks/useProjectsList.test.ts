@@ -1,19 +1,19 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { useProjectList } from "./useProjectsList";
-import * as ProjectRepository from "../api/ProjectRepository";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
+import * as ProjectRepository from "../api/ProjectRepository";
+import { useProjectList } from "./useProjectsList";
 
-const mockPushToast = jest.fn();
-jest.mock("@/shared/context/ToastContext", () => ({
+const mockPushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
   }),
 }));
 
-const mockLoadData = jest.fn();
-const mockOnPageChange = jest.fn();
+const mockLoadData = vi.fn();
+const mockOnPageChange = vi.fn();
 
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     ResponseModel: class ResponseModel {
       errorCode?: number;
@@ -37,22 +37,22 @@ jest.mock("@variamosple/variamos-components", () => {
         this.pageSize = pageSize;
       }
     },
-    usePaginatedQuery: jest.fn(),
+    usePaginatedQuery: vi.fn(),
   };
 });
 
 describe("useProjectList Hook", () => {
-  let updateProjectSpy: jest.SpyInstance;
-  let deleteProjectSpy: jest.SpyInstance;
-  const usePaginatedQueryMock = usePaginatedQuery as jest.Mock;
+  let updateProjectSpy: import("vitest").MockInstance;
+  let deleteProjectSpy: import("vitest").MockInstance;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    updateProjectSpy = jest
+    updateProjectSpy = vi
       .spyOn(ProjectRepository, "updateProject")
       .mockResolvedValue({ errorCode: null } as any);
-    deleteProjectSpy = jest
+    deleteProjectSpy = vi
       .spyOn(ProjectRepository, "deleteProject")
       .mockResolvedValue({ errorCode: null } as any);
 
@@ -76,7 +76,9 @@ describe("useProjectList Hook", () => {
   it("should initialize with values from query hook", () => {
     const { result } = renderHook(() => useProjectList());
 
-    expect(result.current.projects).toEqual([{ id: 1, name: "Project One", template: false }]);
+    expect(result.current.projects).toEqual([
+      { id: 1, name: "Project One", template: false },
+    ]);
     expect(result.current.currentPage).toBe(1);
     expect(result.current.isLoading).toBe(false);
   });
@@ -85,10 +87,16 @@ describe("useProjectList Hook", () => {
     const { result } = renderHook(() => useProjectList());
 
     await act(async () => {
-      await result.current.performEditProject({ id: 1, name: "Project One Edited" });
+      await result.current.performEditProject({
+        id: 1,
+        name: "Project One Edited",
+      });
     });
 
-    expect(updateProjectSpy).toHaveBeenCalledWith({ id: 1, name: "Project One Edited" });
+    expect(updateProjectSpy).toHaveBeenCalledWith({
+      id: 1,
+      name: "Project One Edited",
+    });
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Project edit", variant: "success" }),
@@ -105,16 +113,25 @@ describe("useProjectList Hook", () => {
     expect(deleteProjectSpy).toHaveBeenCalledWith(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Project delete", message: "Project deleted successfully" }),
+      expect.objectContaining({
+        title: "Project delete",
+        message: "Project deleted successfully",
+      }),
     );
   });
 
   it("should handle performEditProject failure", async () => {
     const { result } = renderHook(() => useProjectList());
-    updateProjectSpy.mockResolvedValueOnce({ errorCode: 500, message: "Edit failed" } as any);
+    updateProjectSpy.mockResolvedValueOnce({
+      errorCode: 500,
+      message: "Edit failed",
+    } as any);
 
     await act(async () => {
-      await result.current.performEditProject({ id: 1, name: "Project One Edited" });
+      await result.current.performEditProject({
+        id: 1,
+        name: "Project One Edited",
+      });
     });
 
     expect(mockPushToast).toHaveBeenCalledWith(
@@ -128,7 +145,10 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle query error toast on loadData", async () => {
-    mockLoadData.mockResolvedValueOnce({ errorCode: 500, message: "Query failed" });
+    mockLoadData.mockResolvedValueOnce({
+      errorCode: 500,
+      message: "Query failed",
+    });
     renderHook(() => useProjectList());
 
     await waitFor(() => {

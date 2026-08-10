@@ -1,27 +1,36 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Model } from "../../domain/Entity/Model";
 import { ModelList } from "./index";
-import { Model } from "../../domain/Entity/Model";
 
 const mockModels: Model[] = [
-  { id: "1", projectId: "p1", name: "Model One", description: "Description One" },
-  { id: "2", projectId: "p2", name: "Model Two", description: "Description Two" },
+  {
+    id: "1",
+    projectId: "p1",
+    name: "Model One",
+    description: "Description One",
+  },
+  {
+    id: "2",
+    projectId: "p2",
+    name: "Model Two",
+    description: "Description Two",
+  },
 ];
 
 // Mock the variamos-components library which has Paginator
-jest.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
   };
 });
 
 describe("ModelList Component", () => {
-  const mockOnModelEdit = jest.fn();
-  const mockOnModelDelete = jest.fn();
+  const mockOnModelEdit = vi.fn();
+  const mockOnModelDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders a list of models correctly", () => {
@@ -30,7 +39,7 @@ describe("ModelList Component", () => {
         items={mockModels}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onModelEdit={mockOnModelEdit}
         onModelDelete={mockOnModelDelete}
       />,
@@ -47,7 +56,7 @@ describe("ModelList Component", () => {
         items={mockModels}
         currentPage={1}
         totalPages={1}
-        onPageChange={jest.fn()}
+        onPageChange={vi.fn()}
         onModelEdit={mockOnModelEdit}
         onModelDelete={mockOnModelDelete}
       />,

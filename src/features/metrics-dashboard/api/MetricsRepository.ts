@@ -1,9 +1,8 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-
-import { Metric } from "../domain/Entity/Metric";
-import { MetricsFilter } from "../domain/Entity/MetricsFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { Metric } from "../domain/Entity/Metric";
+import type { MetricsFilter } from "../domain/Entity/MetricsFilter";
 
 export const queryMetrics = (): Promise<ResponseModel<Metric[]>> => {
   return ADMIN_CLIENT.get(`/v1/metrics`)
@@ -14,12 +13,12 @@ export const queryMetrics = (): Promise<ResponseModel<Metric[]>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -33,7 +32,9 @@ export const queryMetrics = (): Promise<ResponseModel<Metric[]>> => {
     });
 };
 
-export const queryMetric = (filter: MetricsFilter): Promise<ResponseModel<Metric>> => {
+export const queryMetric = (
+  filter: MetricsFilter,
+): Promise<ResponseModel<Metric>> => {
   return ADMIN_CLIENT.get(`/v1/metrics/${filter.id}`, { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -42,12 +43,12 @@ export const queryMetric = (filter: MetricsFilter): Promise<ResponseModel<Metric
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

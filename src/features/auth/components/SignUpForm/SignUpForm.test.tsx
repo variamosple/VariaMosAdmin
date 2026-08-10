@@ -1,22 +1,21 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { SignUpForm } from "./index";
 import { useSession } from "@variamosple/variamos-components";
+import { SignUpForm } from "./index";
 
 // Mock @variamosple/variamos-components
-jest.mock("@variamosple/variamos-components", () => ({
-  useSession: jest.fn(),
+vi.mock("@variamosple/variamos-components", async () => ({
+  useSession: vi.fn(),
   PagedModel: class PagedModel {},
 }));
 
 describe("SignUpForm Component", () => {
-  const mockOnSignUp = jest.fn();
+  const mockOnSignUp = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSession as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSession as import("vitest").Mock).mockReturnValue({
       isLoading: false,
     });
   });
@@ -27,7 +26,9 @@ describe("SignUpForm Component", () => {
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sign up/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign up/i }),
+    ).toBeInTheDocument();
   });
 
   it("displays validation errors for empty fields on submit", async () => {
@@ -36,10 +37,14 @@ describe("SignUpForm Component", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /sign up/i }));
 
-    expect(await screen.findByText("Full name is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Full name is required"),
+    ).toBeInTheDocument();
     expect(await screen.findByText("Email is required")).toBeInTheDocument();
     expect(await screen.findByText("password is required")).toBeInTheDocument();
-    expect(await screen.findByText("Please confirm your password")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Please confirm your password"),
+    ).toBeInTheDocument();
     expect(mockOnSignUp).not.toHaveBeenCalled();
   });
 
@@ -48,13 +53,18 @@ describe("SignUpForm Component", () => {
 
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/full name/i), "Jane Doe");
-    await user.type(screen.getByLabelText(/email address/i), "jane@example.com");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "jane@example.com",
+    );
     await user.type(screen.getByLabelText(/^password$/i), "Password123!");
     await user.type(screen.getByLabelText(/confirm password/i), "Password321!");
 
     await user.click(screen.getByRole("button", { name: /sign up/i }));
 
-    expect(await screen.findByText("Passwords do not match")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Passwords do not match"),
+    ).toBeInTheDocument();
     expect(mockOnSignUp).not.toHaveBeenCalled();
   });
 
@@ -63,7 +73,10 @@ describe("SignUpForm Component", () => {
 
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/full name/i), "Jane Doe");
-    await user.type(screen.getByLabelText(/email address/i), "jane@example.com");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "jane@example.com",
+    );
     await user.type(screen.getByLabelText(/^password$/i), "Password123!");
     await user.type(screen.getByLabelText(/confirm password/i), "Password123!");
 
@@ -80,7 +93,7 @@ describe("SignUpForm Component", () => {
   });
 
   it("disables submit button and shows loading spinner when session is loading", () => {
-    (useSession as jest.Mock).mockReturnValue({
+    (useSession as import("vitest").Mock).mockReturnValue({
       isLoading: true,
     });
     render(<SignUpForm onSignUp={mockOnSignUp} />);

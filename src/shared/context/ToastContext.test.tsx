@@ -1,6 +1,6 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, renderHook, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { useToast, ToastProvider } from "./ToastContext";
+import { ToastProvider, useToast } from "./ToastContext";
 
 const TestComponent = () => {
   const { pushToast, removeToast } = useToast();
@@ -8,7 +8,11 @@ const TestComponent = () => {
     <div>
       <button
         onClick={() =>
-          pushToast({ title: "Test Title", message: "Test Message", variant: "success" })
+          pushToast({
+            title: "Test Title",
+            message: "Test Message",
+            variant: "success",
+          })
         }
       >
         Push Toast
@@ -26,8 +30,25 @@ const BadComponent = () => {
 describe("ToastContext & useToast", () => {
   it("throws error when used outside ToastProvider", () => {
     // Suppress console.error for clean output during expected throw
-    const spy = jest.spyOn(console, "error").mockImplementation(() => {});
-    expect(() => render(<BadComponent />)).toThrow("useToast must be used within a ToastProvider");
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    // Intercept and prevent JSDOM from logging the expected uncaught error
+    const errorHandler = (event: ErrorEvent) => {
+      if (
+        event.error?.message?.includes(
+          "useToast must be used within a ToastProvider",
+        )
+      ) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("error", errorHandler);
+
+    expect(() => renderHook(() => useToast())).toThrow(
+      "useToast must be used within a ToastProvider",
+    );
+
+    window.removeEventListener("error", errorHandler);
     spy.mockRestore();
   });
 

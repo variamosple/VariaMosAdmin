@@ -5,7 +5,6 @@ const kPropagationStopped = Symbol("kPropagationStopped");
 const kImmediatePropagationStopped = Symbol("kImmediatePropagationStopped");
 
 class TypedEvent extends MessageEvent {
-  #returnType;
   [kDefaultPrevented];
   [kPropagationStopped];
   [kImmediatePropagationStopped];
@@ -140,8 +139,11 @@ class Emitter {
         return [];
       }
       if (proxiedEvent.event[kImmediatePropagationStopped]) break;
-      const returnValue = await Promise.resolve(this.#callListener(proxiedEvent.event, listener));
-      if (!this.#isTypelessListener(listener)) pendingListeners.push(returnValue);
+      const returnValue = await Promise.resolve(
+        this.#callListener(proxiedEvent.event, listener),
+      );
+      if (!this.#isTypelessListener(listener))
+        pendingListeners.push(returnValue);
     }
     proxiedEvent.revoke();
     return Promise.allSettled(pendingListeners).then((results) => {
@@ -176,7 +178,8 @@ class Emitter {
   removeAllListeners(type) {
     if (type == null) {
       for (const [listenerType, listeners$1] of this.#listeners.entries())
-        while (listeners$1.length > 0) this.removeListener(listenerType, listeners$1[0]);
+        while (listeners$1.length > 0)
+          this.removeListener(listenerType, listeners$1[0]);
       for (const [hookType, hookListener] of [...this.#hookListeners])
         if (!this.#hookListenerOptions.get(hookListener)?.persist)
           this.#deleteHookListener(hookType, hookListener);
