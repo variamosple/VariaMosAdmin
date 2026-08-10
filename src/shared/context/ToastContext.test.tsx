@@ -1,6 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { useToast, ToastProvider } from "./ToastContext";
+import { ToastProvider, useToast } from "./ToastContext";
 
 const TestComponent = () => {
   const { pushToast, removeToast } = useToast();
@@ -8,7 +8,11 @@ const TestComponent = () => {
     <div>
       <button
         onClick={() =>
-          pushToast({ title: "Test Title", message: "Test Message", variant: "success" })
+          pushToast({
+            title: "Test Title",
+            message: "Test Message",
+            variant: "success",
+          })
         }
       >
         Push Toast
@@ -27,7 +31,9 @@ describe("ToastContext & useToast", () => {
   it("throws error when used outside ToastProvider", () => {
     // Suppress console.error for clean output during expected throw
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    expect(() => render(<BadComponent />)).toThrow("useToast must be used within a ToastProvider");
+    expect(() => render(<BadComponent />)).toThrow(
+      "useToast must be used within a ToastProvider",
+    );
     spy.mockRestore();
   });
 

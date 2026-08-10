@@ -1,5 +1,4 @@
-import React from "react";
-import { render, screen, act } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SearchForm } from "./index";
 
@@ -9,7 +8,7 @@ describe("SearchForm Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
@@ -31,11 +30,18 @@ describe("SearchForm Component", () => {
 
   it("triggers onSubmit with a 500ms debounce when user types", async () => {
     render(
-      <SearchForm onSubmit={mockOnSubmit} onSearchReset={mockOnSearchReset} isLoading={false} />,
+      <SearchForm
+        onSubmit={mockOnSubmit}
+        onSearchReset={mockOnSearchReset}
+        isLoading={false}
+      />,
     );
 
     const input = screen.getByPlaceholderText("Search");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
 
     await user.type(input, "react");
 
@@ -50,11 +56,18 @@ describe("SearchForm Component", () => {
 
   it("resets filter values and calls onSearchReset when trash button is clicked", async () => {
     render(
-      <SearchForm onSubmit={mockOnSubmit} onSearchReset={mockOnSearchReset} isLoading={false} />,
+      <SearchForm
+        onSubmit={mockOnSubmit}
+        onSearchReset={mockOnSearchReset}
+        isLoading={false}
+      />,
     );
 
     const input = screen.getByPlaceholderText("Search");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(input, "delete-me");
 
     const clearButton = screen.getByTitle("Clear results");

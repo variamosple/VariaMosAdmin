@@ -3,11 +3,13 @@ import userEvent from "@testing-library/user-event";
 import { UserRoleForm } from "./index";
 
 vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
-  return () => ({
-    lastEntryRef: vi.fn(),
-    setHasMore: vi.fn(),
-    page: 1,
-  });
+  return {
+    default: () => ({
+      lastEntryRef: vi.fn(),
+      setHasMore: vi.fn(),
+      page: 1,
+    }),
+  };
 });
 
 vi.mock("@/shared/components/InfiniteSelect", async () => {
@@ -16,7 +18,9 @@ vi.mock("@/shared/components/InfiniteSelect", async () => {
       <select
         data-testid="infinite-select"
         onChange={(e) => {
-          const opt = options.find((o: any) => String(o.value) === e.target.value);
+          const opt = options.find(
+            (o: any) => String(o.value) === e.target.value,
+          );
           if (opt) handleSelect(opt);
         }}
       >
@@ -84,7 +88,12 @@ describe("UserRoleForm Component", () => {
   });
 
   it("loads and renders the form with role options", async () => {
-    render(<UserRoleForm onUserRoleSubmit={mockOnUserRoleSubmit} isLoading={false} />);
+    render(
+      <UserRoleForm
+        onUserRoleSubmit={mockOnUserRoleSubmit}
+        isLoading={false}
+      />,
+    );
 
     const select = await screen.findByTestId("infinite-select");
     expect(select).toBeInTheDocument();
@@ -92,7 +101,12 @@ describe("UserRoleForm Component", () => {
   });
 
   it("submits the selected role when form is submitted", async () => {
-    render(<UserRoleForm onUserRoleSubmit={mockOnUserRoleSubmit} isLoading={false} />);
+    render(
+      <UserRoleForm
+        onUserRoleSubmit={mockOnUserRoleSubmit}
+        isLoading={false}
+      />,
+    );
 
     const select = await screen.findByTestId("infinite-select");
     const user = userEvent.setup();
@@ -102,7 +116,9 @@ describe("UserRoleForm Component", () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnUserRoleSubmit).toHaveBeenCalledWith(expect.objectContaining({ roleId: 1 }));
+      expect(mockOnUserRoleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ roleId: 1 }),
+      );
     });
   });
 });

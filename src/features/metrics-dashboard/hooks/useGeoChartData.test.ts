@@ -1,6 +1,6 @@
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import type { Metric } from "../domain/Entity/Metric";
 import { useGeoChartData } from "./useGeoChartData";
-import { Metric } from "../domain/Entity/Metric";
 
 const mockMetric: Metric = {
   id: "metric-geo",

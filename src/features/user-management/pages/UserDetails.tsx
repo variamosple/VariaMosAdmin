@@ -1,23 +1,27 @@
+import {
+  usePaginatedQuery,
+  useRouter,
+  withPageVisit,
+} from "@variamosple/variamos-components";
+import { type FC, useCallback, useEffect, useState } from "react";
+import { Button, Container, Spinner } from "react-bootstrap";
+import { ArrowLeft } from "react-bootstrap-icons";
+import { useParams } from "react-router-dom";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { queryUserById } from "@/features/user-management/api/UserRepository";
 import {
   createUserRole,
   deleteUserRole,
   queryUserRoles,
 } from "@/features/user-management/api/UserRoleRepository";
-import { Role } from "@/features/role-management/domain/Entity/Role";
-import { User } from "@/features/user-management/domain/Entity/User";
+import { UserDetails } from "@/features/user-management/components/UserDetails";
+import type { User } from "@/features/user-management/domain/Entity/User";
 import { UserRole } from "@/features/user-management/domain/Entity/UserRole";
 import { UserRoleFilter } from "@/features/user-management/domain/Entity/UserRoleFilter";
-import { usePaginatedQuery, useRouter, withPageVisit } from "@variamosple/variamos-components";
-import { FC, useEffect, useState } from "react";
-import { Button, Container, Spinner } from "react-bootstrap";
-import { ArrowLeft } from "react-bootstrap-icons";
-import { useParams } from "react-router-dom";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
-import { UserDetails } from "@/features/user-management/components/UserDetails";
+import { useToast } from "@/shared/context/ToastContext";
 import { UserRoleForm } from "../components/UserRoleForm";
 import { UserRoleList } from "../components/UserRoleList";
-import { useToast } from "@/shared/context/ToastContext";
 
 const UserDetailsPageComponent: FC<unknown> = () => {
   const { pushToast, removeToast } = useToast();
@@ -41,14 +45,14 @@ const UserDetailsPageComponent: FC<unknown> = () => {
     initialFilter: new UserRoleFilter(),
   });
 
-  const queryUser = (userId: string) => {
+  const queryUser = useCallback((userId: string) => {
     setIsLoading(true);
     queryUserById(userId)
       .then((response) => {
         setUser(response.data);
       })
       .finally(() => setIsLoading(false));
-  };
+  }, []);
 
   const onUserRoleCreate = (UserRole: UserRole) => {
     setIsCreating(true);
@@ -118,7 +122,7 @@ const UserDetailsPageComponent: FC<unknown> = () => {
     if (userIdParam) {
       queryUser(userIdParam);
     }
-  }, [userIdParam]);
+  }, [userIdParam, queryUser]);
 
   useEffect(() => {
     if (userIdParam) {
@@ -193,4 +197,7 @@ const UserDetailsPageComponent: FC<unknown> = () => {
   );
 };
 
-export const UserDetailsPage = withPageVisit(UserDetailsPageComponent, "UserDetails");
+export const UserDetailsPage = withPageVisit(
+  UserDetailsPageComponent,
+  "UserDetails",
+);

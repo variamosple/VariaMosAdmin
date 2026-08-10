@@ -1,9 +1,8 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { PasswordUpdateForm } from "./index";
 import { ResponseModel } from "@variamosple/variamos-components";
+import { PasswordUpdateForm } from "./index";
 
 // Mock @variamosple/variamos-components
 vi.mock("@variamosple/variamos-components", async () => ({
@@ -49,7 +48,9 @@ describe("PasswordUpdateForm Component", () => {
     expect(screen.getByLabelText(/current password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Update Password" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Update Password" }),
+    ).toBeInTheDocument();
   });
 
   it("shows validation errors for empty fields on submit", async () => {
@@ -65,9 +66,15 @@ describe("PasswordUpdateForm Component", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Update Password" }));
 
-    expect(await screen.findByText("Current password is required")).toBeInTheDocument();
-    expect(await screen.findByText("New password is required")).toBeInTheDocument();
-    expect(await screen.findByText("Please confirm your password")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Current password is required"),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("New password is required"),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("Please confirm your password"),
+    ).toBeInTheDocument();
     expect(mockOnUpdatePasswordSubmit).not.toHaveBeenCalled();
   });
 
@@ -84,11 +91,16 @@ describe("PasswordUpdateForm Component", () => {
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/current password/i), "oldPassword");
     await user.type(screen.getByLabelText(/new password/i), "NewPassword123!");
-    await user.type(screen.getByLabelText(/confirm password/i), "WrongConfirm123!");
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      "WrongConfirm123!",
+    );
 
     await user.click(screen.getByRole("button", { name: "Update Password" }));
 
-    expect(await screen.findByText("Passwords do not match")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Passwords do not match"),
+    ).toBeInTheDocument();
     expect(mockOnUpdatePasswordSubmit).not.toHaveBeenCalled();
   });
 
@@ -108,7 +120,10 @@ describe("PasswordUpdateForm Component", () => {
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/current password/i), "oldPassword");
     await user.type(screen.getByLabelText(/new password/i), "NewPassword123!");
-    await user.type(screen.getByLabelText(/confirm password/i), "NewPassword123!");
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      "NewPassword123!",
+    );
 
     await user.click(screen.getByRole("button", { name: "Update Password" }));
 
@@ -121,7 +136,9 @@ describe("PasswordUpdateForm Component", () => {
     });
 
     // Check that form values were reset
-    expect((screen.getByLabelText(/current password/i) as HTMLInputElement).value).toBe("");
+    expect(
+      (screen.getByLabelText(/current password/i) as HTMLInputElement).value,
+    ).toBe("");
   });
 
   it("calls onClose and resets form when Cancel button is clicked", async () => {
@@ -139,7 +156,9 @@ describe("PasswordUpdateForm Component", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(mockOnClose).toHaveBeenCalled();
-    expect((screen.getByLabelText(/current password/i) as HTMLInputElement).value).toBe("");
+    expect(
+      (screen.getByLabelText(/current password/i) as HTMLInputElement).value,
+    ).toBe("");
   });
 
   it("disables buttons and shows spinner when isLoading is true", () => {

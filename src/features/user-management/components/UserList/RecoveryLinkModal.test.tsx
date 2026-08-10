@@ -1,10 +1,10 @@
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { RecoveryLinkModal } from "./RecoveryLinkModal";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { RecoveryLinkModal } from "./RecoveryLinkModal";
 
 // Mock @variamosple/variamos-components to prevent ESM SyntaxError
 vi.mock("@variamosple/variamos-components", async () => {
@@ -94,23 +94,33 @@ describe("RecoveryLinkModal Component", () => {
   });
 
   it("does not render when show is false", () => {
-    render(<RecoveryLinkModal user={mockUser} show={false} onHide={mockOnHide} />);
+    render(
+      <RecoveryLinkModal user={mockUser} show={false} onHide={mockOnHide} />,
+    );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("renders user information and a button to generate link", () => {
-    render(<RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />);
+    render(
+      <RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />,
+    );
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("Bob Smith")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /generate secure link/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /generate secure link/i }),
+    ).toBeInTheDocument();
   });
 
   it("handles link generation successfully and displays the recovery link", async () => {
     delayRecoveryQuery = true;
     const user = userEvent.setup();
-    render(<RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />);
+    render(
+      <RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />,
+    );
 
-    const generateBtn = screen.getByRole("button", { name: /generate secure link/i });
+    const generateBtn = screen.getByRole("button", {
+      name: /generate secure link/i,
+    });
     await user.click(generateBtn);
 
     // Should show loader/spinner first
@@ -134,11 +144,17 @@ describe("RecoveryLinkModal Component", () => {
 
   it("handles copy to clipboard functionality", async () => {
     const user = userEvent.setup();
-    const writeTextSpy = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined);
+    const writeTextSpy = vi
+      .spyOn(navigator.clipboard, "writeText")
+      .mockResolvedValue(undefined);
 
-    render(<RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />);
+    render(
+      <RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />,
+    );
 
-    const generateBtn = screen.getByRole("button", { name: /generate secure link/i });
+    const generateBtn = screen.getByRole("button", {
+      name: /generate secure link/i,
+    });
     await user.click(generateBtn);
 
     await waitFor(() => {
@@ -150,7 +166,9 @@ describe("RecoveryLinkModal Component", () => {
     const copyBtn = screen.getByRole("button", { name: "" }); // icon button has no label by default
     await user.click(copyBtn);
 
-    expect(writeTextSpy).toHaveBeenCalledWith("https://variamos.com/recover?token=xyz");
+    expect(writeTextSpy).toHaveBeenCalledWith(
+      "https://variamos.com/recover?token=xyz",
+    );
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Link copied",
@@ -164,9 +182,13 @@ describe("RecoveryLinkModal Component", () => {
     const user = userEvent.setup();
     isRecoveryError = true;
 
-    render(<RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />);
+    render(
+      <RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />,
+    );
 
-    const generateBtn = screen.getByRole("button", { name: /generate secure link/i });
+    const generateBtn = screen.getByRole("button", {
+      name: /generate secure link/i,
+    });
     await user.click(generateBtn);
 
     await waitFor(() => {

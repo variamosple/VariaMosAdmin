@@ -1,9 +1,11 @@
-import { useLineChartData } from "../../hooks/useLineChartData";
-import { FC } from "react";
-
-import { useChartContext, withChartContextWrapper } from "../../context/ChartContext";
+import type { FC } from "react";
 import { Spinner } from "react-bootstrap";
 import Chart from "react-google-charts";
+import {
+  useChartContext,
+  withChartContextWrapper,
+} from "../../context/ChartContext";
+import { useLineChartData } from "../../hooks/useLineChartData";
 import { ChartDateFilter } from "./ChartDateFilter";
 
 const LineChartComponent: FC<unknown> = () => {
@@ -31,7 +33,9 @@ const LineChartComponent: FC<unknown> = () => {
           />
         )}
 
-        {!isLoading && !metric.data && <span className="text-muted">No data found.</span>}
+        {!isLoading && !metric.data && (
+          <span className="text-muted">No data found.</span>
+        )}
 
         {!isLoading && metric.data && (
           <Chart

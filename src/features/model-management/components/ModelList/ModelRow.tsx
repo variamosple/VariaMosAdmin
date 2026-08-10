@@ -1,7 +1,7 @@
-import { Model } from "@/features/model-management/domain/Entity/Model";
-import { FC, useState } from "react";
+import { type FC, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
 import { DashCircle, PencilFill, PlusCircle } from "react-bootstrap-icons";
+import type { Model } from "@/features/model-management/domain/Entity/Model";
 
 export interface ModelRowProps {
   model: Model;
@@ -9,7 +9,11 @@ export interface ModelRowProps {
   onModelDelete: (model: Model) => void;
 }
 
-export const ModelRowComponent: FC<ModelRowProps> = ({ model, onModelEdit, onModelDelete }) => {
+export const ModelRowComponent: FC<ModelRowProps> = ({
+  model,
+  onModelEdit,
+  onModelDelete,
+}) => {
   const [show, setShow] = useState(false);
 
   return (
@@ -84,7 +88,11 @@ export const ModelRowComponent: FC<ModelRowProps> = ({ model, onModelEdit, onMod
 
         <td>
           <ButtonGroup size="sm">
-            <Button variant="primary" onClick={() => onModelEdit(model)} title="Edit model">
+            <Button
+              variant="primary"
+              onClick={() => onModelEdit(model)}
+              title="Edit model"
+            >
               <PencilFill />
             </Button>
 
@@ -168,7 +176,9 @@ const ModelDetails: FC<ModelDetailsProps> = ({ model }) => {
         </Col>
 
         <Col xs={10}>
-          {(model.owners || []).map((owner) => `${owner.name} (${owner.email})`).join(", ")}
+          {(model.owners || [])
+            .map((owner) => `${owner.name} (${owner.email})`)
+            .join(", ")}
         </Col>
       </Row>
     </Container>

@@ -1,7 +1,7 @@
-import { FC, useCallback, useEffect, useRef } from "react";
+import { type FC, useCallback, useEffect, useRef } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 
 export interface SearchFormProps {
   onSubmit: (search?: string) => void;
@@ -29,7 +29,7 @@ export const SearchForm: FC<SearchFormProps> = ({
     watch,
   } = useForm<SearchFormFields>();
 
-  const values = watch();
+  const _values = watch();
 
   const onReset = () => {
     onSearchReset();
@@ -60,7 +60,7 @@ export const SearchForm: FC<SearchFormProps> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [values, isDirty, handleSubmit, submit]);
+  }, [isDirty, handleSubmit, submit]);
 
   return (
     <Form onSubmit={handleSubmit(submit)}>
@@ -86,7 +86,9 @@ export const SearchForm: FC<SearchFormProps> = ({
               </Button>
             </InputGroup>
 
-            <Form.Control.Feedback type="invalid">{errors.search?.message}</Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">
+              {errors.search?.message}
+            </Form.Control.Feedback>
           </Form.Group>
         </Col>
       </Row>

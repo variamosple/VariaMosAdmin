@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ProjectSearchForm } from "./index";
@@ -23,7 +22,7 @@ describe("ProjectSearchForm Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
@@ -54,7 +53,10 @@ describe("ProjectSearchForm Component", () => {
     );
 
     const nameInput = screen.getByLabelText("Name");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(nameInput, "My Project");
 
     // Since we are changing values, we must trigger form state isDirty by typing
@@ -83,7 +85,10 @@ describe("ProjectSearchForm Component", () => {
     );
 
     const select = screen.getByLabelText("Access level");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.selectOptions(select, "true");
 
     vi.advanceTimersByTime(500);
@@ -109,7 +114,10 @@ describe("ProjectSearchForm Component", () => {
     );
 
     const nameInput = screen.getByLabelText("Name") as HTMLInputElement;
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(nameInput, "Dirty Value");
 
     const resetButton = screen.getByTitle("Clear results");

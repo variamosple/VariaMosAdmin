@@ -1,26 +1,26 @@
-import { queryMetrics } from "../api/MetricsRepository";
-import { Metric } from "../domain/Entity/Metric";
 import { withPageVisit } from "@variamosple/variamos-components";
-import { FC, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useState } from "react";
 import { Container, Row, Spinner } from "react-bootstrap";
+import { queryMetrics } from "../api/MetricsRepository";
 import { ChartComponent } from "../components/Chart";
+import type { Metric } from "../domain/Entity/Metric";
 
 const MetricsPageComponent: FC<unknown> = () => {
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getMetrics = () => {
+  const getMetrics = useCallback(() => {
     setIsLoading(true);
     queryMetrics()
       .then((response) => {
         setMetrics(response.data || []);
       })
       .finally(() => setIsLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     getMetrics();
-  }, []);
+  }, [getMetrics]);
 
   if (isLoading) {
     return (

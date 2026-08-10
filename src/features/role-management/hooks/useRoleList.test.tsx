@@ -1,9 +1,9 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { useRoleList } from "./useRoleList";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { useRoleList } from "./useRoleList";
 
 const mockPushToast = vi.fn();
 const mockRemoveToast = vi.fn();
@@ -51,7 +51,7 @@ const apiTarget = (path: string) => {
 };
 
 describe("useRoleList Hook", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
 
   let createRoleCalled = 0;
   let updateRoleCalled = 0;
@@ -108,7 +108,10 @@ describe("useRoleList Hook", () => {
   });
 
   it("should load data on mount and handle query error toast", async () => {
-    mockLoadData.mockResolvedValueOnce({ errorCode: 500, message: "Query failed" });
+    mockLoadData.mockResolvedValueOnce({
+      errorCode: 500,
+      message: "Query failed",
+    });
 
     renderHook(() => useRoleList());
 
@@ -173,7 +176,10 @@ describe("useRoleList Hook", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.put(apiTarget("/v1/roles/:roleId"), () => {
-        return HttpResponse.json({ errorCode: "500", message: "Edit failed" }, { status: 500 });
+        return HttpResponse.json(
+          { errorCode: "500", message: "Edit failed" },
+          { status: 500 },
+        );
       }),
     );
 

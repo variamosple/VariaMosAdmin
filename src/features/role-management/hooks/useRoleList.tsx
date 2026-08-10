@@ -1,14 +1,14 @@
+import { usePaginatedQuery } from "@variamosple/variamos-components";
+import { useEffect, useState } from "react";
 import {
   createRole,
   deleteRole,
   queryRoles,
   updateRole,
 } from "@/features/role-management/api/RoleRepository";
-import { Role } from "@/features/role-management/domain/Entity/Role";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
 import { useToast } from "@/shared/context/ToastContext";
-import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
 
 export const useRoleList = () => {
   const [showCreate, setShowCreate] = useState(false);

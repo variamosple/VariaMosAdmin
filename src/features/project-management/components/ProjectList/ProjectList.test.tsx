@@ -1,12 +1,21 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Project } from "../../domain/Entity/Project";
 import { ProjectList } from "./index";
-import { Project } from "../../domain/Entity/Project";
 
 const mockProjects: Project[] = [
-  { id: 1, name: "Project One", template: false, description: "Description One" },
-  { id: 2, name: "Project Two", template: true, description: "Description Two" },
+  {
+    id: 1,
+    name: "Project One",
+    template: false,
+    description: "Description One",
+  },
+  {
+    id: 2,
+    name: "Project Two",
+    template: true,
+    description: "Description Two",
+  },
 ];
 
 // Mock the variamos-components library which has Paginator

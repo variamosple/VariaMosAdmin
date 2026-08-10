@@ -6,13 +6,15 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
+    pool: "forks",
     exclude: [
       "**/node_modules/**",
       "**/dist/**",
       "**/build/**",
       "**/.stryker-tmp/**",
       "**/strykerTmp/**",
-      "**/cypress/**"
+      "**/cypress/**",
+      "**/.worktrees/**"
     ],
   },
   resolve: {

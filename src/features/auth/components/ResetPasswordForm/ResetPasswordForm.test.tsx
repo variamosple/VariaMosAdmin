@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -15,7 +14,9 @@ describe("ResetPasswordForm Component", () => {
     render(<ResetPasswordForm onSubmitPassword={mockOnSubmitPassword} />);
     expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /update password/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /update password/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows validation errors for empty fields on submit", async () => {
@@ -24,8 +25,12 @@ describe("ResetPasswordForm Component", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /update password/i }));
 
-    expect(await screen.findByText("New password is required")).toBeInTheDocument();
-    expect(await screen.findByText("Confirm password is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("New password is required"),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("Confirm password is required"),
+    ).toBeInTheDocument();
     expect(mockOnSubmitPassword).not.toHaveBeenCalled();
   });
 
@@ -34,11 +39,16 @@ describe("ResetPasswordForm Component", () => {
 
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/new password/i), "NewPassword123!");
-    await user.type(screen.getByLabelText(/confirm password/i), "DifferentPassword123!");
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      "DifferentPassword123!",
+    );
 
     await user.click(screen.getByRole("button", { name: /update password/i }));
 
-    expect(await screen.findByText("Passwords do not match")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Passwords do not match"),
+    ).toBeInTheDocument();
     expect(mockOnSubmitPassword).not.toHaveBeenCalled();
   });
 
@@ -47,7 +57,10 @@ describe("ResetPasswordForm Component", () => {
 
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/new password/i), "NewPassword123!");
-    await user.type(screen.getByLabelText(/confirm password/i), "NewPassword123!");
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      "NewPassword123!",
+    );
 
     // Click submit button (the errors should be resolved, making the button enabled)
     await user.click(screen.getByRole("button", { name: /update password/i }));
@@ -58,7 +71,12 @@ describe("ResetPasswordForm Component", () => {
   });
 
   it("disables button and shows updating status when isLoading is true", () => {
-    render(<ResetPasswordForm onSubmitPassword={mockOnSubmitPassword} isLoading={true} />);
+    render(
+      <ResetPasswordForm
+        onSubmitPassword={mockOnSubmitPassword}
+        isLoading={true}
+      />,
+    );
 
     const button = screen.getByRole("button");
     expect(button).toBeDisabled();

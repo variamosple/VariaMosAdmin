@@ -1,14 +1,14 @@
+import { usePaginatedQuery } from "@variamosple/variamos-components";
+import { useEffect, useState } from "react";
 import {
   createPermission,
   deletePermission,
   queryPermissions,
   updatePermission,
 } from "@/features/permission-management/api/PermissionRepository";
-import { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { useToast } from "@/shared/context/ToastContext";
-import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
 
 export const usePermissionList = () => {
   const [showCreate, setShowCreate] = useState(false);

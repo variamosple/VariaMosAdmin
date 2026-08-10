@@ -1,13 +1,12 @@
-import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { UserDetailsPage } from "./UserDetails";
 import { usePaginatedQuery, useRouter } from "@variamosple/variamos-components";
+import { HttpResponse, http } from "msw";
 import { useParams } from "react-router-dom";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { UserDetailsPage } from "./UserDetails";
 
 // Mock router-related hooks & components
 vi.mock("react-router-dom", async () => ({
@@ -49,8 +48,8 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 // Mock react-bootstrap components
-vi.mock("react-bootstrap", async () => {
-  const original = await vi.importActual("react-bootstrap");
+vi.mock("react-bootstrap", async (importOriginal) => {
+  const original = await importOriginal<typeof import("react-bootstrap")>();
   return {
     ...original,
     Spinner: (props: any) => <div data-testid="spinner" {...props} />,
@@ -59,14 +58,18 @@ vi.mock("react-bootstrap", async () => {
 
 // Mock sub-components
 vi.mock("@/features/user-management/components/UserDetails", async () => ({
-  UserDetails: ({ user }: any) => <div data-testid="user-details">User: {user?.name}</div>,
+  UserDetails: ({ user }: any) => (
+    <div data-testid="user-details">User: {user?.name}</div>
+  ),
 }));
 
 vi.mock("../components/UserRoleForm", async () => ({
   UserRoleForm: ({ onUserRoleSubmit, isLoading }: any) => (
     <div data-testid="user-role-form">
       <span>Role Form (Loading: {isLoading ? "true" : "false"})</span>
-      <button onClick={() => onUserRoleSubmit({ roleId: "admin-role" })}>Assign Role</button>
+      <button onClick={() => onUserRoleSubmit({ roleId: "admin-role" })}>
+        Assign Role
+      </button>
     </div>
   ),
 }));
@@ -106,9 +109,9 @@ const apiTarget = (path: string) => {
 };
 
 describe("UserDetailsPage Component", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
-  const useRouterMock = useRouter as import('vitest').Mock;
-  const useParamsMock = useParams as import('vitest').Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
+  const useRouterMock = useRouter as import("vitest").Mock;
+  const useParamsMock = useParams as import("vitest").Mock;
 
   const mockNavigate = vi.fn();
   const mockLoadUserRoles = vi.fn();
@@ -158,11 +161,14 @@ describe("UserDetailsPage Component", () => {
         createUserRolePayload = await request.json();
         return HttpResponse.json({ errorCode: null });
       }),
-      http.delete(apiTarget("/v1/users/:userId/roles/:roleId"), ({ params }) => {
-        deleteUserRoleCalled++;
-        deleteUserRoleParams = params;
-        return HttpResponse.json({ errorCode: null });
-      }),
+      http.delete(
+        apiTarget("/v1/users/:userId/roles/:roleId"),
+        ({ params }) => {
+          deleteUserRoleCalled++;
+          deleteUserRoleParams = params;
+          return HttpResponse.json({ errorCode: null });
+        },
+      ),
     );
   });
 
@@ -185,19 +191,25 @@ describe("UserDetailsPage Component", () => {
     render(<UserDetailsPage />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("user-details")).toHaveTextContent("User: John Doe");
+      expect(screen.getByTestId("user-details")).toHaveTextContent(
+        "User: John Doe",
+      );
     });
 
     expect(screen.getByTestId("user-role-form")).toBeInTheDocument();
     expect(screen.getByTestId("user-role-list")).toBeInTheDocument();
-    expect(screen.getByTestId("role-row-role-1")).toHaveTextContent("Administrator");
+    expect(screen.getByTestId("role-row-role-1")).toHaveTextContent(
+      "Administrator",
+    );
   });
 
   it("handles back to user list click", async () => {
     const user = userEvent.setup();
     render(<UserDetailsPage />);
 
-    const backBtn = await screen.findByRole("button", { name: /back to user list/i });
+    const backBtn = await screen.findByRole("button", {
+      name: /back to user list/i,
+    });
     await user.click(backBtn);
     expect(mockNavigate).toHaveBeenCalledWith("/users");
   });
@@ -219,7 +231,10 @@ describe("UserDetailsPage Component", () => {
     await waitFor(() => {
       expect(createUserRoleCalled).toBe(1);
     });
-    expect(createUserRolePayload).toEqual({ roleId: "admin-role", userId: "user-123" });
+    expect(createUserRolePayload).toEqual({
+      roleId: "admin-role",
+      userId: "user-123",
+    });
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Role assignment", variant: "success" }),
     );
@@ -233,16 +248,22 @@ describe("UserDetailsPage Component", () => {
       expect(screen.getByTestId("role-row-role-1")).toBeInTheDocument();
     });
 
-    const deleteBtn = screen.getByRole("button", { name: /delete administrator/i });
+    const deleteBtn = screen.getByRole("button", {
+      name: /delete administrator/i,
+    });
     await user.click(deleteBtn);
 
     expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
-    expect(screen.getByText("Are you sure you want to remove the user role?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to remove the user role?"),
+    ).toBeInTheDocument();
 
     const confirmBtn = screen.getByRole("button", { name: /confirm action/i });
     await user.click(confirmBtn);
 
-    expect(mockPushToast).toHaveBeenCalledWith(expect.objectContaining({ title: "Role delete" }));
+    expect(mockPushToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Role delete" }),
+    );
     await waitFor(() => {
       expect(deleteUserRoleCalled).toBe(1);
     });

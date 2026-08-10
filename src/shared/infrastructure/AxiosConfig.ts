@@ -1,8 +1,9 @@
-import axios, { AxiosInstance } from "axios";
-import { NavigateFunction } from "react-router-dom";
+import axios, {
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import type { NavigateFunction } from "react-router-dom";
 import { AppConfig } from "./AppConfig";
-
-import { InternalAxiosRequestConfig } from "axios";
 
 const authInterceptor = (config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem("authToken");
@@ -54,7 +55,9 @@ export const setupAxiosInterceptors = (
           currentHash.includes("/sign-up");
 
         if (!isPublicRoute) {
-          navigate(`/login?errorMessage=${error.response?.data?.message || ""}`);
+          navigate(
+            `/login?errorMessage=${error.response?.data?.message || ""}`,
+          );
         }
       }
 

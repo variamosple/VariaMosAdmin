@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RoleFormModal } from "./index";
-import { Role } from "@/features/role-management/domain/Entity/Role";
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
@@ -41,7 +41,9 @@ describe("RoleFormModal Component", () => {
     expect(screen.getByText("Create New Role")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Role name")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Cancel/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Create role/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Create role/i }),
+    ).toBeInTheDocument();
   });
 
   it("does not render when showModal is false", () => {
@@ -88,7 +90,9 @@ describe("RoleFormModal Component", () => {
 
     await user.click(screen.getByRole("button", { name: /Create role/i }));
 
-    expect(await screen.findByText("Role name is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Role name is required"),
+    ).toBeInTheDocument();
     expect(mockOnRoleSubmit).not.toHaveBeenCalled();
   });
 
@@ -111,7 +115,9 @@ describe("RoleFormModal Component", () => {
     await user.click(screen.getByRole("button", { name: /Create role/i }));
 
     await waitFor(() => {
-      expect(mockOnRoleSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: "Manager" }));
+      expect(mockOnRoleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "Manager" }),
+      );
     });
   });
 

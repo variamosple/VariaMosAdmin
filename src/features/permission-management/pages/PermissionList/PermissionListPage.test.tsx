@@ -1,10 +1,10 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PermissionListPage } from "./index";
+import { HttpResponse, http } from "msw";
+import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { PermissionListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
@@ -77,7 +77,9 @@ describe("PermissionListPage Integration", () => {
         return HttpResponse.json({ data: { id: 3, name: "NEW_PERM" } });
       }),
       http.put("*/v1/permissions/:id", () => {
-        return HttpResponse.json({ data: { id: 1, name: "READ_PRIVILEGES_EDITED" } });
+        return HttpResponse.json({
+          data: { id: 1, name: "READ_PRIVILEGES_EDITED" },
+        });
       }),
       http.delete("*/v1/permissions/:id", () => {
         return HttpResponse.json({ data: null });
@@ -104,7 +106,9 @@ describe("PermissionListPage Integration", () => {
     renderWithProviders(<PermissionListPage />);
     expect(await screen.findByText("READ_PRIVILEGES")).toBeInTheDocument();
 
-    const createBtn = screen.getByRole("button", { name: /create permission/i });
+    const createBtn = screen.getByRole("button", {
+      name: /create permission/i,
+    });
     await user.click(createBtn);
 
     // Modal should be visible
@@ -115,7 +119,9 @@ describe("PermissionListPage Integration", () => {
     await user.type(input, "NEW_PERM");
 
     // Click submit
-    const submitBtns = screen.getAllByRole("button", { name: "Create Permission" });
+    const submitBtns = screen.getAllByRole("button", {
+      name: "Create Permission",
+    });
     await user.click(submitBtns[submitBtns.length - 1]);
 
     // Verify modal closes
@@ -142,7 +148,9 @@ describe("PermissionListPage Integration", () => {
     await user.type(input, "READ_PRIVILEGES_EDITED");
 
     // Click submit inside the modal
-    const editRoleButtons = screen.getAllByRole("button", { name: /edit permission/i });
+    const editRoleButtons = screen.getAllByRole("button", {
+      name: /edit permission/i,
+    });
     await user.click(editRoleButtons[editRoleButtons.length - 1]);
 
     // Verify modal closes
@@ -161,7 +169,9 @@ describe("PermissionListPage Integration", () => {
     await user.click(deleteButtons[1]);
 
     // Confirmation modal should be visible
-    expect(screen.getByText("Are you sure you want to delete the permission?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to delete the permission?"),
+    ).toBeInTheDocument();
 
     // Click Accept to confirm
     await user.click(screen.getByRole("button", { name: "Accept" }));
@@ -182,7 +192,9 @@ describe("PermissionListPage Integration", () => {
     );
 
     renderWithProviders(<PermissionListPage />);
-    expect(screen.getByRole("heading", { name: "Permissions list" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Permissions list" }),
+    ).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.queryByText("READ_PRIVILEGES")).not.toBeInTheDocument();
@@ -202,8 +214,12 @@ describe("PermissionListPage Integration", () => {
     );
 
     renderWithProviders(<PermissionListPage />);
-    expect(await screen.findByText("Permission query error")).toBeInTheDocument();
-    expect(screen.getByText("Network/communication error.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Permission query error"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Network/communication error."),
+    ).toBeInTheDocument();
     consoleSpy.mockRestore();
   });
 });

@@ -1,10 +1,15 @@
-import React, { useContext } from "react";
-import { render, screen, act } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useContext } from "react";
 import "@testing-library/jest-dom";
+import { Events, RouterContext } from "@variamosple/variamos-components";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { RouterProvider } from "./RouterContext";
-import { RouterContext, Events } from "@variamosple/variamos-components";
-import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 
 // Initialize a global listener array that doesn't suffer from lexical hoisting ReferenceErrors
 let mockNavigateListeners: any[] = [];
@@ -24,15 +29,18 @@ vi.mock("@variamosple/variamos-components", async () => {
   return {
     RouterContext: ReactContext,
     Events: {
-      subscribe: vi.fn((event: string, callback: Function) => {
+      subscribe: vi.fn((_event: string, callback: Function) => {
         mockNavigateListeners.push(callback);
       }),
-      unsubscribe: vi.fn((event: string, callback: Function) => {
-        mockNavigateListeners = mockNavigateListeners.filter((cb: any) => cb !== callback);
+      unsubscribe: vi.fn((_event: string, callback: Function) => {
+        mockNavigateListeners = mockNavigateListeners.filter(
+          (cb: any) => cb !== callback,
+        );
       }),
     },
     getBasePath: () => "/vms",
-    isAbsoluteUrl: (url: string) => url.startsWith("http://") || url.startsWith("https://"),
+    isAbsoluteUrl: (url: string) =>
+      url.startsWith("http://") || url.startsWith("https://"),
   };
 });
 
@@ -71,18 +79,26 @@ describe("RouterContext & RouterProvider", () => {
     vi.clearAllMocks();
     mockNavigateListeners = [];
 
-    (Events.subscribe as import('vitest').Mock).mockImplementation((event: string, callback: Function) => {
-      mockNavigateListeners.push(callback);
-    });
+    (Events.subscribe as import("vitest").Mock).mockImplementation(
+      (_event: string, callback: Function) => {
+        mockNavigateListeners.push(callback);
+      },
+    );
 
-    (Events.unsubscribe as import('vitest').Mock).mockImplementation((event: string, callback: Function) => {
-      mockNavigateListeners = mockNavigateListeners.filter((cb: any) => cb !== callback);
-    });
+    (Events.unsubscribe as import("vitest").Mock).mockImplementation(
+      (_event: string, callback: Function) => {
+        mockNavigateListeners = mockNavigateListeners.filter(
+          (cb: any) => cb !== callback,
+        );
+      },
+    );
 
-    (useNavigate as import('vitest').Mock).mockReturnValue(mockNavigate);
-    (useLocation as import('vitest').Mock).mockReturnValue(mockLocation);
-    (useParams as import('vitest').Mock).mockReturnValue(mockParams);
-    (useSearchParams as import('vitest').Mock).mockReturnValue(mockSearchParams);
+    (useNavigate as import("vitest").Mock).mockReturnValue(mockNavigate);
+    (useLocation as import("vitest").Mock).mockReturnValue(mockLocation);
+    (useParams as import("vitest").Mock).mockReturnValue(mockParams);
+    (useSearchParams as import("vitest").Mock).mockReturnValue(
+      mockSearchParams,
+    );
 
     originalWindowOpen = window.open;
     window.open = vi.fn();
@@ -142,14 +158,17 @@ describe("RouterContext & RouterProvider", () => {
       </RouterProvider>,
     );
 
-    expect(Events.subscribe).toHaveBeenCalledWith("variamosNavigate", expect.any(Function));
+    expect(Events.subscribe).toHaveBeenCalledWith(
+      "variamosNavigate",
+      expect.any(Function),
+    );
 
     // Trigger event using the global listeners list
     act(() => {
       mockNavigateListeners.forEach((cb: any) => {
         try {
           cb({ detail: "/somewhere-else" });
-        } catch (err) {
+        } catch (_err) {
           // ignore or handle
         }
       });
@@ -158,6 +177,9 @@ describe("RouterContext & RouterProvider", () => {
 
     // Unmount
     unmount();
-    expect(Events.unsubscribe).toHaveBeenCalledWith("variamosNavigate", expect.any(Function));
+    expect(Events.unsubscribe).toHaveBeenCalledWith(
+      "variamosNavigate",
+      expect.any(Function),
+    );
   });
 });

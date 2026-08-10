@@ -29,6 +29,9 @@ services:
       - COOKIE_DOMAIN=localhost
       - SECURE_COOKIE=false
       - DOCKER_SOCKET_PATH=/var/run/docker.sock
+      - LOGIN_REDIRECT_URI=http://localhost:3000/variamos_admin/#/login
+      - HOME_REDIRECT_URI=http://localhost:3000/variamos_admin/
+      - ADMIN_HOME_URI=http://localhost:3000/variamos_admin
     user: root
 
   variamos-ms-languages:

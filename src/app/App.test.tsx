@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import App from "./App";
@@ -13,11 +12,16 @@ vi.mock("@variamosple/variamos-components", async () => {
     SessionProvider: ({ children }: any) => (
       <div data-testid="mock-session-provider">{children}</div>
     ),
-    AuthWrapper: ({ children }: any) => <div data-testid="mock-auth-wrapper">{children}</div>,
-    ProtectedRoute: ({ children }: any) => <div data-testid="mock-protected-route">{children}</div>,
+    AuthWrapper: ({ children }: any) => (
+      <div data-testid="mock-auth-wrapper">{children}</div>
+    ),
+    ProtectedRoute: ({ children }: any) => (
+      <div data-testid="mock-protected-route">{children}</div>
+    ),
     RouterContext: React.createContext(null),
     getBasePath: () => "/vms",
-    isAbsoluteUrl: (url: string) => url.startsWith("http://") || url.startsWith("https://"),
+    isAbsoluteUrl: (url: string) =>
+      url.startsWith("http://") || url.startsWith("https://"),
     Events: {
       subscribe: vi.fn(),
       unsubscribe: vi.fn(),
@@ -74,6 +78,8 @@ describe("App Component", () => {
     expect(screen.getByTestId("mock-session-provider")).toBeInTheDocument();
 
     // The default route is "/" which maps to our mock element
-    expect(screen.getByTestId("mock-home-page")).toHaveTextContent("HomePage Content");
+    expect(screen.getByTestId("mock-home-page")).toHaveTextContent(
+      "HomePage Content",
+    );
   });
 });

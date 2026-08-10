@@ -4,8 +4,19 @@ import {
   isAbsoluteUrl,
   RouterContext,
 } from "@variamosple/variamos-components";
-import { FC, ReactNode, useCallback, useEffect, useMemo } from "react";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  type FC,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 
 export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const navigate = useNavigate();

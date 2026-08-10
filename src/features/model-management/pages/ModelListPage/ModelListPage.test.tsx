@@ -1,8 +1,8 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ModelListPage } from "./index";
+import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
+import { ModelListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
@@ -67,21 +67,24 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 // Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-vi.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", async () => {
-  return {
-    __esModule: true,
-    default: ({ show, message, onConfirm, onCancel }: any) => {
-      if (!show) return null;
-      return (
-        <div data-testid="delete-confirm-modal">
-          <span>{message}</span>
-          <button onClick={onConfirm}>Confirm Delete</button>
-          <button onClick={onCancel}>Cancel Delete</button>
-        </div>
-      );
-    },
-  };
-});
+vi.mock(
+  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
+  async () => {
+    return {
+      __esModule: true,
+      default: ({ show, message, onConfirm, onCancel }: any) => {
+        if (!show) return null;
+        return (
+          <div data-testid="delete-confirm-modal">
+            <span>{message}</span>
+            <button onClick={onConfirm}>Confirm Delete</button>
+            <button onClick={onCancel}>Cancel Delete</button>
+          </div>
+        );
+      },
+    };
+  },
+);
 
 describe("ModelListPage Integration", () => {
   beforeEach(() => {
@@ -120,7 +123,9 @@ describe("ModelListPage Integration", () => {
     await user.type(input, "Model One Edited");
 
     // Click submit inside the modal
-    const editModelButtons = screen.getAllByRole("button", { name: /edit model/i });
+    const editModelButtons = screen.getAllByRole("button", {
+      name: /edit model/i,
+    });
     await user.click(editModelButtons[editModelButtons.length - 1]);
 
     // Verify modal closes

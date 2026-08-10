@@ -1,6 +1,6 @@
-import { type FC } from "react";
-import { useForm } from "react-hook-form";
+import type { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
+import { useForm } from "react-hook-form";
 
 interface FormData {
   email: string;
@@ -31,9 +31,15 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
   };
 
   return (
-    <Form className="login-form w-100" data-bs-theme="dark" onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      className="login-form w-100"
+      data-bs-theme="dark"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Form.Group className="w-100" controlId="email">
-        <Form.Label className="form-label align-self-start m-0">Email Address</Form.Label>
+        <Form.Label className="form-label align-self-start m-0">
+          Email Address
+        </Form.Label>
         <Form.Control
           type="email"
           className="form-control"
@@ -41,7 +47,9 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
           {...register("email", { required: "Email is required" })}
           isInvalid={!!errors.email}
         />
-        <Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">
+          {errors.email?.message}
+        </Form.Control.Feedback>
       </Form.Group>
 
       <Button

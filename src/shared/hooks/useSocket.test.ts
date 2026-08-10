@@ -1,9 +1,9 @@
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { useSocket } from "./useSocket";
 
 describe("useSocket Hook", () => {
   let mockWebSocket: any;
-  let mockSocketFunction: import('vitest').Mock;
+  let mockSocketFunction: import("vitest").Mock;
 
   beforeEach(() => {
     mockWebSocket = {
@@ -20,7 +20,9 @@ describe("useSocket Hook", () => {
   });
 
   it("should connect on mount if connectOnMount is true and close on unmount", () => {
-    const { result, unmount } = renderHook(() => useSocket(mockSocketFunction, true));
+    const { result, unmount } = renderHook(() =>
+      useSocket(mockSocketFunction, true),
+    );
 
     expect(result.current.socket).toBe(mockWebSocket);
     expect(mockSocketFunction).toHaveBeenCalledTimes(1);

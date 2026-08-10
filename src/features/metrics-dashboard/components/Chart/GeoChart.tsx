@@ -1,15 +1,16 @@
-import { Metric } from "../../domain/Entity/Metric";
-import { useGeoChartData } from "../../hooks/useGeoChartData";
-import { FC } from "react";
+import type { FC } from "react";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
 import { Chart } from "react-google-charts";
+import type { Metric } from "../../domain/Entity/Metric";
+import { useGeoChartData } from "../../hooks/useGeoChartData";
 
 export interface GeoChartProps {
   metric: Metric;
 }
 
 export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
-  const { activeFilter, data, options, filterOptions, setFilter } = useGeoChartData(metric);
+  const { activeFilter, data, options, filterOptions, setFilter } =
+    useGeoChartData(metric);
 
   return (
     <div className="d-flex flex-column align-items-center w-100 mb-4">

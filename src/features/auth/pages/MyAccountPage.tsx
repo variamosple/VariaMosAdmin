@@ -1,12 +1,16 @@
-import { getMyAccount, updatePersonalInformation, updateUserPassword } from "../api/AuthRepository";
-import { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
-import { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
-import { User } from "@/features/user-management/domain/Entity/User";
 import { withPageVisit } from "@variamosple/variamos-components";
-import { FC, useEffect, useMemo, useState } from "react";
+import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
-import { PasswordUpdateForm } from "../components/PasswordUpdateForm";
 import { PersonalInformationUpdateForModal } from "@/features/user-management/components/UserInformationUpdateFormModal";
+import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
+import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
+import type { User } from "@/features/user-management/domain/Entity/User";
+import {
+  getMyAccount,
+  updatePersonalInformation,
+  updateUserPassword,
+} from "../api/AuthRepository";
+import { PasswordUpdateForm } from "../components/PasswordUpdateForm";
 
 const MyAccountPageComponent: FC<unknown> = () => {
   const [user, setUser] = useState<User>();
@@ -22,18 +26,18 @@ const MyAccountPageComponent: FC<unknown> = () => {
     [user],
   );
 
-  const queryUser = () => {
+  const queryUser = useCallback(() => {
     setIsLoading(true);
     getMyAccount()
       .then((response) => {
         setUser(response.data);
       })
       .finally(() => setIsLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     queryUser();
-  }, []);
+  }, [queryUser]);
 
   const onPasswordUpdate = (passwordUpdate: PasswordUpdate) => {
     setIsUpdatingPassword(true);
@@ -50,7 +54,9 @@ const MyAccountPageComponent: FC<unknown> = () => {
       });
   };
 
-  const onPersonalInformationUpdate = (information: PersonalInformationUpdate) => {
+  const onPersonalInformationUpdate = (
+    information: PersonalInformationUpdate,
+  ) => {
     setIsUpdatingInformation(true);
     return updatePersonalInformation(information)
       .then((response) => {
@@ -70,7 +76,11 @@ const MyAccountPageComponent: FC<unknown> = () => {
     return (
       <Container fluid="sm" className="my-2">
         <div className="w-100 text-center my-3">
-          <Spinner data-testid="loading-spinner" animation="border" variant="primary" />
+          <Spinner
+            data-testid="loading-spinner"
+            animation="border"
+            variant="primary"
+          />
         </div>
       </Container>
     );
@@ -82,7 +92,9 @@ const MyAccountPageComponent: FC<unknown> = () => {
         <h1 className="mb-0">My account</h1>
 
         <div>
-          <Button onClick={() => setShowInformationUpdate(true)}>Edit information</Button>
+          <Button onClick={() => setShowInformationUpdate(true)}>
+            Edit information
+          </Button>
         </div>
       </div>
 
@@ -106,7 +118,8 @@ const MyAccountPageComponent: FC<unknown> = () => {
         </Col>
 
         <Col className="col-12 col-md-6">
-          <span className="fw-bold">Password: </span> <span className="text-muted">********</span>
+          <span className="fw-bold">Password: </span>{" "}
+          <span className="text-muted">********</span>
           <Button
             className="ms-1"
             variant="primary"

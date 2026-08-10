@@ -1,9 +1,15 @@
-import { queryMetric } from "../api/MetricsRepository";
-import { Metric } from "../domain/Entity/Metric";
-import { MetricsFilter } from "../domain/Entity/MetricsFilter";
-import { ResponseModel } from "@variamosple/variamos-components";
-import { createContext, FC, useCallback, useContext, useState } from "react";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import {
+  createContext,
+  type FC,
+  useCallback,
+  useContext,
+  useState,
+} from "react";
 import { useToast } from "@/shared/context/ToastContext";
+import { queryMetric } from "../api/MetricsRepository";
+import type { Metric } from "../domain/Entity/Metric";
+import { MetricsFilter } from "../domain/Entity/MetricsFilter";
 
 export interface ChartDateFormProperties {
   fromDate: string;
@@ -18,7 +24,9 @@ interface IChartContext {
   metric: Metric;
   chartFilter: ChartDateFormProperties;
   isLoading: boolean;
-  filterChartData: (chartFilter: ChartDateFormProperties) => Promise<ResponseModel<Metric>>;
+  filterChartData: (
+    chartFilter: ChartDateFormProperties,
+  ) => Promise<ResponseModel<Metric>>;
 }
 
 const ChartContext = createContext<IChartContext | undefined>(undefined);
@@ -28,7 +36,10 @@ interface ChartContextProviderProps {
   children: React.ReactNode;
 }
 
-export const ChartContextProvider: FC<ChartContextProviderProps> = ({ metric, children }) => {
+export const ChartContextProvider: FC<ChartContextProviderProps> = ({
+  metric,
+  children,
+}) => {
   const { pushToast } = useToast();
   const [currentMetric, setCurrentMetric] = useState(metric);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +53,9 @@ export const ChartContextProvider: FC<ChartContextProviderProps> = ({ metric, ch
       setIsLoading(true);
       setChartFilter(chartFilter);
 
-      return queryMetric(new MetricsFilter(metric.id, chartFilter.fromDate, chartFilter.toDate))
+      return queryMetric(
+        new MetricsFilter(metric.id, chartFilter.fromDate, chartFilter.toDate),
+      )
         .then((response) => {
           if (response.errorCode) {
             pushToast({
@@ -82,7 +95,9 @@ export const ChartContextProvider: FC<ChartContextProviderProps> = ({ metric, ch
 export const useChartContext = () => {
   const context = useContext(ChartContext);
   if (!context) {
-    throw new Error("useChartContext must be used within a ChartContextProvider");
+    throw new Error(
+      "useChartContext must be used within a ChartContextProvider",
+    );
   }
   return context;
 };

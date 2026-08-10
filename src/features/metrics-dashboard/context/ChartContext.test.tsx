@@ -1,10 +1,9 @@
-import React from "react";
-import { render, screen, act, waitFor } from "@testing-library/react";
-import { ChartContextProvider, useChartContext } from "./ChartContext";
-import { Metric } from "../domain/Entity/Metric";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import type { Metric } from "../domain/Entity/Metric";
+import { ChartContextProvider, useChartContext } from "./ChartContext";
 
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
@@ -53,7 +52,11 @@ const TestComponent = () => {
       <span data-testid="title">{metric.title}</span>
       <span data-testid="loading">{isLoading ? "loading" : "idle"}</span>
       <span data-testid="filter-from">{chartFilter.fromDate}</span>
-      <button onClick={() => filterChartData({ fromDate: "2026-01-01", toDate: "2026-01-10" })}>
+      <button
+        onClick={() =>
+          filterChartData({ fromDate: "2026-01-01", toDate: "2026-01-10" })
+        }
+      >
         Filter
       </button>
     </div>
@@ -66,7 +69,7 @@ describe("ChartContext", () => {
   });
 
   it("should throw error when useChartContext is used outside ChartContextProvider", () => {
-    // Suppress console.error in jest output for this test block
+    // Suppress console.error in vi output for this test block
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<TestComponent />)).toThrow(
       "useChartContext must be used within a ChartContextProvider",
@@ -87,7 +90,10 @@ describe("ChartContext", () => {
   });
 
   it("should filter chart data and update context metric upon successful API query", async () => {
-    const updatedMetric: Metric = { ...mockMetric, title: "Updated Visits Chart" };
+    const updatedMetric: Metric = {
+      ...mockMetric,
+      title: "Updated Visits Chart",
+    };
     let queryMetricParams: any = null;
 
     server.use(
@@ -110,7 +116,9 @@ describe("ChartContext", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId("title").textContent).toBe("Updated Visits Chart");
+      expect(screen.getByTestId("title").textContent).toBe(
+        "Updated Visits Chart",
+      );
     });
 
     expect(queryMetricParams?.get("id")).toBe("metric-1");

@@ -1,11 +1,9 @@
 import "@testing-library/jest-dom";
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ModelSearchForm } from "./index";
-
 // Wrapper helper to use act in newer React Testing Library setups
 import { act } from "react";
+import { ModelSearchForm } from "./index";
 
 // Mock @variamosple/variamos-components before any other imports that might use it
 vi.mock("@variamosple/variamos-components", async () => {
@@ -27,7 +25,7 @@ describe("ModelSearchForm Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
@@ -44,7 +42,9 @@ describe("ModelSearchForm Component", () => {
     );
 
     expect(screen.getByLabelText("Name")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Search by model name or project name")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Search by model name or project name"),
+    ).toBeInTheDocument();
     expect(screen.getByTitle("Clear results")).toBeInTheDocument();
   });
 
@@ -69,8 +69,13 @@ describe("ModelSearchForm Component", () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText("Search by model name or project name");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const input = screen.getByPlaceholderText(
+      "Search by model name or project name",
+    );
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(input, "Test Query");
     expect(input).toHaveValue("Test Query");
 
@@ -90,10 +95,15 @@ describe("ModelSearchForm Component", () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText("Search by model name or project name");
+    const input = screen.getByPlaceholderText(
+      "Search by model name or project name",
+    );
 
     // Change input
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(input, "A");
     // Fast-forward 200ms
     act(() => {
@@ -115,7 +125,9 @@ describe("ModelSearchForm Component", () => {
     });
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: "AB" }));
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "AB" }),
+      );
     });
   });
 });

@@ -1,9 +1,8 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { PersonalInformationUpdateForModal } from "./index";
 import { useQuery } from "@variamosple/variamos-components";
+import { PersonalInformationUpdateForModal } from "./index";
 
 // Mock @variamosple/variamos-components completely
 vi.mock("@variamosple/variamos-components", async () => {
@@ -21,7 +20,7 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 describe("PersonalInformationUpdateForModal Component", () => {
-  const useQueryMock = useQuery as import('vitest').Mock;
+  const useQueryMock = useQuery as import("vitest").Mock;
   const mockLoadData = vi.fn();
   const mockOnSubmit = vi.fn();
   const mockOnClose = vi.fn();
@@ -111,7 +110,9 @@ describe("PersonalInformationUpdateForModal Component", () => {
       />,
     );
 
-    const select = screen.getByRole("combobox", { name: /select your country/i });
+    const select = screen.getByRole("combobox", {
+      name: /select your country/i,
+    });
     expect(select).toBeInTheDocument();
     expect(select).toHaveValue("US");
 
@@ -121,10 +122,14 @@ describe("PersonalInformationUpdateForModal Component", () => {
     expect(select).toHaveValue("CO");
 
     // Submit
-    fireEvent.submit(screen.getByRole("button", { name: /update information/i }));
+    fireEvent.submit(
+      screen.getByRole("button", { name: /update information/i }),
+    );
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({ countryCode: "CO" }));
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ countryCode: "CO" }),
+      );
     });
   });
 

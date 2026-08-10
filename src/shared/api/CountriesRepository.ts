@@ -1,7 +1,7 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { Country } from "@/shared/domain/Entity/Country";
+import type { Country } from "@/shared/domain/Entity/Country";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryCountries = (): Promise<ResponseModel<Country[]>> => {
@@ -13,12 +13,12 @@ export const queryCountries = (): Promise<ResponseModel<Country[]>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

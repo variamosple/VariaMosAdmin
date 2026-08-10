@@ -1,10 +1,10 @@
-import ConfirmationModal from "@/shared/components/ConfirmationModal";
-import { RoleFormModal } from "@/features/role-management/components/RoleFormModal";
-import { RoleList } from "../../components/RoleList";
-import { SearchForm } from "@/shared/components/SearchForm";
 import { withPageVisit } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Button, Container } from "react-bootstrap";
+import { RoleFormModal } from "@/features/role-management/components/RoleFormModal";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { SearchForm } from "@/shared/components/SearchForm";
+import { RoleList } from "../../components/RoleList";
 import { useRoleList } from "../../hooks/useRoleList";
 
 const RoleListPageComponent: FC<unknown> = () => {

@@ -1,7 +1,7 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { LineChart } from "./LineChart";
+
 // Mock the ChartContext hook and wrapper
 const mockUseChartContext = {
   metric: {
@@ -13,7 +13,9 @@ const mockUseChartContext = {
 
 vi.mock("../../context/ChartContext", async () => ({
   useChartContext: () => mockUseChartContext,
-  withChartContextWrapper: (Component: any) => (props: any) => <Component {...props} />,
+  withChartContextWrapper: (Component: any) => (props: any) => (
+    <Component {...props} />
+  ),
 }));
 
 // Mock the useLineChartData hook
@@ -42,7 +44,9 @@ vi.mock("react-google-charts", async () => ({
 
 // Mock ChartDateFilter component
 vi.mock("./ChartDateFilter", async () => ({
-  ChartDateFilter: ({ id }: any) => <div data-testid="mock-date-filter">Filter: {id}</div>,
+  ChartDateFilter: ({ id }: any) => (
+    <div data-testid="mock-date-filter">Filter: {id}</div>
+  ),
 }));
 
 describe("LineChart Component", () => {
@@ -64,7 +68,9 @@ describe("LineChart Component", () => {
     render(<LineChart metric={dummyMetric} />);
 
     expect(screen.getByText("Project Signups")).toBeInTheDocument();
-    expect(screen.getByTestId("mock-date-filter")).toHaveTextContent("Filter: Project Signups");
+    expect(screen.getByTestId("mock-date-filter")).toHaveTextContent(
+      "Filter: Project Signups",
+    );
   });
 
   it("shows Spinner when isLoading is true", () => {

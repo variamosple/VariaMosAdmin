@@ -1,7 +1,6 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import type { Metric } from "../../domain/Entity/Metric";
 import { ChartComponent } from "./index";
-import { Metric } from "../../domain/Entity/Metric";
 
 // Mock google charts to prevent errors during rendering in test environment
 vi.mock("react-google-charts", async () => {

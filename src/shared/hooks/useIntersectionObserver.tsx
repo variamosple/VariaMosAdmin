@@ -1,4 +1,10 @@
-import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 
 const useIntersectionObserver = (
   isDataLoading: boolean,

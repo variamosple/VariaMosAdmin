@@ -1,8 +1,7 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import { MetricsPage } from "./MetricsPage";
+import { HttpResponse, http } from "msw";
 import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { MetricsPage } from "./MetricsPage";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
@@ -26,8 +25,8 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 // Mock react-bootstrap Spinner to have a reliable test ID
-vi.mock("react-bootstrap", async () => {
-  const original = await vi.importActual("react-bootstrap");
+vi.mock("react-bootstrap", async (importOriginal) => {
+  const original = await importOriginal<typeof import("react-bootstrap")>();
   return {
     ...original,
     Spinner: () => <div data-testid="loading-spinner">Spinner</div>,
@@ -36,13 +35,16 @@ vi.mock("react-bootstrap", async () => {
 
 // Mock ChartComponent to avoid complex sub-renders
 vi.mock("../components/Chart", async () => ({
-  ChartComponent: ({ metric }: any) => <div data-testid="chart-comp">{metric.title}</div>,
+  ChartComponent: ({ metric }: any) => (
+    <div data-testid="chart-comp">{metric.title}</div>
+  ),
 }));
 
 describe("MetricsPage", () => {
   it("renders the spinner while metrics are loading, then displays chart components", async () => {
     server.use(
-      http.get("*/v1/metrics", () => {
+      http.get("*/v1/metrics", async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
         return HttpResponse.json({
           data: [
             { title: "Metric One", type: "line" },

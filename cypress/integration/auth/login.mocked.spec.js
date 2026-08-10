@@ -112,7 +112,7 @@ describe("Auth - Login Mocked Flows", () => {
     cy.wait("@sessionInfo");
 
     // Check redirection to the dashboard
-    cy.url().should("eq", "http://localhost:3000/");
+    cy.url().should("eq", "http://localhost:3000/#/");
   });
 
   it("should allow navigating to forgot password, validate empty input, and show success message on submit (mocked)", () => {

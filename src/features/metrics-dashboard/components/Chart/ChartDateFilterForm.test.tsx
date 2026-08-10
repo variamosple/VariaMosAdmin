@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ChartDateFilterForm } from "./ChartDateFilterForm";
@@ -42,7 +41,9 @@ describe("ChartDateFilterForm Component", () => {
     const submitBtn = screen.getByText("Apply");
     await user.click(submitBtn);
 
-    expect(await screen.findByText("From date is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("From date is required"),
+    ).toBeInTheDocument();
     expect(await screen.findByText("To date is required")).toBeInTheDocument();
     expect(mockFilterSubmit).not.toHaveBeenCalled();
   });

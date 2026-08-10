@@ -1,11 +1,13 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 
-import { Model } from "@/features/model-management/domain/Entity/Model";
-import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
+import type { Model } from "@/features/model-management/domain/Entity/Model";
+import type { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
 import { PROJECTS_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
-export const queryModels = (filter: ModelsFilter): Promise<ResponseModel<Model[]>> => {
+export const queryModels = (
+  filter: ModelsFilter,
+): Promise<ResponseModel<Model[]>> => {
   return PROJECTS_CLIENT.get("/v1/admin/models", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -14,12 +16,12 @@ export const queryModels = (filter: ModelsFilter): Promise<ResponseModel<Model[]
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -42,12 +44,12 @@ export const deleteModel = (modelId: string): Promise<ResponseModel<void>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -99,12 +101,12 @@ export const updateModel = (request: Model): Promise<ResponseModel<Model>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

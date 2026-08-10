@@ -1,10 +1,12 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { User } from "../domain/Entity/User";
-import { UsersFilter } from "../domain/Entity/UsersFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { User } from "../domain/Entity/User";
+import type { UsersFilter } from "../domain/Entity/UsersFilter";
 
-export const queryUsers = (filter: UsersFilter): Promise<ResponseModel<User[]>> => {
+export const queryUsers = (
+  filter: UsersFilter,
+): Promise<ResponseModel<User[]>> => {
   return ADMIN_CLIENT.get("/v1/users", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -13,12 +15,12 @@ export const queryUsers = (filter: UsersFilter): Promise<ResponseModel<User[]>> 
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -41,12 +43,12 @@ export const queryUserById = (userId: string): Promise<ResponseModel<User>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

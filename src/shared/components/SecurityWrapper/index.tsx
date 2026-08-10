@@ -1,6 +1,9 @@
-import { ADMIN_CLIENT, setupAxiosInterceptors } from "@/shared/infrastructure/AxiosConfig";
-import { FC, useEffect } from "react";
+import { type FC, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  ADMIN_CLIENT,
+  setupAxiosInterceptors,
+} from "@/shared/infrastructure/AxiosConfig";
 
 export interface SecurityWrapperProps {
   children?: React.ReactNode;

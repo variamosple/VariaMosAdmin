@@ -1,14 +1,14 @@
+import { usePaginatedQuery } from "@variamosple/variamos-components";
+import { useEffect, useState } from "react";
 import {
   deleteUser,
   disableUser,
   enableUser,
   queryUsers,
 } from "@/features/user-management/api/UserRepository";
-import { User } from "@/features/user-management/domain/Entity/User";
+import type { User } from "@/features/user-management/domain/Entity/User";
 import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
 import { useToast } from "@/shared/context/ToastContext";
-import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
 
 export const useUserList = () => {
   const [showResetLink, setShowResetLink] = useState(false);

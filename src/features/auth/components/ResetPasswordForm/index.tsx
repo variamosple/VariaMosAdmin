@@ -1,6 +1,6 @@
-import { type FC } from "react";
-import { useForm } from "react-hook-form";
+import type { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
+import { useForm } from "react-hook-form";
 import { PASSWORD_REGEXP } from "@/shared/constants";
 
 interface FormData {
@@ -41,9 +41,15 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
   };
 
   return (
-    <Form className="login-form w-100" data-bs-theme="dark" onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      className="login-form w-100"
+      data-bs-theme="dark"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Form.Group className="w-100 mb-3" controlId="new_password">
-        <Form.Label className="form-label align-self-start m-0">New Password</Form.Label>
+        <Form.Label className="form-label align-self-start m-0">
+          New Password
+        </Form.Label>
         <Form.Control
           type="password"
           className="form-control"
@@ -58,11 +64,15 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
           })}
           isInvalid={!!errors.new_password}
         />
-        <Form.Control.Feedback type="invalid">{errors.new_password?.message}</Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">
+          {errors.new_password?.message}
+        </Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="w-100 mb-3" controlId="confirm_password">
-        <Form.Label className="form-label align-self-start m-0">Confirm Password</Form.Label>
+        <Form.Label className="form-label align-self-start m-0">
+          Confirm Password
+        </Form.Label>
         <Form.Control
           type="password"
           className="form-control"
@@ -82,7 +92,9 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
         className="w-100"
         variant="primary"
         type="submit"
-        disabled={!!errors.new_password || !!errors.confirm_password || isLoading}
+        disabled={
+          !!errors.new_password || !!errors.confirm_password || isLoading
+        }
       >
         {isLoading ? (
           <>

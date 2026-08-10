@@ -1,8 +1,7 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { InfiniteSelect } from "./index";
-import { SelectOptionProps } from "./index.types";
+import type { SelectOptionProps } from "./index.types";
 
 const mockOptions: SelectOptionProps<string>[] = [
   { label: "Option 1", value: "val-1" },
@@ -74,7 +73,10 @@ describe("InfiniteSelect Component", () => {
     const optionBtn = screen.getByText("Option 2");
     await user.click(optionBtn);
 
-    expect(mockHandleSelect).toHaveBeenCalledWith({ label: "Option 2", value: "val-2" });
+    expect(mockHandleSelect).toHaveBeenCalledWith({
+      label: "Option 2",
+      value: "val-2",
+    });
     // Verify dropdown was closed
     expect(screen.queryByText("Option 1")).toBeNull();
   });

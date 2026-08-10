@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -17,7 +16,9 @@ vi.mock("./ChartDateFilterForm", async () => ({
     <div>
       <button
         data-testid="mock-submit-btn"
-        onClick={() => onFilterSubmit({ startDate: "2026-01-01", endDate: "2026-01-10" })}
+        onClick={() =>
+          onFilterSubmit({ startDate: "2026-01-01", endDate: "2026-01-10" })
+        }
       >
         Submit Filter
       </button>

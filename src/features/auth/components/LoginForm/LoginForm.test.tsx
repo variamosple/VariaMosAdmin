@@ -1,11 +1,9 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { LoginForm } from "./index";
 import { useSession } from "@variamosple/variamos-components";
-
 import { MemoryRouter } from "react-router-dom";
+import { LoginForm } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => ({
@@ -18,7 +16,7 @@ describe("LoginForm Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useSession as import('vitest').Mock).mockReturnValue({
+    (useSession as import("vitest").Mock).mockReturnValue({
       isLoading: false,
     });
   });
@@ -34,7 +32,9 @@ describe("LoginForm Component", () => {
     renderLoginForm();
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Forgot Password?")).toBeInTheDocument();
   });
 
@@ -53,7 +53,10 @@ describe("LoginForm Component", () => {
     renderLoginForm();
 
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
     await user.type(screen.getByLabelText(/password/i), "password123");
 
     await user.click(screen.getByRole("button", { name: /sign in/i }));
@@ -67,13 +70,15 @@ describe("LoginForm Component", () => {
   });
 
   it("disables submit button and shows loading spinner when session is loading", () => {
-    (useSession as import('vitest').Mock).mockReturnValue({
+    (useSession as import("vitest").Mock).mockReturnValue({
       isLoading: true,
     });
     renderLoginForm();
 
     const submitBtn = screen.getByRole("button");
     expect(submitBtn).toBeDisabled();
-    expect(screen.queryByRole("button", { name: /sign in/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /sign in/i }),
+    ).not.toBeInTheDocument();
   });
 });

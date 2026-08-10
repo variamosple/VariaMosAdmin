@@ -1,2 +1,2 @@
-export { RoleListPage } from "./pages/RoleList";
 export { RoleDetailsPage } from "./pages/RoleDetails";
+export { RoleListPage } from "./pages/RoleList";

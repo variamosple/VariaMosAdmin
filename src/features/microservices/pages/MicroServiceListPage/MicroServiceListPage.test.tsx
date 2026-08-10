@@ -1,10 +1,10 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MicroServiceListPage } from "./index";
+import { HttpResponse, http } from "msw";
+import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { MicroServiceListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
@@ -71,7 +71,9 @@ vi.mock("@variamosple/variamos-components", async () => {
 // Mock patternfly log viewer to prevent Jest ESM syntax errors
 vi.mock("@patternfly/react-log-viewer", async () => {
   return {
-    LogViewer: ({ data }: { data: string }) => <div data-testid="log-viewer">{data}</div>,
+    LogViewer: ({ data }: { data: string }) => (
+      <div data-testid="log-viewer">{data}</div>
+    ),
   };
 });
 
@@ -170,7 +172,9 @@ describe("MicroServiceListPage Integration", () => {
     // Modal should close
     await waitFor(() => {
       expect(
-        screen.queryByText("Are you sure you want to restart the microservice?"),
+        screen.queryByText(
+          "Are you sure you want to restart the microservice?",
+        ),
       ).not.toBeInTheDocument();
     });
   });
@@ -184,7 +188,9 @@ describe("MicroServiceListPage Integration", () => {
     const stopBtn = screen.getByTitle("Stop Microservice");
     await user.click(stopBtn);
 
-    expect(screen.getByText("Are you sure you want to stop the microservice?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to stop the microservice?"),
+    ).toBeInTheDocument();
 
     // Confirm click (Accept button)
     await user.click(screen.getByRole("button", { name: "Accept" }));

@@ -1,8 +1,8 @@
-import { User } from "@/features/user-management/domain/Entity/User";
-import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Table } from "react-bootstrap";
+import type { User } from "@/features/user-management/domain/Entity/User";
+import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { UserRowComponent } from "./UserRow";
 
 export interface UserListParameters extends PaginationControlsProps {
@@ -25,7 +25,11 @@ export const UserList: FC<UserListParameters> = ({
 }) => {
   return (
     <>
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
       <Table striped bordered hover>
         <thead>
@@ -60,7 +64,11 @@ export const UserList: FC<UserListParameters> = ({
         </tbody>
       </Table>
 
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

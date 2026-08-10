@@ -21,7 +21,7 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 describe("RepositoryUtils handleRepositoryError", () => {
-  let consoleSpy: import('vitest').MockInstance;
+  let consoleSpy: import("vitest").MockInstance;
 
   beforeAll(() => {
     consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -67,7 +67,10 @@ describe("RepositoryUtils handleRepositoryError", () => {
     vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
     const genericError = new Error("Generic fail");
 
-    const result = handleRepositoryError(genericError, "Fallback fallback") as any;
+    const result = handleRepositoryError(
+      genericError,
+      "Fallback fallback",
+    ) as any;
     expect(result.type).toBe("APP-ERROR");
     expect(result.errorCode).toBe(500);
     expect(result.message).toBe("Fallback fallback");

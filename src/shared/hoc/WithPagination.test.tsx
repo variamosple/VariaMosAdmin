@@ -1,7 +1,7 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { withPagination, PaginationControlsProps } from "./WithPagination";
+import type React from "react";
+import { type PaginationControlsProps, withPagination } from "./WithPagination";
 
 // Simple dummy component that receives the pagination props
 const DummyComponent: React.FC<PaginationControlsProps & { title: string }> = ({
@@ -15,10 +15,16 @@ const DummyComponent: React.FC<PaginationControlsProps & { title: string }> = ({
       <h1>{title}</h1>
       <span data-testid="current-page">{currentPage}</span>
       <span data-testid="total-pages">{totalPages}</span>
-      <button data-testid="btn-next" onClick={() => onPageChange(currentPage + 1)}>
+      <button
+        data-testid="btn-next"
+        onClick={() => onPageChange(currentPage + 1)}
+      >
         Next
       </button>
-      <button data-testid="btn-prev" onClick={() => onPageChange(currentPage - 1)}>
+      <button
+        data-testid="btn-prev"
+        onClick={() => onPageChange(currentPage - 1)}
+      >
         Prev
       </button>
       <button data-testid="btn-invalid" onClick={() => onPageChange(99)}>
@@ -34,7 +40,9 @@ describe("withPagination HOC", () => {
   it("should transmit pagination props and render title correctly", () => {
     render(<Wrapped title="Test Title" totalItems={25} pageSize={10} />);
 
-    expect(screen.getByRole("heading", { name: "Test Title" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Test Title" }),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("current-page")).toHaveTextContent("1");
     expect(screen.getByTestId("total-pages")).toHaveTextContent("3");
   });
@@ -94,7 +102,9 @@ describe("withPagination HOC", () => {
     expect(screen.getByTestId("total-pages")).toHaveTextContent("4");
 
     // Rerender with only 5 items (totalPages becomes 1)
-    rerender(<Wrapped title="Test" totalItems={5} pageSize={10} initialPage={4} />);
+    rerender(
+      <Wrapped title="Test" totalItems={5} pageSize={10} initialPage={4} />,
+    );
     expect(screen.getByTestId("total-pages")).toHaveTextContent("1");
     expect(screen.getByTestId("current-page")).toHaveTextContent("1");
   });

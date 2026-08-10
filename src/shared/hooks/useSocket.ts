@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export type SocketFunction = () => WebSocket;
 
-export const useSocket = (socketFunction: SocketFunction, connectOnMount: Boolean = false) => {
+export const useSocket = (
+  socketFunction: SocketFunction,
+  connectOnMount: boolean = false,
+) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 

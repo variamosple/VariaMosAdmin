@@ -1,14 +1,17 @@
-import { queryRoles } from "@/features/role-management/api/RoleRepository";
-import { Role } from "@/features/role-management/domain/Entity/Role";
-import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
-import { UserRole } from "@/features/user-management/domain/Entity/UserRole";
-import useIntersectionObserver from "@/shared/hooks/useIntersectionObserver";
-import { useDebouncedValue, usePaginatedQuery } from "@variamosple/variamos-components";
-import { FC, useCallback, useEffect, useState } from "react";
+import {
+  useDebouncedValue,
+  usePaginatedQuery,
+} from "@variamosple/variamos-components";
+import { type FC, useCallback, useEffect, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, type SubmitHandler, useForm } from "react-hook-form";
+import { queryRoles } from "@/features/role-management/api/RoleRepository";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
+import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
+import type { UserRole } from "@/features/user-management/domain/Entity/UserRole";
 import { InfiniteSelect } from "@/shared/components/InfiniteSelect";
-import { SelectOptionProps } from "@/shared/components/InfiniteSelect/index.types";
+import type { SelectOptionProps } from "@/shared/components/InfiniteSelect/index.types";
+import useIntersectionObserver from "@/shared/hooks/useIntersectionObserver";
 
 export interface UserRoleFormProps {
   onUserRoleSubmit: (roleRole: UserRole) => void;
@@ -21,14 +24,18 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
   isLoading,
   submitText = "Add role",
 }) => {
-  const [selectedOption, setSelectedOption] = useState<SelectOptionProps<number>>({
+  const [selectedOption, setSelectedOption] = useState<
+    SelectOptionProps<number>
+  >({
     label: "",
     value: 0,
   });
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchInput] = useDebouncedValue<string>(searchValue, 500);
-  const [roleOptions, setSemanticOptions] = useState<SelectOptionProps<number>[]>([]);
+  const [roleOptions, setSemanticOptions] = useState<
+    SelectOptionProps<number>[]
+  >([]);
 
   const onSearchChange = (search: string) => {
     setSearchInput(search);
@@ -41,16 +48,19 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
     setSearchValue("");
   };
 
-  const transformToSelectOptions = (roles: Role[]): SelectOptionProps<number>[] => {
-    if (!roles) return [];
+  const transformToSelectOptions = useCallback(
+    (roles: Role[]): SelectOptionProps<number>[] => {
+      if (!roles) return [];
 
-    return roles?.map(({ id, name }) => {
-      return {
-        label: name,
-        value: id,
-      } as SelectOptionProps<number>;
-    });
-  };
+      return roles?.map(({ id, name }) => {
+        return {
+          label: name,
+          value: id,
+        } as SelectOptionProps<number>;
+      });
+    },
+    [],
+  );
 
   const {
     loadData: loadRolesData,
@@ -70,12 +80,17 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
   );
 
   const fetchAndSetRoles = useCallback(async () => {
-    loadRolesData(new RolesFilter(debouncedSearchInput, page)).then((result) => {
-      if (page === 1) setSemanticOptions([]);
+    loadRolesData(new RolesFilter(debouncedSearchInput, page)).then(
+      (result) => {
+        if (page === 1) setSemanticOptions([]);
 
-      setSemanticOptions((prev) => [...prev, ...transformToSelectOptions(result?.data || [])]);
-    });
-  }, [debouncedSearchInput, page, loadRolesData]);
+        setSemanticOptions((prev) => [
+          ...prev,
+          ...transformToSelectOptions(result?.data || []),
+        ]);
+      },
+    );
+  }, [debouncedSearchInput, page, loadRolesData, transformToSelectOptions]);
 
   const {
     control,
@@ -91,7 +106,7 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
 
   useEffect(() => {
     fetchAndSetRoles();
-  }, [page, fetchAndSetRoles]);
+  }, [fetchAndSetRoles]);
 
   useEffect(() => {
     if (totalRoleItems === 0) return;
@@ -101,7 +116,10 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
   }, [roleOptions, totalRoleItems, isFetchingRoles, setHasMore]);
 
   return (
-    <Form className="d-flex justify-content-between" onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      className="d-flex justify-content-between"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Form.Group controlId="name" className="col-6 col-md-4">
         <Controller
           name="roleId"
@@ -125,12 +143,18 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
           )}
         />
 
-        <Form.Control.Feedback type="invalid">{errors.roleId?.message}</Form.Control.Feedback>
+        <Form.Control.Feedback type="invalid">
+          {errors.roleId?.message}
+        </Form.Control.Feedback>
       </Form.Group>
 
       <div>
         <Button variant="primary" type="submit" disabled={isLoading}>
-          {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : submitText}
+          {isLoading ? (
+            <Spinner animation="border" variant="light" size="sm" />
+          ) : (
+            submitText
+          )}
         </Button>
       </div>
     </Form>

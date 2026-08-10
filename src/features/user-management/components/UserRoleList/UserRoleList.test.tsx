@@ -1,8 +1,7 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { UserRoleList } from "./index";
-import { Role } from "@/features/role-management/domain/Entity/Role";
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {

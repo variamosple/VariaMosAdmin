@@ -1,7 +1,6 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import type { User } from "../../domain/Entity/User";
 import { UserDetails } from "./index";
-import { User } from "../../domain/Entity/User";
 import "@testing-library/jest-dom";
 
 const mockUser: User = {

@@ -1,5 +1,5 @@
-import { Metric } from "../../domain/Entity/Metric";
-import { FC } from "react";
+import type { FC } from "react";
+import type { Metric } from "../../domain/Entity/Metric";
 import { GeoChart } from "./GeoChart";
 import { LineChart } from "./LineChart";
 import { PieChart } from "./PieChart";

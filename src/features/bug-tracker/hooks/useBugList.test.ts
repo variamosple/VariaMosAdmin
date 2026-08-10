@@ -1,9 +1,9 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { useBugList } from "./useBugList";
-import { Bug } from "../domain/Bug";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import type { Bug } from "../domain/Bug";
+import { useBugList } from "./useBugList";
 
 // Mock the variamos-components library which is published as ES Module
 vi.mock("@variamosple/variamos-components", async () => {
@@ -79,7 +79,9 @@ describe("useBugList Hook", () => {
       }),
       http.get(apiTarget("/bugs/local"), ({ request }) => {
         const url = new URL(request.url);
-        queryLocalBugsParams.push(Object.fromEntries(url.searchParams.entries()));
+        queryLocalBugsParams.push(
+          Object.fromEntries(url.searchParams.entries()),
+        );
         return HttpResponse.json({ data: [] });
       }),
       http.get(apiTarget("/bugs/repos"), () => {
@@ -106,17 +108,20 @@ describe("useBugList Hook", () => {
         restoreLocalBugId = params.id as string;
         return HttpResponse.json({ data: { id: params.id } });
       }),
-      http.post(apiTarget("/bugs/:bugId/status"), async ({ request, params }) => {
-        let body = {};
-        try {
-          body = (await request.json()) as any;
-        } catch (e) {}
-        updateBugStatusBody = {
-          bugId: params.bugId,
-          ...body,
-        };
-        return HttpResponse.json({ data: { id: params.bugId } });
-      }),
+      http.post(
+        apiTarget("/bugs/:bugId/status"),
+        async ({ request, params }) => {
+          let body = {};
+          try {
+            body = (await request.json()) as any;
+          } catch (_e) {}
+          updateBugStatusBody = {
+            bugId: params.bugId,
+            ...body,
+          };
+          return HttpResponse.json({ data: { id: params.bugId } });
+        },
+      ),
     );
   });
 
@@ -139,11 +144,16 @@ describe("useBugList Hook", () => {
   });
 
   it("should handle error during bug fetching gracefully", async () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     server.use(
       http.get(apiTarget("/bugs"), () => {
-        return HttpResponse.json({ errorCode: 500, message: "Server Error" }, { status: 500 });
+        return HttpResponse.json(
+          { errorCode: 500, message: "Server Error" },
+          { status: 500 },
+        );
       }),
     );
 
@@ -174,7 +184,9 @@ describe("useBugList Hook", () => {
     server.use(
       http.get(apiTarget("/bugs/local"), ({ request }) => {
         const url = new URL(request.url);
-        queryLocalBugsParams.push(Object.fromEntries(url.searchParams.entries()));
+        queryLocalBugsParams.push(
+          Object.fromEntries(url.searchParams.entries()),
+        );
         return HttpResponse.json({ data: mockLocalBugs });
       }),
     );
@@ -194,7 +206,9 @@ describe("useBugList Hook", () => {
     });
 
     expect(result.current.activeTab).toBe("local");
-    expect(queryLocalBugsParams[0]).toEqual(expect.objectContaining({ status: "pending" }));
+    expect(queryLocalBugsParams[0]).toEqual(
+      expect.objectContaining({ status: "pending" }),
+    );
     expect(result.current.bugs).toEqual(mockLocalBugs);
   });
 

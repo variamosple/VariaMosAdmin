@@ -1,6 +1,6 @@
-import { User } from "@/features/user-management/domain/Entity/User";
-import { Language } from "@/features/language-management/domain/Entity/Language";
-import { Bug } from "@/features/bug-tracker/domain/Bug";
+import type { Bug } from "@/features/bug-tracker/domain/Bug";
+import type { Language } from "@/features/language-management/domain/Entity/Language";
+import type { User } from "@/features/user-management/domain/Entity/User";
 
 export const createUserMock = (overrides?: Partial<User>): User => ({
   id: "user-default-id",
@@ -13,7 +13,9 @@ export const createUserMock = (overrides?: Partial<User>): User => ({
   ...overrides,
 });
 
-export const createLanguageMock = (overrides?: Partial<Language>): Language => ({
+export const createLanguageMock = (
+  overrides?: Partial<Language>,
+): Language => ({
   id: 1,
   name: "Default DSL",
   type: "DSL",

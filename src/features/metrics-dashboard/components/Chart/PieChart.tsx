@@ -1,7 +1,7 @@
-import { Metric } from "../../domain/Entity/Metric";
-import { useChart } from "../../hooks/useChart";
-import { FC } from "react";
+import type { FC } from "react";
 import { Chart } from "react-google-charts";
+import type { Metric } from "../../domain/Entity/Metric";
+import { useChart } from "../../hooks/useChart";
 
 export interface PieChartProps {
   metric: Metric;

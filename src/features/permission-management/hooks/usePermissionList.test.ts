@@ -1,9 +1,9 @@
-import { renderHook, act } from "@testing-library/react";
-import { usePermissionList } from "./usePermissionList";
+import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { usePermissionList } from "./usePermissionList";
 
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
@@ -49,7 +49,7 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 describe("usePermissionList Hook", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -93,7 +93,10 @@ describe("usePermissionList Hook", () => {
     expect(createPayload).toEqual({ name: "write:roles" });
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Permission create", variant: "success" }),
+      expect.objectContaining({
+        title: "Permission create",
+        variant: "success",
+      }),
     );
   });
 
@@ -123,17 +126,23 @@ describe("usePermissionList Hook", () => {
     let editPayload: any = null;
     let editPermissionId: string | null = null;
     server.use(
-      http.put(apiTarget("/v1/permissions/:id"), async ({ request, params }) => {
-        editPermissionId = params.id as string;
-        editPayload = await request.json();
-        return HttpResponse.json({ errorCode: null });
-      }),
+      http.put(
+        apiTarget("/v1/permissions/:id"),
+        async ({ request, params }) => {
+          editPermissionId = params.id as string;
+          editPayload = await request.json();
+          return HttpResponse.json({ errorCode: null });
+        },
+      ),
     );
 
     const { result } = renderHook(() => usePermissionList());
 
     await act(async () => {
-      await result.current.performEditPermission({ id: 1, name: "read:users-edited" });
+      await result.current.performEditPermission({
+        id: 1,
+        name: "read:users-edited",
+      });
     });
 
     expect(editPermissionId).toBe("1");
@@ -156,7 +165,10 @@ describe("usePermissionList Hook", () => {
     const { result } = renderHook(() => usePermissionList());
 
     await act(async () => {
-      await result.current.performDeletePermission({ id: 1, name: "read:users" });
+      await result.current.performDeletePermission({
+        id: 1,
+        name: "read:users",
+      });
     });
 
     expect(deletePermissionId).toBe("1");

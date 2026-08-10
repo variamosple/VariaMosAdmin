@@ -1,9 +1,8 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-
-import { Bug, BugStatusLog } from "../domain/Bug";
-import { BugFilter } from "../domain/BugFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { Bug, BugStatusLog } from "../domain/Bug";
+import type { BugFilter } from "../domain/BugFilter";
 
 export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
   return ADMIN_CLIENT.get("/bugs", { params: filter })
@@ -12,9 +11,9 @@ export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -53,9 +52,9 @@ export const createBug = (
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -115,9 +114,9 @@ export const updateBugStatus = (
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -130,16 +129,19 @@ export const updateBugStatus = (
     });
 };
 
-export const addBugNote = (bugId: string, body: string): Promise<ResponseModel<any>> => {
+export const addBugNote = (
+  bugId: string,
+  body: string,
+): Promise<ResponseModel<any>> => {
   return ADMIN_CLIENT.post(`/bugs/${bugId}/notes`, { body })
     .then((response) => response.data)
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -159,9 +161,9 @@ export const queryBugRepos = (): Promise<ResponseModel<string[]>> => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -181,9 +183,9 @@ export const queryCategories = (): Promise<ResponseModel<string[]>> => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -203,9 +205,9 @@ export const syncBugs = (): Promise<ResponseModel<void>> => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -218,16 +220,18 @@ export const syncBugs = (): Promise<ResponseModel<void>> => {
     });
 };
 
-export const queryLocalBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
+export const queryLocalBugs = (
+  filter: BugFilter,
+): Promise<ResponseModel<Bug[]>> => {
   return ADMIN_CLIENT.get("/bugs/local", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -247,9 +251,9 @@ export const rejectLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -269,9 +273,9 @@ export const restoreLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -284,7 +288,10 @@ export const restoreLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
     });
 };
 
-export const uploadAttachment = (bugId: string, file: File): Promise<ResponseModel<any>> => {
+export const uploadAttachment = (
+  bugId: string,
+  file: File,
+): Promise<ResponseModel<any>> => {
   const formData = new FormData();
   formData.append("file", file);
   return ADMIN_CLIENT.post(`/bugs/${bugId}/attachments`, formData)
@@ -293,9 +300,9 @@ export const uploadAttachment = (bugId: string, file: File): Promise<ResponseMod
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -308,16 +315,18 @@ export const uploadAttachment = (bugId: string, file: File): Promise<ResponseMod
     });
 };
 
-export const deleteAttachment = (attachmentId: string): Promise<ResponseModel<void>> => {
+export const deleteAttachment = (
+  attachmentId: string,
+): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.delete(`/bugs/attachments/${attachmentId}`)
     .then((response) => response.data)
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -330,16 +339,18 @@ export const deleteAttachment = (attachmentId: string): Promise<ResponseModel<vo
     });
 };
 
-export const queryBugNotes = (bugId: string): Promise<ResponseModel<BugStatusLog[]>> => {
+export const queryBugNotes = (
+  bugId: string,
+): Promise<ResponseModel<BugStatusLog[]>> => {
   return ADMIN_CLIENT.get(`/bugs/${bugId}/notes`)
     .then((response) => response.data)
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
         const response = error.response?.data;
-        if (!!response) return response;
+        if (response) return response;
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

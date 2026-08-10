@@ -1,10 +1,12 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
-import { Role } from "../domain/Entity/Role";
-import { RolesFilter } from "../domain/Entity/RolesFilter";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { Role } from "../domain/Entity/Role";
+import type { RolesFilter } from "../domain/Entity/RolesFilter";
 
-export const queryRoles = (filter: RolesFilter): Promise<ResponseModel<Role[]>> => {
+export const queryRoles = (
+  filter: RolesFilter,
+): Promise<ResponseModel<Role[]>> => {
   return ADMIN_CLIENT.get("/v1/roles", { params: filter })
     .then((response) => response.data)
     .catch((error) => {
@@ -13,12 +15,12 @@ export const queryRoles = (filter: RolesFilter): Promise<ResponseModel<Role[]>> 
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -41,12 +43,12 @@ export const createRole = (request: Role): Promise<ResponseModel<Role>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -69,12 +71,12 @@ export const deleteRole = (roleId: number): Promise<ResponseModel<void>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -97,12 +99,12 @@ export const queryRoleById = (roleId: number): Promise<ResponseModel<Role>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {
@@ -125,12 +127,12 @@ export const updateRole = (request: Role): Promise<ResponseModel<Role>> => {
 
         const response = error.response?.data;
 
-        if (!!response) {
+        if (response) {
           return response;
         }
 
         return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500"),
+          Number.parseInt(error.code || "500", 10),
           "Network/communication error.",
         );
       } else {

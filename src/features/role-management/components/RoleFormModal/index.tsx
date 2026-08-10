@@ -1,8 +1,8 @@
-import { Role } from "@/features/role-management/domain/Entity/Role";
-import { ResponseModel } from "@variamosple/variamos-components";
-import { FC, useEffect } from "react";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import { type FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 
 export interface RoleFormModalProps {
   modalTitle: string;
@@ -50,7 +50,11 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
   };
 
   return (
-    <Modal show={showModal} backdrop={isLoading ? "static" : true} onHide={onCloseModal}>
+    <Modal
+      show={showModal}
+      backdrop={isLoading ? "static" : true}
+      onHide={onCloseModal}
+    >
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title>{modalTitle}</Modal.Title>
       </Modal.Header>
@@ -66,17 +70,28 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
               {...register("name", { required: "Role name is required" })}
               isInvalid={!!errors.name}
             />
-            <Form.Control.Feedback type="invalid">{errors.name?.message}</Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">
+              {errors.name?.message}
+            </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
 
         <Modal.Footer>
-          <Button type="button" variant="secondary" disabled={isLoading} onClick={onCloseModal}>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isLoading}
+            onClick={onCloseModal}
+          >
             Cancel
           </Button>
 
           <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? <Spinner animation="border" variant="light" size="sm" /> : submitText}
+            {isLoading ? (
+              <Spinner animation="border" variant="light" size="sm" />
+            ) : (
+              submitText
+            )}
           </Button>
         </Modal.Footer>
       </Form>

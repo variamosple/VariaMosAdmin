@@ -1,13 +1,13 @@
+import { usePaginatedQuery } from "@variamosple/variamos-components";
+import { useEffect, useState } from "react";
 import {
   deleteProject,
   queryProjects,
   updateProject,
 } from "@/features/project-management/api/ProjectRepository";
-import { Project } from "@/features/project-management/domain/Entity/Project";
+import type { Project } from "@/features/project-management/domain/Entity/Project";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/shared/context/ToastContext";
-import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
 
 export const useProjectList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -117,15 +117,17 @@ export const useProjectList = () => {
   };
 
   const onSearchSubmit = (search?: ProjectsFilter) => {
-    loadData(new ProjectsFilter(search?.name, search?.isTemplate)).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Project query error",
-          message: response.message!,
-          variant: "danger",
-        });
-      }
-    });
+    loadData(new ProjectsFilter(search?.name, search?.isTemplate)).then(
+      (response) => {
+        if (response.errorCode) {
+          pushToast({
+            title: "Project query error",
+            message: response.message!,
+            variant: "danger",
+          });
+        }
+      },
+    );
   };
 
   return {

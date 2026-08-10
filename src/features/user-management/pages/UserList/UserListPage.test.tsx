@@ -1,10 +1,10 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { UserListPage } from "./index";
+import { HttpResponse, http } from "msw";
+import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { UserListPage } from "./index";
 
 const mockNavigate = vi.fn();
 
@@ -131,7 +131,13 @@ describe("UserListPage Integration", () => {
       }),
       http.get("*/v1/users/:userId/roles/details", () => {
         return HttpResponse.json({
-          data: [{ id: 1, name: "Admin", permissions: [{ id: 10, name: "READ_PRIVILEGES" }] }],
+          data: [
+            {
+              id: 1,
+              name: "Admin",
+              permissions: [{ id: 10, name: "READ_PRIVILEGES" }],
+            },
+          ],
         });
       }),
       http.post("*/v1/users/:userId/recovery-link", () => {
@@ -170,25 +176,33 @@ describe("UserListPage Integration", () => {
     expect(await screen.findByText("Admin User")).toBeInTheDocument();
 
     // Click Reset Password key icon for Admin User (first active user)
-    const resetKeyButtons = screen.getAllByTitle("Generate password reset link");
+    const resetKeyButtons = screen.getAllByTitle(
+      "Generate password reset link",
+    );
     await user.click(resetKeyButtons[0]);
 
     // Modal should show
     expect(screen.getByText("Generate Recovery Link")).toBeInTheDocument();
 
     // Click generate button
-    const generateBtn = screen.getByRole("button", { name: "Generate Secure Link" });
+    const generateBtn = screen.getByRole("button", {
+      name: "Generate Secure Link",
+    });
     await user.click(generateBtn);
 
     // Wait for link generation to output the value
-    expect(await screen.findByDisplayValue("http://recovery-url-test")).toBeInTheDocument();
+    expect(
+      await screen.findByDisplayValue("http://recovery-url-test"),
+    ).toBeInTheDocument();
 
     // Close modal
     const closeButtons = screen.getAllByRole("button", { name: "Close" });
     await user.click(closeButtons[closeButtons.length - 1]);
 
     await waitFor(() => {
-      expect(screen.queryByText("Generate Recovery Link")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Generate Recovery Link"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -201,7 +215,9 @@ describe("UserListPage Integration", () => {
     const disableButtons = screen.getAllByTitle("Disable user");
     await user.click(disableButtons[0]);
 
-    expect(screen.getByText("Are you sure you want to disable the user?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to disable the user?"),
+    ).toBeInTheDocument();
 
     // Confirm (Accept button)
     await user.click(screen.getByRole("button", { name: "Accept" }));
@@ -223,7 +239,9 @@ describe("UserListPage Integration", () => {
     const enableButtons = screen.getAllByTitle("Enable user");
     await user.click(enableButtons[0]);
 
-    expect(screen.getByText("Are you sure you want to enable the user?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to enable the user?"),
+    ).toBeInTheDocument();
 
     // Confirm (Accept button)
     await user.click(screen.getByRole("button", { name: "Accept" }));
@@ -245,7 +263,9 @@ describe("UserListPage Integration", () => {
     const deleteButtons = screen.getAllByTitle("Delete user");
     await user.click(deleteButtons[0]);
 
-    expect(screen.getByText("Are you sure you want to delete the user?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to delete the user?"),
+    ).toBeInTheDocument();
 
     // Confirm (Accept button)
     await user.click(screen.getByRole("button", { name: "Accept" }));
@@ -287,7 +307,9 @@ describe("UserListPage Integration", () => {
 
     renderWithProviders(<UserListPage />);
     expect(await screen.findByText("User query error")).toBeInTheDocument();
-    expect(screen.getByText("Network/communication error.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Network/communication error."),
+    ).toBeInTheDocument();
     consoleSpy.mockRestore();
   });
 });

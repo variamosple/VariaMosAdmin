@@ -6,7 +6,11 @@ import { RolePermissionList } from "./index";
 // Mock dependencies
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    Paginator: function DummyPaginator({ currentPage, totalPages, onPageChange }: any) {
+    Paginator: function DummyPaginator({
+      currentPage,
+      totalPages,
+      onPageChange,
+    }: any) {
       return (
         <div data-testid="paginator">
           <span data-testid="current-page">{currentPage}</span>
@@ -64,7 +68,9 @@ describe("RolePermissionList", () => {
       />,
     );
 
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete role permission" });
+    const deleteButtons = screen.getAllByRole("button", {
+      name: "Delete role permission",
+    });
     expect(deleteButtons).toHaveLength(2);
 
     await user.click(deleteButtons[0]);

@@ -1,7 +1,7 @@
-import { renderHook, act } from "@testing-library/react";
-import { useMicroServiceList } from "./useMicroServiceList";
-import * as MicroServiceRepository from "../api/MicroServiceRepository";
+import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
+import * as MicroServiceRepository from "../api/MicroServiceRepository";
+import { useMicroServiceList } from "./useMicroServiceList";
 
 const mockLoadData = vi.fn();
 const mockOnPageChange = vi.fn();
@@ -35,21 +35,21 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 describe("useMicroServiceList Hook", () => {
-  let startMicroserviceSpy: import('vitest').MockInstance;
-  let restartMicroserviceSpy: import('vitest').MockInstance;
-  let stopMicroserviceSpy: import('vitest').MockInstance;
-  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
+  let startMicroserviceSpy: import("vitest").MockInstance;
+  let restartMicroserviceSpy: import("vitest").MockInstance;
+  let stopMicroserviceSpy: import("vitest").MockInstance;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    startMicroserviceSpy = jest
+    startMicroserviceSpy = vi
       .spyOn(MicroServiceRepository, "startMicroservice")
       .mockResolvedValue({ errorCode: null } as any);
-    restartMicroserviceSpy = jest
+    restartMicroserviceSpy = vi
       .spyOn(MicroServiceRepository, "restartMicroservice")
       .mockResolvedValue({ errorCode: null } as any);
-    stopMicroserviceSpy = jest
+    stopMicroserviceSpy = vi
       .spyOn(MicroServiceRepository, "stopMicroservice")
       .mockResolvedValue({ errorCode: null } as any);
 

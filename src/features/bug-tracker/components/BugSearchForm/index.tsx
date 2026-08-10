@@ -1,8 +1,8 @@
-import { BugFilter } from "../../domain/BugFilter";
-import { FC, useCallback, useEffect, useRef } from "react";
+import { type FC, useCallback, useEffect, useRef } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import type { BugFilter } from "../../domain/BugFilter";
 
 export interface BugSearchFormProps {
   onSubmit: (search?: BugFilter) => void;
@@ -28,7 +28,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
     setValue,
   } = useForm<BugFilter>();
 
-  const values = watch();
+  const _values = watch();
 
   const onReset = () => {
     reset({
@@ -62,7 +62,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
       priority: undefined,
       search: undefined,
     });
-  }, [activeTab, reset]);
+  }, [reset]);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -80,12 +80,16 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [values, isDirty, handleSubmit, submit]);
+  }, [isDirty, handleSubmit, submit]);
 
   const isGitHub = activeTab === "github";
 
   return (
-    <Form data-testid="bug-search-form" onSubmit={handleSubmit(submit)} onReset={onReset}>
+    <Form
+      data-testid="bug-search-form"
+      onSubmit={handleSubmit(submit)}
+      onReset={onReset}
+    >
       <Row className="d-flex align-items-end mb-3">
         <Col xs={12} sm={isGitHub ? 6 : 12} lg={isGitHub ? 3 : 6}>
           <Form.Group className="w-100" controlId="name">
@@ -173,7 +177,12 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
           </Col>
         )}
 
-        <Col xs={12} sm={isGitHub ? 6 : 12} lg={isGitHub ? 3 : 6} className="mt-2 mt-sm-0">
+        <Col
+          xs={12}
+          sm={isGitHub ? 6 : 12}
+          lg={isGitHub ? 3 : 6}
+          className="mt-2 mt-sm-0"
+        >
           <Form.Group className="w-100" controlId="priority">
             <Form.Label>Priority</Form.Label>
             <InputGroup>

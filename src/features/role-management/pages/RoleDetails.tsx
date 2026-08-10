@@ -1,22 +1,26 @@
 import {
+  usePaginatedQuery,
+  useRouter,
+  withPageVisit,
+} from "@variamosple/variamos-components";
+import { type FC, useCallback, useEffect, useState } from "react";
+import { Button, Container, Spinner } from "react-bootstrap";
+import { ArrowLeft } from "react-bootstrap-icons";
+import { useParams } from "react-router-dom";
+import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import {
   createRolePermission,
   deleteRolePermission,
   queryRolePermissions,
 } from "@/features/role-management/api/RolePermissionRepository";
 import { queryRoleById } from "@/features/role-management/api/RoleRepository";
-import { Permission } from "@/features/permission-management/domain/Entity/Permission";
-import { Role } from "@/features/role-management/domain/Entity/Role";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
 import { RolePermissionFilter } from "@/features/role-management/domain/Entity/RolePermissionFilter";
-import { usePaginatedQuery, useRouter, withPageVisit } from "@variamosple/variamos-components";
-import { FC, useEffect, useState } from "react";
-import { Button, Container, Spinner } from "react-bootstrap";
-import { ArrowLeft } from "react-bootstrap-icons";
-import { useParams } from "react-router-dom";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { useToast } from "@/shared/context/ToastContext";
 import { RolePermissionForm } from "../components/RolePermissionForm";
 import { RolePermissionList } from "../components/RolePermissionList";
-import { useToast } from "@/shared/context/ToastContext";
 
 const RoleDetailsPageComponent: FC<unknown> = () => {
   const { pushToast, removeToast } = useToast();
@@ -40,14 +44,14 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
     initialFilter: new RolePermissionFilter(),
   });
 
-  const queryRole = (roleId: number) => {
+  const queryRole = useCallback((roleId: number) => {
     setIsLoading(true);
     queryRoleById(roleId)
       .then((response) => {
         setRole(response.data);
       })
       .finally(() => setIsLoading(false));
-  };
+  }, []);
 
   const onRolePermissionCreate = (rolePermission: RolePermission) => {
     setIsCreating(true);
@@ -60,7 +64,7 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
 
     createRolePermission({
       ...rolePermission,
-      roleId: Number.parseInt(roleIdParam!),
+      roleId: Number.parseInt(roleIdParam!, 10),
     })
       .then((response) => {
         removeToast(toastId);
@@ -92,40 +96,40 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
       variant: "info",
     });
 
-    deleteRolePermission(new RolePermission(Number.parseInt(roleIdParam!), permission.id!)).then(
-      (response) => {
-        removeToast(toastId);
+    deleteRolePermission(
+      new RolePermission(Number.parseInt(roleIdParam!, 10), permission.id!),
+    ).then((response) => {
+      removeToast(toastId);
 
-        if (response.errorCode) {
-          pushToast({
-            title: "Permission deletion",
-            message: response.message!,
-            variant: "danger",
-          });
-        } else {
-          pushToast({
-            title: "Permission delete",
-            message: "Permission deleted successfully",
-            variant: "success",
-          });
-        }
-        onRolePermissionsPageChange(1);
-      },
-    );
+      if (response.errorCode) {
+        pushToast({
+          title: "Permission deletion",
+          message: response.message!,
+          variant: "danger",
+        });
+      } else {
+        pushToast({
+          title: "Permission delete",
+          message: "Permission deleted successfully",
+          variant: "success",
+        });
+      }
+      onRolePermissionsPageChange(1);
+    });
   };
 
   useEffect(() => {
     if (roleIdParam) {
-      queryRole(Number.parseInt(roleIdParam));
+      queryRole(Number.parseInt(roleIdParam, 10));
     }
-  }, [roleIdParam]);
+  }, [roleIdParam, queryRole]);
 
   useEffect(() => {
     if (roleIdParam) {
       const updated = !rolePermissionsFilter
-        ? new RolePermissionFilter(Number.parseInt(roleIdParam))
+        ? new RolePermissionFilter(Number.parseInt(roleIdParam, 10))
         : Object.assign(rolePermissionsFilter, {
-            roleId: Number.parseInt(roleIdParam),
+            roleId: Number.parseInt(roleIdParam, 10),
           });
 
       loadRolePermissions(updated);
@@ -156,7 +160,10 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
 
       <hr />
 
-      <RolePermissionForm isLoading={isCreating} onRolePermissionSubmit={onRolePermissionCreate} />
+      <RolePermissionForm
+        isLoading={isCreating}
+        onRolePermissionSubmit={onRolePermissionCreate}
+      />
 
       <RolePermissionList
         items={rolePermissions}
@@ -183,4 +190,7 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
   );
 };
 
-export const RoleDetailsPage = withPageVisit(RoleDetailsPageComponent, "RoleDetails");
+export const RoleDetailsPage = withPageVisit(
+  RoleDetailsPageComponent,
+  "RoleDetails",
+);

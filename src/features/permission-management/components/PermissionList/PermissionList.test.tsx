@@ -1,8 +1,7 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Permission } from "../../domain/Entity/Permission";
 import { PermissionList } from "./index";
-import { Permission } from "../../domain/Entity/Permission";
 
 const mockPermissions: Permission[] = [
   { id: 1, name: "read:users" },

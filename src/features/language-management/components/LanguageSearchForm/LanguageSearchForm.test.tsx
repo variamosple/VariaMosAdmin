@@ -1,5 +1,4 @@
-import React from "react";
-import { render, screen, act } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LanguageSearchForm } from "./index";
 
@@ -9,7 +8,7 @@ describe("LanguageSearchForm Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
@@ -25,7 +24,9 @@ describe("LanguageSearchForm Component", () => {
       />,
     );
 
-    expect(screen.getByPlaceholderText("Search by language name")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Search by language name"),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Access level")).toBeInTheDocument();
   });
 
@@ -41,7 +42,10 @@ describe("LanguageSearchForm Component", () => {
     const input = screen.getByPlaceholderText("Search by language name");
 
     // Simulate typing
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(input, "my-query");
 
     // Ensure it hasn't fired immediately
@@ -52,7 +56,9 @@ describe("LanguageSearchForm Component", () => {
       vi.advanceTimersByTime(500);
     });
 
-    expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: "my-query" }));
+    expect(mockOnSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "my-query" }),
+    );
   });
 
   it("resets search filter when trash button is clicked", async () => {
@@ -65,7 +71,10 @@ describe("LanguageSearchForm Component", () => {
     );
 
     const input = screen.getByPlaceholderText("Search by language name");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(input, "temp");
 
     const clearButton = screen.getByTitle("Clear results");

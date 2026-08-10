@@ -1,25 +1,20 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import {
+  useDebouncedValue,
+  usePaginatedQuery,
+} from "@variamosple/variamos-components";
 import { RolePermissionForm } from "./index";
-import { usePaginatedQuery, useDebouncedValue } from "@variamosple/variamos-components";
 
 // Mock dependencies
 vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
-  return () => ({
-    lastEntryRef: vi.fn(),
-    setHasMore: vi.fn(),
-    page: 1,
-  });
-});
-
-vi.mock("react-bootstrap", async () => {
-  const original = await vi.importActual("react-bootstrap");
   return {
-    ...original,
-    Spinner: function DummySpinner() {
-      return <div data-testid="loading-spinner">Spinner</div>;
-    },
+    default: () => ({
+      lastEntryRef: vi.fn(),
+      setHasMore: vi.fn(),
+      page: 1,
+    }),
   };
 });
 
@@ -54,7 +49,11 @@ vi.mock("@variamosple/variamos-components", async () => {
 
 vi.mock("@/shared/components/InfiniteSelect", async () => {
   return {
-    InfiniteSelect: function DummyInfiniteSelect({ options, handleSelect, placeholder }: any) {
+    InfiniteSelect: function DummyInfiniteSelect({
+      options,
+      handleSelect,
+      placeholder,
+    }: any) {
       return (
         <div data-testid="infinite-select">
           <span>{placeholder}</span>
@@ -81,8 +80,8 @@ vi.mock("@/shared/components/InfiniteSelect", async () => {
 });
 
 describe("RolePermissionForm", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
-  const useDebouncedValueMock = useDebouncedValue as import('vitest').Mock;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
+  const useDebouncedValueMock = useDebouncedValue as import("vitest").Mock;
 
   const mockLoadData = vi.fn();
   const mockSetCurrentPage = vi.fn();
@@ -111,7 +110,10 @@ describe("RolePermissionForm", () => {
 
   it("should render selection input and submit button", async () => {
     render(
-      <RolePermissionForm onRolePermissionSubmit={mockOnRolePermissionSubmit} isLoading={false} />,
+      <RolePermissionForm
+        onRolePermissionSubmit={mockOnRolePermissionSubmit}
+        isLoading={false}
+      />,
     );
 
     await waitFor(() => {
@@ -119,13 +121,18 @@ describe("RolePermissionForm", () => {
     });
 
     expect(screen.getByTestId("infinite-select")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add permission" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Add permission" }),
+    ).toBeInTheDocument();
   });
 
   it("should show validation error if submitted without selection", async () => {
     const user = userEvent.setup();
     render(
-      <RolePermissionForm onRolePermissionSubmit={mockOnRolePermissionSubmit} isLoading={false} />,
+      <RolePermissionForm
+        onRolePermissionSubmit={mockOnRolePermissionSubmit}
+        isLoading={false}
+      />,
     );
 
     await waitFor(() => {
@@ -143,7 +150,10 @@ describe("RolePermissionForm", () => {
 
   it("should call onRolePermissionSubmit when valid selection is submitted", async () => {
     render(
-      <RolePermissionForm onRolePermissionSubmit={mockOnRolePermissionSubmit} isLoading={false} />,
+      <RolePermissionForm
+        onRolePermissionSubmit={mockOnRolePermissionSubmit}
+        isLoading={false}
+      />,
     );
 
     const select = screen.getByTestId("select-element");
@@ -166,7 +176,10 @@ describe("RolePermissionForm", () => {
 
   it("should render spinner and disable button if isLoading is true", async () => {
     render(
-      <RolePermissionForm onRolePermissionSubmit={mockOnRolePermissionSubmit} isLoading={true} />,
+      <RolePermissionForm
+        onRolePermissionSubmit={mockOnRolePermissionSubmit}
+        isLoading={true}
+      />,
     );
 
     await waitFor(() => {

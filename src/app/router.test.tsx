@@ -1,4 +1,3 @@
-import React from "react";
 import { ROUTES } from "./router";
 
 // Mock @variamosple/variamos-components
@@ -88,7 +87,9 @@ describe("Router Configuration", () => {
     const signUpRoute = ROUTES.find((r) => r.path === "/sign-up");
     expect(signUpRoute).toBeTruthy();
 
-    const forgotPasswordRoute = ROUTES.find((r) => r.path === "/forgot-password");
+    const forgotPasswordRoute = ROUTES.find(
+      (r) => r.path === "/forgot-password",
+    );
     expect(forgotPasswordRoute).toBeTruthy();
 
     const resetPasswordRoute = ROUTES.find((r) => r.path === "/reset-password");

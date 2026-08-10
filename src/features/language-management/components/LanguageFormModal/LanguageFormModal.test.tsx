@@ -1,8 +1,7 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { LanguageFormModal } from "./index";
 import { ResponseModel } from "@variamosple/variamos-components";
+import { LanguageFormModal } from "./index";
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
@@ -90,7 +89,9 @@ describe("LanguageFormModal Component", () => {
     const submitButton = screen.getByText("Edit Language");
     await user.click(submitButton);
 
-    expect(await screen.findByText("Language name is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Language name is required"),
+    ).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 });

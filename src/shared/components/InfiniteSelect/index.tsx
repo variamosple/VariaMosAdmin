@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Spinner } from "react-bootstrap";
 
 import useListenOutsideClicks from "@/shared/hooks/useListenOutsideClicks";
-import { SelectOptionProps, SelectProps } from "./index.types";
+import type { SelectOptionProps, SelectProps } from "./index.types";
 
 export const InfiniteSelect = <ValueType,>({
   options,
@@ -64,7 +64,11 @@ export const InfiniteSelect = <ValueType,>({
 
   return (
     <div className="position-relative grow mb-3">
-      <button type="button" onClick={toggleDropDown} className="text-start form-select">
+      <button
+        type="button"
+        onClick={toggleDropDown}
+        className="text-start form-select"
+      >
         {isSearchable ? (
           <input
             type="text"
@@ -78,7 +82,7 @@ export const InfiniteSelect = <ValueType,>({
             title={selected?.label}
           />
         ) : (
-          <>{selected?.label || placeholder}</>
+          selected?.label || placeholder
         )}
       </button>
 
@@ -90,7 +94,9 @@ export const InfiniteSelect = <ValueType,>({
         >
           {renderOptions(options)}
 
-          {isFetchingOptions && options?.length > 0 && <Spinner animation="border" role="status" />}
+          {isFetchingOptions && options?.length > 0 && (
+            <Spinner animation="border" role="status" />
+          )}
         </div>
       )}
     </div>

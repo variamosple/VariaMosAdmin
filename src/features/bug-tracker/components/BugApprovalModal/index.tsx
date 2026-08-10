@@ -1,9 +1,10 @@
-import { Bug } from "../../domain/Bug";
-import { deleteAttachment, uploadAttachment } from "../../api/BugRepository";
-import { FC, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
-import { useForm } from "react-hook-form";
 import { Trash, Upload } from "react-bootstrap-icons";
+import { useForm } from "react-hook-form";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { deleteAttachment, uploadAttachment } from "../../api/BugRepository";
+import type { Bug } from "../../domain/Bug";
 
 interface BugApprovalModalProps {
   show: boolean;
@@ -65,7 +66,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
       setAttachments(bug.attachments || []);
       setModalError(null);
     }
-  }, [show, bug, reset, repos, categories]);
+  }, [show, bug, reset, categories]);
 
   if (!bug) return null;
 
@@ -130,7 +131,14 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
   };
 
   return (
-    <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} size="lg" centered>
+    <Modal
+      show={show}
+      onHide={onHide}
+      backdrop="static"
+      keyboard={false}
+      size="lg"
+      centered
+    >
       <Modal.Header closeButton>
         <Modal.Title>Review and Approve Local Bug</Modal.Title>
       </Modal.Header>
@@ -147,7 +155,9 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
               {...register("title", { required: "Title is required" })}
             />
             {errors.title && (
-              <Form.Control.Feedback type="invalid">{errors.title.message}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {errors.title.message}
+              </Form.Control.Feedback>
             )}
           </Form.Group>
 
@@ -232,7 +242,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                     className="list-group-item d-flex justify-content-between align-items-center py-2"
                   >
                     <a
-                      href={`${process.env.REACT_APP_ADMIN_API_URL || "http://localhost:4000"}${att.filePath}`}
+                      href={`${AppConfig.ADMIN_API_URL || "http://localhost:4000"}${att.filePath}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-decoration-none small text-truncate"
@@ -290,7 +300,11 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
           <Button variant="secondary" onClick={onHide} disabled={isApproving}>
             Cancel
           </Button>
-          <Button variant="success" type="submit" disabled={isApproving || isUploading}>
+          <Button
+            variant="success"
+            type="submit"
+            disabled={isApproving || isUploading}
+          >
             {isApproving ? "Approving..." : "Approve & Send to GitHub"}
           </Button>
         </Modal.Footer>

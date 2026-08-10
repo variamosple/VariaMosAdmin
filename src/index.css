@@ -5,13 +5,13 @@
 :root {
   --primary-color: #428dcf;
   --primary-color-text: #ffffff;
-  --primary-color-constrast: #0f436d;
-  --primary-color-constrast-text: #ffffff;
+  --primary-color-contrast: #0f436d;
+  --primary-color-contrast-text: #ffffff;
 
   --secondary-color: #428dcf;
   --secondary-color-text: #ffffff;
-  --secondary-color-constrast: #0f436d;
-  --secondary-color-constrast-text: #ffffff;
+  --secondary-color-contrast: #0f436d;
+  --secondary-color-contrast-text: #ffffff;
 
   --header-color: #dcdcdc;
   --dark-color-font: #212529;
@@ -32,7 +32,7 @@ body,
 
 html {
   font-family: Arial, Helvetica, sans-serif;
-  color: var(--dark-color-font) !important;
+  color: var(--dark-color-font);
 }
 
 body {
@@ -55,11 +55,11 @@ body {
 }
 
 .text-decoration-underline-hover:hover {
-  text-decoration: underline !important;
+  text-decoration: underline;
 }
 
-.text-primary-color-constrast {
-  color: var(--primary-color-constrast);
+.text-primary-color-contrast {
+  color: var(--primary-color-contrast);
 }
 
 .play-regular {

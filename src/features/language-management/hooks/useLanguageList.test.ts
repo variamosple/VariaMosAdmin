@@ -1,7 +1,7 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { useLanguageList } from "./useLanguageList";
-import * as LanguageRepository from "../api/LanguageRepository";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
+import * as LanguageRepository from "../api/LanguageRepository";
+import { useLanguageList } from "./useLanguageList";
 
 const mockPushToast = vi.fn();
 vi.mock("@/shared/context/ToastContext", async () => ({
@@ -42,17 +42,17 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 describe("useLanguageList Hook", () => {
-  let updateLanguageSpy: import('vitest').MockInstance;
-  let deleteLanguageSpy: import('vitest').MockInstance;
-  const usePaginatedQueryMock = usePaginatedQuery as import('vitest').Mock;
+  let updateLanguageSpy: import("vitest").MockInstance;
+  let deleteLanguageSpy: import("vitest").MockInstance;
+  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    updateLanguageSpy = jest
+    updateLanguageSpy = vi
       .spyOn(LanguageRepository, "updateLanguage")
       .mockResolvedValue({ errorCode: null } as any);
-    deleteLanguageSpy = jest
+    deleteLanguageSpy = vi
       .spyOn(LanguageRepository, "deleteLanguage")
       .mockResolvedValue({ errorCode: null } as any);
 
@@ -128,7 +128,10 @@ describe("useLanguageList Hook", () => {
 
   it("should handle performEditLanguage failure", async () => {
     const { result } = renderHook(() => useLanguageList());
-    updateLanguageSpy.mockResolvedValueOnce({ errorCode: 500, message: "Edit failed" } as any);
+    updateLanguageSpy.mockResolvedValueOnce({
+      errorCode: 500,
+      message: "Edit failed",
+    } as any);
 
     await act(async () => {
       await result.current.performEditLanguage({
@@ -149,7 +152,10 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle query error toast on loadData", async () => {
-    mockLoadData.mockResolvedValueOnce({ errorCode: 500, message: "Query failed" });
+    mockLoadData.mockResolvedValueOnce({
+      errorCode: 500,
+      message: "Query failed",
+    });
     renderHook(() => useLanguageList());
 
     await waitFor(() => {

@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { UserList } from "./index";
-import { User } from "../../domain/Entity/User";
 import { createUserMock } from "@/shared/tests/factories";
+import type { User } from "../../domain/Entity/User";
+import { UserList } from "./index";
 
 const mockNavigate = vi.fn();
 vi.mock("@variamosple/variamos-components", async () => {

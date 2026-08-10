@@ -1,16 +1,15 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { GoogleLogin } from "./index";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { GoogleLogin } from "./index";
 
 describe("GoogleLogin Component", () => {
-  let mockInitialize: import('vitest').Mock;
-  let mockRenderButton: import('vitest').Mock;
+  let mockInitialize: import("vitest").Mock;
+  let mockRenderButton: import("vitest").Mock;
   let originalGoogle: any;
 
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     originalGoogle = (window as any).google;
     mockInitialize = vi.fn();
     mockRenderButton = vi.fn();

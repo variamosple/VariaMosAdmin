@@ -1,12 +1,14 @@
-import { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
-import { PASSWORD_REGEXP } from "@/shared/constants";
-import { ResponseModel } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import type { FC } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
+import { PASSWORD_REGEXP } from "@/shared/constants";
 
 export interface PasswordUpdateFormProps {
-  onUpdatePasswordSubmit: (passwordUpdate: PasswordUpdate) => Promise<ResponseModel<void>>;
+  onUpdatePasswordSubmit: (
+    passwordUpdate: PasswordUpdate,
+  ) => Promise<ResponseModel<void>>;
   showModal: boolean;
   onClose: () => void;
   isLoading: boolean;
@@ -48,14 +50,20 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
   };
 
   return (
-    <Modal show={showModal} backdrop={isLoading ? "static" : true} onHide={onCloseModal}>
+    <Modal
+      show={showModal}
+      backdrop={isLoading ? "static" : true}
+      onHide={onCloseModal}
+    >
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title>Password update</Modal.Title>
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">
           <Form.Group className="w-100" controlId="newPassword">
-            <Form.Label className="form-label align-self-start m-0">Current password</Form.Label>
+            <Form.Label className="form-label align-self-start m-0">
+              Current password
+            </Form.Label>
             <Form.Control
               type="password"
               className="form-control"
@@ -71,7 +79,9 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
           </Form.Group>
 
           <Form.Group className="w-100" controlId="currentPassword">
-            <Form.Label className="form-label align-self-start m-0">New password</Form.Label>
+            <Form.Label className="form-label align-self-start m-0">
+              New password
+            </Form.Label>
             <Form.Control
               type="password"
               className="form-control"
@@ -92,7 +102,9 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
           </Form.Group>
 
           <Form.Group className="w-100" controlId="passwordConfirm">
-            <Form.Label className="form-label align-self-start m-0">Confirm Password</Form.Label>
+            <Form.Label className="form-label align-self-start m-0">
+              Confirm Password
+            </Form.Label>
             <Form.Control
               type="password"
               className="form-control"
@@ -109,7 +121,12 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
           </Form.Group>
 
           <Modal.Footer>
-            <Button type="button" variant="secondary" disabled={isLoading} onClick={onCloseModal}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={isLoading}
+              onClick={onCloseModal}
+            >
               Cancel
             </Button>
 

@@ -1,5 +1,10 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { BugSearchForm } from "./index";
@@ -11,7 +16,7 @@ describe("BugSearchForm Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
@@ -66,7 +71,10 @@ describe("BugSearchForm Component", () => {
     );
 
     const nameInput = screen.getByPlaceholderText("Search by name");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(nameInput, "Test Query");
     expect(nameInput).toHaveValue("Test Query");
 
@@ -88,7 +96,10 @@ describe("BugSearchForm Component", () => {
     );
 
     const nameInput = screen.getByPlaceholderText("Search by name");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(nameInput, "Glitch");
 
     const clearNameBtn = screen.getByTitle("Clear name filter");
@@ -114,7 +125,10 @@ describe("BugSearchForm Component", () => {
     const nameInput = screen.getByPlaceholderText("Search by name");
 
     // Simulate typing
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.type(nameInput, "Performance issue");
 
     // Initially not submitted (within 500ms debounce window)

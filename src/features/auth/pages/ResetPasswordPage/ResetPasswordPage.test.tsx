@@ -1,12 +1,11 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { ResetPasswordPage } from "./index";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { ResetPasswordPage } from "./index";
 
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
@@ -25,7 +24,10 @@ vi.mock("../../components/ResetPasswordForm", async () => ({
   ResetPasswordForm: ({ onSubmitPassword, isLoading }: any) => (
     <div>
       <span>Loading: {isLoading ? "Yes" : "No"}</span>
-      <button data-testid="mock-reset-form" onClick={() => onSubmitPassword("NewPassword123!")}>
+      <button
+        data-testid="mock-reset-form"
+        onClick={() => onSubmitPassword("NewPassword123!")}
+      >
         Submit Reset
       </button>
     </div>
@@ -44,10 +46,12 @@ describe("ResetPasswordPage Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockSearchParams = new URLSearchParams();
-    (useSearchParams as import('vitest').Mock).mockReturnValue([mockSearchParams]);
-    (useNavigate as import('vitest').Mock).mockReturnValue(mockNavigate);
+    (useSearchParams as import("vitest").Mock).mockReturnValue([
+      mockSearchParams,
+    ]);
+    (useNavigate as import("vitest").Mock).mockReturnValue(mockNavigate);
   });
 
   afterEach(() => {
@@ -113,7 +117,9 @@ describe("ResetPasswordPage Component", () => {
 
     await screen.findByTestId("mock-reset-form");
     expect(
-      screen.getByText("Enter your new password to reset your account credentials."),
+      screen.getByText(
+        "Enter your new password to reset your account credentials.",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -134,7 +140,10 @@ describe("ResetPasswordPage Component", () => {
     render(<ResetPasswordPage />);
 
     await screen.findByTestId("mock-reset-form");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.click(screen.getByTestId("mock-reset-form"));
 
     expect(
@@ -168,11 +177,16 @@ describe("ResetPasswordPage Component", () => {
     render(<ResetPasswordPage />);
 
     await screen.findByTestId("mock-reset-form");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.click(screen.getByTestId("mock-reset-form"));
 
     expect(
-      await screen.findByText("New password must be different from the current one."),
+      await screen.findByText(
+        "New password must be different from the current one.",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -194,7 +208,10 @@ describe("ResetPasswordPage Component", () => {
     render(<ResetPasswordPage />);
 
     await screen.findByTestId("mock-reset-form");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.click(screen.getByTestId("mock-reset-form"));
 
     expect(await screen.findByText("Generic error")).toBeInTheDocument();
@@ -217,7 +234,10 @@ describe("ResetPasswordPage Component", () => {
     render(<ResetPasswordPage />);
 
     await screen.findByTestId("mock-reset-form");
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
     await user.click(screen.getByTestId("mock-reset-form"));
 
     expect(

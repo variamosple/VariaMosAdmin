@@ -1,5 +1,5 @@
-import { Metric } from "../domain/Entity/Metric";
 import { useMemo, useState } from "react";
+import type { Metric } from "../domain/Entity/Metric";
 
 export const useGeoChartData = (metric: Metric) => {
   const [activeFilter, setFilter] = useState(metric.defaultFilter);
@@ -20,7 +20,10 @@ export const useGeoChartData = (metric: Metric) => {
   );
 
   const data = useMemo(() => {
-    return [["Country", "Visits"], ...((metric?.data as any)?.[activeFilter] || [])];
+    return [
+      ["Country", "Visits"],
+      ...((metric?.data as any)?.[activeFilter] || []),
+    ];
   }, [activeFilter, metric]);
 
   return { activeFilter, setFilter, options, data, filterOptions };

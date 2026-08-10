@@ -1,8 +1,7 @@
-import React from "react";
-import { render, screen, act } from "@testing-library/react";
-import { SignInLayout } from "./SignInLayout";
-import { useSession, useRouter } from "@variamosple/variamos-components";
+import { act, render, screen } from "@testing-library/react";
+import { useRouter, useSession } from "@variamosple/variamos-components";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { SignInLayout } from "./SignInLayout";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
@@ -29,8 +28,8 @@ describe("SignInLayout", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
-    (useRouter as import('vitest').Mock).mockReturnValue({
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    (useRouter as import("vitest").Mock).mockReturnValue({
       navigate: mockNavigate,
     });
   });
@@ -40,7 +39,7 @@ describe("SignInLayout", () => {
   });
 
   it("renders children and About component when user is not authenticated", () => {
-    (useSession as import('vitest').Mock).mockReturnValue({
+    (useSession as import("vitest").Mock).mockReturnValue({
       isAuthenticated: false,
     });
 
@@ -56,7 +55,7 @@ describe("SignInLayout", () => {
   });
 
   it("schedules redirect to Home page and cleans up timeout on unmount if authenticated", () => {
-    (useSession as import('vitest').Mock).mockReturnValue({
+    (useSession as import("vitest").Mock).mockReturnValue({
       isAuthenticated: true,
     });
 

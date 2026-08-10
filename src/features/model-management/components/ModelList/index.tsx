@@ -1,8 +1,8 @@
-import { Model } from "@/features/model-management/domain/Entity/Model";
-import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Table } from "react-bootstrap";
+import type { Model } from "@/features/model-management/domain/Entity/Model";
+import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { ModelRowComponent } from "./ModelRow";
 
 export interface ModelListProps extends PaginationControlsProps {
@@ -21,7 +21,11 @@ export const ModelList: FC<ModelListProps> = ({
 }) => {
   return (
     <>
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
       <Table striped bordered hover responsive>
         <thead>
@@ -54,7 +58,11 @@ export const ModelList: FC<ModelListProps> = ({
         </tbody>
       </Table>
 
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

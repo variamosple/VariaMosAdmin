@@ -1,8 +1,7 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { Language } from "../../domain/Entity/Language";
 import { LanguageList } from "./index";
-import { Language } from "../../domain/Entity/Language";
 
 const mockLanguages: Language[] = [
   {

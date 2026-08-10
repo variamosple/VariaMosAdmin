@@ -9,7 +9,9 @@ describe("useListenOutsideClicks hook", () => {
   });
 
   it("should trigger callback when clicking outside element", () => {
-    const { result } = renderHook(() => useListenOutsideClicks(mockOnOutsideClick));
+    const { result } = renderHook(() =>
+      useListenOutsideClicks(mockOnOutsideClick),
+    );
 
     // Set up dummy DOM elements
     const insideElement = document.createElement("div");
@@ -32,7 +34,9 @@ describe("useListenOutsideClicks hook", () => {
   });
 
   it("should NOT trigger callback when clicking inside element", () => {
-    const { result } = renderHook(() => useListenOutsideClicks(mockOnOutsideClick));
+    const { result } = renderHook(() =>
+      useListenOutsideClicks(mockOnOutsideClick),
+    );
 
     const insideElement = document.createElement("div");
     document.body.appendChild(insideElement);
@@ -50,7 +54,9 @@ describe("useListenOutsideClicks hook", () => {
   it("should remove click listener from document on unmount", () => {
     const removeSpy = vi.spyOn(document, "removeEventListener");
 
-    const { unmount } = renderHook(() => useListenOutsideClicks(mockOnOutsideClick));
+    const { unmount } = renderHook(() =>
+      useListenOutsideClicks(mockOnOutsideClick),
+    );
 
     unmount();
 

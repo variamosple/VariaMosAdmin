@@ -1,11 +1,9 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { SignUpPage } from "./SignUpPage";
 import { useSession } from "@variamosple/variamos-components";
-
 import { MemoryRouter } from "react-router-dom";
+import { SignUpPage } from "./SignUpPage";
 
 // Mock @variamosple/variamos-components
 vi.mock("@variamosple/variamos-components", async () => ({
@@ -16,14 +14,19 @@ vi.mock("@variamosple/variamos-components", async () => ({
 // Mock Subcomponents
 vi.mock("../components/SignUpForm", async () => ({
   SignUpForm: ({ onSignUp }: any) => (
-    <button data-testid="mock-signup-form" onClick={() => onSignUp({ email: "test@example.com" })}>
+    <button
+      data-testid="mock-signup-form"
+      onClick={() => onSignUp({ email: "test@example.com" })}
+    >
       Submit SignUp
     </button>
   ),
 }));
 
 vi.mock("../components/GoogleLogin", async () => ({
-  GoogleLogin: ({ text }: any) => <div data-testid="mock-google-login">Google Login: {text}</div>,
+  GoogleLogin: ({ text }: any) => (
+    <div data-testid="mock-google-login">Google Login: {text}</div>
+  ),
 }));
 
 describe("SignUpPage Page Component", () => {
@@ -31,7 +34,7 @@ describe("SignUpPage Page Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useSession as import('vitest').Mock).mockReturnValue({
+    (useSession as import("vitest").Mock).mockReturnValue({
       signUp: mockSignUp,
     });
   });
@@ -44,12 +47,17 @@ describe("SignUpPage Page Component", () => {
     );
     expect(screen.getByAltText("Variamos logo")).toBeInTheDocument();
     expect(screen.getByTestId("mock-signup-form")).toBeInTheDocument();
-    expect(screen.getByTestId("mock-google-login")).toHaveTextContent("signup_with");
+    expect(screen.getByTestId("mock-google-login")).toHaveTextContent(
+      "signup_with",
+    );
     expect(screen.getByText("Sign in")).toBeInTheDocument();
   });
 
   it("handles successful sign up and displays success message", async () => {
-    mockSignUp.mockResolvedValueOnce({ errorCode: null, message: "Registration successful" });
+    mockSignUp.mockResolvedValueOnce({
+      errorCode: null,
+      message: "Registration successful",
+    });
     render(
       <MemoryRouter>
         <SignUpPage />
@@ -66,7 +74,10 @@ describe("SignUpPage Page Component", () => {
   });
 
   it("handles failed sign up and displays error message", async () => {
-    mockSignUp.mockResolvedValueOnce({ errorCode: 400, message: "Email already exists" });
+    mockSignUp.mockResolvedValueOnce({
+      errorCode: 400,
+      message: "Email already exists",
+    });
     render(
       <MemoryRouter>
         <SignUpPage />

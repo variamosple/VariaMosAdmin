@@ -1,7 +1,7 @@
-import { Bug } from "../../domain/Bug";
-import { FC, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
+import type { Bug } from "../../domain/Bug";
 
 interface BugFormModalProps {
   show: boolean;
@@ -49,16 +49,24 @@ export const BugFormModal: FC<BugFormModalProps> = ({
       });
       setSelectedFile(null);
     }
-  }, [show, reset, repos, categories, mode]);
+  }, [show, reset, categories]);
 
   const handleFormSubmit = (data: Bug) => {
     onSubmit(data, selectedFile || undefined);
   };
 
   return (
-    <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered>
+    <Modal
+      show={show}
+      onHide={onHide}
+      backdrop="static"
+      keyboard={false}
+      centered
+    >
       <Modal.Header closeButton>
-        <Modal.Title>{mode === "admin" ? "Report a GitHub Bug" : "Report a New Bug"}</Modal.Title>
+        <Modal.Title>
+          {mode === "admin" ? "Report a GitHub Bug" : "Report a New Bug"}
+        </Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleSubmit(handleFormSubmit)}>

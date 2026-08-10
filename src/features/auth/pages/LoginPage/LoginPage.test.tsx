@@ -1,15 +1,13 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { LoginPage } from "./index";
+import userEvent from "@testing-library/user-event";
 import { useRouter, useSession } from "@variamosple/variamos-components";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router-dom";
 
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
-
-import { MemoryRouter } from "react-router-dom";
-import userEvent from "@testing-library/user-event";
+import { server } from "@/shared/tests/mocks/server";
+import { LoginPage } from "./index";
 
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
@@ -50,12 +48,12 @@ describe("LoginPage Page Component", () => {
     vi.clearAllMocks();
     mockQueryParams = new URLSearchParams();
 
-    (useRouter as import('vitest').Mock).mockReturnValue({
+    (useRouter as import("vitest").Mock).mockReturnValue({
       queryParams: mockQueryParams,
       navigate: mockNavigate,
     });
 
-    (useSession as import('vitest').Mock).mockReturnValue({
+    (useSession as import("vitest").Mock).mockReturnValue({
       signIn: mockSignIn,
       signInAsGuest: mockSignInAsGuest,
       isLoading: false,
@@ -86,13 +84,19 @@ describe("LoginPage Page Component", () => {
     await user.click(screen.getByTestId("mock-login-form"));
 
     await waitFor(() => {
-      expect(mockSignIn).toHaveBeenCalledWith({ username: "user", password: "pwd" });
+      expect(mockSignIn).toHaveBeenCalledWith({
+        username: "user",
+        password: "pwd",
+      });
     });
     expect(mockNavigate).toHaveBeenCalledWith(AppConfig.HOME_PAGE);
   });
 
   it("handles failed sign in and displays error message", async () => {
-    mockSignIn.mockResolvedValueOnce({ errorCode: 401, message: "Invalid credentials" });
+    mockSignIn.mockResolvedValueOnce({
+      errorCode: 401,
+      message: "Invalid credentials",
+    });
     renderLoginPage();
 
     const user = userEvent.setup();
@@ -108,7 +112,10 @@ describe("LoginPage Page Component", () => {
   });
 
   it("handles successful guest sign in and navigates to redirect target", async () => {
-    mockSignInAsGuest.mockResolvedValueOnce({ errorCode: null, data: { redirect: "/dashboard" } });
+    mockSignInAsGuest.mockResolvedValueOnce({
+      errorCode: null,
+      data: { redirect: "/dashboard" },
+    });
     renderLoginPage();
 
     const user = userEvent.setup();
@@ -121,7 +128,10 @@ describe("LoginPage Page Component", () => {
   });
 
   it("handles guest sign in failure", async () => {
-    mockSignInAsGuest.mockResolvedValueOnce({ errorCode: 500, message: "Server error" });
+    mockSignInAsGuest.mockResolvedValueOnce({
+      errorCode: 500,
+      message: "Server error",
+    });
     renderLoginPage();
 
     const user = userEvent.setup();

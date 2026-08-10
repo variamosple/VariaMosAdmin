@@ -1,13 +1,11 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { ForgotPasswordPage } from "./index";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
-import { AppConfig } from "@/shared/infrastructure/AppConfig";
-
+import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router-dom";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { ForgotPasswordPage } from "./index";
 
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
@@ -33,7 +31,10 @@ vi.mock("../../components/ForgotPasswordForm", async () => ({
   ForgotPasswordForm: ({ onSubmitEmail, isLoading }: any) => (
     <div>
       <span>Loading: {isLoading ? "Yes" : "No"}</span>
-      <button data-testid="mock-forgot-form" onClick={() => onSubmitEmail("test@example.com")}>
+      <button
+        data-testid="mock-forgot-form"
+        onClick={() => onSubmitEmail("test@example.com")}
+      >
         Submit Email
       </button>
     </div>
@@ -48,7 +49,9 @@ describe("ForgotPasswordPage Component", () => {
       </MemoryRouter>,
     );
     expect(screen.getByAltText("Variamos logo")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /forgot password/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /forgot password/i }),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("mock-forgot-form")).toBeInTheDocument();
     expect(screen.getByText("Back to Sign In")).toBeInTheDocument();
   });
@@ -85,7 +88,9 @@ describe("ForgotPasswordPage Component", () => {
 
     await screen.findByText(/If an account with this email exists/i);
     expect(forgotPasswordCalled).toBe(true);
-    expect(screen.queryByRole("heading", { name: /forgot password/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /forgot password/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("handles API failure response and displays custom error message", async () => {
@@ -131,7 +136,9 @@ describe("ForgotPasswordPage Component", () => {
     await user.click(screen.getByTestId("mock-forgot-form"));
 
     await waitFor(() => {
-      expect(screen.getByText("Error sending reset link. Please try again.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error sending reset link. Please try again."),
+      ).toBeInTheDocument();
     });
 
     consoleSpy.mockRestore();

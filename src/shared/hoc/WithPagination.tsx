@@ -1,4 +1,4 @@
-import React, { ComponentType, useState, useEffect } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 
 export interface PaginationControlsProps {
   currentPage: number;

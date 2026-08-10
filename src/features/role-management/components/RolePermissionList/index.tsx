@@ -1,9 +1,9 @@
-import { Permission } from "@/features/permission-management/domain/Entity/Permission";
-import { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import { Paginator } from "@variamosple/variamos-components";
-import { FC } from "react";
+import type { FC } from "react";
 import { Button, ButtonGroup, Table } from "react-bootstrap";
 import { TrashFill } from "react-bootstrap-icons";
+import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 
 export interface PermissionListParameters extends PaginationControlsProps {
   items: Permission[];
@@ -19,7 +19,11 @@ export const RolePermissionList: FC<PermissionListParameters> = ({
 }) => {
   return (
     <>
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
       <Table striped bordered hover>
         <thead>
@@ -55,7 +59,11 @@ export const RolePermissionList: FC<PermissionListParameters> = ({
         </tbody>
       </Table>
 
-      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

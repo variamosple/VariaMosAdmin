@@ -1,5 +1,4 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { ModelFormModal } from "./index";
@@ -61,10 +60,18 @@ describe("ModelFormModal Component", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("Create a New Model")).toBeInTheDocument();
 
-    expect(screen.getByPlaceholderText("Model name")).toHaveValue("Original Name");
-    expect(screen.getByPlaceholderText("Model author")).toHaveValue("Author Name");
-    expect(screen.getByPlaceholderText("Model description")).toHaveValue("Original Description");
-    expect(screen.getByPlaceholderText("Model source")).toHaveValue("Original Source");
+    expect(screen.getByPlaceholderText("Model name")).toHaveValue(
+      "Original Name",
+    );
+    expect(screen.getByPlaceholderText("Model author")).toHaveValue(
+      "Author Name",
+    );
+    expect(screen.getByPlaceholderText("Model description")).toHaveValue(
+      "Original Description",
+    );
+    expect(screen.getByPlaceholderText("Model source")).toHaveValue(
+      "Original Source",
+    );
   });
 
   it("triggers validation when submit name is empty", async () => {
@@ -80,7 +87,9 @@ describe("ModelFormModal Component", () => {
 
     fireEvent.submit(screen.getByRole("button", { name: /edit model/i }));
 
-    expect(await screen.findByText("Model name is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Model name is required"),
+    ).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 

@@ -1,8 +1,9 @@
-import { Bug } from "../../domain/Bug";
-import { formatDate } from "@/shared/constants";
-import { FC } from "react";
+import type { FC } from "react";
 import { Badge, Button } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";
+import { formatDate } from "@/shared/constants";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import type { Bug } from "../../domain/Bug";
 
 interface BugRowProps {
   bug: Bug;
@@ -83,7 +84,10 @@ export const BugRowComponent: FC<BugRowProps> = ({
         )}
       </td>
 
-      <td className="align-middle font-weight-bold text-dark" style={{ minWidth: "150px" }}>
+      <td
+        className="align-middle font-weight-bold text-dark"
+        style={{ minWidth: "150px" }}
+      >
         {bug.title}
       </td>
 
@@ -125,7 +129,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
         <td className="align-middle">
           {bug.attachments && bug.attachments.length > 0 ? (
             <a
-              href={`${process.env.REACT_APP_ADMIN_API_URL || "http://localhost:4000"}${bug.attachments[0].filePath}`}
+              href={`${AppConfig.ADMIN_API_URL || "http://localhost:4000"}${bug.attachments[0].filePath}`}
               target="_blank"
               rel="noopener noreferrer"
             >

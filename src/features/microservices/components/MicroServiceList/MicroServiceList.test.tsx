@@ -1,14 +1,26 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MicroServiceList } from "./index";
-import { MicroService } from "../../domain/Entity/MicroService";
-
 import * as MicroServiceRepository from "../../api/MicroServiceRepository";
+import type { MicroService } from "../../domain/Entity/MicroService";
+import { MicroServiceList } from "./index";
 
 const mockMicroservices: MicroService[] = [
-  { id: "1", names: ["micro-1"], state: "exited", status: "down", created: new Date(), labels: {} },
-  { id: "2", names: ["micro-2"], state: "running", status: "up", created: new Date(), labels: {} },
+  {
+    id: "1",
+    names: ["micro-1"],
+    state: "exited",
+    status: "down",
+    created: new Date(),
+    labels: {},
+  },
+  {
+    id: "2",
+    names: ["micro-2"],
+    state: "running",
+    status: "up",
+    created: new Date(),
+    labels: {},
+  },
 ];
 
 // Mock the variamos-components library which has Paginator
@@ -43,13 +55,15 @@ describe("MicroServiceList Component", () => {
   const mockOnStart = vi.fn();
   const mockOnRestart = vi.fn();
   const mockOnStop = vi.fn();
-  let watchLogsSpy: import('vitest').MockInstance;
+  let watchLogsSpy: import("vitest").MockInstance;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    watchLogsSpy = vi.spyOn(MicroServiceRepository, "watchMicroserviceLogs").mockReturnValue({
-      close: vi.fn(),
-    } as any);
+    watchLogsSpy = vi
+      .spyOn(MicroServiceRepository, "watchMicroserviceLogs")
+      .mockReturnValue({
+        close: vi.fn(),
+      } as any);
   });
 
   afterEach(() => {

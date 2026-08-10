@@ -1,8 +1,13 @@
-import { Language } from "../../domain/Entity/Language";
-import { formatDate, formatDateTime } from "@/shared/constants";
-import { FC, useMemo, useState } from "react";
+import { type FC, useMemo, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
-import { DashCircle, PencilFill, PlusCircle, TrashFill } from "react-bootstrap-icons";
+import {
+  DashCircle,
+  PencilFill,
+  PlusCircle,
+  TrashFill,
+} from "react-bootstrap-icons";
+import { formatDate, formatDateTime } from "@/shared/constants";
+import type { Language } from "../../domain/Entity/Language";
 
 export interface LanguageRowProps {
   language: Language;
@@ -132,7 +137,9 @@ const LanguageDetails: FC<LanguageDetailsProps> = ({ language }) => {
         </Col>
 
         <Col xs={10}>
-          {(language.owners || []).map((owner) => `${owner.name} (${owner.email})`).join(", ")}
+          {(language.owners || [])
+            .map((owner) => `${owner.name} (${owner.email})`)
+            .join(", ")}
         </Col>
       </Row>
     </Container>

@@ -1,8 +1,8 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { LanguageListPage } from "./index";
+import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
+import { LanguageListPage } from "./index";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
@@ -67,21 +67,24 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 // Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-vi.mock("@variamosple/variamos-components/dist/Components/ConfirmationModal", async () => {
-  return {
-    __esModule: true,
-    default: ({ show, message, onConfirm, onCancel }: any) => {
-      if (!show) return null;
-      return (
-        <div data-testid="delete-confirm-modal">
-          <span>{message}</span>
-          <button onClick={onConfirm}>Confirm Delete</button>
-          <button onClick={onCancel}>Cancel Delete</button>
-        </div>
-      );
-    },
-  };
-});
+vi.mock(
+  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
+  async () => {
+    return {
+      __esModule: true,
+      default: ({ show, message, onConfirm, onCancel }: any) => {
+        if (!show) return null;
+        return (
+          <div data-testid="delete-confirm-modal">
+            <span>{message}</span>
+            <button onClick={onConfirm}>Confirm Delete</button>
+            <button onClick={onCancel}>Cancel Delete</button>
+          </div>
+        );
+      },
+    };
+  },
+);
 
 describe("LanguageListPage", () => {
   beforeEach(() => {
@@ -120,7 +123,9 @@ describe("LanguageListPage", () => {
     await user.type(input, "English US");
 
     // Click submit inside the modal
-    const editLangButtons = screen.getAllByRole("button", { name: /edit language/i });
+    const editLangButtons = screen.getAllByRole("button", {
+      name: /edit language/i,
+    });
     await user.click(editLangButtons[editLangButtons.length - 1]);
 
     // Verify modal closes
@@ -141,14 +146,18 @@ describe("LanguageListPage", () => {
 
     // Delete confirmation modal should be visible
     expect(screen.getByTestId("delete-confirm-modal")).toBeInTheDocument();
-    expect(screen.getByText("Are you sure you want to delete the language?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Are you sure you want to delete the language?"),
+    ).toBeInTheDocument();
 
     // Click confirm delete
     await user.click(screen.getByText("Confirm Delete"));
 
     // Verify modal closes
     await waitFor(() => {
-      expect(screen.queryByTestId("delete-confirm-modal")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("delete-confirm-modal"),
+      ).not.toBeInTheDocument();
     });
   });
 });

@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { UserRowComponent } from "./UserRow";
-import { User } from "@/features/user-management/domain/Entity/User";
 import { useQuery } from "@variamosple/variamos-components";
-import { server } from "@/shared/tests/mocks/server";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
+import type { User } from "@/features/user-management/domain/Entity/User";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
+import { UserRowComponent } from "./UserRow";
 
 // Mock router and query hooks from variamos-components
 const mockNavigate = vi.fn();
@@ -35,7 +35,7 @@ const apiTarget = (path: string) => {
 };
 
 describe("UserRowComponent", () => {
-  const useQueryMock = useQuery as import('vitest').Mock;
+  const useQueryMock = useQuery as import("vitest").Mock;
   const mockOnUserResetLink = vi.fn();
   const mockOnUserDisable = vi.fn();
   const mockOnUserEnable = vi.fn();
@@ -160,7 +160,9 @@ describe("UserRowComponent", () => {
     );
 
     expect(screen.getByText("deleted")).toBeInTheDocument();
-    expect(screen.queryByTitle("Generate password reset link")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTitle("Generate password reset link"),
+    ).not.toBeInTheDocument();
     expect(screen.queryByTitle("Disable user")).not.toBeInTheDocument();
     expect(screen.queryByTitle("Enable user")).not.toBeInTheDocument();
     expect(screen.queryByTitle("Delete user")).not.toBeInTheDocument();
