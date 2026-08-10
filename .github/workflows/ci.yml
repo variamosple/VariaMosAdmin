@@ -54,7 +54,7 @@ jobs:
 
     - name: Run unit tests
       run: |
-        npm run test -- --watchAll=false --passWithNoTests
+        npm run test -- --run --passWithNoTests
 
     - name: Verify production build
       run: |
