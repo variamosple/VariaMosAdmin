@@ -44,9 +44,7 @@ vi.mock("../../components/ForgotPasswordForm", async () => ({
 describe("ForgotPasswordPage Component", () => {
   it("renders page correctly in initial state", () => {
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <ForgotPasswordPage />
       </MemoryRouter>,
     );
@@ -74,9 +72,7 @@ describe("ForgotPasswordPage Component", () => {
     );
 
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <ForgotPasswordPage />
       </MemoryRouter>,
     );
@@ -108,9 +104,7 @@ describe("ForgotPasswordPage Component", () => {
     );
 
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <ForgotPasswordPage />
       </MemoryRouter>,
     );
@@ -133,9 +127,7 @@ describe("ForgotPasswordPage Component", () => {
     );
 
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <ForgotPasswordPage />
       </MemoryRouter>,
     );

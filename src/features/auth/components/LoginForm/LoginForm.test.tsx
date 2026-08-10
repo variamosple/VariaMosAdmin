@@ -23,9 +23,7 @@ describe("LoginForm Component", () => {
 
   const renderLoginForm = () =>
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <LoginForm onSignIn={mockOnSignIn} />
       </MemoryRouter>,
     );

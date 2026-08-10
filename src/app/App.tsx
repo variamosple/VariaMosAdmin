@@ -34,9 +34,7 @@ function App() {
         requestSignInAsGuest={requestSignInAsGuest}
         requestLogout={requestLogout}
       >
-        <HashRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
+        <HashRouter>
           <RouterProvider>
             <Routes />
           </RouterProvider>
