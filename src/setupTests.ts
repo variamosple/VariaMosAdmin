@@ -72,6 +72,22 @@ Object.defineProperty(window, "IntersectionObserver", {
   value: MockIntersectionObserver,
 });
 
+// Polyfill window.getComputedStyle to return default transition values in JSDOM,
+// preventing NaN timeout warnings in third-party transition helpers (like react-bootstrap)
+const originalGetComputedStyle = window.getComputedStyle;
+window.getComputedStyle = function (elt, ...args) {
+  const style = originalGetComputedStyle.call(this, elt, ...args);
+  if (style) {
+    if (!style.transitionDuration) {
+      style.transitionDuration = "0s";
+    }
+    if (!style.transitionDelay) {
+      style.transitionDelay = "0s";
+    }
+  }
+  return style;
+};
+
 beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
 afterEach(() => server.resetHandlers());
 afterAll(async () => {

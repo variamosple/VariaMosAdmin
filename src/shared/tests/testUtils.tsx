@@ -7,7 +7,10 @@ export const renderWithRouter = (
   { route = "/", path = "/" } = {},
 ) => {
   return render(
-    <MemoryRouter initialEntries={[route]}>
+    <MemoryRouter
+      initialEntries={[route]}
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <Routes>
         <Route path={path} element={ui} />
       </Routes>

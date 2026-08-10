@@ -170,6 +170,9 @@ describe('Admin - Password Reset Flow', () => {
       cy.get('a#nav-dropdown').click();
       cy.contains('a', 'Logout').click();
 
+      // Clear local storage to prevent session persistence/restoration
+      cy.clearLocalStorage();
+
       // First use: successful reset
       cy.visit(recoveryLink);
       cy.get('input[id="new_password"]').type(newPassword);
@@ -179,6 +182,7 @@ describe('Admin - Password Reset Flow', () => {
 
       // Go to login page first to ensure component unmounts
       cy.visit('http://localhost:3000/variamos_admin/#/login');
+      cy.get('input[name="email"]').should('be.visible');
 
       // Second use: trying to access the link again
       cy.visit(recoveryLink);

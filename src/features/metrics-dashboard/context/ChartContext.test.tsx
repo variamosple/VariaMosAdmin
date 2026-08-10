@@ -1,4 +1,10 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
@@ -71,9 +77,24 @@ describe("ChartContext", () => {
   it("should throw error when useChartContext is used outside ChartContextProvider", () => {
     // Suppress console.error in vi output for this test block
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    expect(() => render(<TestComponent />)).toThrow(
+
+    // Intercept and prevent JSDOM from logging the expected uncaught error
+    const errorHandler = (event: ErrorEvent) => {
+      if (
+        event.error?.message?.includes(
+          "useChartContext must be used within a ChartContextProvider",
+        )
+      ) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("error", errorHandler);
+
+    expect(() => renderHook(() => useChartContext())).toThrow(
       "useChartContext must be used within a ChartContextProvider",
     );
+
+    window.removeEventListener("error", errorHandler);
     spy.mockRestore();
   });
 

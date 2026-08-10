@@ -297,7 +297,15 @@ export const requestPasswordReset = (
 export const verifyPasswordResetToken = (
   token: string,
 ): Promise<ResponseModel<void>> => {
-  return ADMIN_CLIENT.get(`/auth/verify-token?token=${token}`)
+  return ADMIN_CLIENT.get(
+    `/auth/verify-token?token=${token}&_t=${Date.now()}`,
+    {
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    },
+  )
     .then((response) => response.data)
     .catch((error) =>
       handleRepositoryError(
