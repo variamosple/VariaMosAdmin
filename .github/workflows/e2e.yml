@@ -10,111 +10,111 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Stop native PostgreSQL and start test container
-      run: |
-        # 1. Forcefully stop native host PostgreSQL and free port 5432
-        sudo systemctl stop postgresql || true
-        sudo systemctl disable postgresql || true
-        sudo fuser -k 5432/tcp || true
-        
-        # 2. Start PostgreSQL container on port 5432
-        docker run --name postgres -e POSTGRES_USER=variamos_admin -e POSTGRES_PASSWORD=variamos_db_password -e POSTGRES_DB=VariamosDB -p 5432:5432 -d postgres:15
-        
-        # 3. Wait for PostgreSQL container to be ready
-        until docker exec postgres pg_isready -U variamos_admin -d VariamosDB; do
-          echo "Waiting for PostgreSQL container to start..."
-          sleep 1
-        done
+      - name: Stop native PostgreSQL and start test container
+        run: |
+          # 1. Forcefully stop native host PostgreSQL and free port 5432
+          sudo systemctl stop postgresql || true
+          sudo systemctl disable postgresql || true
+          sudo fuser -k 5432/tcp || true
 
-    - name: Checkout VariaMosAdmin (frontend)
-      uses: actions/checkout@v4
+          # 2. Start PostgreSQL container on port 5432
+          docker run --name postgres -e POSTGRES_USER=variamos_admin -e POSTGRES_PASSWORD=variamos_db_password -e POSTGRES_DB=VariamosDB -p 5432:5432 -d postgres:15
 
-    - name: Checkout variamos_ms_admin (backend)
-      uses: actions/checkout@v4
-      with:
-        repository: variamosple/variamos_ms_admin
-        path: variamos_ms_admin
+          # 3. Wait for PostgreSQL container to be ready
+          until docker exec postgres pg_isready -U variamos_admin -d VariamosDB; do
+            echo "Waiting for PostgreSQL container to start..."
+            sleep 1
+          done
 
-    - name: Checkout variamos_ms_languages
-      uses: actions/checkout@v4
-      with:
-        repository: variamosple/variamos_ms_languages
-        path: variamos_ms_languages
+      - name: Checkout VariaMosAdmin (frontend)
+        uses: actions/checkout@v7
 
-    - name: Checkout vms_projects
-      uses: actions/checkout@v4
-      with:
-        repository: variamosple/vms_projects
-        path: vms_projects
+      - name: Checkout variamos_ms_admin (backend)
+        uses: actions/checkout@v7
+        with:
+          repository: variamosple/variamos_ms_admin
+          path: variamos_ms_admin
 
-    - name: Generate E2E Test Credentials & Keys
-      run: |
-        # Generate RS256 private and public keys for token authentication
-        openssl genrsa -out ./variamos_ms_admin/jwtRS256.key 2048
-        openssl rsa -in ./variamos_ms_admin/jwtRS256.key -pubout -out ./variamos_ms_admin/jwtRS256.key.pub
-        
-        # Create dummy credentials.json for projects microservice
-        echo '{}' > ./vms_projects/credentials.json
+      - name: Checkout variamos_ms_languages
+        uses: actions/checkout@v7
+        with:
+          repository: variamosple/variamos_ms_languages
+          path: variamos_ms_languages
 
-    - name: Initialize PostgreSQL database schema
-      run: |
-        PGPASSWORD=variamos_db_password psql -h 127.0.0.1 -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/VariamosDB.sql
-        PGPASSWORD=variamos_db_password PGOPTIONS="-c search_path=variamos,public" psql -h 127.0.0.1 -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/config.sql
+      - name: Checkout vms_projects
+        uses: actions/checkout@v7
+        with:
+          repository: variamosple/vms_projects
+          path: vms_projects
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 24
-        cache: 'npm'
-        cache-dependency-path: package-lock.json
+      - name: Generate E2E Test Credentials & Keys
+        run: |
+          # Generate RS256 private and public keys for token authentication
+          openssl genrsa -out ./variamos_ms_admin/jwtRS256.key 2048
+          openssl rsa -in ./variamos_ms_admin/jwtRS256.key -pubout -out ./variamos_ms_admin/jwtRS256.key.pub
 
-    - name: Install frontend dependencies
-      run: |
-        npm ci
+          # Create dummy credentials.json for projects microservice
+          echo '{}' > ./vms_projects/credentials.json
 
-    - name: Start Microservices (Docker Compose)
-      run: |
-        npm run docker:test:up
-      env:
-        VARIAMOS_WORKSPACE_DIR: ./
+      - name: Initialize PostgreSQL database schema
+        run: |
+          PGPASSWORD=variamos_db_password psql -h 127.0.0.1 -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/VariamosDB.sql
+          PGPASSWORD=variamos_db_password PGOPTIONS="-c search_path=variamos,public" psql -h 127.0.0.1 -U variamos_admin -d VariamosDB -v ON_ERROR_STOP=1 -f cypress/support/db/config.sql
 
-    - name: Run Real E2E Tests (Cypress)
-      uses: cypress-io/github-action@v7
-      with:
-        start: npm start
-        wait-on: 'http://localhost:3000, http://localhost:4000/version'
-        wait-on-timeout: 120
-        command: npx cypress run --spec cypress/integration/**/*.real.spec.js
-      env:
-        VARIAMOS_WORKSPACE_DIR: ./
-        DB_USER: variamos_admin
-        DB_PASSWORD: variamos_db_password
-        DB_HOST: 127.0.0.1
-        DB_DATABASE: VariamosDB
-        DB_PORT: 5432
-        DB_SCHEMA: variamos
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
 
-    - name: Print Docker Container Logs on Failure
-      if: failure()
-      run: |
-        docker compose -f docker-compose.test.yml logs
-      env:
-        VARIAMOS_WORKSPACE_DIR: ./
+      - name: Install frontend dependencies
+        run: |
+          npm ci
 
-    - name: Stop Microservices (Docker Compose)
-      if: always()
-      run: |
-        npm run docker:test:down
-      env:
-        VARIAMOS_WORKSPACE_DIR: ./
+      - name: Start Microservices (Docker Compose)
+        run: |
+          npm run docker:test:up
+        env:
+          VARIAMOS_WORKSPACE_DIR: ./
 
-    - name: Upload Cypress Screenshots and Videos
-      if: failure()
-      uses: actions/upload-artifact@v7
-      with:
-        name: cypress-real-screenshots-and-videos
-        path: |
-          cypress/screenshots
-          cypress/videos
-        if-no-files-found: ignore
-        retention-days: 7
+      - name: Run Real E2E Tests (Cypress)
+        uses: cypress-io/github-action@v7.4.1
+        with:
+          start: npm start
+          wait-on: 'http://localhost:3000, http://localhost:4000/version'
+          wait-on-timeout: 120
+          command: npx cypress run --spec cypress/integration/**/*.real.spec.js
+        env:
+          VARIAMOS_WORKSPACE_DIR: ./
+          DB_USER: variamos_admin
+          DB_PASSWORD: variamos_db_password
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: VariamosDB
+          DB_PORT: 5432
+          DB_SCHEMA: variamos
+
+      - name: Print Docker Container Logs on Failure
+        if: failure()
+        run: |
+          docker compose -f docker-compose.test.yml logs
+        env:
+          VARIAMOS_WORKSPACE_DIR: ./
+
+      - name: Stop Microservices (Docker Compose)
+        if: always()
+        run: |
+          npm run docker:test:down
+        env:
+          VARIAMOS_WORKSPACE_DIR: ./
+
+      - name: Upload Cypress Screenshots and Videos
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cypress-real-screenshots-and-videos
+          path: |
+            cypress/screenshots
+            cypress/videos
+          if-no-files-found: ignore
+          retention-days: 7
