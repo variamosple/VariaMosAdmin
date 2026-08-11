@@ -62,9 +62,7 @@ describe("LoginPage Page Component", () => {
 
   const renderLoginPage = () =>
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <LoginPage />
       </MemoryRouter>,
     );

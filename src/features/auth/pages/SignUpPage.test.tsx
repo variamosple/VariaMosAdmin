@@ -41,9 +41,7 @@ describe("SignUpPage Page Component", () => {
 
   it("renders SignUpPage components correctly", () => {
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <SignUpPage />
       </MemoryRouter>,
     );
@@ -61,9 +59,7 @@ describe("SignUpPage Page Component", () => {
       message: "Registration successful",
     });
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <SignUpPage />
       </MemoryRouter>,
     );
@@ -83,9 +79,7 @@ describe("SignUpPage Page Component", () => {
       message: "Email already exists",
     });
     render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter>
         <SignUpPage />
       </MemoryRouter>,
     );

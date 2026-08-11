@@ -2,7 +2,11 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useContext } from "react";
 import "@testing-library/jest-dom";
-import { Events, RouterContext } from "@variamosple/variamos-components";
+import {
+  Events,
+  RouterContext,
+  type RouterContextProps,
+} from "@variamosple/variamos-components";
 import {
   useLocation,
   useNavigate,
@@ -45,7 +49,9 @@ vi.mock("@variamosple/variamos-components", async () => {
 });
 
 const ConsumerComponent = () => {
-  const ctx = useContext(RouterContext);
+  const ctx = useContext(
+    RouterContext as React.Context<RouterContextProps | null>,
+  );
   if (!ctx) return null;
   return (
     <div>

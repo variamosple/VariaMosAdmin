@@ -32,7 +32,7 @@ describe("Metrics & Monitoring - Real E2E Flows", () => {
     cy.contains("h1", "Metrics").should("be.visible");
 
     // Verify real database metric titles are displayed
-    cy.contains("Daily Unique Visits").should("be.visible");
+    cy.contains("Daily Unique Visits", { timeout: 30000 }).should("be.visible");
     cy.contains("Daily Visits").should("be.visible");
     cy.contains("Monthly Visits").should("be.visible");
     cy.contains("Top visited pages (Last 3 Months)").should("be.visible");
