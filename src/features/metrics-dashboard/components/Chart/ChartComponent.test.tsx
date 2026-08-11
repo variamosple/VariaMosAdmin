@@ -2,10 +2,29 @@ import { render, screen } from "@testing-library/react";
 import type { Metric } from "../../domain/Entity/Metric";
 import { ChartComponent } from "./index";
 
-// Mock google charts to prevent errors during rendering in test environment
-vi.mock("react-google-charts", async () => {
+// Mock recharts and react-svg-worldmap to prevent errors during rendering in test environment
+vi.mock("react-svg-worldmap", async () => {
   return {
-    Chart: () => <div data-testid="google-chart">Mock Google Chart</div>,
+    WorldMap: () => <div data-testid="mock-world-map">Mock World Map</div>,
+  };
+});
+
+vi.mock("recharts", async () => {
+  const OriginalModule = await vi.importActual("recharts");
+  return {
+    ...OriginalModule,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+    PieChart: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="recharts-pie-chart">{children}</div>
+    ),
+    BarChart: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="recharts-bar-chart">{children}</div>
+    ),
+    LineChart: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="recharts-line-chart">{children}</div>
+    ),
   };
 });
 
@@ -16,7 +35,7 @@ vi.mock("../../context/ChartContext", async () => {
       metric: { title: "Test Line Metric", data: [] },
       isLoading: false,
     }),
-    withChartContextWrapper: (Component: any) => Component,
+    withChartContextWrapper: (Component: React.ComponentType<any>) => Component,
   };
 });
 
@@ -32,7 +51,7 @@ describe("ChartComponent Component", () => {
     };
 
     render(<ChartComponent metric={geoMetric} />);
-    expect(screen.getAllByTestId("google-chart")).toHaveLength(1);
+    expect(screen.getByTestId("mock-world-map")).toBeInTheDocument();
   });
 
   it("renders PieChart when chartType is pie", () => {
@@ -46,6 +65,6 @@ describe("ChartComponent Component", () => {
     };
 
     render(<ChartComponent metric={pieMetric} />);
-    expect(screen.getAllByTestId("google-chart")).toHaveLength(1);
+    expect(screen.getByTestId("recharts-pie-chart")).toBeInTheDocument();
   });
 });

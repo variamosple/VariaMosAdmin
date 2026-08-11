@@ -13,9 +13,9 @@ const mockUseChartContext = {
 
 vi.mock("../../context/ChartContext", async () => ({
   useChartContext: () => mockUseChartContext,
-  withChartContextWrapper: (Component: any) => (props: any) => (
-    <Component {...props} />
-  ),
+  withChartContextWrapper:
+    (Component: React.ComponentType<any>) =>
+    (props: React.ComponentProps<any>) => <Component {...props} />,
 }));
 
 // Mock the useLineChartData hook
@@ -32,19 +32,41 @@ vi.mock("../../hooks/useLineChartData", async () => ({
   useLineChartData: () => mockUseLineChartData,
 }));
 
-// Mock react-google-charts to avoid JSDOM charting errors
-vi.mock("react-google-charts", async () => ({
-  __esModule: true,
-  default: ({ chartType, data }: any) => (
-    <div data-testid="mock-google-chart" data-chart-type={chartType}>
-      Chart Type: {chartType}, Rows: {data ? data.length - 1 : 0}
-    </div>
-  ),
-}));
+// Mock recharts to avoid JSDOM charting errors
+vi.mock("recharts", async () => {
+  const OriginalModule = await vi.importActual("recharts");
+  return {
+    ...OriginalModule,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+    LineChart: ({
+      children,
+      data,
+    }: {
+      children: React.ReactNode;
+      data?: unknown[];
+    }) => (
+      <div
+        data-testid="mock-recharts-line-chart"
+        data-rows-count={data ? data.length : 0}
+      >
+        LineChart: Rows: {data ? data.length : 0}
+        {children}
+      </div>
+    ),
+    Line: () => <div data-testid="mock-recharts-line" />,
+    XAxis: () => null,
+    YAxis: () => null,
+    CartesianGrid: () => null,
+    Tooltip: () => null,
+    Legend: () => null,
+  };
+});
 
 // Mock ChartDateFilter component
 vi.mock("./ChartDateFilter", async () => ({
-  ChartDateFilter: ({ id }: any) => (
+  ChartDateFilter: ({ id }: { id: string }) => (
     <div data-testid="mock-date-filter">Filter: {id}</div>
   ),
 }));
@@ -78,7 +100,9 @@ describe("LineChart Component", () => {
     render(<LineChart metric={dummyMetric} />);
 
     // Should not show chart or empty state
-    expect(screen.queryByTestId("mock-google-chart")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("mock-recharts-line-chart"),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("No data found.")).not.toBeInTheDocument();
 
     // Check loading indicator
@@ -91,18 +115,19 @@ describe("LineChart Component", () => {
     render(<LineChart metric={dummyMetric} />);
 
     expect(screen.getByText("No data found.")).toBeInTheDocument();
-    expect(screen.queryByTestId("mock-google-chart")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("mock-recharts-line-chart"),
+    ).not.toBeInTheDocument();
   });
 
-  it("renders the Google Chart when metric has data", () => {
+  it("renders the Recharts LineChart when metric has data", () => {
     mockUseChartContext.isLoading = false;
     mockUseChartContext.metric.data = { some: "data" };
     render(<LineChart metric={dummyMetric} />);
 
     expect(screen.queryByText("No data found.")).not.toBeInTheDocument();
-    const chart = screen.getByTestId("mock-google-chart");
+    const chart = screen.getByTestId("mock-recharts-line-chart");
     expect(chart).toBeInTheDocument();
-    expect(chart).toHaveAttribute("data-chart-type", "LineChart");
-    expect(chart).toHaveTextContent("Rows: 2");
+    expect(chart).toHaveAttribute("data-rows-count", "2");
   });
 });

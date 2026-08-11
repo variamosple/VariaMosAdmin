@@ -22,7 +22,7 @@ const TestComponent = () => {
   );
 };
 
-const BadComponent = () => {
+const _BadComponent = () => {
   useToast();
   return <div>Bad</div>;
 };

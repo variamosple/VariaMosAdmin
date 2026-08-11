@@ -1,6 +1,15 @@
 import type { FC } from "react";
 import { Spinner } from "react-bootstrap";
-import Chart from "react-google-charts";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart as RechartsLineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   useChartContext,
   withChartContextWrapper,
@@ -10,7 +19,52 @@ import { ChartDateFilter } from "./ChartDateFilter";
 
 const LineChartComponent: FC<unknown> = () => {
   const { metric, isLoading } = useChartContext();
-  const { data, options } = useLineChartData(metric);
+  const { data: rawData } = useLineChartData(metric);
+
+  // Transform rawData [ ["Date", "Series1", "Series2"], [DateObj, val1, val2] ] into Recharts format:
+  // [ { date: "10/12", Series1: val1, Series2: val2 } ]
+  const chartData = (() => {
+    if (!rawData || rawData.length <= 1) return [];
+    const headers = rawData[0]; // ["Date", ...seriesKeys]
+    const rows = rawData.slice(1);
+    return rows.map((row) => {
+      const item: Record<string, any> = {};
+      row.forEach((val, idx) => {
+        const key = headers[idx];
+        if (key === "Date") {
+          // Format date to locale string
+          if (val instanceof Date) {
+            item.date = val.toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            });
+          } else {
+            item.date = String(val);
+          }
+        } else {
+          item[key] = val;
+        }
+      });
+      return item;
+    });
+  })();
+
+  const seriesKeys = (() => {
+    if (!rawData || rawData.length === 0) return [];
+    return rawData[0].filter((h) => h !== "Date");
+  })();
+
+  // Use a nice color list for different lines
+  const colors = [
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#ff7300",
+    "#387908",
+    "#0088fe",
+    "#00c49f",
+    "#ffbb28",
+  ];
 
   return (
     <div className="d-flex flex-column align-items-center col-12 col-lg-6 mb-4">
@@ -38,14 +92,29 @@ const LineChartComponent: FC<unknown> = () => {
         )}
 
         {!isLoading && metric.data && (
-          <Chart
-            chartType="LineChart"
-            width="100%"
-            height={"350px"}
-            data={data}
-            loader={<div>Loading Chart...</div>}
-            options={options}
-          />
+          <div className="w-100 h-100">
+            <ResponsiveContainer width="100%" height={350}>
+              <RechartsLineChart
+                data={chartData}
+                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip />
+                <Legend />
+                {seriesKeys.map((key, index) => (
+                  <Line
+                    key={key}
+                    type="monotone"
+                    dataKey={key}
+                    stroke={colors[index % colors.length]}
+                    activeDot={{ r: 8 }}
+                  />
+                ))}
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
     </div>

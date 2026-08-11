@@ -15,6 +15,7 @@
     "prepare": "husky",
     "check-arch": "dependency-cruiser --config .dependency-cruiser.js src/",
     "lint": "biome check src/",
+    "lint:errors": "biome check --diagnostic-level=error src/",
     "lint:fix": "biome check --write --unsafe src/",
     "typecheck": "tsc --noEmit",
     "find-deadcode": "knip",
@@ -34,10 +35,10 @@
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^19.2.8",
-    "react-google-charts": "^5.2.1",
     "react-hook-form": "^7.85.0",
     "react-router-dom": "^7.18.2",
-    "uuid": "^14.0.1",
+    "react-svg-worldmap": "^2.0.2",
+    "recharts": "^3.10.1",
     "web-vitals": "^6.1.0"
   },
   "devDependencies": {
