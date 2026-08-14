@@ -66,6 +66,10 @@ jobs:
         with:
           path: ./
 
+      - name: Install Playwright Browsers
+        run: |
+          npx playwright install --with-deps
+
       - name: Run Mocked E2E Tests (Playwright in Docker)
         run: |
           npm run playwright:run:mocked
