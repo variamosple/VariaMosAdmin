@@ -17,15 +17,24 @@ const apiTarget = (path: string) => {
 vi.mock("react-router-dom", async () => ({
   useSearchParams: vi.fn(),
   useNavigate: vi.fn(),
-  Link: ({ to, children }: any) => <a href={to}>{children}</a>,
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
+    <a href={to}>{children}</a>
+  ),
 }));
 
 // Mock components
 vi.mock("../../components/ResetPasswordForm", async () => ({
-  ResetPasswordForm: ({ onSubmitPassword, isLoading }: any) => (
+  ResetPasswordForm: ({
+    onSubmitPassword,
+    isLoading,
+  }: {
+    onSubmitPassword: (password: string) => void;
+    isLoading: boolean;
+  }) => (
     <div>
       <span>Loading: {isLoading ? "Yes" : "No"}</span>
       <button
+        type="button"
         data-testid="mock-reset-form"
         onClick={() => onSubmitPassword("NewPassword123!")}
       >
@@ -115,13 +124,17 @@ describe("ResetPasswordPage Component", () => {
   });
 
   it("handles successful password reset submit and redirects after timeout", async () => {
-    let resetPasswordPayload: any = null;
+    let resetPasswordPayload: { token?: string; password?: string } | null =
+      null;
     server.use(
       http.get(apiTarget("/auth/verify-token"), () => {
         return HttpResponse.json({ errorCode: null });
       }),
       http.post(apiTarget("/auth/reset-password"), async ({ request }) => {
-        resetPasswordPayload = await request.json();
+        resetPasswordPayload = (await request.json()) as {
+          token?: string;
+          password?: string;
+        };
         return HttpResponse.json({ errorCode: null });
       }),
     );

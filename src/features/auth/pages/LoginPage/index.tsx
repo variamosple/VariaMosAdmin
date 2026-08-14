@@ -34,8 +34,9 @@ export const LoginPage: FC<unknown> = () => {
   };
 
   useEffect(() => {
-    if (queryParams.has("errorMessage")) {
-      setErrorMessage(queryParams.get("errorMessage")!);
+    const errorMsg = queryParams.get("errorMessage");
+    if (errorMsg) {
+      setErrorMessage(errorMsg);
     }
 
     if (queryParams.has("redirectTo")) {

@@ -76,7 +76,7 @@ export const ResetPasswordPage: FC = () => {
           navigate("/login");
         }, 3000);
       }
-    } catch (_err: any) {
+    } catch {
       setError("Error modifying password. Please try again.");
     } finally {
       setIsLoading(false);

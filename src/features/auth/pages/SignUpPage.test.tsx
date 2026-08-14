@@ -7,8 +7,13 @@ import { SignUpPage } from "./SignUpPage";
 
 // Mock Subcomponents
 vi.mock("../components/SignUpForm", async () => ({
-  SignUpForm: ({ onSignUp }: any) => (
+  SignUpForm: ({
+    onSignUp,
+  }: {
+    onSignUp: (data: { email: string }) => void;
+  }) => (
     <button
+      type="button"
       data-testid="mock-signup-form"
       onClick={() => onSignUp({ email: "test@example.com" })}
     >
@@ -18,7 +23,7 @@ vi.mock("../components/SignUpForm", async () => ({
 }));
 
 vi.mock("../components/GoogleLogin", async () => ({
-  GoogleLogin: ({ text }: any) => (
+  GoogleLogin: ({ text }: { text?: string }) => (
     <div data-testid="mock-google-login">Google Login: {text}</div>
   ),
 }));

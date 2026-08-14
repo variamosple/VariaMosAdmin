@@ -15,10 +15,17 @@ const apiTarget = (path: string) => {
 
 // Mock ForgotPasswordForm
 vi.mock("../../components/ForgotPasswordForm", async () => ({
-  ForgotPasswordForm: ({ onSubmitEmail, isLoading }: any) => (
+  ForgotPasswordForm: ({
+    onSubmitEmail,
+    isLoading,
+  }: {
+    onSubmitEmail: (email: string) => void;
+    isLoading: boolean;
+  }) => (
     <div>
       <span>Loading: {isLoading ? "Yes" : "No"}</span>
       <button
+        type="button"
         data-testid="mock-forgot-form"
         onClick={() => onSubmitEmail("test@example.com")}
       >
@@ -44,7 +51,7 @@ describe("ForgotPasswordPage Component", () => {
   });
 
   it("handles successful password reset request and shows success screen", async () => {
-    let resolveRequest: any;
+    let resolveRequest: () => void;
     const requestPromise = new Promise<void>((resolve) => {
       resolveRequest = resolve;
     });

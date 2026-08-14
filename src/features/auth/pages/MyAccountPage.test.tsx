@@ -18,12 +18,21 @@ vi.mock("../components/PasswordUpdateForm", async () => ({
     onClose,
     onUpdatePasswordSubmit,
     isLoading,
-  }: any) => {
+  }: {
+    showModal: boolean;
+    onClose: () => void;
+    onUpdatePasswordSubmit: (data: {
+      currentPassword: string;
+      newPassword: string;
+    }) => Promise<unknown>;
+    isLoading: boolean;
+  }) => {
     if (!showModal) return null;
     return (
       <div data-testid="password-update-form">
         <span>Loading: {isLoading ? "Yes" : "No"}</span>
         <button
+          type="button"
           onClick={() =>
             onUpdatePasswordSubmit({
               currentPassword: "123",
@@ -33,7 +42,9 @@ vi.mock("../components/PasswordUpdateForm", async () => ({
         >
           Submit Password Update
         </button>
-        <button onClick={onClose}>Close Password Modal</button>
+        <button type="button" onClick={onClose}>
+          Close Password Modal
+        </button>
       </div>
     );
   },
@@ -48,20 +59,31 @@ vi.mock(
       onUpdatePersonalInformationSubmit,
       defaultValue,
       isLoading,
-    }: any) => {
+    }: {
+      showModal: boolean;
+      onClose: () => void;
+      onUpdatePersonalInformationSubmit: (data: {
+        countryCode: string;
+      }) => Promise<unknown>;
+      defaultValue?: { countryCode?: string };
+      isLoading: boolean;
+    }) => {
       if (!showModal) return null;
       return (
         <div data-testid="info-update-form">
           <span>Loading: {isLoading ? "Yes" : "No"}</span>
           <span>Country: {defaultValue?.countryCode}</span>
           <button
+            type="button"
             onClick={() =>
               onUpdatePersonalInformationSubmit({ countryCode: "FR" })
             }
           >
             Submit Info Update
           </button>
-          <button onClick={onClose}>Close Info Modal</button>
+          <button type="button" onClick={onClose}>
+            Close Info Modal
+          </button>
         </div>
       );
     },
@@ -94,7 +116,7 @@ describe("MyAccountPage Component", () => {
 
   it("renders loader initially then queries user account info", async () => {
     // Create a promise we control to inspect loading state
-    let resolvePromise: any;
+    let resolvePromise: () => void;
     const promise = new Promise<void>((resolve) => {
       resolvePromise = resolve;
     });
@@ -120,10 +142,16 @@ describe("MyAccountPage Component", () => {
   });
 
   it("handles password update form submission successfully", async () => {
-    let updatePasswordPayload: any = null;
+    let updatePasswordPayload: {
+      currentPassword?: string;
+      newPassword?: string;
+    } | null = null;
     server.use(
       http.put(apiTarget("/auth/password-update"), async ({ request }) => {
-        updatePasswordPayload = await request.json();
+        updatePasswordPayload = (await request.json()) as {
+          currentPassword?: string;
+          newPassword?: string;
+        };
         return HttpResponse.json({ errorCode: null });
       }),
     );
@@ -150,7 +178,8 @@ describe("MyAccountPage Component", () => {
   });
 
   it("handles personal information update submission successfully", async () => {
-    let updatePersonalInformationPayload: any = null;
+    let updatePersonalInformationPayload: { countryCode?: string } | null =
+      null;
     let getMyAccountCalledCount = 0;
     server.use(
       http.get(apiTarget("/auth/my-account"), () => {
@@ -160,7 +189,9 @@ describe("MyAccountPage Component", () => {
       http.put(
         apiTarget("/auth/my-account/information"),
         async ({ request }) => {
-          updatePersonalInformationPayload = await request.json();
+          updatePersonalInformationPayload = (await request.json()) as {
+            countryCode?: string;
+          };
           return HttpResponse.json({ errorCode: null });
         },
       ),
