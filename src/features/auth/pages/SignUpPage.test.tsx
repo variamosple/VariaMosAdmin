@@ -5,12 +5,6 @@ import { useSession } from "@variamosple/variamos-components";
 import { MemoryRouter } from "react-router-dom";
 import { SignUpPage } from "./SignUpPage";
 
-// Mock @variamosple/variamos-components
-vi.mock("@variamosple/variamos-components", async () => ({
-  useSession: vi.fn(),
-  PagedModel: class PagedModel {},
-}));
-
 // Mock Subcomponents
 vi.mock("../components/SignUpForm", async () => ({
   SignUpForm: ({ onSignUp }: any) => (

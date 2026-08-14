@@ -11,12 +11,6 @@ const apiTarget = (path: string) => {
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 };
 
-// Mock @variamosple/variamos-components
-vi.mock("@variamosple/variamos-components", async () => ({
-  withPageVisit: (component: any) => component,
-  PagedModel: class PagedModel {},
-}));
-
 // Mock sub-components
 vi.mock("../components/PasswordUpdateForm", async () => ({
   PasswordUpdateForm: ({

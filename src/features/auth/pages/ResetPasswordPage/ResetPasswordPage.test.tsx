@@ -5,6 +5,7 @@ import { HttpResponse, http } from "msw";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
+import * as AuthRepository from "../../api/AuthRepository";
 import { ResetPasswordPage } from "./index";
 
 const apiTarget = (path: string) => {
@@ -32,12 +33,6 @@ vi.mock("../../components/ResetPasswordForm", async () => ({
       </button>
     </div>
   ),
-}));
-
-// Mock components module to prevent ESM errors
-vi.mock("@variamosple/variamos-components", async () => ({
-  withPageVisit: (component: any) => component,
-  PagedModel: class PagedModel {},
 }));
 
 describe("ResetPasswordPage Component", () => {
@@ -85,23 +80,19 @@ describe("ResetPasswordPage Component", () => {
 
   it("shows invalid token message if token verification throws error", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    let verifyTokenCalledWith: string | null = null;
-    server.use(
-      http.get(apiTarget("/auth/verify-token"), ({ request }) => {
-        const url = new URL(request.url);
-        verifyTokenCalledWith = url.searchParams.get("token");
-        return new HttpResponse(null, { status: 500 });
-      }),
-    );
+    const verifySpy = vi
+      .spyOn(AuthRepository, "verifyPasswordResetToken")
+      .mockRejectedValue(new Error("Token validation failed"));
 
     mockSearchParams.set("token", "error-token");
 
     render(<ResetPasswordPage />);
 
     await screen.findByText(/This password reset link is invalid/i);
-    expect(verifyTokenCalledWith).toBe("error-token");
+    expect(verifySpy).toHaveBeenCalledWith("error-token");
 
     consoleSpy.mockRestore();
+    verifySpy.mockRestore();
   });
 
   it("renders form when token is successfully verified", async () => {
@@ -219,13 +210,13 @@ describe("ResetPasswordPage Component", () => {
 
   it("handles exception thrown by resetPassword", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const resetSpy = vi
+      .spyOn(AuthRepository, "resetPassword")
+      .mockRejectedValue(new Error("Reset password failed"));
 
     server.use(
       http.get(apiTarget("/auth/verify-token"), () => {
         return HttpResponse.json({ errorCode: null });
-      }),
-      http.post(apiTarget("/auth/reset-password"), () => {
-        return new HttpResponse(null, { status: 500 });
       }),
     );
 
@@ -245,5 +236,6 @@ describe("ResetPasswordPage Component", () => {
     ).toBeInTheDocument();
 
     consoleSpy.mockRestore();
+    resetSpy.mockRestore();
   });
 });

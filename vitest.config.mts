@@ -13,7 +13,7 @@ export default defineConfig({
       "**/build/**",
       "**/.stryker-tmp/**",
       "**/strykerTmp/**",
-      "**/cypress/**",
+      "**/tests/**",
       "**/.worktrees/**"
     ],
   },

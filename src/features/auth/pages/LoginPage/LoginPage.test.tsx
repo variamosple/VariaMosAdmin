@@ -14,14 +14,6 @@ const apiTarget = (path: string) => {
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 };
 
-// Mock @variamosple/variamos-components to avoid ESM import errors
-vi.mock("@variamosple/variamos-components", async () => ({
-  withPageVisit: (component: any) => component,
-  useRouter: vi.fn(),
-  useSession: vi.fn(),
-  PagedModel: class PagedModel {},
-}));
-
 // Mock Subcomponents
 vi.mock("../../components/GoogleLogin", async () => ({
   GoogleLogin: () => <div data-testid="mock-google-login">Google Login</div>,

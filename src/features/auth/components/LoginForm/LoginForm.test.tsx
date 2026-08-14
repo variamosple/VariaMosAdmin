@@ -5,12 +5,6 @@ import { useSession } from "@variamosple/variamos-components";
 import { MemoryRouter } from "react-router-dom";
 import { LoginForm } from "./index";
 
-// Mock @variamosple/variamos-components to avoid ESM import errors
-vi.mock("@variamosple/variamos-components", async () => ({
-  useSession: vi.fn(),
-  PagedModel: class PagedModel {},
-}));
-
 describe("LoginForm Component", () => {
   const mockOnSignIn = vi.fn();
 
