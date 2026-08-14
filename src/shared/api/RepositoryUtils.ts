@@ -14,7 +14,7 @@ export const handleRepositoryError = (
     const response = error.response?.data;
 
     if (response) {
-      return response;
+      return Object.assign(new ResponseModel(), response);
     }
 
     return new ResponseModel("BACK-ERROR").withError(
