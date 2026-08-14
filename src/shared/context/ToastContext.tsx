@@ -1,4 +1,3 @@
-/* cspell:disable */
 import {
   createContext,
   type ReactNode,
@@ -7,7 +6,6 @@ import {
   useState,
 } from "react";
 import { Toast, ToastContainer } from "react-bootstrap";
-import { v4 as uuidv4 } from "uuid";
 
 export type ToastType = {
   id: string;
@@ -44,7 +42,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<ToastType[]>([]);
 
   const pushToast = useCallback((toast: Omit<ToastType, "id">) => {
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     setToasts((prev) => [
       ...prev,
       { delay: 5000, variant: "light", ...toast, id },

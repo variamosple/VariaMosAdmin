@@ -21,7 +21,7 @@ export const getSessionInfo = (): Promise<
       Pragma: "no-cache",
     },
   })
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
@@ -29,7 +29,7 @@ export const getSessionInfo = (): Promise<
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -57,7 +57,7 @@ export const requestLogout = (): Promise<ResponseModel<void>> => {
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -79,7 +79,7 @@ export const requestSignIn = (
   request: Credentials,
 ): Promise<ResponseModel<singInResponse>> => {
   return ADMIN_CLIENT.post("/auth/sign-in", request)
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
@@ -87,7 +87,7 @@ export const requestSignIn = (
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -109,7 +109,7 @@ export const requestSignInAsGuest = (
   guestId?: string | null,
 ): Promise<ResponseModel<singInResponse>> => {
   return ADMIN_CLIENT.post("/auth/guest/sign-in", { guestId })
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
@@ -117,7 +117,7 @@ export const requestSignInAsGuest = (
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -139,7 +139,7 @@ export const requestSignUp = (
   request: UserRegistration,
 ): Promise<ResponseModel<unknown>> => {
   return ADMIN_CLIENT.post("/auth/sign-up", request)
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
@@ -147,7 +147,7 @@ export const requestSignUp = (
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -167,7 +167,7 @@ export const requestSignUp = (
 
 export const getMyAccount = (): Promise<ResponseModel<User>> => {
   return ADMIN_CLIENT.get("/auth/my-account")
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
@@ -175,7 +175,7 @@ export const getMyAccount = (): Promise<ResponseModel<User>> => {
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -197,7 +197,7 @@ export const updatePersonalInformation = (
   personalInformation: PersonalInformationUpdate,
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put("/auth/my-account/information", personalInformation)
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
@@ -205,7 +205,7 @@ export const updatePersonalInformation = (
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -227,7 +227,7 @@ export const updateUserPassword = (
   passwordUpdate: PasswordUpdate,
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put("/auth/password-update", passwordUpdate)
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
@@ -235,7 +235,7 @@ export const updateUserPassword = (
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -255,7 +255,7 @@ export const updateUserPassword = (
 
 export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/auth/redirects", { url })
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);
@@ -263,7 +263,7 @@ export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
         const response = error.response?.data;
 
         if (response) {
-          return response;
+          return Object.assign(new ResponseModel(), response);
         }
 
         return new ResponseModel("BACK-ERROR").withError(
@@ -285,7 +285,7 @@ export const requestPasswordReset = (
   email: string,
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/auth/forgot-password", { email })
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) =>
       handleRepositoryError(
         error,
@@ -306,7 +306,7 @@ export const verifyPasswordResetToken = (
       },
     },
   )
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) =>
       handleRepositoryError(
         error,
@@ -323,7 +323,7 @@ export const resetPassword = (
     token,
     password: passwordPlain,
   })
-    .then((response) => response.data)
+    .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) =>
       handleRepositoryError(
         error,

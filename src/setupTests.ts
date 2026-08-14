@@ -99,3 +99,28 @@ afterAll(async () => {
     }
   }
 });
+
+// Global mock for @variamosple/variamos-components to satisfy ResponseModel and PagedModel usages in all unit tests
+vi.mock("@variamosple/variamos-components", () => {
+  class ResponseModel {
+    status: string;
+    errorCode: number | null = null;
+    message: string = "";
+    data: any = null;
+    constructor(status = "success") {
+      this.status = status;
+    }
+    withError(code: number, msg: string) {
+      this.errorCode = code;
+      this.message = msg;
+      return this;
+    }
+  }
+  return {
+    withPageVisit: (component: any) => component,
+    PagedModel: class PagedModel {},
+    ResponseModel,
+    useRouter: vi.fn(),
+    useSession: vi.fn(),
+  };
+});

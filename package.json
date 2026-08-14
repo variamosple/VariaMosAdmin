@@ -15,14 +15,15 @@
     "prepare": "husky",
     "check-arch": "dependency-cruiser --config .dependency-cruiser.js src/",
     "lint": "biome check src/",
+    "lint:errors": "biome check --diagnostic-level=error src/",
     "lint:fix": "biome check --write --unsafe src/",
     "typecheck": "tsc --noEmit",
     "find-deadcode": "knip",
     "check-updates": "taze",
-    "cypress:run:mocked": "bash ./scripts/run-mocked-docker.sh",
-    "docker:test:up": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml up -d",
+    "playwright:run:mocked": "bash ./scripts/run-mocked-playwright.sh",
+    "docker:test:up": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml up -d --build",
     "docker:test:down": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml down && docker image prune -f",
-    "cypress:run:real": "npm run docker:test:up && start-server-and-test start http://localhost:3000 \"cypress run --spec 'cypress/integration/**/*.real.spec.js'\" ; status=$?; npm run docker:test:down; exit $status"
+    "playwright:run:real": "npm run build && npm run docker:test:up && start-server-and-test \"npx vite preview --port 3000\" http://localhost:3000 \"npx playwright test --grep .real.\" ; status=$?; npm run docker:test:down; exit $status"
   },
   "dependencies": {
     "@patternfly/react-core": "^6.6.1",
@@ -34,16 +35,17 @@
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^19.2.8",
-    "react-google-charts": "^5.2.1",
     "react-hook-form": "^7.85.0",
     "react-router-dom": "^7.18.2",
-    "uuid": "^14.0.1",
+    "react-svg-worldmap": "^2.0.2",
+    "recharts": "^3.10.1",
     "web-vitals": "^6.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.8",
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
+    "@playwright/test": "^1.62.1",
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/vitest-runner": "^9.6.1",
     "@testing-library/dom": "^10.4.1",
@@ -56,7 +58,6 @@
     "@vitejs/plugin-react": "^6.0.5",
     "@vitest/coverage-v8": "^4.1.10",
     "cspell": "^10.0.1",
-    "cypress": "^15.20.1",
     "dependency-cruiser": "^18.2.0",
     "dotenv": "^17.4.2",
     "husky": "^9.1.7",
@@ -103,7 +104,6 @@
     "core-js-pure@3.40.0": true,
     "msw@2.15.0": true,
     "@biomejs/biome@2.5.7": true,
-    "cypress@15.20.1": true,
     "esbuild@0.28.1": true,
     "esbuild@0.25.12": true
   }

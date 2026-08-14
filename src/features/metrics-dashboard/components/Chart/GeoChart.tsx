@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
-import { Chart } from "react-google-charts";
+import { type ISOCode, WorldMap } from "react-svg-worldmap";
 import type { Metric } from "../../domain/Entity/Metric";
 import { useGeoChartData } from "../../hooks/useGeoChartData";
 
@@ -9,8 +9,34 @@ export interface GeoChartProps {
 }
 
 export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
-  const { activeFilter, data, options, filterOptions, setFilter } =
-    useGeoChartData(metric);
+  const {
+    activeFilter,
+    data: rawData,
+    filterOptions,
+    setFilter,
+  } = useGeoChartData(metric);
+
+  // Transform rawData [ ["Country", "Visits"], ["US", 10] ] into react-svg-worldmap format:
+  // [ { country: "us", value: 10 } ]
+  const chartData = (() => {
+    if (!rawData || rawData.length <= 1) return [];
+
+    const resultList: { country: ISOCode; value: number }[] = [];
+
+    for (const row of rawData.slice(1)) {
+      const rawCountry = row[0];
+      if (rawCountry !== null && rawCountry !== undefined) {
+        const countryInput = String(rawCountry).trim();
+        if (countryInput.length === 2) {
+          resultList.push({
+            country: countryInput.toLowerCase() as ISOCode,
+            value: Number(row[1]),
+          });
+        }
+      }
+    }
+    return resultList;
+  })();
 
   return (
     <div className="d-flex flex-column align-items-center w-100 mb-4">
@@ -37,13 +63,13 @@ export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
         </ButtonGroup>
       </div>
 
-      <div className="col-10">
-        <Chart
-          chartType="GeoChart"
-          width="100%"
-          data={data}
-          loader={<div>Loading Chart...</div>}
-          options={options}
+      <div className="col-12 d-flex justify-content-center">
+        <WorldMap
+          color="#1C5C9E"
+          title=""
+          value-suffix=" visits"
+          size="xxl"
+          data={chartData}
         />
       </div>
     </div>

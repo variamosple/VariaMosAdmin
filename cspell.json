@@ -27,7 +27,9 @@
     "johndoe",
     "subcomponents",
     "signups",
-    "paginators"
+    "paginators",
+    "worldmap",
+    "autohide"
   ],
   "ignorePaths": [
     "node_modules/**",

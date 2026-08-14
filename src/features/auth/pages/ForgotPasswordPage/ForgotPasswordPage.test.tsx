@@ -5,26 +5,13 @@ import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router-dom";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
+import * as AuthRepository from "../../api/AuthRepository";
 import { ForgotPasswordPage } from "./index";
 
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 };
-
-// Mock @variamosple/variamos-components to avoid ESM import errors
-vi.mock("@variamosple/variamos-components", async () => ({
-  withPageVisit: (component: any) => component,
-  PagedModel: class PagedModel {},
-  ResponseModel: class ResponseModel {
-    errorCode?: number | null;
-    message?: string;
-    constructor(code?: number | null, msg?: string) {
-      this.errorCode = code;
-      this.message = msg;
-    }
-  },
-}));
 
 // Mock ForgotPasswordForm
 vi.mock("../../components/ForgotPasswordForm", async () => ({
@@ -119,12 +106,9 @@ describe("ForgotPasswordPage Component", () => {
 
   it("handles exception thrown by requestPasswordReset", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    server.use(
-      http.post(apiTarget("/auth/forgot-password"), () => {
-        return new HttpResponse(null, { status: 500 });
-      }),
-    );
+    const requestSpy = vi
+      .spyOn(AuthRepository, "requestPasswordReset")
+      .mockRejectedValue(new Error("Network Error"));
 
     render(
       <MemoryRouter>
@@ -142,5 +126,6 @@ describe("ForgotPasswordPage Component", () => {
     });
 
     consoleSpy.mockRestore();
+    requestSpy.mockRestore();
   });
 });
