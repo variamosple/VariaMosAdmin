@@ -1,0 +1,8 @@
+language js
+
+`$name: unknown` where {
+  register_diagnostic(
+    message = "Avoid using the 'unknown' type. Use a specific type instead. If absolutely necessary, ignore this warning with a comment.",
+    span = $name
+  )
+}
