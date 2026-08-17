@@ -16,6 +16,26 @@ const projectsApiTarget = (path: string) => {
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 };
 
+interface LanguageRequestBody {
+  id?: number;
+  name?: string;
+  code?: string;
+  isEnabled?: boolean;
+  isDefault?: boolean;
+}
+
+interface ProjectRequestBody {
+  id?: number;
+  name?: string;
+  description?: string;
+}
+
+interface ModelRequestBody {
+  id?: string;
+  name?: string;
+  description?: string;
+}
+
 export const handlers = [
   http.get(apiTarget("/v1/metrics"), () => {
     return HttpResponse.json({
@@ -315,7 +335,7 @@ export const handlers = [
   http.put(
     languagesApiTarget("/v1/admin/languages/:languageId"),
     async ({ request }) => {
-      const body = (await request.json()) as any;
+      const body = (await request.json()) as LanguageRequestBody;
       return HttpResponse.json({
         data: {
           id: body.id || 1,
@@ -423,7 +443,7 @@ export const handlers = [
   http.put(
     projectsApiTarget("/v1/admin/projects/:projectId"),
     async ({ request }) => {
-      const body = (await request.json()) as any;
+      const body = (await request.json()) as ProjectRequestBody;
       return HttpResponse.json({ data: body });
     },
   ),
@@ -431,7 +451,7 @@ export const handlers = [
   http.put(
     projectsApiTarget("/v1/projects/:projectId"),
     async ({ request }) => {
-      const body = (await request.json()) as any;
+      const body = (await request.json()) as ProjectRequestBody;
       return HttpResponse.json({ data: body });
     },
   ),
@@ -466,13 +486,13 @@ export const handlers = [
   http.put(
     projectsApiTarget("/v1/admin/models/:modelId"),
     async ({ request }) => {
-      const body = (await request.json()) as any;
+      const body = (await request.json()) as ModelRequestBody;
       return HttpResponse.json({ data: body });
     },
   ),
 
   http.put(projectsApiTarget("/v1/models/:modelId"), async ({ request }) => {
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as ModelRequestBody;
     return HttpResponse.json({ data: body });
   }),
 
