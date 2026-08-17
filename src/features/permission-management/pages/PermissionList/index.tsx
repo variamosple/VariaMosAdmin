@@ -84,7 +84,9 @@ const PermissionListPageComponent: FC<unknown> = () => {
         message="Are you sure you want to delete the permission?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeletePermission(toDeletePermission!);
+          if (toDeletePermission) {
+            performDeletePermission(toDeletePermission);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {

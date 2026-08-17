@@ -30,10 +30,10 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.pageSize = pageSize;
       }
     },
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -53,7 +53,11 @@ vi.mock("@/shared/components/InfiniteSelect", async () => {
       options,
       handleSelect,
       placeholder,
-    }: any) {
+    }: {
+      options: Array<{ value: number | string; label: string }>;
+      handleSelect: (option: { value: number | string; label: string }) => void;
+      placeholder?: string;
+    }) {
       return (
         <div data-testid="infinite-select">
           <span>{placeholder}</span>
@@ -61,13 +65,13 @@ vi.mock("@/shared/components/InfiniteSelect", async () => {
             data-testid="select-element"
             onChange={(e) => {
               const selectedOption = options.find(
-                (opt: any) => opt.value === Number(e.target.value),
+                (opt) => opt.value === Number(e.target.value),
               );
               if (selectedOption) handleSelect(selectedOption);
             }}
           >
             <option value="">Select...</option>
-            {options.map((opt: any) => (
+            {options.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>

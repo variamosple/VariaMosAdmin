@@ -39,7 +39,7 @@ export const useRoleList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Role query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -61,7 +61,7 @@ export const useRoleList = () => {
         } else {
           pushToast({
             title: "Role create",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }
@@ -101,7 +101,7 @@ export const useRoleList = () => {
         } else {
           pushToast({
             title: "Role edit",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }
@@ -119,24 +119,26 @@ export const useRoleList = () => {
       message: "Deleting role...",
     });
 
-    deleteRole(role.id!).then((response) => {
-      removeToast(toastId);
+    if (role.id !== undefined) {
+      deleteRole(role.id).then((response) => {
+        removeToast(toastId);
 
-      if (response.errorCode) {
-        pushToast({
-          title: "Role delete",
-          message: response.message!,
-          variant: "danger",
-        });
-      } else {
-        pushToast({
-          title: "Role delete",
-          message: "Role deleted successfully",
-          variant: "success",
-        });
-        onPageChange(currentPage);
-      }
-    });
+        if (response.errorCode) {
+          pushToast({
+            title: "Role delete",
+            message: response.message ?? "An error occurred",
+            variant: "danger",
+          });
+        } else {
+          pushToast({
+            title: "Role delete",
+            message: "Role deleted successfully",
+            variant: "success",
+          });
+          onPageChange(currentPage);
+        }
+      });
+    }
   };
 
   const onRoleDelete = (role: Role) => {
@@ -149,7 +151,7 @@ export const useRoleList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Role query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -161,7 +163,7 @@ export const useRoleList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Role query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }

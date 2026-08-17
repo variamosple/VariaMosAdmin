@@ -19,10 +19,10 @@ const mockOnPageChange = vi.fn();
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -56,9 +56,9 @@ describe("useRoleList Hook", () => {
   let createRoleCalled = 0;
   let updateRoleCalled = 0;
   let deleteRoleCalled = 0;
-  let createRolePayload: any = null;
-  let updateRolePayload: any = null;
-  let deleteRoleId: any = null;
+  let createRolePayload: Partial<Role> | null = null;
+  let updateRolePayload: Role | null = null;
+  let deleteRoleId: number | null = null;
 
   beforeEach(() => {
     vi.clearAllMocks();

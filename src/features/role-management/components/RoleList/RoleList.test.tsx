@@ -8,12 +8,22 @@ const mockNavigate = vi.fn();
 // Mock the variamos-components library completely
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    Paginator: ({ currentPage, totalPages, onPageChange }: any) => (
+    Paginator: ({
+      currentPage,
+      totalPages,
+      onPageChange,
+    }: {
+      currentPage: number;
+      totalPages: number;
+      onPageChange: (page: number) => void;
+    }) => (
       <div data-testid="mock-paginator">
         <span>
           Page: {currentPage} / {totalPages}
         </span>
-        <button onClick={() => onPageChange(currentPage + 1)}>Next</button>
+        <button type="button" onClick={() => onPageChange(currentPage + 1)}>
+          Next
+        </button>
       </div>
     ),
     useRouter: () => ({

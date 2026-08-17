@@ -84,7 +84,9 @@ const RoleListPageComponent: FC<unknown> = () => {
         message="Are you sure you want to delete the role?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeleteRole(toDeleteRole!);
+          if (toDeleteRole) {
+            performDeleteRole(toDeleteRole);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {

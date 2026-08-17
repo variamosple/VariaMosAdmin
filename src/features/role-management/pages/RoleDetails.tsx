@@ -62,26 +62,33 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
       variant: "info",
     });
 
-    createRolePermission({
-      ...rolePermission,
-      roleId: Number.parseInt(roleIdParam!, 10),
-    })
-      .then((response) => {
-        removeToast(toastId);
-
-        if (!response.errorCode) {
-          loadRolePermissions(rolePermissionsFilter!);
-
-          pushToast({
-            title: "Permission assignment",
-            message: "Permission assigned successfully",
-            variant: "success",
-          });
-        }
+    if (roleIdParam) {
+      createRolePermission({
+        ...rolePermission,
+        roleId: Number.parseInt(roleIdParam, 10),
       })
-      .finally(() => {
-        setIsCreating(false);
-      });
+        .then((response) => {
+          removeToast(toastId);
+
+          if (!response.errorCode) {
+            if (rolePermissionsFilter) {
+              loadRolePermissions(rolePermissionsFilter);
+            }
+
+            pushToast({
+              title: "Permission assignment",
+              message: "Permission assigned successfully",
+              variant: "success",
+            });
+          }
+        })
+        .finally(() => {
+          setIsCreating(false);
+        });
+    } else {
+      removeToast(toastId);
+      setIsCreating(false);
+    }
   };
 
   const onRolePermissionDelete = (permission: Permission) => {
@@ -96,26 +103,30 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
       variant: "info",
     });
 
-    deleteRolePermission(
-      new RolePermission(Number.parseInt(roleIdParam!, 10), permission.id!),
-    ).then((response) => {
-      removeToast(toastId);
+    if (roleIdParam && permission.id !== undefined) {
+      deleteRolePermission(
+        new RolePermission(Number.parseInt(roleIdParam, 10), permission.id),
+      ).then((response) => {
+        removeToast(toastId);
 
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission deletion",
-          message: response.message!,
-          variant: "danger",
-        });
-      } else {
-        pushToast({
-          title: "Permission delete",
-          message: "Permission deleted successfully",
-          variant: "success",
-        });
-      }
-      onRolePermissionsPageChange(1);
-    });
+        if (response.errorCode) {
+          pushToast({
+            title: "Permission deletion",
+            message: response.message ?? "An error occurred",
+            variant: "danger",
+          });
+        } else {
+          pushToast({
+            title: "Permission delete",
+            message: "Permission deleted successfully",
+            variant: "success",
+          });
+          onRolePermissionsPageChange(currentRolePermissionsPage);
+        }
+      });
+    } else {
+      removeToast(toastId);
+    }
   };
 
   useEffect(() => {
@@ -178,7 +189,9 @@ const RoleDetailsPageComponent: FC<unknown> = () => {
         message="Are you sure you want to remove the role permission?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeleteRolePermission(toDeletePermission!);
+          if (toDeletePermission) {
+            performDeleteRolePermission(toDeletePermission);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {
