@@ -44,7 +44,11 @@ class DummyMessagePort {
 }
 global.MessagePort = DummyMessagePort as unknown as typeof global.MessagePort;
 
-let getGlobalDispatcher: any = null;
+interface GlobalDispatcher {
+  destroy?: () => Promise<void> | void;
+}
+
+let getGlobalDispatcher: (() => GlobalDispatcher) | null = null;
 
 try {
   const undici = require("undici");
@@ -102,11 +106,11 @@ afterAll(async () => {
 
 // Global mock for @variamosple/variamos-components to satisfy ResponseModel and PagedModel usages in all unit tests
 vi.mock("@variamosple/variamos-components", () => {
-  class ResponseModel {
+  class ResponseModel<T = Record<string, never>> {
     status: string;
     errorCode: number | null = null;
     message: string = "";
-    data: any = null;
+    data: T | null = null;
     constructor(status = "success") {
       this.status = status;
     }
@@ -117,7 +121,7 @@ vi.mock("@variamosple/variamos-components", () => {
     }
   }
   return {
-    withPageVisit: (component: any) => component,
+    withPageVisit: <T>(component: T): T => component,
     PagedModel: class PagedModel {},
     ResponseModel,
     useRouter: vi.fn(),

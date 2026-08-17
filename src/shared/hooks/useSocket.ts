@@ -10,7 +10,7 @@ export const useSocket = (
   const socketRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(() => {
-    let socketConnection;
+    let socketConnection: WebSocket | undefined;
     try {
       socketConnection = socketFunction();
       socketRef.current = socketConnection;
