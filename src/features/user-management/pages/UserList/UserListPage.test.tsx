@@ -68,7 +68,7 @@ vi.mock("@variamosple/variamos-components", async () => {
       const onPageChange = useCallback(
         (page: number) => {
           setCurrentPage(page);
-          loadData({ ...initialFilter, page } as unknown as UsersFilter);
+          loadData({ ...initialFilter, page } as UsersFilter);
         },
         [loadData, initialFilter],
       );

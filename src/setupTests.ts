@@ -10,14 +10,26 @@ import "@testing-library/jest-dom";
 import { vi } from "vitest";
 import { server } from "./shared/tests/mocks/server";
 
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as unknown as typeof global.TextDecoder;
-global.TransformStream =
-  TransformStream as unknown as typeof global.TransformStream;
-global.ReadableStream =
-  ReadableStream as unknown as typeof global.ReadableStream;
-global.WritableStream =
-  WritableStream as unknown as typeof global.WritableStream;
+Object.defineProperty(globalThis, "TextEncoder", {
+  value: TextEncoder,
+  writable: true,
+});
+Object.defineProperty(globalThis, "TextDecoder", {
+  value: TextDecoder,
+  writable: true,
+});
+Object.defineProperty(globalThis, "TransformStream", {
+  value: TransformStream,
+  writable: true,
+});
+Object.defineProperty(globalThis, "ReadableStream", {
+  value: ReadableStream,
+  writable: true,
+});
+Object.defineProperty(globalThis, "WritableStream", {
+  value: WritableStream,
+  writable: true,
+});
 
 // Use dummy class for BroadcastChannel to prevent open handles while satisfying MSW ws.ts
 class DummyBroadcastChannel {
@@ -31,8 +43,10 @@ class DummyBroadcastChannel {
   close() {}
   unref() {}
 }
-global.BroadcastChannel =
-  DummyBroadcastChannel as unknown as typeof global.BroadcastChannel;
+Object.defineProperty(globalThis, "BroadcastChannel", {
+  value: DummyBroadcastChannel,
+  writable: true,
+});
 
 // Use dummy class for MessagePort to prevent open handles while satisfying undici
 class DummyMessagePort {
@@ -42,7 +56,10 @@ class DummyMessagePort {
   start() {}
   close() {}
 }
-global.MessagePort = DummyMessagePort as unknown as typeof global.MessagePort;
+Object.defineProperty(globalThis, "MessagePort", {
+  value: DummyMessagePort,
+  writable: true,
+});
 
 interface GlobalDispatcher {
   destroy?: () => Promise<void> | void;
@@ -52,14 +69,26 @@ let getGlobalDispatcher: (() => GlobalDispatcher) | null = null;
 
 try {
   const undici = require("undici");
-  global.fetch = undici.fetch;
-  global.Headers = undici.Headers as unknown as typeof global.Headers;
-  global.Request = undici.Request as unknown as typeof global.Request;
-  global.Response = undici.Response as unknown as typeof global.Response;
+  Object.defineProperty(globalThis, "fetch", {
+    value: undici.fetch,
+    writable: true,
+  });
+  Object.defineProperty(globalThis, "Headers", {
+    value: undici.Headers,
+    writable: true,
+  });
+  Object.defineProperty(globalThis, "Request", {
+    value: undici.Request,
+    writable: true,
+  });
+  Object.defineProperty(globalThis, "Response", {
+    value: undici.Response,
+    writable: true,
+  });
   getGlobalDispatcher = undici.getGlobalDispatcher;
 } catch (e) {
   // Fallback to native fetch if undici fails to load due to node version incompatibilities
-  if (typeof global.fetch === "undefined") {
+  if (typeof globalThis.fetch === "undefined") {
     throw e;
   }
 }

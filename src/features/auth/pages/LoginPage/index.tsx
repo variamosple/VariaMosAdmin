@@ -8,7 +8,7 @@ import { registerRedirect } from "../../api/AuthRepository";
 import { GoogleLogin } from "../../components/GoogleLogin";
 import { LoginForm } from "../../components/LoginForm";
 
-export const LoginPage: FC<unknown> = () => {
+export const LoginPage: FC = () => {
   const { queryParams, navigate } = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const { signIn, signInAsGuest, isLoading } = useSession();

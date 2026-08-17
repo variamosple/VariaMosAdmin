@@ -5,7 +5,7 @@ import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
 import { useMicroServiceList } from "../../hooks/useMicroServiceList";
 
-const MicroServiceListPageComponent: FC<unknown> = () => {
+const MicroServiceListPageComponent: FC = () => {
   const {
     showStart,
     setShowStart,

@@ -7,7 +7,7 @@ import { SearchForm } from "@/shared/components/SearchForm";
 import { RoleList } from "../../components/RoleList";
 import { useRoleList } from "../../hooks/useRoleList";
 
-const RoleListPageComponent: FC<unknown> = () => {
+const RoleListPageComponent: FC = () => {
   const {
     showCreate,
     setShowCreate,

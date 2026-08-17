@@ -5,7 +5,7 @@ import axios from "axios";
  * Centrally processes Axios and other network errors, mapping them to a standardized ResponseModel.
  */
 export const handleRepositoryError = <T = Record<string, never>>(
-  error: Error | Record<string, unknown> | null | undefined,
+  error: Error | object | null | undefined,
   fallbackMessage: string,
 ): ResponseModel<T> => {
   if (axios.isAxiosError(error)) {

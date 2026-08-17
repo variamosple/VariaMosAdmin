@@ -30,7 +30,7 @@ export const PersonalInformationUpdateForModal: FC<
     isLoading: isLoadingCountries,
     isLoaded: areCountriesLoaded,
     loadData,
-  } = useQuery<unknown, Country[]>({
+  } = useQuery<null, Country[]>({
     queryFunction: queryCountries,
     initialFilter: null,
   });

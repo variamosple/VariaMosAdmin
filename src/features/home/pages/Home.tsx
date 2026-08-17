@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Container } from "react-bootstrap";
 
-export const HomePage: FC<unknown> = () => {
+export const HomePage: FC = () => {
   return (
     <Container>
       <article>

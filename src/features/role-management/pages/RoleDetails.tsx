@@ -22,7 +22,7 @@ import { useToast } from "@/shared/context/ToastContext";
 import { RolePermissionForm } from "../components/RolePermissionForm";
 import { RolePermissionList } from "../components/RolePermissionList";
 
-const RoleDetailsPageComponent: FC<unknown> = () => {
+const RoleDetailsPageComponent: FC = () => {
   const { pushToast, removeToast } = useToast();
   const { navigate } = useRouter();
   const { roleId: roleIdParam } = useParams();

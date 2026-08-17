@@ -24,7 +24,9 @@ vi.mock("../components/PasswordUpdateForm", async () => ({
     onUpdatePasswordSubmit: (data: {
       currentPassword: string;
       newPassword: string;
-    }) => Promise<unknown>;
+    }) => Promise<
+      import("@variamosple/variamos-components").ResponseModel<void>
+    >;
     isLoading: boolean;
   }) => {
     if (!showModal) return null;
@@ -64,7 +66,9 @@ vi.mock(
       onClose: () => void;
       onUpdatePersonalInformationSubmit: (data: {
         countryCode: string;
-      }) => Promise<unknown>;
+      }) => Promise<
+        import("@variamosple/variamos-components").ResponseModel<void>
+      >;
       defaultValue?: { countryCode?: string };
       isLoading: boolean;
     }) => {

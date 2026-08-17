@@ -109,7 +109,7 @@ export const withChartContextWrapper = <P extends object>(
     const { metric, ...restProps } = props;
     return (
       <ChartContextProvider metric={metric}>
-        <Component {...(restProps as unknown as P)} />
+        <Component {...(restProps as P)} />
       </ChartContextProvider>
     );
   };

@@ -49,7 +49,7 @@ vi.mock("recharts", async () => {
       data,
     }: {
       children: React.ReactNode;
-      data?: unknown[];
+      data?: Record<string, string | number>[];
     }) => (
       <div
         data-testid="mock-recharts-line-chart"

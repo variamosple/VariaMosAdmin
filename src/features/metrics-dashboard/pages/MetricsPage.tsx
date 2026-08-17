@@ -5,7 +5,7 @@ import { queryMetrics } from "../api/MetricsRepository";
 import { ChartComponent } from "../components/Chart";
 import type { Metric } from "../domain/Entity/Metric";
 
-const MetricsPageComponent: FC<unknown> = () => {
+const MetricsPageComponent: FC = () => {
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 

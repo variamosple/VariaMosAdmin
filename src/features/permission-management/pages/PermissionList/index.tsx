@@ -7,7 +7,7 @@ import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { SearchForm } from "@/shared/components/SearchForm";
 import { usePermissionList } from "../../hooks/usePermissionList";
 
-const PermissionListPageComponent: FC<unknown> = () => {
+const PermissionListPageComponent: FC = () => {
   const {
     showCreate,
     setShowCreate,

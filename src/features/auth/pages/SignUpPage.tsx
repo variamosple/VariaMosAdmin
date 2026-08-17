@@ -6,7 +6,7 @@ import type { UserRegistration } from "@/features/user-management/domain/Entity/
 import { GoogleLogin } from "../components/GoogleLogin";
 import { SignUpForm } from "../components/SignUpForm";
 
-export const SignUpPage: FC<unknown> = () => {
+export const SignUpPage: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [successMessage, setSuccessMessage] = useState<string | undefined>();
   const { signUp } = useSession();

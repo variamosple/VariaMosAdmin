@@ -10,7 +10,7 @@ describe("useIntersectionObserver hook", () => {
     vi.clearAllMocks();
 
     // Mock the global IntersectionObserver
-    global.IntersectionObserver = vi.fn(
+    const mockObserverClass = vi.fn(
       class {
         constructor(callback: IntersectionObserverCallback) {
           observerCallback = callback;
@@ -23,7 +23,12 @@ describe("useIntersectionObserver hook", () => {
         rootMargin = "";
         thresholds = [];
       },
-    ) as unknown as typeof global.IntersectionObserver;
+    );
+    Object.defineProperty(globalThis, "IntersectionObserver", {
+      value: mockObserverClass,
+      writable: true,
+      configurable: true,
+    });
   });
 
   it("should initialize hook and register intersection observer on node", () => {
