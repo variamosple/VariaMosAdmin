@@ -51,7 +51,7 @@ describe("ForgotPasswordPage Component", () => {
   });
 
   it("handles successful password reset request and shows success screen", async () => {
-    let resolveRequest: () => void;
+    let resolveRequest!: () => void;
     const requestPromise = new Promise<void>((resolve) => {
       resolveRequest = resolve;
     });

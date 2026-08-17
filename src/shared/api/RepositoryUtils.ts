@@ -17,13 +17,13 @@ export const handleRepositoryError = <T = Record<string, never>>(
       return Object.assign(new ResponseModel(), response);
     }
 
-    return new ResponseModel("BACK-ERROR").withError(
+    return new ResponseModel<T>("BACK-ERROR").withError(
       Number.parseInt(error.code || "500", 10),
       "Error when communicating with the back-end.",
     );
   } else {
     console.error("Unexpected error:", error);
 
-    return new ResponseModel("APP-ERROR").withError(500, fallbackMessage);
+    return new ResponseModel<T>("APP-ERROR").withError(500, fallbackMessage);
   }
 };

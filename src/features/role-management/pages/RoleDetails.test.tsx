@@ -149,7 +149,10 @@ describe("RoleDetailsPage Component", () => {
         apiTarget("/v1/roles/:roleId/permissions"),
         async ({ request }) => {
           createRolePermissionCalled++;
-          createRolePermissionPayload = await request.json();
+          createRolePermissionPayload = (await request.json()) as {
+            permissionId: number;
+            roleId: number;
+          };
           return HttpResponse.json({ errorCode: null });
         },
       ),

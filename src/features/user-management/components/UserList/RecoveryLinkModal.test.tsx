@@ -53,7 +53,7 @@ describe("RecoveryLinkModal Component", () => {
 
   let recoveryLinkCalled = 0;
   let delayRecoveryQuery = false;
-  let resolveRecoveryPromise: (value: HttpResponse) => void;
+  let resolveRecoveryPromise: (value: Response) => void;
   let isRecoveryError = false;
 
   beforeEach(() => {

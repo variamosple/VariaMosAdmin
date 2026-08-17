@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { useRoleList } from "./useRoleList";
@@ -83,12 +84,12 @@ describe("useRoleList Hook", () => {
     server.use(
       http.post(apiTarget("/v1/roles"), async ({ request }) => {
         createRoleCalled++;
-        createRolePayload = await request.json();
+        createRolePayload = (await request.json()) as Partial<Role>;
         return HttpResponse.json({ errorCode: null });
       }),
       http.put(apiTarget("/v1/roles/:roleId"), async ({ request }) => {
         updateRoleCalled++;
-        updateRolePayload = await request.json();
+        updateRolePayload = (await request.json()) as Role;
         return HttpResponse.json({ errorCode: null });
       }),
       http.delete(apiTarget("/v1/roles/:roleId"), ({ params }) => {

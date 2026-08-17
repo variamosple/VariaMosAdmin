@@ -115,8 +115,9 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
       const response = await uploadAttachment(bug.id, files[0]);
       if (response.errorCode) {
         setModalError(response.message || "Failed to upload attachment");
-      } else {
-        setAttachments((prev) => [...prev, response.data]);
+      } else if (response.data !== undefined) {
+        const data = response.data;
+        setAttachments((prev) => [...prev, data]);
       }
     } catch (err) {
       const error = err as Error;

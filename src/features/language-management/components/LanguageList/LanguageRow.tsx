@@ -72,13 +72,15 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
         <td>{owner?.name}</td>
 
         <td>
-          {language.createdAt ? formatDate(new Date(language.createdAt)) : ""}
+          {language.createdAt
+            ? formatDate(new Date(language.createdAt))
+            : "N/A"}
         </td>
 
         <td>
           {language.updatedAt
             ? formatDateTime(new Date(language.updatedAt))
-            : ""}
+            : "N/A"}
         </td>
 
         <td>

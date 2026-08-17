@@ -82,7 +82,14 @@ vi.mock("../components/UserRoleForm", async () => ({
       <span>Role Form (Loading: {isLoading ? "true" : "false"})</span>
       <button
         type="button"
-        onClick={() => onUserRoleSubmit({ roleId: "admin-role" } as UserRole)}
+        onClick={() => {
+          interface MockUserRoleShape {
+            userId: string;
+            roleId: string | number;
+          }
+          const payload = { userId: "user-123", roleId: "admin-role" };
+          onUserRoleSubmit(payload as MockUserRoleShape as UserRole);
+        }}
       >
         Assign Role
       </button>
@@ -164,7 +171,7 @@ describe("UserDetailsPage Component", () => {
     onPageChange: mockOnUserRolesPageChange,
   };
 
-  let resolveUserPromise: (value: HttpResponse) => void;
+  let resolveUserPromise: (value: Response) => void;
   let delayUserQuery = false;
   let createUserRoleCalled = 0;
   let deleteUserRoleCalled = 0;
@@ -197,14 +204,17 @@ describe("UserDetailsPage Component", () => {
       }),
       http.post(apiTarget("/v1/users/:userId/roles"), async ({ request }) => {
         createUserRoleCalled++;
-        createUserRolePayload = await request.json();
+        createUserRolePayload = (await request.json()) as UserRole;
         return HttpResponse.json({ errorCode: null });
       }),
       http.delete(
         apiTarget("/v1/users/:userId/roles/:roleId"),
         ({ params }) => {
           deleteUserRoleCalled++;
-          deleteUserRoleParams = params;
+          deleteUserRoleParams = params as Record<
+            string,
+            string | readonly string[]
+          >;
           return HttpResponse.json({ errorCode: null });
         },
       ),

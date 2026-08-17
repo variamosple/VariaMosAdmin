@@ -55,7 +55,10 @@ describe("useIntersectionObserver hook", () => {
 
     // Simulate intersection entry
     act(() => {
-      observerCallback([{ isIntersecting: true }]);
+      observerCallback(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver,
+      );
     });
 
     expect(mockSetPage).toHaveBeenCalled();

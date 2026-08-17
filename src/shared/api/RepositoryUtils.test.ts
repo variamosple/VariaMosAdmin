@@ -8,8 +8,10 @@ vi.mock("@variamosple/variamos-components", async () => {
       message?: string;
       data?: T;
       type: string;
+      transactionId: string;
       constructor(type: string) {
         this.type = type;
+        this.transactionId = type;
       }
       withError(code: number, msg: string) {
         this.errorCode = code;
@@ -19,6 +21,13 @@ vi.mock("@variamosple/variamos-components", async () => {
     },
   };
 });
+
+interface MockedResponse {
+  type?: string;
+  transactionId?: string;
+  errorCode?: number;
+  message?: string;
+}
 
 describe("RepositoryUtils handleRepositoryError", () => {
   let consoleSpy: import("vitest").MockInstance;
@@ -38,15 +47,18 @@ describe("RepositoryUtils handleRepositoryError", () => {
     };
     const mockAxiosError = {
       isAxiosError: true,
+      response: { data: mockResponseData },
       message: "Request failed",
-      response: {
-        data: mockResponseData,
-      },
     };
     vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
 
-    const result = handleRepositoryError(mockAxiosError, "Fallback msg");
-    expect(result).toEqual(mockResponseData);
+    const result = handleRepositoryError(
+      mockAxiosError,
+      "Fallback msg",
+    ) as MockedResponse;
+    expect(result.type).toBe("BACK-ERROR");
+    expect(result.errorCode).toBe(400);
+    expect(result.message).toBe("Custom Backend Error");
   });
 
   it("should return formatted BACK-ERROR if no response data is in Axios error", () => {
@@ -57,7 +69,10 @@ describe("RepositoryUtils handleRepositoryError", () => {
     };
     vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
 
-    const result = handleRepositoryError(mockAxiosError, "Fallback msg");
+    const result = handleRepositoryError(
+      mockAxiosError,
+      "Fallback msg",
+    ) as MockedResponse;
     expect(result.type).toBe("BACK-ERROR");
     expect(result.errorCode).toBe(503);
     expect(result.message).toBe("Error when communicating with the back-end.");
@@ -67,7 +82,10 @@ describe("RepositoryUtils handleRepositoryError", () => {
     vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
     const genericError = new Error("Generic fail");
 
-    const result = handleRepositoryError(genericError, "Fallback fallback");
+    const result = handleRepositoryError(
+      genericError,
+      "Fallback fallback",
+    ) as MockedResponse;
     expect(result.type).toBe("APP-ERROR");
     expect(result.errorCode).toBe(500);
     expect(result.message).toBe("Fallback fallback");

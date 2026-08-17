@@ -25,7 +25,7 @@ export const InfiniteSelect = <ValueType,>({
     setIsDropdownOpen(false);
   };
 
-  const { elementRef } = useListenOutsideClicks(closeDropdown);
+  const { elementRef } = useListenOutsideClicks<HTMLDivElement>(closeDropdown);
 
   const renderNoOptions = () => {
     if (isFetchingOptions) return <Spinner animation="border" role="status" />;

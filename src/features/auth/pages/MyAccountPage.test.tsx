@@ -116,7 +116,7 @@ describe("MyAccountPage Component", () => {
 
   it("renders loader initially then queries user account info", async () => {
     // Create a promise we control to inspect loading state
-    let resolvePromise: () => void;
+    let resolvePromise!: () => void;
     const promise = new Promise<void>((resolve) => {
       resolvePromise = resolve;
     });

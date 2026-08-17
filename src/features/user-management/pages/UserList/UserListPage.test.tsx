@@ -14,7 +14,7 @@ import type { UsersFilter } from "../../domain/Entity/UsersFilter";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
-  const React = require("react");
+  const React = require("react") as typeof import("react");
   const { useState, useCallback } = React;
   return {
     withPageVisit: (component: ComponentType) => component,

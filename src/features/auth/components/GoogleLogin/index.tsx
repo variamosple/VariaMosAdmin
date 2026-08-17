@@ -8,26 +8,29 @@ interface GoogleLoginProps {
 export const GoogleLogin: FC<GoogleLoginProps> = ({ text = "signin_with" }) => {
   useEffect(() => {
     const initializeGoogleSignIn = () => {
-      window.google.accounts.id.initialize({
+      const google = window.google;
+      if (!google) return;
+
+      const element = document.getElementById("g_id_signin");
+      if (!element) return;
+
+      google.accounts.id.initialize({
         client_id: AppConfig.GOOGLE.CLIENT_ID,
         context: "signin",
         ux_mode: "redirect",
         login_uri: AppConfig.GOOGLE.REDIRECT_URI,
       });
 
-      window.google.accounts.id.renderButton(
-        document.getElementById("g_id_signin"),
-        {
-          theme: "outline",
-          type: "standard",
-          text,
-          shape: "rectangular",
-          size: "large",
-          width: "300",
-          locale: "en",
-          logo_alignment: "left",
-        },
-      );
+      google.accounts.id.renderButton(element, {
+        theme: "outline",
+        type: "standard",
+        text,
+        shape: "rectangular",
+        size: "large",
+        width: "300",
+        locale: "en",
+        logo_alignment: "left",
+      });
     };
 
     if (window.google?.accounts?.id) {

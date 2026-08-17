@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { useRouter, useSession } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router-dom";
-
+import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { LoginPage } from "./index";
@@ -30,7 +30,15 @@ vi.mock("../../components/LoginForm", async () => ({
     <button
       type="button"
       data-testid="mock-login-form"
-      onClick={() => onSignIn({ username: "user", password: "pwd" })}
+      onClick={() => {
+        interface MockCredentialsShape {
+          username: string;
+          email?: string;
+          password: string;
+        }
+        const payload = { username: "user", password: "pwd" };
+        onSignIn(payload as MockCredentialsShape as Credentials);
+      }}
     >
       Submit Login
     </button>
