@@ -10,12 +10,18 @@ vi.mock("@variamosple/variamos-components", async () => {
       currentPage,
       totalPages,
       onPageChange,
-    }: any) {
+    }: {
+      currentPage: number;
+      totalPages: number;
+      onPageChange: (page: number) => void;
+    }) {
       return (
         <div data-testid="paginator">
           <span data-testid="current-page">{currentPage}</span>
           <span data-testid="total-pages">{totalPages}</span>
-          <button onClick={() => onPageChange(currentPage + 1)}>Next</button>
+          <button type="button" onClick={() => onPageChange(currentPage + 1)}>
+            Next
+          </button>
         </div>
       );
     },

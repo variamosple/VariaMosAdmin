@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Metric } from "../domain/Entity/Metric";
+import type { ChartDataItem, Metric } from "../domain/Entity/Metric";
 
 interface ChartAxes {
   xAxis: string[];
@@ -16,8 +16,6 @@ export const useLineChartData = (metric: Metric) => {
         textStyle: {
           fontSize: 10,
         },
-        // slantedText: true,
-        // slantedTextAngle: 90,
       },
       vAxis: {
         title: "Visits",
@@ -31,42 +29,52 @@ export const useLineChartData = (metric: Metric) => {
   );
 
   const { xAxis, yAxis }: ChartAxes = useMemo(() => {
-    const metricData = metric.data || [];
+    const metricData = (metric.data as ChartDataItem[]) || [];
     const x = new Set<string>();
     const y = new Set<string>();
+    const labelKey = metric.labelKey;
+    const defaultFilter = metric.defaultFilter;
 
-    metricData.forEach((item: any) => {
-      x.add(item[metric.labelKey!]);
-      y.add(item[metric.defaultFilter]);
-    });
+    if (labelKey && defaultFilter) {
+      for (const item of metricData) {
+        const xVal = item[labelKey];
+        const yVal = item[defaultFilter];
+        if (xVal !== undefined) x.add(String(xVal));
+        if (yVal !== undefined) y.add(String(yVal));
+      }
+    }
 
     return { xAxis: Array.from(x), yAxis: Array.from(y) };
   }, [metric]);
 
   const data = useMemo(() => {
-    if (!metric.data) {
+    const metricData = metric.data as ChartDataItem[] | undefined;
+    if (!metricData) {
       return [["Date", "Visits"]];
     }
 
-    const metricData = metric.data;
+    const labelKey = metric.labelKey;
+    if (!labelKey) {
+      return [["Date", "Visits"]];
+    }
 
-    const groupedData: Map<string, any> = metricData.reduce(
-      (acc: Map<string, any[]>, item: any) => {
-        const key = item[activeFilter];
+    const groupedData = metricData.reduce(
+      (acc: Map<string, Record<string, number>>, item) => {
+        const key = String(item[activeFilter]);
 
-        const element: any = acc.get(key) || {};
-        element[item[metric.labelKey!]] = item.count;
+        const element = acc.get(key) || {};
+        element[String(item[labelKey])] = item.count;
 
         acc.set(key, element);
 
         return acc;
       },
-      new Map<string, any[]>(),
+      new Map<string, Record<string, number>>(),
     );
 
     const columns = ["Date", ...yAxis];
 
-    const rows: any[][] = xAxis.map((x: string) => {
+    const rows: (Date | number | string)[][] = xAxis.map((x: string) => {
       const date = new Date(x);
       const userTimezoneOffset = date.getTimezoneOffset() * 60000;
 

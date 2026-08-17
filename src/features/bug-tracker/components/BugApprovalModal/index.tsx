@@ -4,7 +4,16 @@ import { Trash, Upload } from "react-bootstrap-icons";
 import { useForm } from "react-hook-form";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { deleteAttachment, uploadAttachment } from "../../api/BugRepository";
-import type { Bug } from "../../domain/Bug";
+import type { Bug, BugAttachment } from "../../domain/Bug";
+
+interface ApproveFormData {
+  title: string;
+  description: string;
+  priority: "low" | "medium" | "high";
+  category: string;
+  githubRepo: string;
+  comment: string;
+}
 
 interface BugApprovalModalProps {
   show: boolean;
@@ -32,7 +41,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
   repos,
   categories,
 }) => {
-  const [attachments, setAttachments] = useState<any[]>([]);
+  const [attachments, setAttachments] = useState<BugAttachment[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -42,7 +51,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<ApproveFormData>({
     defaultValues: {
       title: "",
       description: "",
@@ -70,7 +79,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
 
   if (!bug) return null;
 
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: ApproveFormData) => {
     if (!bug.id) {
       setModalError("Bug ID is missing.");
       return;
@@ -89,8 +98,9 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
         data.githubRepo,
       );
       onHide();
-    } catch (err: any) {
-      setModalError(err.message || "Failed to approve bug");
+    } catch (err) {
+      const error = err as Error;
+      setModalError(error.message || "Failed to approve bug");
     } finally {
       setIsApproving(false);
     }
@@ -105,28 +115,31 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
       const response = await uploadAttachment(bug.id, files[0]);
       if (response.errorCode) {
         setModalError(response.message || "Failed to upload attachment");
-      } else {
-        setAttachments((prev) => [...prev, response.data]);
+      } else if (response.data !== undefined) {
+        const data = response.data;
+        setAttachments((prev) => [...prev, data]);
       }
-    } catch (err: any) {
-      setModalError(err.message || "Upload error");
+    } catch (err) {
+      const error = err as Error;
+      setModalError(error.message || "Upload error");
     } finally {
       setIsUploading(false);
       e.target.value = ""; // reset file input
     }
   };
 
-  const handleDeleteAttachment = async (attachmentId: string) => {
+  const handleDeleteAttachment = async (attachmentId: number) => {
     setModalError(null);
     try {
-      const response = await deleteAttachment(attachmentId);
+      const response = await deleteAttachment(attachmentId.toString());
       if (response.errorCode) {
         setModalError(response.message || "Failed to delete attachment");
       } else {
         setAttachments((prev) => prev.filter((att) => att.id !== attachmentId));
       }
-    } catch (err: any) {
-      setModalError(err.message || "Deletion error");
+    } catch (err) {
+      const error = err as Error;
+      setModalError(error.message || "Deletion error");
     }
   };
 

@@ -10,11 +10,11 @@ import { BugApprovalModal } from "./index";
 // Mock @variamosple/variamos-components to avoid ESM import errors when BugRepository is loaded
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    withPageVisit: (component: any) => component,
-    ResponseModel: class ResponseModel {
+    withPageVisit: <T,>(component: T) => component,
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -56,8 +56,8 @@ describe("BugApprovalModal Component", () => {
     ],
   };
 
-  let uploadAttachmentParams: any[] = [];
-  let deleteAttachmentParams: any[] = [];
+  let uploadAttachmentParams: { bugId: string }[] = [];
+  let deleteAttachmentParams: string[] = [];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -66,20 +66,20 @@ describe("BugApprovalModal Component", () => {
 
     server.use(
       http.post(apiTarget("/bugs/:bugId/attachments"), ({ params }) => {
-        uploadAttachmentParams.push({ bugId: params.bugId });
+        uploadAttachmentParams.push({ bugId: params.bugId as string });
         return HttpResponse.json({
           data: {
             id: 2,
             filePath: "/path/to/att2.png",
             fileType: "image/png",
-            bugId: params.bugId,
+            bugId: params.bugId as string,
           },
         });
       }),
       http.delete(
         apiTarget("/bugs/attachments/:attachmentId"),
         ({ params }) => {
-          deleteAttachmentParams.push(params.attachmentId);
+          deleteAttachmentParams.push(params.attachmentId as string);
           return HttpResponse.json({ data: null });
         },
       ),

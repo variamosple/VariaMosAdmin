@@ -1,5 +1,9 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { usePaginatedQuery } from "@variamosple/variamos-components";
+import {
+  type ResponseModel,
+  usePaginatedQuery,
+} from "@variamosple/variamos-components";
+import type { Model } from "@/features/model-management/domain/Entity/Model";
 import * as ModelRepository from "../api/ModelRepository";
 import { useModelList } from "./useModelList";
 
@@ -15,10 +19,10 @@ const mockOnPageChange = vi.fn();
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -51,10 +55,10 @@ describe("useModelList Hook", () => {
 
     updateModelSpy = vi
       .spyOn(ModelRepository, "updateModel")
-      .mockResolvedValue({ errorCode: null } as any);
+      .mockResolvedValue({ errorCode: undefined } as ResponseModel<Model>);
     deleteModelSpy = vi
       .spyOn(ModelRepository, "deleteModel")
-      .mockResolvedValue({ errorCode: null } as any);
+      .mockResolvedValue({ errorCode: undefined } as ResponseModel<void>);
 
     mockLoadData.mockResolvedValue({ data: [] });
 
@@ -131,7 +135,7 @@ describe("useModelList Hook", () => {
     updateModelSpy.mockResolvedValueOnce({
       errorCode: 500,
       message: "Edit failed",
-    } as any);
+    } as ResponseModel<Model>);
 
     await act(async () => {
       await result.current.performEditModel({

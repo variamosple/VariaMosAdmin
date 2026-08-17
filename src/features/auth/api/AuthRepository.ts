@@ -137,7 +137,7 @@ export const requestSignInAsGuest = (
 
 export const requestSignUp = (
   request: UserRegistration,
-): Promise<ResponseModel<unknown>> => {
+): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/auth/sign-up", request)
     .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) => {

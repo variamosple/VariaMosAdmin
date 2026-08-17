@@ -12,21 +12,29 @@ vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
   };
 });
 
+interface SelectOptionProps<T> {
+  label: string;
+  value: T;
+}
+
+interface InfiniteSelectProps<T> {
+  options: SelectOptionProps<T>[];
+  handleSelect: (option: SelectOptionProps<T>) => void;
+}
+
 vi.mock("@/shared/components/InfiniteSelect", async () => {
   return {
-    InfiniteSelect: ({ handleSelect, options }: any) => (
+    InfiniteSelect: <T,>({ handleSelect, options }: InfiniteSelectProps<T>) => (
       <select
         data-testid="infinite-select"
         onChange={(e) => {
-          const opt = options.find(
-            (o: any) => String(o.value) === e.target.value,
-          );
+          const opt = options.find((o) => String(o.value) === e.target.value);
           if (opt) handleSelect(opt);
         }}
       >
         <option value="">Select a role</option>
-        {options.map((o: any) => (
-          <option key={o.value} value={o.value}>
+        {options.map((o) => (
+          <option key={String(o.value)} value={String(o.value)}>
             {o.label}
           </option>
         ))}
@@ -38,7 +46,7 @@ vi.mock("@/shared/components/InfiniteSelect", async () => {
 const mockLoadData = vi.fn();
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    useDebouncedValue: (val: any) => [val],
+    useDebouncedValue: <T,>(val: T) => [val],
     usePaginatedQuery: () => ({
       loadData: mockLoadData,
       isLoading: false,
@@ -54,10 +62,10 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.pageSize = pageSize;
       }
     },
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;

@@ -16,10 +16,10 @@ const mockMicroservice: MicroService = {
 // Mock @variamosple/variamos-components to avoid ESM syntax errors
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -42,8 +42,17 @@ vi.mock("@patternfly/react-log-viewer", async () => {
   };
 });
 
+interface MockWebSocketType {
+  send: import("vitest").Mock;
+  close: import("vitest").Mock;
+  onopen: (() => void) | null;
+  onmessage: ((ev: { data: string }) => void) | null;
+  onclose: (() => void) | null;
+  onerror: (() => void) | null;
+}
+
 // Mock watchMicroserviceLogs API to return a mock WebSocket object
-const mockWebSocket = {
+const mockWebSocket: MockWebSocketType = {
   send: vi.fn(),
   close: vi.fn(),
   onopen: null,
@@ -61,12 +70,12 @@ describe("MicroServiceRowComponent WebSocket Logging", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (mockWebSocket as any).onopen = null;
-    (mockWebSocket as any).onmessage = null;
-    (mockWebSocket as any).onclose = null;
+    mockWebSocket.onopen = null;
+    mockWebSocket.onmessage = null;
+    mockWebSocket.onclose = null;
     watchLogsSpy = vi
       .spyOn(MicroServiceRepository, "watchMicroserviceLogs")
-      .mockReturnValue(mockWebSocket as any);
+      .mockReturnValue(mockWebSocket as object as WebSocket);
   });
 
   afterEach(() => {
@@ -103,10 +112,9 @@ describe("MicroServiceRowComponent WebSocket Logging", () => {
       JSON.stringify({ microserviceId: "test-id" }),
     );
 
-    // Simulate receiving message
     await act(async () => {
       if (mockWebSocket.onmessage) {
-        (mockWebSocket.onmessage as (ev: any) => void)({
+        mockWebSocket.onmessage({
           data: "log line 1\n",
         });
       }

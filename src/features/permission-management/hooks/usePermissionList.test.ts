@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { usePermissionList } from "./usePermissionList";
@@ -22,10 +23,10 @@ const mockOnPageChange = vi.fn();
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -76,10 +77,10 @@ describe("usePermissionList Hook", () => {
   });
 
   it("should handle onPermissionCreate successfully", async () => {
-    let createPayload: any = null;
+    let createPayload: Partial<Permission> | null = null;
     server.use(
       http.post(apiTarget("/v1/permissions"), async ({ request }) => {
-        createPayload = await request.json();
+        createPayload = (await request.json()) as Partial<Permission>;
         return HttpResponse.json({ errorCode: null });
       }),
     );
@@ -123,14 +124,14 @@ describe("usePermissionList Hook", () => {
   });
 
   it("should handle performEditPermission successfully", async () => {
-    let editPayload: any = null;
+    let editPayload: Permission | null = null;
     let editPermissionId: string | null = null;
     server.use(
       http.put(
         apiTarget("/v1/permissions/:id"),
         async ({ request, params }) => {
           editPermissionId = params.id as string;
-          editPayload = await request.json();
+          editPayload = (await request.json()) as Permission;
           return HttpResponse.json({ errorCode: null });
         },
       ),

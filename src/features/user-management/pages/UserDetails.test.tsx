@@ -3,7 +3,11 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { usePaginatedQuery, useRouter } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import type { ComponentType } from "react";
 import { useParams } from "react-router-dom";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
+import type { User } from "@/features/user-management/domain/Entity/User";
+import type { UserRole } from "@/features/user-management/domain/Entity/UserRole";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { UserDetailsPage } from "./UserDetails";
@@ -25,7 +29,7 @@ vi.mock("@/shared/context/ToastContext", async () => ({
 // Mock @variamosple/variamos-components completely
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    withPageVisit: (component: any) => component,
+    withPageVisit: (component: ComponentType) => component,
     useRouter: vi.fn(),
     usePaginatedQuery: vi.fn(),
     PagedModel: class PagedModel {
@@ -36,9 +40,10 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.pageSize = s;
       }
     },
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number | null;
       message?: string;
+      data?: T;
       constructor(code?: number | null, msg?: string) {
         this.errorCode = code;
         this.message = msg;
@@ -52,22 +57,40 @@ vi.mock("react-bootstrap", async (importOriginal) => {
   const original = await importOriginal<typeof import("react-bootstrap")>();
   return {
     ...original,
-    Spinner: (props: any) => <div data-testid="spinner" {...props} />,
+    Spinner: (props: { animation?: string; variant?: string }) => (
+      <div data-testid="spinner" {...props} />
+    ),
   };
 });
 
 // Mock sub-components
 vi.mock("@/features/user-management/components/UserDetails", async () => ({
-  UserDetails: ({ user }: any) => (
+  UserDetails: ({ user }: { user?: User }) => (
     <div data-testid="user-details">User: {user?.name}</div>
   ),
 }));
 
 vi.mock("../components/UserRoleForm", async () => ({
-  UserRoleForm: ({ onUserRoleSubmit, isLoading }: any) => (
+  UserRoleForm: ({
+    onUserRoleSubmit,
+    isLoading,
+  }: {
+    onUserRoleSubmit: (role: UserRole) => void;
+    isLoading: boolean;
+  }) => (
     <div data-testid="user-role-form">
       <span>Role Form (Loading: {isLoading ? "true" : "false"})</span>
-      <button onClick={() => onUserRoleSubmit({ roleId: "admin-role" })}>
+      <button
+        type="button"
+        onClick={() => {
+          interface MockUserRoleShape {
+            userId: string;
+            roleId: string | number;
+          }
+          const payload = { userId: "user-123", roleId: "admin-role" };
+          onUserRoleSubmit(payload as MockUserRoleShape as UserRole);
+        }}
+      >
         Assign Role
       </button>
     </div>
@@ -75,12 +98,20 @@ vi.mock("../components/UserRoleForm", async () => ({
 }));
 
 vi.mock("../components/UserRoleList", async () => ({
-  UserRoleList: ({ items, onRoleDelete }: any) => (
+  UserRoleList: ({
+    items,
+    onRoleDelete,
+  }: {
+    items?: Role[];
+    onRoleDelete: (role: Role) => void;
+  }) => (
     <div data-testid="user-role-list">
-      {items?.map((item: any) => (
+      {items?.map((item) => (
         <div key={item.id} data-testid={`role-row-${item.id}`}>
           {item.name}
-          <button onClick={() => onRoleDelete(item)}>Delete {item.name}</button>
+          <button type="button" onClick={() => onRoleDelete(item)}>
+            Delete {item.name}
+          </button>
         </div>
       ))}
     </div>
@@ -90,13 +121,27 @@ vi.mock("../components/UserRoleList", async () => ({
 vi.mock("@/shared/components/ConfirmationModal", async () => {
   return {
     __esModule: true,
-    default: ({ show, message, onConfirm, onCancel }: any) => {
+    default: ({
+      show,
+      message,
+      onConfirm,
+      onCancel,
+    }: {
+      show: boolean;
+      message: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => {
       if (!show) return null;
       return (
         <div data-testid="confirmation-modal">
           <span>{message}</span>
-          <button onClick={onConfirm}>Confirm Action</button>
-          <button onClick={onCancel}>Cancel Action</button>
+          <button type="button" onClick={onConfirm}>
+            Confirm Action
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel Action
+          </button>
         </div>
       );
     },
@@ -126,12 +171,13 @@ describe("UserDetailsPage Component", () => {
     onPageChange: mockOnUserRolesPageChange,
   };
 
-  let resolveUserPromise: any;
+  let resolveUserPromise: (value: Response) => void;
   let delayUserQuery = false;
   let createUserRoleCalled = 0;
   let deleteUserRoleCalled = 0;
-  let createUserRolePayload: any = null;
-  let deleteUserRoleParams: any = null;
+  let createUserRolePayload: UserRole | null = null;
+  let deleteUserRoleParams: Record<string, string | readonly string[]> | null =
+    null;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -158,14 +204,17 @@ describe("UserDetailsPage Component", () => {
       }),
       http.post(apiTarget("/v1/users/:userId/roles"), async ({ request }) => {
         createUserRoleCalled++;
-        createUserRolePayload = await request.json();
+        createUserRolePayload = (await request.json()) as UserRole;
         return HttpResponse.json({ errorCode: null });
       }),
       http.delete(
         apiTarget("/v1/users/:userId/roles/:roleId"),
         ({ params }) => {
           deleteUserRoleCalled++;
-          deleteUserRoleParams = params;
+          deleteUserRoleParams = params as Record<
+            string,
+            string | readonly string[]
+          >;
           return HttpResponse.json({ errorCode: null });
         },
       ),

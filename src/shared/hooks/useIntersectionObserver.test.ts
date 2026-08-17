@@ -4,21 +4,31 @@ import useIntersectionObserver from "./useIntersectionObserver";
 describe("useIntersectionObserver hook", () => {
   const mockDisconnect = vi.fn();
   const mockObserve = vi.fn();
-  let observerCallback: any;
+  let observerCallback: IntersectionObserverCallback;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Mock the global IntersectionObserver
-    global.IntersectionObserver = vi.fn().mockImplementation(function (
-      this: any,
-      callback: any,
-    ) {
-      observerCallback = callback;
-      this.observe = mockObserve;
-      this.disconnect = mockDisconnect;
-      this.unobserve = vi.fn();
-    }) as any;
+    const mockObserverClass = vi.fn(
+      class {
+        constructor(callback: IntersectionObserverCallback) {
+          observerCallback = callback;
+        }
+        observe = mockObserve;
+        disconnect = mockDisconnect;
+        unobserve = vi.fn();
+        takeRecords = vi.fn();
+        root = null;
+        rootMargin = "";
+        thresholds = [];
+      },
+    );
+    Object.defineProperty(globalThis, "IntersectionObserver", {
+      value: mockObserverClass,
+      writable: true,
+      configurable: true,
+    });
   });
 
   it("should initialize hook and register intersection observer on node", () => {
@@ -50,7 +60,10 @@ describe("useIntersectionObserver hook", () => {
 
     // Simulate intersection entry
     act(() => {
-      observerCallback([{ isIntersecting: true }]);
+      observerCallback(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver,
+      );
     });
 
     expect(mockSetPage).toHaveBeenCalled();

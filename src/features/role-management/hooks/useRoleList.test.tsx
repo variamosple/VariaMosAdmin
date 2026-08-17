@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { useRoleList } from "./useRoleList";
@@ -19,10 +20,10 @@ const mockOnPageChange = vi.fn();
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -56,9 +57,9 @@ describe("useRoleList Hook", () => {
   let createRoleCalled = 0;
   let updateRoleCalled = 0;
   let deleteRoleCalled = 0;
-  let createRolePayload: any = null;
-  let updateRolePayload: any = null;
-  let deleteRoleId: any = null;
+  let createRolePayload: Partial<Role> | null = null;
+  let updateRolePayload: Role | null = null;
+  let deleteRoleId: number | null = null;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -83,12 +84,12 @@ describe("useRoleList Hook", () => {
     server.use(
       http.post(apiTarget("/v1/roles"), async ({ request }) => {
         createRoleCalled++;
-        createRolePayload = await request.json();
+        createRolePayload = (await request.json()) as Partial<Role>;
         return HttpResponse.json({ errorCode: null });
       }),
       http.put(apiTarget("/v1/roles/:roleId"), async ({ request }) => {
         updateRoleCalled++;
-        updateRolePayload = await request.json();
+        updateRolePayload = (await request.json()) as Role;
         return HttpResponse.json({ errorCode: null });
       }),
       http.delete(apiTarget("/v1/roles/:roleId"), ({ params }) => {

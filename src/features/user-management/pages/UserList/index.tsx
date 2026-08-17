@@ -7,7 +7,7 @@ import { UserList } from "../../components/UserList";
 import { RecoveryLinkModal } from "../../components/UserList/RecoveryLinkModal";
 import { useUserList } from "../../hooks/useUserList";
 
-const UserListPageComponent: FC<unknown> = () => {
+const UserListPageComponent: FC = () => {
   const {
     showResetLink,
     setShowResetLink,
@@ -61,7 +61,7 @@ const UserListPageComponent: FC<unknown> = () => {
       <RecoveryLinkModal
         show={showResetLink}
         onHide={() => setShowResetLink(false)}
-        user={selectedUser!}
+        user={selectedUser}
       />
 
       <ConfirmationModal
@@ -69,7 +69,9 @@ const UserListPageComponent: FC<unknown> = () => {
         message="Are you sure you want to disable the user?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDisableUser(selectedUser!);
+          if (selectedUser) {
+            performDisableUser(selectedUser);
+          }
           setShowDisable(false);
         }}
         onCancel={() => {
@@ -82,7 +84,9 @@ const UserListPageComponent: FC<unknown> = () => {
         show={showEnable}
         message="Are you sure you want to enable the user?"
         onConfirm={() => {
-          performEnableUser(selectedUser!);
+          if (selectedUser) {
+            performEnableUser(selectedUser);
+          }
           setShowEnable(false);
         }}
         onCancel={() => {
@@ -96,7 +100,9 @@ const UserListPageComponent: FC<unknown> = () => {
         message="Are you sure you want to delete the user?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeleteUser(selectedUser!);
+          if (selectedUser) {
+            performDeleteUser(selectedUser);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {

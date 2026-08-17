@@ -1,5 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
-import { usePaginatedQuery } from "@variamosple/variamos-components";
+import {
+  ResponseModel,
+  usePaginatedQuery,
+} from "@variamosple/variamos-components";
 import * as MicroServiceRepository from "../api/MicroServiceRepository";
 import { useMicroServiceList } from "./useMicroServiceList";
 
@@ -8,10 +11,10 @@ const mockOnPageChange = vi.fn();
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -45,13 +48,13 @@ describe("useMicroServiceList Hook", () => {
 
     startMicroserviceSpy = vi
       .spyOn(MicroServiceRepository, "startMicroservice")
-      .mockResolvedValue({ errorCode: null } as any);
+      .mockResolvedValue(new ResponseModel<void>("success"));
     restartMicroserviceSpy = vi
       .spyOn(MicroServiceRepository, "restartMicroservice")
-      .mockResolvedValue({ errorCode: null } as any);
+      .mockResolvedValue(new ResponseModel<void>("success"));
     stopMicroserviceSpy = vi
       .spyOn(MicroServiceRepository, "stopMicroservice")
-      .mockResolvedValue({ errorCode: null } as any);
+      .mockResolvedValue(new ResponseModel<void>("success"));
 
     mockLoadData.mockResolvedValue({ data: [] });
 

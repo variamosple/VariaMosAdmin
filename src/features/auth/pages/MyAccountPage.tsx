@@ -12,7 +12,7 @@ import {
 } from "../api/AuthRepository";
 import { PasswordUpdateForm } from "../components/PasswordUpdateForm";
 
-const MyAccountPageComponent: FC<unknown> = () => {
+const MyAccountPageComponent: FC = () => {
   const [user, setUser] = useState<User>();
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordUpdate, setShowPasswordUpdate] = useState(false);

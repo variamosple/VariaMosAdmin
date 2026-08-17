@@ -3,11 +3,11 @@ import {
   Header,
   MenuContextProvider,
 } from "@variamosple/variamos-components";
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 import { requestMenuConfig } from "@/shared/api/ConfigRepository";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
-export const MainLayout: FC<any> = ({ children }) => {
+export const MainLayout: FC<{ children?: ReactNode }> = ({ children }) => {
   return (
     <>
       <MenuContextProvider requestMenu={requestMenuConfig}>

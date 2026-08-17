@@ -16,18 +16,24 @@ const DummyComponent: React.FC<PaginationControlsProps & { title: string }> = ({
       <span data-testid="current-page">{currentPage}</span>
       <span data-testid="total-pages">{totalPages}</span>
       <button
+        type="button"
         data-testid="btn-next"
         onClick={() => onPageChange(currentPage + 1)}
       >
         Next
       </button>
       <button
+        type="button"
         data-testid="btn-prev"
         onClick={() => onPageChange(currentPage - 1)}
       >
         Prev
       </button>
-      <button data-testid="btn-invalid" onClick={() => onPageChange(99)}>
+      <button
+        type="button"
+        data-testid="btn-invalid"
+        onClick={() => onPageChange(99)}
+      >
         Go to 99
       </button>
     </div>

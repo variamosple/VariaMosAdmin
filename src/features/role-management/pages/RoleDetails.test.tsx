@@ -43,17 +43,17 @@ const mockLoadData = vi.fn();
 const mockOnPageChange = vi.fn();
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    withPageVisit: (component: any) => component,
+    withPageVisit: <T,>(component: T): T => component,
     useRouter: () => ({
       navigate: mockNavigate,
     }),
     usePaginatedQuery: vi.fn(),
-    useDebouncedValue: (val: any) => [val],
+    useDebouncedValue: <T,>(val: T): [T] => [val],
     Paginator: () => <div data-testid="paginator" />,
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number | null = null;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -67,9 +67,16 @@ vi.mock("@variamosple/variamos-components", async () => {
 vi.mock(
   "@/features/role-management/components/RolePermissionForm",
   async () => ({
-    RolePermissionForm: ({ onRolePermissionSubmit, isLoading }: any) => (
+    RolePermissionForm: ({
+      onRolePermissionSubmit,
+      isLoading,
+    }: {
+      onRolePermissionSubmit: (payload: { permissionId: number }) => void;
+      isLoading: boolean;
+    }) => (
       <div data-testid="role-permission-form">
         <button
+          type="button"
           onClick={() => onRolePermissionSubmit({ permissionId: 42 })}
           disabled={isLoading}
         >
@@ -93,12 +100,18 @@ describe("RoleDetailsPage Component", () => {
     { id: 2, name: "WRITE_PRIVILEGES" },
   ];
 
-  let resolveRolePromise: any;
+  let resolveRolePromise: (value: Response) => void;
   let delayRoleQuery = false;
   let createRolePermissionCalled = 0;
   let deleteRolePermissionCalled = 0;
-  let createRolePermissionPayload: any = null;
-  let deleteRolePermissionParams: any = null;
+  let createRolePermissionPayload: {
+    permissionId: number;
+    roleId: number;
+  } | null = null;
+  let deleteRolePermissionParams: Record<
+    string,
+    string | readonly string[] | undefined
+  > | null = null;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -136,7 +149,10 @@ describe("RoleDetailsPage Component", () => {
         apiTarget("/v1/roles/:roleId/permissions"),
         async ({ request }) => {
           createRolePermissionCalled++;
-          createRolePermissionPayload = await request.json();
+          createRolePermissionPayload = (await request.json()) as {
+            permissionId: number;
+            roleId: number;
+          };
           return HttpResponse.json({ errorCode: null });
         },
       ),

@@ -2,20 +2,30 @@ import { ROUTES } from "./router";
 
 // Mock @variamosple/variamos-components
 vi.mock("@variamosple/variamos-components", async () => ({
-  AuthWrapper: ({ children }: any) => <div>{children}</div>,
+  AuthWrapper: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
   NotAuthorized: () => <div>Not Authorized</div>,
-  ProtectedRoute: ({ children }: any) => <div>{children}</div>,
+  ProtectedRoute: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 // Mock SecurityWrapper and Layouts
 vi.mock("@/shared/components/SecurityWrapper", async () => ({
-  SecurityWrapper: ({ children }: any) => <div>{children}</div>,
+  SecurityWrapper: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 vi.mock("@/shared/layouts/MainLayout", async () => ({
-  MainLayout: ({ children }: any) => <div>{children}</div>,
+  MainLayout: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 vi.mock("@/shared/layouts/SignInLayout", async () => ({
-  SignInLayout: ({ children }: any) => <div>{children}</div>,
+  SignInLayout: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 // Mock Pages

@@ -7,7 +7,7 @@ import { SearchForm } from "@/shared/components/SearchForm";
 import { RoleList } from "../../components/RoleList";
 import { useRoleList } from "../../hooks/useRoleList";
 
-const RoleListPageComponent: FC<unknown> = () => {
+const RoleListPageComponent: FC = () => {
   const {
     showCreate,
     setShowCreate,
@@ -84,7 +84,9 @@ const RoleListPageComponent: FC<unknown> = () => {
         message="Are you sure you want to delete the role?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeleteRole(toDeleteRole!);
+          if (toDeleteRole) {
+            performDeleteRole(toDeleteRole);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {

@@ -8,15 +8,15 @@ import { ProjectListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
-  const React = require("react");
+  const React = require("react") as typeof import("react");
   const { useState, useCallback } = React;
   return {
-    withPageVisit: (component: any) => component,
+    withPageVisit: <T,>(component: T): T => component,
     PagedModel: class PagedModel {},
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -28,14 +28,22 @@ vi.mock("@variamosple/variamos-components", async () => {
       }
     },
     Paginator: () => <div data-testid="paginator">Paginator</div>,
-    usePaginatedQuery: ({ queryFunction, initialFilter }: any) => {
-      const [data, setData] = useState([]);
+    usePaginatedQuery: <TData, TFilter>({
+      queryFunction,
+      initialFilter,
+    }: {
+      queryFunction: (
+        filter: TFilter,
+      ) => Promise<{ errorCode?: number; data?: TData[] }>;
+      initialFilter: TFilter;
+    }) => {
+      const [data, setData] = useState<TData[]>([]);
       const [currentPage, setCurrentPage] = useState(1);
       const [totalPages, setTotalPages] = useState(1);
       const [isLoading, setIsLoading] = useState(false);
 
       const loadData = useCallback(
-        async (filter: any) => {
+        async (filter: TFilter) => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
@@ -74,13 +82,27 @@ vi.mock(
   async () => {
     return {
       __esModule: true,
-      default: ({ show, message, onConfirm, onCancel }: any) => {
+      default: ({
+        show,
+        message,
+        onConfirm,
+        onCancel,
+      }: {
+        show: boolean;
+        message: string;
+        onConfirm: () => void;
+        onCancel: () => void;
+      }) => {
         if (!show) return null;
         return (
           <div data-testid="delete-confirm-modal">
             <span>{message}</span>
-            <button onClick={onConfirm}>Confirm Delete</button>
-            <button onClick={onCancel}>Cancel Delete</button>
+            <button type="button" onClick={onConfirm}>
+              Confirm Delete
+            </button>
+            <button type="button" onClick={onCancel}>
+              Cancel Delete
+            </button>
           </div>
         );
       },

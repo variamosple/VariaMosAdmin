@@ -1,5 +1,6 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.7/schema.json",
+  "plugins": ["./rules/no-unknown.grit"],
   "vcs": {
     "enabled": true,
     "clientKind": "git",

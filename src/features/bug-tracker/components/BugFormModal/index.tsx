@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from "react";
+import { type ChangeEvent, type FC, useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import type { Bug } from "../../domain/Bug";
@@ -168,7 +168,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
             <Form.Label>Attachment (Optional)</Form.Label>
             <Form.Control
               type="file"
-              onChange={(e: any) => {
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 if (e.target.files && e.target.files.length > 0) {
                   setSelectedFile(e.target.files[0]);
                 }

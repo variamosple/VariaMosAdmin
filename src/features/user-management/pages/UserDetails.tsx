@@ -23,7 +23,7 @@ import { useToast } from "@/shared/context/ToastContext";
 import { UserRoleForm } from "../components/UserRoleForm";
 import { UserRoleList } from "../components/UserRoleList";
 
-const UserDetailsPageComponent: FC<unknown> = () => {
+const UserDetailsPageComponent: FC = () => {
   const { pushToast, removeToast } = useToast();
   const { navigate } = useRouter();
   const { userId: userIdParam } = useParams();
@@ -55,6 +55,15 @@ const UserDetailsPageComponent: FC<unknown> = () => {
   }, []);
 
   const onUserRoleCreate = (UserRole: UserRole) => {
+    if (!userIdParam) {
+      pushToast({
+        title: "Role assignment",
+        message: "User ID is missing",
+        variant: "danger",
+      });
+      return;
+    }
+
     setIsCreating(true);
     const toastId = pushToast({
       title: "Role assignment",
@@ -63,18 +72,20 @@ const UserDetailsPageComponent: FC<unknown> = () => {
 
     createUserRole({
       ...UserRole,
-      userId: userIdParam!,
+      userId: userIdParam,
     })
       .then((response) => {
         removeToast(toastId);
         if (response.errorCode) {
           pushToast({
             title: "Role assignment",
-            message: response.message!,
+            message: response.message || "Failed to assign role",
             variant: "danger",
           });
         } else {
-          loadUserRoles(userRolesFilter!);
+          if (userRolesFilter) {
+            loadUserRoles(userRolesFilter);
+          }
           pushToast({
             title: "Role assignment",
             message: "Role assigned successfully",
@@ -93,18 +104,27 @@ const UserDetailsPageComponent: FC<unknown> = () => {
   };
 
   const performDeleteUserRole = (role: Role) => {
+    if (!userIdParam || !role.id) {
+      pushToast({
+        title: "Role delete",
+        message: "User ID or Role ID is missing",
+        variant: "danger",
+      });
+      return;
+    }
+
     const toastId = pushToast({
       title: "Role delete",
       message: "Deleting role...",
     });
 
-    deleteUserRole(new UserRole(userIdParam!, role.id!)).then((response) => {
+    deleteUserRole(new UserRole(userIdParam, role.id)).then((response) => {
       removeToast(toastId);
 
       if (response.errorCode) {
         pushToast({
           title: "Role delete",
-          message: response.message!,
+          message: response.message || "Failed to delete role",
           variant: "danger",
         });
       } else {
@@ -185,7 +205,9 @@ const UserDetailsPageComponent: FC<unknown> = () => {
         message="Are you sure you want to remove the user role?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeleteUserRole(toDeleteRole!);
+          if (toDeleteRole) {
+            performDeleteUserRole(toDeleteRole);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {

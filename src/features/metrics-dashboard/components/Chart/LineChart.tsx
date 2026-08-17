@@ -17,7 +17,7 @@ import {
 import { useLineChartData } from "../../hooks/useLineChartData";
 import { ChartDateFilter } from "./ChartDateFilter";
 
-const LineChartComponent: FC<unknown> = () => {
+const LineChartComponent: FC = () => {
   const { metric, isLoading } = useChartContext();
   const { data: rawData } = useLineChartData(metric);
 
@@ -28,9 +28,9 @@ const LineChartComponent: FC<unknown> = () => {
     const headers = rawData[0]; // ["Date", ...seriesKeys]
     const rows = rawData.slice(1);
     return rows.map((row) => {
-      const item: Record<string, any> = {};
+      const item: Record<string, string | number> = {};
       row.forEach((val, idx) => {
-        const key = headers[idx];
+        const key = String(headers[idx]);
         if (key === "Date") {
           // Format date to locale string
           if (val instanceof Date) {
@@ -42,7 +42,7 @@ const LineChartComponent: FC<unknown> = () => {
             item.date = String(val);
           }
         } else {
-          item[key] = val;
+          item[key] = val as string | number;
         }
       });
       return item;
@@ -103,15 +103,18 @@ const LineChartComponent: FC<unknown> = () => {
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip />
                 <Legend />
-                {seriesKeys.map((key, index) => (
-                  <Line
-                    key={key}
-                    type="monotone"
-                    dataKey={key}
-                    stroke={colors[index % colors.length]}
-                    activeDot={{ r: 8 }}
-                  />
-                ))}
+                {seriesKeys.map((key, index) => {
+                  const keyStr = String(key);
+                  return (
+                    <Line
+                      key={keyStr}
+                      type="monotone"
+                      dataKey={keyStr}
+                      stroke={colors[index % colors.length]}
+                      activeDot={{ r: 8 }}
+                    />
+                  );
+                })}
               </RechartsLineChart>
             </ResponsiveContainer>
           </div>

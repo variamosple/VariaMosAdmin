@@ -2,14 +2,14 @@ import { act, renderHook } from "@testing-library/react";
 import { useSocket } from "./useSocket";
 
 describe("useSocket Hook", () => {
-  let mockWebSocket: any;
+  let mockWebSocket: Partial<WebSocket>;
   let mockSocketFunction: import("vitest").Mock;
 
   beforeEach(() => {
     mockWebSocket = {
       close: vi.fn(),
     };
-    mockSocketFunction = vi.fn().mockReturnValue(mockWebSocket);
+    mockSocketFunction = vi.fn().mockReturnValue(mockWebSocket as WebSocket);
   });
 
   it("should not connect on mount if connectOnMount is false", () => {
@@ -34,7 +34,7 @@ describe("useSocket Hook", () => {
   it("should connect manually when connect is called", () => {
     const { result } = renderHook(() => useSocket(mockSocketFunction, false));
 
-    let conn;
+    let conn: WebSocket | undefined;
     act(() => {
       conn = result.current.connect();
     });
@@ -52,7 +52,7 @@ describe("useSocket Hook", () => {
 
     const { result } = renderHook(() => useSocket(mockSocketFunction, false));
 
-    let conn;
+    let conn: WebSocket | undefined;
     act(() => {
       conn = result.current.connect();
     });

@@ -1,4 +1,5 @@
-import { type ComponentType, useEffect, useState } from "react";
+import type { ComponentType } from "react";
+import { usePagination } from "../hooks/usePagination";
 
 export interface PaginationControlsProps {
   currentPage: number;
@@ -19,29 +20,31 @@ export function withPagination<T extends PaginationControlsProps>(
     props: Omit<T, keyof PaginationControlsProps> & WithPaginationProps,
   ) {
     const { totalItems, pageSize = 10, initialPage = 1, ...rest } = props;
-    const [currentPage, setCurrentPage] = useState(initialPage);
+    const paginationProps = usePagination({
+      totalItems,
+      pageSize,
+      initialPage,
+    });
 
-    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    interface GenericPropObject {
+      [key: string]:
+        | string
+        | number
+        | boolean
+        | ((
+            ...args: never[]
+          ) => undefined | object | string | number | boolean | null)
+        | object
+        | null
+        | undefined;
+    }
 
-    // Keep currentPage within bounds if totalPages shrinks
-    useEffect(() => {
-      if (currentPage > totalPages) {
-        setCurrentPage(totalPages);
-      }
-    }, [totalPages, currentPage]);
+    const combinedProps = Object.assign(
+      {},
+      rest as GenericPropObject as Omit<T, keyof PaginationControlsProps>,
+      paginationProps,
+    ) as T;
 
-    const handlePageChange = (page: number) => {
-      if (page >= 1 && page <= totalPages) {
-        setCurrentPage(page);
-      }
-    };
-
-    const paginationProps: PaginationControlsProps = {
-      currentPage: Math.min(currentPage, totalPages),
-      totalPages,
-      onPageChange: handlePageChange,
-    };
-
-    return <WrappedComponent {...(rest as any)} {...paginationProps} />;
+    return <WrappedComponent {...combinedProps} />;
   };
 }

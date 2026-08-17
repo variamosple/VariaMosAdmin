@@ -16,7 +16,8 @@ import {
 import { RouterProvider } from "./RouterContext";
 
 // Initialize a global listener array that doesn't suffer from lexical hoisting ReferenceErrors
-let mockNavigateListeners: any[] = [];
+// Initialize a global listener array that doesn't suffer from lexical hoisting ReferenceErrors
+let mockNavigateListeners: ((event: { detail: string }) => void)[] = [];
 
 // Mock react-router-dom hooks
 vi.mock("react-router-dom", async () => ({
@@ -33,14 +34,18 @@ vi.mock("@variamosple/variamos-components", async () => {
   return {
     RouterContext: ReactContext,
     Events: {
-      subscribe: vi.fn((_event: string, callback: Function) => {
-        mockNavigateListeners.push(callback);
-      }),
-      unsubscribe: vi.fn((_event: string, callback: Function) => {
-        mockNavigateListeners = mockNavigateListeners.filter(
-          (cb: any) => cb !== callback,
-        );
-      }),
+      subscribe: vi.fn(
+        (_event: string, callback: (event: { detail: string }) => void) => {
+          mockNavigateListeners.push(callback);
+        },
+      ),
+      unsubscribe: vi.fn(
+        (_event: string, callback: (event: { detail: string }) => void) => {
+          mockNavigateListeners = mockNavigateListeners.filter(
+            (cb) => cb !== callback,
+          );
+        },
+      ),
     },
     getBasePath: () => "/vms",
     isAbsoluteUrl: (url: string) =>
@@ -58,12 +63,14 @@ const ConsumerComponent = () => {
       <span data-testid="pathname">{ctx.pathname}</span>
       <span data-testid="basePath">{ctx.basePath}</span>
       <button
+        type="button"
         data-testid="navigate-btn"
         onClick={() => ctx.navigate("/home", { target: "_blank" })}
       >
         Go Home
       </button>
       <button
+        type="button"
         data-testid="navigate-absolute"
         onClick={() => ctx.navigate("https://google.com", { target: "_blank" })}
       >
@@ -78,23 +85,23 @@ describe("RouterContext & RouterProvider", () => {
   const mockLocation = { pathname: "/current-page" };
   const mockParams = { id: "123" };
   const mockSearchParams = [new URLSearchParams("?q=test")];
-  let originalWindowOpen: any;
-  let originalLocation: any;
+  let originalWindowOpen: typeof window.open;
+  let originalLocation: Location;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockNavigateListeners = [];
 
     (Events.subscribe as import("vitest").Mock).mockImplementation(
-      (_event: string, callback: Function) => {
+      (_event: string, callback: (event: { detail: string }) => void) => {
         mockNavigateListeners.push(callback);
       },
     );
 
     (Events.unsubscribe as import("vitest").Mock).mockImplementation(
-      (_event: string, callback: Function) => {
+      (_event: string, callback: (event: { detail: string }) => void) => {
         mockNavigateListeners = mockNavigateListeners.filter(
-          (cb: any) => cb !== callback,
+          (cb) => cb !== callback,
         );
       },
     );
@@ -111,15 +118,18 @@ describe("RouterContext & RouterProvider", () => {
 
     // Mock window.location.origin
     originalLocation = window.location;
-    delete (window as any).location;
-    (window as any).location = {
+    // @ts-expect-error
+    delete window.location;
+    // @ts-expect-error
+    window.location = {
       origin: "http://localhost:3000",
-    };
+    } as Location;
   });
 
   afterEach(() => {
     window.open = originalWindowOpen;
-    (window as any).location = originalLocation;
+    // @ts-expect-error
+    window.location = originalLocation;
   });
 
   it("provides RouterContext values to consumer components", () => {
@@ -171,7 +181,7 @@ describe("RouterContext & RouterProvider", () => {
 
     // Trigger event using the global listeners list
     act(() => {
-      mockNavigateListeners.forEach((cb: any) => {
+      mockNavigateListeners.forEach((cb) => {
         try {
           cb({ detail: "/somewhere-else" });
         } catch (_err) {

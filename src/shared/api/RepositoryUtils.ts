@@ -4,10 +4,10 @@ import axios from "axios";
 /**
  * Centrally processes Axios and other network errors, mapping them to a standardized ResponseModel.
  */
-export const handleRepositoryError = (
-  error: unknown,
+export const handleRepositoryError = <T = Record<string, never>>(
+  error: Error | object | null | undefined,
   fallbackMessage: string,
-): ResponseModel<any> => {
+): ResponseModel<T> => {
   if (axios.isAxiosError(error)) {
     console.error("Axios error:", error.message);
 
@@ -17,13 +17,13 @@ export const handleRepositoryError = (
       return Object.assign(new ResponseModel(), response);
     }
 
-    return new ResponseModel("BACK-ERROR").withError(
+    return new ResponseModel<T>("BACK-ERROR").withError(
       Number.parseInt(error.code || "500", 10),
       "Error when communicating with the back-end.",
     );
   } else {
     console.error("Unexpected error:", error);
 
-    return new ResponseModel("APP-ERROR").withError(500, fallbackMessage);
+    return new ResponseModel<T>("APP-ERROR").withError(500, fallbackMessage);
   }
 };

@@ -38,7 +38,7 @@ export const usePermissionList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Permission query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -60,7 +60,7 @@ export const usePermissionList = () => {
         } else {
           pushToast({
             title: "Permission create",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }
@@ -93,7 +93,7 @@ export const usePermissionList = () => {
         } else {
           pushToast({
             title: "Permission edit",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }
@@ -111,24 +111,26 @@ export const usePermissionList = () => {
       message: "Deleting permission...",
     });
 
-    deletePermission(permission.id!).then((response) => {
-      // alertify.dismissAll();
+    if (permission.id !== undefined) {
+      deletePermission(permission.id).then((response) => {
+        // alertify.dismissAll();
 
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission delete",
-          message: response.message!,
-          variant: "danger",
-        });
-      } else {
-        pushToast({
-          title: "Permission delete",
-          message: "Permission deleted successfully",
-          variant: "success",
-        });
-        onPageChange(currentPage);
-      }
-    });
+        if (response.errorCode) {
+          pushToast({
+            title: "Permission delete",
+            message: response.message ?? "An error occurred",
+            variant: "danger",
+          });
+        } else {
+          pushToast({
+            title: "Permission delete",
+            message: "Permission deleted successfully",
+            variant: "success",
+          });
+          onPageChange(currentPage);
+        }
+      });
+    }
   };
 
   const onPermissionDelete = (permission: Permission) => {
@@ -141,7 +143,7 @@ export const usePermissionList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Permission query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -153,7 +155,7 @@ export const usePermissionList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Permission query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }

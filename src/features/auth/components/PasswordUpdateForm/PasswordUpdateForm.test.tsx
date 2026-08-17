@@ -6,10 +6,25 @@ import { PasswordUpdateForm } from "./index";
 
 // Mock @variamosple/variamos-components
 vi.mock("@variamosple/variamos-components", async () => ({
-  ResponseModel: class ResponseModel {
-    errorCode: any;
-    constructor(errorCode: any) {
+  ResponseModel: class ResponseModel<T> {
+    transactionId?: string;
+    errorCode?: number;
+    message?: string;
+    totalCount?: number;
+    data?: T;
+
+    constructor(
+      transactionId?: string,
+      errorCode?: number,
+      message?: string,
+      totalCount?: number,
+      data?: T,
+    ) {
+      this.transactionId = transactionId;
       this.errorCode = errorCode;
+      this.message = message;
+      this.totalCount = totalCount;
+      this.data = data;
     }
   },
   PagedModel: class PagedModel {},

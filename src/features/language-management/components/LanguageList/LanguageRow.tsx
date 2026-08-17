@@ -71,9 +71,17 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
 
         <td>{owner?.name}</td>
 
-        <td>{formatDate(new Date(language.createdAt!))}</td>
+        <td>
+          {language.createdAt
+            ? formatDate(new Date(language.createdAt))
+            : "N/A"}
+        </td>
 
-        <td>{formatDateTime(new Date(language.updatedAt!))}</td>
+        <td>
+          {language.updatedAt
+            ? formatDateTime(new Date(language.updatedAt))
+            : "N/A"}
+        </td>
 
         <td>
           <ButtonGroup size="sm">

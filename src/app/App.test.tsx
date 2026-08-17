@@ -6,16 +6,16 @@ import App from "./App";
 vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   return {
-    AnalyticsProvider: ({ children }: any) => (
+    AnalyticsProvider: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="mock-analytics-provider">{children}</div>
     ),
-    SessionProvider: ({ children }: any) => (
+    SessionProvider: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="mock-session-provider">{children}</div>
     ),
-    AuthWrapper: ({ children }: any) => (
+    AuthWrapper: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="mock-auth-wrapper">{children}</div>
     ),
-    ProtectedRoute: ({ children }: any) => (
+    ProtectedRoute: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="mock-protected-route">{children}</div>
     ),
     RouterContext: React.createContext(null),
@@ -26,10 +26,10 @@ vi.mock("@variamosple/variamos-components", async () => {
       subscribe: vi.fn(),
       unsubscribe: vi.fn(),
     },
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;

@@ -35,7 +35,7 @@ export const useLanguageList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Language query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -67,7 +67,7 @@ export const useLanguageList = () => {
         } else {
           pushToast({
             title: "Language edit",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }
@@ -85,22 +85,24 @@ export const useLanguageList = () => {
       message: "Deleting language...",
     });
 
-    deleteLanguage(language.id!).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Language delete",
-          message: response.message!,
-          variant: "danger",
-        });
-      } else {
-        pushToast({
-          title: "Language delete",
-          message: "Language deleted successfully",
-          variant: "success",
-        });
-        onPageChange(currentPage);
-      }
-    });
+    if (language.id !== undefined) {
+      deleteLanguage(language.id).then((response) => {
+        if (response.errorCode) {
+          pushToast({
+            title: "Language delete",
+            message: response.message ?? "An error occurred",
+            variant: "danger",
+          });
+        } else {
+          pushToast({
+            title: "Language delete",
+            message: "Language deleted successfully",
+            variant: "success",
+          });
+          onPageChange(currentPage);
+        }
+      });
+    }
   };
 
   const onLanguageDelete = (language: Language) => {
@@ -113,7 +115,7 @@ export const useLanguageList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Language query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -126,7 +128,7 @@ export const useLanguageList = () => {
         if (response.errorCode) {
           pushToast({
             title: "Language query error",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }

@@ -36,7 +36,7 @@ export const useUserList = () => {
       if (response.errorCode) {
         pushToast({
           title: "User query error",
-          message: response.message!,
+          message: response.message || "Failed to query users",
           variant: "danger",
         });
       }
@@ -54,12 +54,21 @@ export const useUserList = () => {
   };
 
   const performDisableUser = (user: User) => {
+    if (!user.id) {
+      pushToast({
+        title: "User disable",
+        message: "User ID is missing",
+        variant: "danger",
+      });
+      return Promise.reject(new Error("User ID is missing"));
+    }
+
     pushToast({
       title: "User disable",
       message: "Disabling users...",
     });
 
-    return disableUser(user.id!).then((response) => {
+    return disableUser(user.id).then((response) => {
       if (!response.errorCode) {
         onPageChange(currentPage);
         setShowDisable(false);
@@ -71,7 +80,7 @@ export const useUserList = () => {
       } else {
         pushToast({
           title: "User disable",
-          message: response.message!,
+          message: response.message || "Failed to disable user",
           variant: "danger",
         });
       }
@@ -86,12 +95,21 @@ export const useUserList = () => {
   };
 
   const performEnableUser = (user: User) => {
+    if (!user.id) {
+      pushToast({
+        title: "User enable",
+        message: "User ID is missing",
+        variant: "danger",
+      });
+      return Promise.reject(new Error("User ID is missing"));
+    }
+
     pushToast({
       title: "User enable",
       message: "Enabling users...",
     });
 
-    return enableUser(user.id!).then((response) => {
+    return enableUser(user.id).then((response) => {
       if (!response.errorCode) {
         onPageChange(currentPage);
         setShowEnable(false);
@@ -103,7 +121,7 @@ export const useUserList = () => {
       } else {
         pushToast({
           title: "User enable",
-          message: response.message!,
+          message: response.message || "Failed to enable user",
           variant: "danger",
         });
       }
@@ -118,7 +136,16 @@ export const useUserList = () => {
   };
 
   const performDeleteUser = (user: User) => {
-    return deleteUser(user.id!).then((response) => {
+    if (!user.id) {
+      pushToast({
+        title: "User delete",
+        message: "User ID is missing",
+        variant: "danger",
+      });
+      return Promise.reject(new Error("User ID is missing"));
+    }
+
+    return deleteUser(user.id).then((response) => {
       if (!response.errorCode) {
         onPageChange(currentPage);
         setShowDelete(false);
@@ -130,7 +157,7 @@ export const useUserList = () => {
       } else {
         pushToast({
           title: "User delete",
-          message: response.message!,
+          message: response.message || "Failed to delete user",
           variant: "danger",
         });
       }
@@ -144,7 +171,7 @@ export const useUserList = () => {
       if (response.errorCode) {
         pushToast({
           title: "User query error",
-          message: response.message!,
+          message: response.message || "Failed to query users",
           variant: "danger",
         });
       }
@@ -156,7 +183,7 @@ export const useUserList = () => {
       if (response.errorCode) {
         pushToast({
           title: "User query error",
-          message: response.message!,
+          message: response.message || "Failed to query users",
           variant: "danger",
         });
       }

@@ -5,7 +5,7 @@ import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
 import { useMicroServiceList } from "../../hooks/useMicroServiceList";
 
-const MicroServiceListPageComponent: FC<unknown> = () => {
+const MicroServiceListPageComponent: FC = () => {
   const {
     showStart,
     setShowStart,
@@ -50,7 +50,9 @@ const MicroServiceListPageComponent: FC<unknown> = () => {
         show={showStart}
         message="Are you sure you want to start the microservice?"
         onConfirm={() => {
-          performMicroSerViceStart(toStartMicroService!);
+          if (toStartMicroService) {
+            performMicroSerViceStart(toStartMicroService);
+          }
           setShowStart(false);
         }}
         onCancel={() => {
@@ -64,7 +66,9 @@ const MicroServiceListPageComponent: FC<unknown> = () => {
         message="Are you sure you want to restart the microservice?"
         confirmButtonVariant="warning"
         onConfirm={() => {
-          performMicroSerViceRestart(toRestartMicroService!);
+          if (toRestartMicroService) {
+            performMicroSerViceRestart(toRestartMicroService);
+          }
           setShowRestart(false);
         }}
         onCancel={() => {
@@ -78,7 +82,9 @@ const MicroServiceListPageComponent: FC<unknown> = () => {
         message="Are you sure you want to stop the microservice?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performMicroSerViceStop(toStopMicroService!);
+          if (toStopMicroService) {
+            performMicroSerViceStop(toStopMicroService);
+          }
           setShowStop(false);
         }}
         onCancel={() => {

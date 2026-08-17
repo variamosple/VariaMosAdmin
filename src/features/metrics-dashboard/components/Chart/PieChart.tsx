@@ -61,7 +61,7 @@ export const PieChart: FC<PieChartProps> = ({ metric }) => {
             >
               {chartData.map((_entry, index) => (
                 <Cell
-                  key={`cell-${index}`}
+                  key={`cell-${_entry.name}`}
                   fill={COLORS[index % COLORS.length]}
                 />
               ))}

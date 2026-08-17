@@ -1,7 +1,12 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import axios from "axios";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
-import type { Bug, BugStatusLog } from "../domain/Bug";
+import type {
+  Bug,
+  BugAttachment,
+  BugStatusLog,
+  RawBugNote,
+} from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 
 export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
@@ -132,7 +137,7 @@ export const updateBugStatus = (
 export const addBugNote = (
   bugId: string,
   body: string,
-): Promise<ResponseModel<any>> => {
+): Promise<ResponseModel<BugStatusLog>> => {
   return ADMIN_CLIENT.post(`/bugs/${bugId}/notes`, { body })
     .then((response) => response.data)
     .catch((error) => {
@@ -291,7 +296,7 @@ export const restoreLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
 export const uploadAttachment = (
   bugId: string,
   file: File,
-): Promise<ResponseModel<any>> => {
+): Promise<ResponseModel<BugAttachment>> => {
   const formData = new FormData();
   formData.append("file", file);
   return ADMIN_CLIENT.post(`/bugs/${bugId}/attachments`, formData)
@@ -341,7 +346,7 @@ export const deleteAttachment = (
 
 export const queryBugNotes = (
   bugId: string,
-): Promise<ResponseModel<BugStatusLog[]>> => {
+): Promise<ResponseModel<RawBugNote[]>> => {
   return ADMIN_CLIENT.get(`/bugs/${bugId}/notes`)
     .then((response) => response.data)
     .catch((error) => {

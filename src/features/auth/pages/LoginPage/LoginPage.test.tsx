@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { useRouter, useSession } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router-dom";
-
+import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { LoginPage } from "./index";
@@ -20,10 +20,25 @@ vi.mock("../../components/GoogleLogin", async () => ({
 }));
 
 vi.mock("../../components/LoginForm", async () => ({
-  LoginForm: ({ onSignIn }: any) => (
+  LoginForm: ({
+    onSignIn,
+  }: {
+    onSignIn: (
+      credentials: import("@/features/user-management/domain/Entity/Credentials").Credentials,
+    ) => void;
+  }) => (
     <button
+      type="button"
       data-testid="mock-login-form"
-      onClick={() => onSignIn({ username: "user", password: "pwd" })}
+      onClick={() => {
+        interface MockCredentialsShape {
+          username: string;
+          email?: string;
+          password: string;
+        }
+        const payload = { username: "user", password: "pwd" };
+        onSignIn(payload as MockCredentialsShape as Credentials);
+      }}
     >
       Submit Login
     </button>
@@ -144,7 +159,7 @@ describe("LoginPage Page Component", () => {
     let redirectUrlCalledWith: string | null = null;
     server.use(
       http.post(apiTarget("/auth/redirects"), async ({ request }) => {
-        const body = (await request.json()) as any;
+        const body = (await request.json()) as { url: string };
         redirectUrlCalledWith = body.url;
         return HttpResponse.json({ errorCode: null });
       }),

@@ -7,6 +7,7 @@ const TestComponent = () => {
   return (
     <div>
       <button
+        type="button"
         onClick={() =>
           pushToast({
             title: "Test Title",
@@ -17,7 +18,9 @@ const TestComponent = () => {
       >
         Push Toast
       </button>
-      <button onClick={() => removeToast("test-id")}>Remove Toast</button>
+      <button type="button" onClick={() => removeToast("test-id")}>
+        Remove Toast
+      </button>
     </div>
   );
 };

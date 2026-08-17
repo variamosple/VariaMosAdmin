@@ -27,10 +27,10 @@ const mockMicroservices: MicroService[] = [
 vi.mock("@variamosple/variamos-components", async () => {
   return {
     Paginator: () => <div data-testid="paginator">Paginator</div>,
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -63,7 +63,7 @@ describe("MicroServiceList Component", () => {
       .spyOn(MicroServiceRepository, "watchMicroserviceLogs")
       .mockReturnValue({
         close: vi.fn(),
-      } as any);
+      } as object as WebSocket);
   });
 
   afterEach(() => {

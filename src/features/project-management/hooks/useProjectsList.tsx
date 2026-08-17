@@ -35,7 +35,7 @@ export const useProjectList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Project query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -63,7 +63,7 @@ export const useProjectList = () => {
         } else {
           pushToast({
             title: "Project edit",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }
@@ -81,22 +81,24 @@ export const useProjectList = () => {
       message: "Deleting role...",
     });
 
-    deleteProject(project.id!).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Project delete",
-          message: response.message!,
-          variant: "danger",
-        });
-      } else {
-        pushToast({
-          title: "Project delete",
-          message: "Project deleted successfully",
-          variant: "success",
-        });
-        onPageChange(currentPage);
-      }
-    });
+    if (project.id !== undefined) {
+      deleteProject(project.id).then((response) => {
+        if (response.errorCode) {
+          pushToast({
+            title: "Project delete",
+            message: response.message ?? "An error occurred",
+            variant: "danger",
+          });
+        } else {
+          pushToast({
+            title: "Project delete",
+            message: "Project deleted successfully",
+            variant: "success",
+          });
+          onPageChange(currentPage);
+        }
+      });
+    }
   };
 
   const onProjectDelete = (project: Project) => {
@@ -109,7 +111,7 @@ export const useProjectList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Project query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -122,7 +124,7 @@ export const useProjectList = () => {
         if (response.errorCode) {
           pushToast({
             title: "Project query error",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }

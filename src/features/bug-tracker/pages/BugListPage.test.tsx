@@ -6,7 +6,7 @@ import { BugListPage } from "./BugListPage";
 
 // Mock only @variamosple/variamos-components to avoid page visit tracker external side effects
 vi.mock("@variamosple/variamos-components", async () => ({
-  withPageVisit: (component: any) => component,
+  withPageVisit: <T,>(component: T) => component,
 }));
 
 describe("BugListPage Component", () => {

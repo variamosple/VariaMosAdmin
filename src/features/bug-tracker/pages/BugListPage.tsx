@@ -19,6 +19,8 @@ import { BugApprovalModal } from "../components/BugApprovalModal";
 import { BugFormModal } from "../components/BugFormModal";
 import { BugList } from "../components/BugList";
 import { BugSearchForm } from "../components/BugSearchForm";
+import type { Bug, BugAttachment, BugStatusLog } from "../domain/Bug";
+import type { BugFilter } from "../domain/BugFilter";
 import { useBugList } from "../hooks/useBugList";
 
 const BugListPageComponent: FC = () => {
@@ -46,12 +48,13 @@ const BugListPageComponent: FC = () => {
 
   const [showUserCreateModal, setShowUserCreateModal] = useState(false);
   const [showAdminCreateModal, setShowAdminCreateModal] = useState(false);
-  const [bugToApprove, setBugToApprove] = useState<any>(null);
-  const [selectedBugForDetails, setSelectedBugForDetails] = useState<any>(null);
+  const [bugToApprove, setBugToApprove] = useState<Bug | null>(null);
+  const [selectedBugForDetails, setSelectedBugForDetails] =
+    useState<Bug | null>(null);
   const [newNoteBody, setNewNoteBody] = useState("");
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
 
-  const handleViewDetails = (bug: any) => {
+  const handleViewDetails = (bug: Bug) => {
     setSelectedBugForDetails(bug);
     if (bug?.id) {
       fetchNotes(bug.id);
@@ -115,7 +118,7 @@ const BugListPageComponent: FC = () => {
       )}
 
       <BugSearchForm
-        onSubmit={(search: any) => setFilter(search || {})}
+        onSubmit={(search?: BugFilter) => setFilter(search || {})}
         onSearchReset={() => setFilter({})}
         isLoading={isLoading}
         repos={repos}
@@ -124,7 +127,9 @@ const BugListPageComponent: FC = () => {
 
       <Tabs
         activeKey={activeTab}
-        onSelect={(k) => setActiveTab(k as any)}
+        onSelect={(k) => {
+          if (k) setActiveTab(k as "github" | "local" | "trash");
+        }}
         className="mb-3"
       >
         <Tab eventKey="github" title="GitHub Bugs">
@@ -184,7 +189,7 @@ const BugListPageComponent: FC = () => {
         mode="user"
         show={showUserCreateModal}
         onHide={() => setShowUserCreateModal(false)}
-        onSubmit={async (data: any, file?: any) => {
+        onSubmit={async (data: Bug, file?: File) => {
           await handleCreateBug(
             data.title,
             data.description,
@@ -204,7 +209,7 @@ const BugListPageComponent: FC = () => {
         mode="admin"
         show={showAdminCreateModal}
         onHide={() => setShowAdminCreateModal(false)}
-        onSubmit={async (data: any, file?: any) => {
+        onSubmit={async (data: Bug, file?: File) => {
           await handleCreateBug(
             data.title,
             data.description,
@@ -360,7 +365,7 @@ const BugListPageComponent: FC = () => {
                     <strong>Attachments:</strong>
                     <ul className="mt-1 mb-0 pl-3">
                       {selectedBugForDetails.attachments.map(
-                        (attachment: any) => (
+                        (attachment: BugAttachment) => (
                           <li key={attachment.id} className="my-1">
                             <a
                               href={`${AppConfig.ADMIN_API_URL || "http://localhost:4000"}${attachment.filePath}`}
@@ -400,7 +405,7 @@ const BugListPageComponent: FC = () => {
                     className="d-flex flex-column gap-2 mb-3"
                     style={{ maxHeight: "300px", overflowY: "auto" }}
                   >
-                    {notes.map((note: any) => {
+                    {notes.map((note: BugStatusLog) => {
                       const isSystem = note.comment?.startsWith("[Audit]");
                       if (isSystem) {
                         const cleanComment = (note.comment || "").replace(
@@ -453,6 +458,7 @@ const BugListPageComponent: FC = () => {
                                           .trim();
                                         return (
                                           <div
+                                            // biome-ignore lint/suspicious/noArrayIndexKey: split lines of static system log note
                                             key={idx}
                                             className="my-1 ps-2 border-start border-2 border-secondary-subtle d-flex flex-wrap align-items-center gap-1"
                                           >
@@ -488,6 +494,7 @@ const BugListPageComponent: FC = () => {
                                   if (line.startsWith("Admin Comment:")) {
                                     return (
                                       <div
+                                        // biome-ignore lint/suspicious/noArrayIndexKey: split lines of static system log note
                                         key={idx}
                                         className="mt-2 pt-1 border-top text-dark-emphasis fw-semibold"
                                         style={{ fontSize: "0.85rem" }}
@@ -498,6 +505,7 @@ const BugListPageComponent: FC = () => {
                                   }
                                   return (
                                     <div
+                                      // biome-ignore lint/suspicious/noArrayIndexKey: split lines of static system log note
                                       key={idx}
                                       style={{ whiteSpace: "pre-wrap" }}
                                       className="my-1"

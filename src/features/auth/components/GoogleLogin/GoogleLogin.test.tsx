@@ -6,17 +6,17 @@ import { GoogleLogin } from "./index";
 describe("GoogleLogin Component", () => {
   let mockInitialize: import("vitest").Mock;
   let mockRenderButton: import("vitest").Mock;
-  let originalGoogle: any;
+  let originalGoogle: typeof window.google;
 
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    originalGoogle = (window as any).google;
+    originalGoogle = window.google;
     mockInitialize = vi.fn();
     mockRenderButton = vi.fn();
   });
 
   afterEach(() => {
-    (window as any).google = originalGoogle;
+    window.google = originalGoogle;
     vi.useRealTimers();
   });
 
@@ -27,7 +27,7 @@ describe("GoogleLogin Component", () => {
   });
 
   it("initializes Google Sign-In and renders button immediately if window.google is defined", () => {
-    (window as any).google = {
+    window.google = {
       accounts: {
         id: {
           initialize: mockInitialize,
@@ -61,7 +61,7 @@ describe("GoogleLogin Component", () => {
   });
 
   it("polls for window.google if it is initially undefined", () => {
-    delete (window as any).google;
+    window.google = undefined;
 
     render(<GoogleLogin text="signin_with" />);
 
@@ -69,7 +69,7 @@ describe("GoogleLogin Component", () => {
     expect(mockInitialize).not.toHaveBeenCalled();
 
     // Now define window.google
-    (window as any).google = {
+    window.google = {
       accounts: {
         id: {
           initialize: mockInitialize,

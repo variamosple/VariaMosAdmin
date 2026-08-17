@@ -35,7 +35,7 @@ export const useModelList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Model query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -63,7 +63,7 @@ export const useModelList = () => {
         } else {
           pushToast({
             title: "Model edit",
-            message: response.message!,
+            message: response.message ?? "An error occurred",
             variant: "danger",
           });
         }
@@ -81,22 +81,24 @@ export const useModelList = () => {
       message: "Deleting model...",
     });
 
-    deleteModel(model.id!).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Model delete",
-          message: response.message!,
-          variant: "danger",
-        });
-      } else {
-        pushToast({
-          title: "Model delete",
-          message: "Model deleted successfully",
-          variant: "success",
-        });
-        onPageChange(currentPage);
-      }
-    });
+    if (model.id !== undefined) {
+      deleteModel(model.id).then((response) => {
+        if (response.errorCode) {
+          pushToast({
+            title: "Model delete",
+            message: response.message ?? "An error occurred",
+            variant: "danger",
+          });
+        } else {
+          pushToast({
+            title: "Model delete",
+            message: "Model deleted successfully",
+            variant: "success",
+          });
+          onPageChange(currentPage);
+        }
+      });
+    }
   };
 
   const onModelDelete = (model: Model) => {
@@ -109,7 +111,7 @@ export const useModelList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Model query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }
@@ -121,7 +123,7 @@ export const useModelList = () => {
       if (response.errorCode) {
         pushToast({
           title: "Model query error",
-          message: response.message!,
+          message: response.message ?? "An error occurred",
           variant: "danger",
         });
       }

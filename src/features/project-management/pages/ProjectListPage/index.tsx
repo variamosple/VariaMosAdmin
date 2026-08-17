@@ -64,7 +64,9 @@ const ProjectListPageComponent: FC = () => {
         message="Are you sure you want to delete the project?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeleteProject(toDeleteProject!);
+          if (toDeleteProject) {
+            performDeleteProject(toDeleteProject);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {

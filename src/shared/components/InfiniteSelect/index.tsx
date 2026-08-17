@@ -10,7 +10,7 @@ export const InfiniteSelect = <ValueType,>({
   lastOptionRef,
   isSearchable,
   searchInput,
-  selected = { label: "", value: "" as any },
+  selected = { label: "", value: "" as ValueType },
   placeholder = "Select",
   handleSelect,
   setSearchInput,
@@ -25,7 +25,7 @@ export const InfiniteSelect = <ValueType,>({
     setIsDropdownOpen(false);
   };
 
-  const { elementRef } = useListenOutsideClicks(closeDropdown);
+  const { elementRef } = useListenOutsideClicks<HTMLDivElement>(closeDropdown);
 
   const renderNoOptions = () => {
     if (isFetchingOptions) return <Spinner animation="border" role="status" />;

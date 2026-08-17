@@ -1,6 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { usePaginatedQuery } from "@variamosple/variamos-components";
+import {
+  ResponseModel,
+  usePaginatedQuery,
+} from "@variamosple/variamos-components";
 import * as LanguageRepository from "../api/LanguageRepository";
+import type { Language } from "../domain/Entity/Language";
 import { useLanguageList } from "./useLanguageList";
 
 const mockPushToast = vi.fn();
@@ -15,10 +19,10 @@ const mockOnPageChange = vi.fn();
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -51,10 +55,10 @@ describe("useLanguageList Hook", () => {
 
     updateLanguageSpy = vi
       .spyOn(LanguageRepository, "updateLanguage")
-      .mockResolvedValue({ errorCode: null } as any);
+      .mockResolvedValue(new ResponseModel<Language>("success"));
     deleteLanguageSpy = vi
       .spyOn(LanguageRepository, "deleteLanguage")
-      .mockResolvedValue({ errorCode: null } as any);
+      .mockResolvedValue(new ResponseModel<void>("success"));
 
     mockLoadData.mockResolvedValue({ data: [] });
 
@@ -128,10 +132,9 @@ describe("useLanguageList Hook", () => {
 
   it("should handle performEditLanguage failure", async () => {
     const { result } = renderHook(() => useLanguageList());
-    updateLanguageSpy.mockResolvedValueOnce({
-      errorCode: 500,
-      message: "Edit failed",
-    } as any);
+    updateLanguageSpy.mockResolvedValueOnce(
+      new ResponseModel<Language>("error").withError(500, "Edit failed"),
+    );
 
     await act(async () => {
       await result.current.performEditLanguage({

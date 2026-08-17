@@ -12,7 +12,7 @@ export interface ModelRowProps {
 export const ModelRowComponent: FC<ModelRowProps> = ({
   model,
   onModelEdit,
-  onModelDelete,
+  onModelDelete: _onModelDelete,
 }) => {
   const [show, setShow] = useState(false);
 
