@@ -18,10 +18,10 @@ const apiTarget = (path: string) => {
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -59,6 +59,7 @@ const TestComponent = () => {
       <span data-testid="loading">{isLoading ? "loading" : "idle"}</span>
       <span data-testid="filter-from">{chartFilter.fromDate}</span>
       <button
+        type="button"
         onClick={() =>
           filterChartData({ fromDate: "2026-01-01", toDate: "2026-01-10" })
         }
@@ -115,7 +116,7 @@ describe("ChartContext", () => {
       ...mockMetric,
       title: "Updated Visits Chart",
     };
-    let queryMetricParams: any = null;
+    let queryMetricParams = null as URLSearchParams | null;
 
     server.use(
       http.get(apiTarget("/v1/metrics/:metricId"), ({ request }) => {

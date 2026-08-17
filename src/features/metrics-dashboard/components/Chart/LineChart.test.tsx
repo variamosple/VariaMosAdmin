@@ -1,12 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import type { Metric, MetricData } from "../../domain/Entity/Metric";
 import { LineChart } from "./LineChart";
 
 // Mock the ChartContext hook and wrapper
 const mockUseChartContext = {
   metric: {
+    id: "project-signups",
+    chartType: "line",
+    defaultFilter: "all",
     title: "Project Signups",
-    data: null as any,
+    data: null as MetricData | null,
   },
   isLoading: false,
 };
@@ -14,8 +18,8 @@ const mockUseChartContext = {
 vi.mock("../../context/ChartContext", async () => ({
   useChartContext: () => mockUseChartContext,
   withChartContextWrapper:
-    (Component: React.ComponentType<any>) =>
-    (props: React.ComponentProps<any>) => <Component {...props} />,
+    <P extends object>(Component: React.ComponentType<P>) =>
+    (props: P) => <Component {...props} />,
 }));
 
 // Mock the useLineChartData hook
@@ -75,13 +79,19 @@ describe("LineChart Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseChartContext.metric = {
+      id: "project-signups",
+      chartType: "line",
+      defaultFilter: "all",
       title: "Project Signups",
       data: null,
     };
     mockUseChartContext.isLoading = false;
   });
 
-  const dummyMetric: any = {
+  const dummyMetric: Metric = {
+    id: "dummy-metric",
+    chartType: "line",
+    defaultFilter: "all",
     title: "Project Signups",
     data: null,
   };
@@ -122,7 +132,7 @@ describe("LineChart Component", () => {
 
   it("renders the Recharts LineChart when metric has data", () => {
     mockUseChartContext.isLoading = false;
-    mockUseChartContext.metric.data = { some: "data" };
+    mockUseChartContext.metric.data = [];
     render(<LineChart metric={dummyMetric} />);
 
     expect(screen.queryByText("No data found.")).not.toBeInTheDocument();

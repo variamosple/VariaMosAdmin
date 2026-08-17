@@ -60,7 +60,7 @@ export const ChartContextProvider: FC<ChartContextProviderProps> = ({
           if (response.errorCode) {
             pushToast({
               title: "Error",
-              message: response.message!,
+              message: response.message || "An error occurred",
               variant: "danger",
             });
           }
@@ -101,10 +101,17 @@ export const useChartContext = () => {
   }
   return context;
 };
-export const withChartContextWrapper = (Component: FC<any>) => {
-  return ({ metric, ...props }: { metric: Metric }) => (
-    <ChartContextProvider metric={metric}>
-      <Component {...props} />
-    </ChartContextProvider>
-  );
+
+export const withChartContextWrapper = <P extends object>(
+  Component: React.ComponentType<P>,
+) => {
+  const WrappedComponent = (props: P & { metric: Metric }) => {
+    const { metric, ...restProps } = props;
+    return (
+      <ChartContextProvider metric={metric}>
+        <Component {...(restProps as unknown as P)} />
+      </ChartContextProvider>
+    );
+  };
+  return WrappedComponent;
 };

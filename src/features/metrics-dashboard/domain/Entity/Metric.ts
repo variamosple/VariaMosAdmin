@@ -1,3 +1,12 @@
+export interface ChartDataItem {
+  count: number;
+  [key: string]: string | number;
+}
+
+export type GeoChartData = Record<string, [string, number][]>;
+
+export type MetricData = ChartDataItem[] | GeoChartData;
+
 export interface Metric {
   id: string;
   title: string;
@@ -5,5 +14,5 @@ export interface Metric {
   defaultFilter: string;
   filters?: string[];
   labelKey?: string;
-  data?: any;
+  data?: MetricData | null;
 }

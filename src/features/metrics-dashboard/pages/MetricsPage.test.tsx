@@ -6,7 +6,7 @@ import { MetricsPage } from "./MetricsPage";
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    withPageVisit: (component: any) => component,
+    withPageVisit: <T,>(component: T): T => component,
     PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel {
       type: string;
@@ -33,11 +33,15 @@ vi.mock("react-bootstrap", async (importOriginal) => {
   };
 });
 
-// Mock ChartComponent to avoid complex sub-renders
+{
+  /* Mock ChartComponent to avoid complex sub-renders */
+}
 vi.mock("../components/Chart", async () => ({
-  ChartComponent: ({ metric }: any) => (
-    <div data-testid="chart-comp">{metric.title}</div>
-  ),
+  ChartComponent: ({
+    metric,
+  }: {
+    metric: import("../domain/Entity/Metric").Metric;
+  }) => <div data-testid="chart-comp">{metric.title}</div>,
 }));
 
 describe("MetricsPage", () => {

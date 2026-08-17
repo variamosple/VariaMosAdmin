@@ -12,9 +12,14 @@ vi.mock("../../context/ChartContext", async () => ({
 }));
 
 vi.mock("./ChartDateFilterForm", async () => ({
-  ChartDateFilterForm: ({ onFilterSubmit }: any) => (
+  ChartDateFilterForm: ({
+    onFilterSubmit,
+  }: {
+    onFilterSubmit: (data: { startDate: string; endDate: string }) => void;
+  }) => (
     <div>
       <button
+        type="button"
         data-testid="mock-submit-btn"
         onClick={() =>
           onFilterSubmit({ startDate: "2026-01-01", endDate: "2026-01-10" })

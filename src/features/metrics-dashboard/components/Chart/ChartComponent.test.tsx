@@ -35,7 +35,9 @@ vi.mock("../../context/ChartContext", async () => {
       metric: { title: "Test Line Metric", data: [] },
       isLoading: false,
     }),
-    withChartContextWrapper: (Component: React.ComponentType<any>) => Component,
+    withChartContextWrapper: <P extends object>(
+      Component: React.ComponentType<P>,
+    ) => Component,
   };
 });
 
