@@ -10,20 +10,20 @@ describe("useIntersectionObserver hook", () => {
     vi.clearAllMocks();
 
     // Mock the global IntersectionObserver
-    global.IntersectionObserver = vi
-      .fn()
-      .mockImplementation((callback: IntersectionObserverCallback) => {
-        observerCallback = callback;
-        return {
-          observe: mockObserve,
-          disconnect: mockDisconnect,
-          unobserve: vi.fn(),
-          takeRecords: vi.fn(),
-          root: null,
-          rootMargin: "",
-          thresholds: [],
-        };
-      }) as unknown as typeof global.IntersectionObserver;
+    global.IntersectionObserver = vi.fn(
+      class {
+        constructor(callback: IntersectionObserverCallback) {
+          observerCallback = callback;
+        }
+        observe = mockObserve;
+        disconnect = mockDisconnect;
+        unobserve = vi.fn();
+        takeRecords = vi.fn();
+        root = null;
+        rootMargin = "";
+        thresholds = [];
+      },
+    ) as unknown as typeof global.IntersectionObserver;
   });
 
   it("should initialize hook and register intersection observer on node", () => {
