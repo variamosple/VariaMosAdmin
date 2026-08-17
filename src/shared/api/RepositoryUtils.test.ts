@@ -3,10 +3,10 @@ import { handleRepositoryError } from "./RepositoryUtils";
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -57,7 +57,7 @@ describe("RepositoryUtils handleRepositoryError", () => {
     };
     vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
 
-    const result = handleRepositoryError(mockAxiosError, "Fallback msg") as any;
+    const result = handleRepositoryError(mockAxiosError, "Fallback msg");
     expect(result.type).toBe("BACK-ERROR");
     expect(result.errorCode).toBe(503);
     expect(result.message).toBe("Error when communicating with the back-end.");
@@ -67,10 +67,7 @@ describe("RepositoryUtils handleRepositoryError", () => {
     vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
     const genericError = new Error("Generic fail");
 
-    const result = handleRepositoryError(
-      genericError,
-      "Fallback fallback",
-    ) as any;
+    const result = handleRepositoryError(genericError, "Fallback fallback");
     expect(result.type).toBe("APP-ERROR");
     expect(result.errorCode).toBe(500);
     expect(result.message).toBe("Fallback fallback");

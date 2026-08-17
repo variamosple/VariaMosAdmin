@@ -8,20 +8,24 @@ import { UserListPage } from "./index";
 
 const mockNavigate = vi.fn();
 
+import type { ComponentType } from "react";
+import type { User } from "../../domain/Entity/User";
+import type { UsersFilter } from "../../domain/Entity/UsersFilter";
+
 // Mock @variamosple/variamos-components to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   const { useState, useCallback } = React;
   return {
-    withPageVisit: (component: any) => component,
+    withPageVisit: (component: ComponentType) => component,
     useRouter: () => ({
       navigate: mockNavigate,
     }),
     PagedModel: class PagedModel {},
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -33,14 +37,22 @@ vi.mock("@variamosple/variamos-components", async () => {
       }
     },
     Paginator: () => <div data-testid="paginator">Paginator</div>,
-    usePaginatedQuery: ({ queryFunction, initialFilter }: any) => {
-      const [data, setData] = useState([]);
+    usePaginatedQuery: ({
+      queryFunction,
+      initialFilter,
+    }: {
+      queryFunction: (
+        filter: UsersFilter,
+      ) => Promise<{ data?: User[]; errorCode?: number; message?: string }>;
+      initialFilter: UsersFilter;
+    }) => {
+      const [data, setData] = useState<User[]>([]);
       const [currentPage, setCurrentPage] = useState(1);
       const [totalPages, setTotalPages] = useState(1);
       const [isLoading, setIsLoading] = useState(false);
 
       const loadData = useCallback(
-        async (filter: any) => {
+        async (filter: UsersFilter) => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
@@ -56,7 +68,7 @@ vi.mock("@variamosple/variamos-components", async () => {
       const onPageChange = useCallback(
         (page: number) => {
           setCurrentPage(page);
-          loadData({ ...initialFilter, page });
+          loadData({ ...initialFilter, page } as unknown as UsersFilter);
         },
         [loadData, initialFilter],
       );
@@ -70,13 +82,21 @@ vi.mock("@variamosple/variamos-components", async () => {
         onPageChange,
       };
     },
-    useQuery: ({ queryFunction, initialFilter }: any) => {
-      const [data, setData] = useState([]);
+    useQuery: ({
+      queryFunction,
+      initialFilter,
+    }: {
+      queryFunction: (
+        filter: UsersFilter,
+      ) => Promise<{ data?: User[]; errorCode?: number; message?: string }>;
+      initialFilter: UsersFilter;
+    }) => {
+      const [data, setData] = useState<User[]>([]);
       const [isLoading, setIsLoading] = useState(false);
       const [isLoaded, setIsLoaded] = useState(false);
 
       const loadData = useCallback(
-        async (filter: any) => {
+        async (filter: UsersFilter) => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {

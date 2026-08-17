@@ -65,7 +65,9 @@ const LanguageListPageComponent: FC = () => {
         message="Are you sure you want to delete the language?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeleteLanguage(toDeleteLanguage!);
+          if (toDeleteLanguage) {
+            performDeleteLanguage(toDeleteLanguage);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {

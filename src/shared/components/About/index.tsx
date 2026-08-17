@@ -2,7 +2,7 @@
 import type { FC } from "react";
 import { Col, Container, Nav, Row, Tab, Tabs } from "react-bootstrap";
 
-export const About: FC<unknown> = () => {
+export const About: FC = () => {
   return (
     <section className="p-2 p-md-5">
       <article>

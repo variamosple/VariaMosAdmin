@@ -1,3 +1,4 @@
+import type { ResponseModel } from "@variamosple/variamos-components";
 import { useCallback, useEffect, useState } from "react";
 import {
   addBugNote,
@@ -12,7 +13,7 @@ import {
   syncBugs,
   updateBugStatus,
 } from "../api/BugRepository";
-import type { Bug, BugStatusLog } from "../domain/Bug";
+import type { Bug, BugStatusLog, RawBugNote } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 
 export const useBugList = () => {
@@ -41,12 +42,12 @@ export const useBugList = () => {
 
   // Fetch repos and categories on mount
   useEffect(() => {
-    queryBugRepos().then((res: any) => {
+    queryBugRepos().then((res) => {
       if (!res.errorCode) {
         setRepos(res.data || []);
       }
     });
-    queryCategories().then((res: any) => {
+    queryCategories().then((res) => {
       if (!res.errorCode) {
         setCategories(res.data || []);
       }
@@ -72,7 +73,7 @@ export const useBugList = () => {
     setIsLoading(true);
     setError(null);
 
-    let response;
+    let response: ResponseModel<Bug[]>;
     if (activeTab === "github") {
       response = await queryBugs(filter);
     } else {
@@ -101,7 +102,7 @@ export const useBugList = () => {
     if (response.errorCode) {
       setError(response.message || "Failed to load bug notes");
     } else {
-      const mapped = (response.data || []).map((n: any) => ({
+      const mapped = (response.data || []).map((n: RawBugNote) => ({
         id: n.id,
         status: "",
         comment: n.body || "",

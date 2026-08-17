@@ -64,7 +64,9 @@ const ModelListPageComponent: FC = () => {
         message="Are you sure you want to delete the model?"
         confirmButtonVariant="danger"
         onConfirm={() => {
-          performDeleteModel(toDeleteModel!);
+          if (toDeleteModel) {
+            performDeleteModel(toDeleteModel);
+          }
           setShowDelete(false);
         }}
         onCancel={() => {

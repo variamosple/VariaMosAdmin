@@ -26,7 +26,13 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const pathname = useMemo(() => getBasePath(), []);
 
   const navigateTo = useCallback(
-    (url: string, options: any) => {
+    (
+      url: string,
+      options?: {
+        replace?: boolean;
+        target?: "_blank" | "_self" | "_parent" | "_top";
+      },
+    ) => {
       const basePath = window.location.origin + pathname;
       if (isAbsoluteUrl(url) && !url.startsWith(basePath)) {
         window.open(url, options?.target || "_self");

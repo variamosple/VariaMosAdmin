@@ -40,7 +40,7 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
     (data) => {
       const { isTemplate } = data;
 
-      let template;
+      let template: boolean | undefined;
 
       if (isTemplate === "all") {
         template = undefined;

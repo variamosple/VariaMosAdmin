@@ -22,12 +22,12 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
   const { pushToast } = useToast();
 
   const handleGenerateLink = async () => {
-    if (!user) return;
+    if (!user?.id) return;
     if (loading) return;
 
     setLoading(true);
     try {
-      const response = await generateRecoveryLink(user.id!);
+      const response = await generateRecoveryLink(user.id);
 
       if (response.errorCode) {
         pushToast({
@@ -38,10 +38,10 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
       } else {
         setRecoveryUrl(response.data?.recoveryUrl ?? null);
       }
-    } catch (error: any) {
+    } catch (error) {
       pushToast({
         title: "Connection error",
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
         variant: "danger",
       });
     } finally {

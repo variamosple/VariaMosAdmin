@@ -10,7 +10,7 @@ export const InfiniteSelect = <ValueType,>({
   lastOptionRef,
   isSearchable,
   searchInput,
-  selected = { label: "", value: "" as any },
+  selected = { label: "", value: "" as ValueType },
   placeholder = "Select",
   handleSelect,
   setSearchInput,

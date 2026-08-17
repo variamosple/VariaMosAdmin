@@ -42,6 +42,11 @@ export function withPagination<T extends PaginationControlsProps>(
       onPageChange: handlePageChange,
     };
 
-    return <WrappedComponent {...(rest as any)} {...paginationProps} />;
+    const combinedProps = {
+      ...rest,
+      ...paginationProps,
+    } as T;
+
+    return <WrappedComponent {...combinedProps} />;
   };
 }

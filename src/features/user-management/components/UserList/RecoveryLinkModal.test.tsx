@@ -9,10 +9,10 @@ import { RecoveryLinkModal } from "./RecoveryLinkModal";
 // Mock @variamosple/variamos-components to prevent ESM SyntaxError
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -53,7 +53,7 @@ describe("RecoveryLinkModal Component", () => {
 
   let recoveryLinkCalled = 0;
   let delayRecoveryQuery = false;
-  let resolveRecoveryPromise: any;
+  let resolveRecoveryPromise: (value: HttpResponse) => void;
   let isRecoveryError = false;
 
   beforeEach(() => {

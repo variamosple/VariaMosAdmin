@@ -15,7 +15,7 @@ export interface Bug {
   reporterEmail?: string;
 }
 
-interface BugAttachment {
+export interface BugAttachment {
   id: number;
   filePath: string;
   fileType: string;
@@ -29,4 +29,13 @@ export interface BugStatusLog {
   comment?: string;
   changedAt: string;
   changedBy?: { id: string; name: string; email: string };
+}
+
+export interface RawBugNote {
+  id: number;
+  body: string;
+  createdAt: string;
+  author?: {
+    name: string;
+  };
 }

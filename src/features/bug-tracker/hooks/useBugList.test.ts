@@ -8,10 +8,10 @@ import { useBugList } from "./useBugList";
 // Mock the variamos-components library which is published as ES Module
 vi.mock("@variamosple/variamos-components", async () => {
   return {
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -50,15 +50,24 @@ const apiTarget = (path: string) => {
 };
 
 describe("useBugList Hook", () => {
-  let queryBugsParams: any[] = [];
-  let queryLocalBugsParams: any[] = [];
+  let queryBugsParams: Record<string, string>[] = [];
+  let queryLocalBugsParams: Record<string, string>[] = [];
   let queryBugReposCalled = 0;
   let queryCategoriesCalled = 0;
   let createBugCalled = 0;
   let syncBugsCalled = 0;
   let rejectLocalBugId: string | null = null;
   let restoreLocalBugId: string | null = null;
-  let updateBugStatusBody: any = null;
+  interface UpdateStatusBody {
+    status?: string;
+    comment?: string;
+    title?: string;
+    description?: string;
+    priority?: string;
+    category?: string;
+    githubRepo?: string;
+  }
+  let updateBugStatusBody: ({ bugId: string } & UpdateStatusBody) | null = null;
 
   beforeEach(() => {
     queryBugsParams = [];
@@ -113,13 +122,13 @@ describe("useBugList Hook", () => {
         async ({ request, params }) => {
           let body = {};
           try {
-            body = (await request.json()) as any;
+            body = (await request.json()) as UpdateStatusBody;
           } catch (_e) {}
           updateBugStatusBody = {
-            bugId: params.bugId,
+            bugId: params.bugId as string,
             ...body,
           };
-          return HttpResponse.json({ data: { id: params.bugId } });
+          return HttpResponse.json({ data: { id: params.bugId as string } });
         },
       ),
     );
@@ -245,7 +254,7 @@ describe("useBugList Hook", () => {
 
     queryBugsParams = [];
 
-    let createSuccess;
+    let createSuccess = false;
     await act(async () => {
       createSuccess = await result.current.handleCreateBug(
         "New Title",

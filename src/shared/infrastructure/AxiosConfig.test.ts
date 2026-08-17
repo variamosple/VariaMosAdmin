@@ -5,7 +5,7 @@ import { ADMIN_CLIENT, setupAxiosInterceptors } from "./AxiosConfig";
 
 describe("AxiosConfig Interceptors", () => {
   let navigateMock: import("vitest").Mock;
-  let testClient: any;
+  let testClient: import("axios").AxiosInstance;
 
   beforeEach(() => {
     navigateMock = vi.fn();
