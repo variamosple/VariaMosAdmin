@@ -6,15 +6,15 @@ import { LanguageListPage } from "./index";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
-  const React = require("react");
+  const React = await import("react");
   const { useState, useCallback } = React;
   return {
-    withPageVisit: (component: any) => component,
+    withPageVisit: <T,>(component: T): T => component,
     PagedModel: class PagedModel {},
-    ResponseModel: class ResponseModel {
+    ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
-      data?: any;
+      data?: T;
       type: string;
       constructor(type: string) {
         this.type = type;
@@ -26,14 +26,25 @@ vi.mock("@variamosple/variamos-components", async () => {
       }
     },
     Paginator: () => <div data-testid="paginator">Paginator</div>,
-    usePaginatedQuery: ({ queryFunction, initialFilter }: any) => {
-      const [data, setData] = useState([]);
+    usePaginatedQuery: <T, F>({
+      queryFunction,
+      initialFilter,
+    }: {
+      queryFunction: (filter: F) => Promise<{
+        errorCode?: number;
+        message?: string;
+        data?: T[];
+        type: string;
+      }>;
+      initialFilter: F;
+    }) => {
+      const [data, setData] = useState<T[]>([]);
       const [currentPage, setCurrentPage] = useState(1);
       const [totalPages, setTotalPages] = useState(1);
       const [isLoading, setIsLoading] = useState(false);
 
       const loadData = useCallback(
-        async (filter: any) => {
+        async (filter: F) => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
