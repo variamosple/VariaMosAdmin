@@ -1,8 +1,9 @@
 language js
 
-`$name: unknown` where {
+`$unknown` where {
+  $unknown == `unknown`,
   register_diagnostic(
     message = "Avoid using the 'unknown' type. Use a specific type instead. If absolutely necessary, ignore this warning with a comment.",
-    span = $name
+    span = $unknown
   )
 }
