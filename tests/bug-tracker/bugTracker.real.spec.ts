@@ -60,6 +60,37 @@ test.describe("Bug Tracker - Real DB E2E Flows", () => {
     await page.locator(".modal-footer").getByRole("button", { name: "Close" }).click();
   });
 
+  test("should open bug report modal when clicking Report a problem in options menu and persist it", async ({ page }) => {
+    await login(page, adminEmail, adminPassword);
+    await page.goto("http://localhost:3000/variamos_admin/#/");
+
+    // Wait for configurations/menu to load
+    await page.waitForResponse("**/v1/configurations/menu");
+
+    const dropdownToggle = page.locator("#nav-dropdown");
+    await expect(dropdownToggle).toBeVisible();
+    await dropdownToggle.click();
+
+    await page.getByText("Report a problem").click();
+    await expect(page.locator(".modal-title")).toHaveText("Report a New Bug");
+
+    const bugTitle = "Real Global Bug Test " + Date.now();
+    await page.locator('.modal input[name="title"]').fill(bugTitle);
+    await page.locator('.modal textarea[name="description"]').fill("This global bug was created via the menu options link.");
+    await page.locator('.modal select[name="category"]').selectOption("Editor");
+
+    const reportPromise = page.waitForResponse("**/bugs");
+    await page.locator(".modal-footer").getByRole("button", { name: "Report Bug" }).click();
+    await reportPromise;
+    await expect(page.locator(".modal-title")).not.toBeVisible();
+
+    // Verify it is visible in the Local Inbox
+    await page.getByText("Bugs", { exact: true }).click();
+    await page.getByText("Local Inbox").click();
+    const row = page.locator(".tab-pane.active tr", { hasText: bugTitle });
+    await expect(row).toBeVisible();
+  });
+
   test.afterAll(async () => {
     await dbHelper.cleanTestUsers(suffix);
   });
