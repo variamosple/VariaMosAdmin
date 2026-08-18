@@ -79,7 +79,15 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
                 ]
               }
             ],
-            options: []
+            options: [
+              {
+                title: "Report a problem",
+                location: "#report-bug",
+                accessibleFrom: "/variamos_admin/",
+                target: "self",
+                allowedPermissions: [],
+              }
+            ]
           }
         })
       });
@@ -304,6 +312,54 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
 
     await page.locator('.modal input[name="title"]').fill("User Bug Title");
     await page.locator('.modal textarea[name="description"]').fill("User Bug Description");
+    await page.locator('.modal select[name="category"]').selectOption("Editor");
+
+    await page.locator(".modal-footer").getByRole("button", { name: "Report Bug" }).click();
+    await expect(page.locator(".modal-title")).not.toBeVisible();
+  });
+
+  test("should open bug report modal when clicking Report a problem in menu options", async ({ page }) => {
+    await page.route("**/bugs*", async (route) => {
+      if (route.request().method() === "POST") {
+        await route.fulfill({
+          status: 201,
+          contentType: "application/json",
+          body: JSON.stringify({
+            transactionId: "createBug",
+            data: { id: "user-bug-999", title: "Global Bug", description: "Global bug description", priority: "medium", category: "Editor", githubRepo: "" }
+          })
+        });
+      } else {
+        await route.fulfill({ status: 200, body: JSON.stringify({ data: [] }) });
+      }
+    });
+
+    await page.addInitScript(() => {
+      window.localStorage.setItem("authToken", "fake-jwt-token");
+    });
+    await page.goto("http://localhost:3000");
+
+    const emailLocator = page.locator("#email");
+    if (await emailLocator.isVisible()) {
+      await emailLocator.fill(adminEmail);
+      await page.locator("#password").fill(adminPassword);
+      await page.locator('button[type="submit"]').click();
+    }
+
+    const modal = page.locator(".modal");
+    if (await modal.isVisible()) {
+      await modal.getByRole("button", { name: "Cancel" }).click();
+    }
+
+    const dropdownToggle = page.locator("#nav-dropdown");
+    await expect(dropdownToggle).toBeVisible();
+    await dropdownToggle.click();
+
+    await page.getByText("Report a problem").click();
+    await expect(page.locator(".modal-title")).toHaveText("Report a New Bug");
+
+    await page.locator('.modal input[name="title"]').fill("Global Bug");
+    await page.locator('.modal textarea[name="description"]').fill("Global bug description");
     await page.locator('.modal select[name="category"]').selectOption("Editor");
 
     await page.locator(".modal-footer").getByRole("button", { name: "Report Bug" }).click();

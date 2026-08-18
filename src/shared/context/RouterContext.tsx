@@ -33,6 +33,10 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
         target?: "_blank" | "_self" | "_parent" | "_top";
       },
     ) => {
+      if (url.endsWith("#report-bug")) {
+        Events.publish<Record<string, never>>("openReportBugModal", {});
+        return;
+      }
       const basePath = window.location.origin + pathname;
       if (isAbsoluteUrl(url) && !url.startsWith(basePath)) {
         window.open(url, options?.target || "_self");
