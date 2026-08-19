@@ -358,9 +358,9 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     await page.getByText("Report a problem").click();
     await expect(page.locator(".modal-title")).toHaveText("Report a New Bug");
 
-    await page.locator('.modal input[name="title"]').fill("Global Bug");
-    await page.locator('.modal textarea[name="description"]').fill("Global bug description");
-    await page.locator('.modal select[name="category"]').selectOption("Editor");
+    await page.locator('#bugTitle').fill("Global Bug");
+    await page.locator('#bugDescription').fill("Global bug description");
+    await page.locator('#bugCategory').selectOption("Editor");
 
     await page.locator(".modal-footer").getByRole("button", { name: "Report Bug" }).click();
     await expect(page.locator(".modal-title")).not.toBeVisible();
