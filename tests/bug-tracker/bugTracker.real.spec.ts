@@ -75,9 +75,9 @@ test.describe("Bug Tracker - Real DB E2E Flows", () => {
     await expect(page.locator(".modal-title")).toHaveText("Report a New Bug");
 
     const bugTitle = "Real Global Bug Test " + Date.now();
-    await page.locator('.modal input[name="title"]').fill(bugTitle);
-    await page.locator('.modal textarea[name="description"]').fill("This global bug was created via the menu options link.");
-    await page.locator('.modal select[name="category"]').selectOption("Editor");
+    await page.locator('#bugTitle').fill(bugTitle);
+    await page.locator('#bugDescription').fill("This global bug was created via the menu options link.");
+    await page.locator('#bugCategory').selectOption("Editor");
 
     const reportPromise = page.waitForResponse("**/bugs");
     await page.locator(".modal-footer").getByRole("button", { name: "Report Bug" }).click();
