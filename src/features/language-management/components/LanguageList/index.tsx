@@ -9,6 +9,8 @@ export interface LanguageListProps extends PaginationControlsProps {
   items: Language[];
   onLanguageEdit: (language: Language) => void;
   onLanguageDelete: (language: Language) => void;
+  onLanguageActivate: (language: Language) => void;
+  onLanguageDeactivate: (language: Language) => void;
 }
 
 export const LanguageList: FC<LanguageListProps> = ({
@@ -18,6 +20,8 @@ export const LanguageList: FC<LanguageListProps> = ({
   onPageChange,
   onLanguageEdit,
   onLanguageDelete,
+  onLanguageActivate,
+  onLanguageDeactivate,
 }) => {
   return (
     <>
@@ -53,6 +57,8 @@ export const LanguageList: FC<LanguageListProps> = ({
               language={language}
               onLanguageEdit={onLanguageEdit}
               onLanguageDelete={onLanguageDelete}
+              onLanguageActivate={onLanguageActivate}
+              onLanguageDeactivate={onLanguageDeactivate}
             />
           ))}
         </tbody>

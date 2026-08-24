@@ -56,15 +56,14 @@ describe("ContactOwnerModal Component", () => {
       />,
     );
 
-    const sendButton = screen.getByText("Send Email");
-    await user.click(sendButton);
+    const sendLink = screen.getByRole("link", { name: "Send Email" });
+    expect(sendLink).toHaveAttribute("href");
 
-    expect(window.location.href).toContain(
-      "mailto:john@example.com,jane@example.com",
-    );
-    expect(window.location.href).toContain(
-      "subject=Inquiry%20regarding%20Language%3A%20MyDSL",
-    );
+    const href = sendLink.getAttribute("href");
+    expect(href).toContain("mailto:john@example.com,jane@example.com");
+    expect(href).toContain("subject=Inquiry%20regarding%20Language%3A%20MyDSL");
+
+    await user.click(sendLink);
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 });

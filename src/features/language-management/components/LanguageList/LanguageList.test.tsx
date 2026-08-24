@@ -32,6 +32,8 @@ vi.mock("@variamosple/variamos-components", async () => {
 describe("LanguageList Component", () => {
   const mockOnLanguageEdit = vi.fn();
   const mockOnLanguageDelete = vi.fn();
+  const mockOnLanguageActivate = vi.fn();
+  const mockOnLanguageDeactivate = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -46,6 +48,8 @@ describe("LanguageList Component", () => {
         onPageChange={vi.fn()}
         onLanguageEdit={mockOnLanguageEdit}
         onLanguageDelete={mockOnLanguageDelete}
+        onLanguageActivate={mockOnLanguageActivate}
+        onLanguageDeactivate={mockOnLanguageDeactivate}
       />,
     );
 
@@ -63,6 +67,8 @@ describe("LanguageList Component", () => {
         onPageChange={vi.fn()}
         onLanguageEdit={mockOnLanguageEdit}
         onLanguageDelete={mockOnLanguageDelete}
+        onLanguageActivate={mockOnLanguageActivate}
+        onLanguageDeactivate={mockOnLanguageDeactivate}
       />,
     );
 

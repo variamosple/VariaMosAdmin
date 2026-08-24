@@ -27,6 +27,14 @@ const LanguageListPageComponent: FC = () => {
     setToDeleteLanguage,
     showDelete,
     setShowDelete,
+    showActivateConfirm,
+    setShowActivateConfirm,
+    showDeactivateConfirm,
+    setShowDeactivateConfirm,
+    toToggleLanguage,
+    setToToggleLanguage,
+    onLanguageActivateClick,
+    onLanguageDeactivateClick,
     performDeleteLanguage,
   } = useLanguageList();
 
@@ -58,6 +66,8 @@ const LanguageListPageComponent: FC = () => {
         onPageChange={onPageChange}
         onLanguageEdit={onLanguageEdit}
         onLanguageDelete={onLanguageDelete}
+        onLanguageActivate={onLanguageActivateClick}
+        onLanguageDeactivate={onLanguageDeactivateClick}
       />
 
       <ConfirmationModal
@@ -73,6 +83,43 @@ const LanguageListPageComponent: FC = () => {
         onCancel={() => {
           setToDeleteLanguage(undefined);
           setShowDelete(false);
+        }}
+      />
+
+      <ConfirmationModal
+        show={showActivateConfirm}
+        message={`Are you sure you want to activate the language '${toToggleLanguage?.name || ""}'?`}
+        confirmButtonVariant="success"
+        onConfirm={() => {
+          if (toToggleLanguage) {
+            performEditLanguage({ ...toToggleLanguage, stateAccept: "ACTIVE" });
+          }
+          setShowActivateConfirm(false);
+          setToToggleLanguage(undefined);
+        }}
+        onCancel={() => {
+          setToToggleLanguage(undefined);
+          setShowActivateConfirm(false);
+        }}
+      />
+
+      <ConfirmationModal
+        show={showDeactivateConfirm}
+        message={`Are you sure you want to deactivate the language '${toToggleLanguage?.name || ""}'?`}
+        confirmButtonVariant="warning"
+        onConfirm={() => {
+          if (toToggleLanguage) {
+            performEditLanguage({
+              ...toToggleLanguage,
+              stateAccept: "PENDING",
+            });
+          }
+          setShowDeactivateConfirm(false);
+          setToToggleLanguage(undefined);
+        }}
+        onCancel={() => {
+          setToToggleLanguage(undefined);
+          setShowDeactivateConfirm(false);
         }}
       />
     </Container>

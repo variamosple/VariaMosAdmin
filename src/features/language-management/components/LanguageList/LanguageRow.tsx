@@ -17,12 +17,16 @@ export interface LanguageRowProps {
   language: Language;
   onLanguageEdit: (language: Language) => void;
   onLanguageDelete: (language: Language) => void;
+  onLanguageActivate: (language: Language) => void;
+  onLanguageDeactivate: (language: Language) => void;
 }
 
 export const LanguageRowComponent: FC<LanguageRowProps> = ({
   language,
   onLanguageEdit,
   onLanguageDelete,
+  onLanguageActivate,
+  onLanguageDeactivate,
 }) => {
   const [show, setShow] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
@@ -41,6 +45,8 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
     language.stateAccept === LanguageStatus.PENDING ||
     language.stateAccept === LanguageStatus.DRAFT ||
     language.stateAccept === LanguageStatus.REQUEST_CHANGES;
+
+  const isDeleted = language.stateAccept === LanguageStatus.DELETED;
 
   return (
     <>
@@ -111,12 +117,7 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
             {isActive && (
               <Button
                 variant="warning"
-                onClick={() =>
-                  onLanguageEdit({
-                    ...language,
-                    stateAccept: LanguageStatus.PENDING,
-                  })
-                }
+                onClick={() => onLanguageDeactivate(language)}
                 title="Deactivate language"
               >
                 <StopFill />
@@ -126,19 +127,14 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
             {isDisabledOrPending && (
               <Button
                 variant="success"
-                onClick={() =>
-                  onLanguageEdit({
-                    ...language,
-                    stateAccept: LanguageStatus.ACTIVE,
-                  })
-                }
+                onClick={() => onLanguageActivate(language)}
                 title="Activate language"
               >
                 <PlayFill />
               </Button>
             )}
 
-            {!isActive && (
+            {!isActive && !isDeleted && (
               <Button
                 variant="danger"
                 onClick={() => onLanguageDelete(language)}

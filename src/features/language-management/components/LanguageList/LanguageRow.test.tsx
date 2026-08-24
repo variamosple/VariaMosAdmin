@@ -6,6 +6,8 @@ import { LanguageRowComponent } from "./LanguageRow";
 describe("LanguageRowComponent", () => {
   const mockOnLanguageEdit = vi.fn();
   const mockOnLanguageDelete = vi.fn();
+  const mockOnLanguageActivate = vi.fn();
+  const mockOnLanguageDeactivate = vi.fn();
 
   const mockActiveLanguage: Language = {
     id: 1,
@@ -34,6 +36,16 @@ describe("LanguageRowComponent", () => {
     updatedAt: new Date(),
   };
 
+  const mockDeletedLanguage: Language = {
+    id: 3,
+    name: "Deleted DSL",
+    type: "DSL",
+    stateAccept: "DELETED",
+    owners: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -46,6 +58,8 @@ describe("LanguageRowComponent", () => {
             language={mockActiveLanguage}
             onLanguageEdit={mockOnLanguageEdit}
             onLanguageDelete={mockOnLanguageDelete}
+            onLanguageActivate={mockOnLanguageActivate}
+            onLanguageDeactivate={mockOnLanguageDeactivate}
           />
         </tbody>
       </table>,
@@ -65,6 +79,8 @@ describe("LanguageRowComponent", () => {
             language={mockPendingLanguage}
             onLanguageEdit={mockOnLanguageEdit}
             onLanguageDelete={mockOnLanguageDelete}
+            onLanguageActivate={mockOnLanguageActivate}
+            onLanguageDeactivate={mockOnLanguageDeactivate}
           />
         </tbody>
       </table>,
@@ -76,6 +92,70 @@ describe("LanguageRowComponent", () => {
     expect(screen.getByTitle("Delete language")).toBeInTheDocument();
   });
 
+  it("does not render delete button if the language is deleted", () => {
+    render(
+      <table>
+        <tbody>
+          <LanguageRowComponent
+            language={mockDeletedLanguage}
+            onLanguageEdit={mockOnLanguageEdit}
+            onLanguageDelete={mockOnLanguageDelete}
+            onLanguageActivate={mockOnLanguageActivate}
+            onLanguageDeactivate={mockOnLanguageDeactivate}
+          />
+        </tbody>
+      </table>,
+    );
+
+    expect(screen.queryByTitle("Delete language")).not.toBeInTheDocument();
+  });
+
+  it("triggers onLanguageActivate when the activate button is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <table>
+        <tbody>
+          <LanguageRowComponent
+            language={mockPendingLanguage}
+            onLanguageEdit={mockOnLanguageEdit}
+            onLanguageDelete={mockOnLanguageDelete}
+            onLanguageActivate={mockOnLanguageActivate}
+            onLanguageDeactivate={mockOnLanguageDeactivate}
+          />
+        </tbody>
+      </table>,
+    );
+
+    const activateButton = screen.getByTitle("Activate language");
+    await user.click(activateButton);
+
+    expect(mockOnLanguageActivate).toHaveBeenCalledTimes(1);
+    expect(mockOnLanguageActivate).toHaveBeenCalledWith(mockPendingLanguage);
+  });
+
+  it("triggers onLanguageDeactivate when the deactivate button is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <table>
+        <tbody>
+          <LanguageRowComponent
+            language={mockActiveLanguage}
+            onLanguageEdit={mockOnLanguageEdit}
+            onLanguageDelete={mockOnLanguageDelete}
+            onLanguageActivate={mockOnLanguageActivate}
+            onLanguageDeactivate={mockOnLanguageDeactivate}
+          />
+        </tbody>
+      </table>,
+    );
+
+    const deactivateButton = screen.getByTitle("Deactivate language");
+    await user.click(deactivateButton);
+
+    expect(mockOnLanguageDeactivate).toHaveBeenCalledTimes(1);
+    expect(mockOnLanguageDeactivate).toHaveBeenCalledWith(mockActiveLanguage);
+  });
+
   it("shows contact owners option if owners are present", async () => {
     const user = userEvent.setup();
     render(
@@ -85,6 +165,8 @@ describe("LanguageRowComponent", () => {
             language={mockActiveLanguage}
             onLanguageEdit={mockOnLanguageEdit}
             onLanguageDelete={mockOnLanguageDelete}
+            onLanguageActivate={mockOnLanguageActivate}
+            onLanguageDeactivate={mockOnLanguageDeactivate}
           />
         </tbody>
       </table>,

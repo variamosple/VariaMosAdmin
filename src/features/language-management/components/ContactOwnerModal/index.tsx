@@ -31,15 +31,12 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
     STATUS_UPDATE: `Status Update Request for Language: ${languageName}`,
   };
 
-  const handleSend = () => {
-    const subject = encodeURIComponent(
-      subjects[subjectKey] || subjects.GENERAL_INQUIRY,
-    );
-    const defaultBody = `Hello,\n\nI am reaching out to you as the owner of the language '${languageName}' registered on VariaMos Admin.\n\nBest regards,\nVariaMos Administration Team`;
-    const body = encodeURIComponent(customBody || defaultBody);
-    window.location.href = `mailto:${emailList}?subject=${subject}&body=${body}`;
-    onClose();
-  };
+  const mailtoHref = `mailto:${emailList}?subject=${encodeURIComponent(
+    subjects[subjectKey] || subjects.GENERAL_INQUIRY,
+  )}&body=${encodeURIComponent(
+    customBody ||
+      `Hello,\n\nI am reaching out to you as the owner of the language '${languageName}' registered on VariaMos Admin.\n\nBest regards,\nVariaMos Administration Team`,
+  )}`;
 
   return (
     <Modal show={show} onHide={onClose} centered>
@@ -51,7 +48,6 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
           <Form.Group className="mb-3" controlId="contact-subject">
             <Form.Label>Subject</Form.Label>
             <Form.Select
-              id="contact-subject"
               value={subjectKey}
               onChange={(e) => setSubjectKey(e.target.value)}
             >
@@ -64,7 +60,6 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
           <Form.Group className="mb-3" controlId="contact-body">
             <Form.Label>Message Body (Optional)</Form.Label>
             <Form.Control
-              id="contact-body"
               as="textarea"
               rows={4}
               placeholder="Write your message here..."
@@ -78,9 +73,14 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
         <Button variant="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={handleSend} disabled={!emailList}>
+        <a
+          className={`btn btn-primary ${!emailList ? "disabled" : ""}`}
+          href={emailList ? mailtoHref : undefined}
+          onClick={onClose}
+          title="Send Email"
+        >
           Send Email
-        </Button>
+        </a>
       </Modal.Footer>
     </Modal>
   );

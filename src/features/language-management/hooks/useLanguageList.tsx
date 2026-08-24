@@ -8,10 +8,13 @@ import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
 export const useLanguageList = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showActivateConfirm, setShowActivateConfirm] = useState(false);
+  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   const [toEditLanguage, setToEditLanguage] = useState<Language>();
   const [toDeleteLanguage, setToDeleteLanguage] = useState<Language>();
+  const [toToggleLanguage, setToToggleLanguage] = useState<Language>();
   const { pushToast } = useToast();
 
   const {
@@ -41,6 +44,16 @@ export const useLanguageList = () => {
   const onLanguageEdit = (language: Language) => {
     setToEditLanguage(language);
     setShowEdit(true);
+  };
+
+  const onLanguageActivateClick = (language: Language) => {
+    setToToggleLanguage(language);
+    setShowActivateConfirm(true);
+  };
+
+  const onLanguageDeactivateClick = (language: Language) => {
+    setToToggleLanguage(language);
+    setShowDeactivateConfirm(true);
   };
 
   const performEditLanguage = (language: Partial<Language>) => {
@@ -141,16 +154,24 @@ export const useLanguageList = () => {
     setShowEdit,
     showDelete,
     setShowDelete,
+    showActivateConfirm,
+    setShowActivateConfirm,
+    showDeactivateConfirm,
+    setShowDeactivateConfirm,
     isEditing,
     toEditLanguage,
     toDeleteLanguage,
     setToDeleteLanguage,
+    toToggleLanguage,
+    setToToggleLanguage,
     languages,
     currentPage,
     isLoading,
     totalPages,
     onPageChange,
     onLanguageEdit,
+    onLanguageActivateClick,
+    onLanguageDeactivateClick,
     performEditLanguage,
     performDeleteLanguage,
     onLanguageDelete,

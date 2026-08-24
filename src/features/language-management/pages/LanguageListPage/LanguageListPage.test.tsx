@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
@@ -96,13 +96,13 @@ vi.mock(
       }) => {
         if (!show) return null;
         return (
-          <div data-testid="delete-confirm-modal">
+          <div data-testid="confirm-modal">
             <span>{message}</span>
             <button type="button" onClick={onConfirm}>
-              Confirm Delete
+              Confirm
             </button>
             <button type="button" onClick={onCancel}>
-              Cancel Delete
+              Cancel
             </button>
           </div>
         );
@@ -135,9 +135,10 @@ describe("LanguageListPage", () => {
 
     expect(await screen.findByText("English")).toBeInTheDocument();
 
-    // Click edit on the English language (first row)
-    const editButtons = screen.getAllByTitle("Edit language");
-    await user.click(editButtons[0]);
+    // Click edit on the English language row
+    const englishRow = screen.getByRole("row", { name: /English/ });
+    const editButton = within(englishRow).getByTitle("Edit language");
+    await user.click(editButton);
 
     // Modal should be visible
     expect(screen.getByText(/edit a language/i)).toBeInTheDocument();
@@ -165,24 +166,81 @@ describe("LanguageListPage", () => {
 
     expect(await screen.findByText("Spanish")).toBeInTheDocument();
 
-    // Click delete on the Spanish language (second row)
-    const deleteButtons = screen.getAllByTitle("Delete language");
-    await user.click(deleteButtons[1]);
+    // Click delete on the Spanish language row
+    const spanishRow = screen.getByRole("row", { name: /Spanish/ });
+    const deleteButton = within(spanishRow).getByTitle("Delete language");
+    await user.click(deleteButton);
 
     // Delete confirmation modal should be visible
-    expect(screen.getByTestId("delete-confirm-modal")).toBeInTheDocument();
+    expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
     expect(
       screen.getByText("Are you sure you want to delete the language?"),
     ).toBeInTheDocument();
 
     // Click confirm delete
-    await user.click(screen.getByText("Confirm Delete"));
+    await user.click(screen.getByText("Confirm"));
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByTestId("delete-confirm-modal"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("confirm-modal")).not.toBeInTheDocument();
+    });
+  });
+
+  it("shows and handles ConfirmationModal for activating a language", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<LanguageListPage />);
+
+    expect(await screen.findByText("Spanish")).toBeInTheDocument();
+
+    // Click activate on the Spanish language row (which is PENDING)
+    const spanishRow = screen.getByRole("row", { name: /Spanish/ });
+    const activateButton = within(spanishRow).getByTitle("Activate language");
+    await user.click(activateButton);
+
+    // Confirmation modal should be visible
+    expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Are you sure you want to activate the language 'Spanish'?",
+      ),
+    ).toBeInTheDocument();
+
+    // Click confirm
+    await user.click(screen.getByText("Confirm"));
+
+    // Verify modal closes
+    await waitFor(() => {
+      expect(screen.queryByTestId("confirm-modal")).not.toBeInTheDocument();
+    });
+  });
+
+  it("shows and handles ConfirmationModal for deactivating a language", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<LanguageListPage />);
+
+    expect(await screen.findByText("English")).toBeInTheDocument();
+
+    // Click deactivate on the English language row (which is ACTIVE)
+    const englishRow = screen.getByRole("row", { name: /English/ });
+    const deactivateButton = within(englishRow).getByTitle(
+      "Deactivate language",
+    );
+    await user.click(deactivateButton);
+
+    // Confirmation modal should be visible
+    expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Are you sure you want to deactivate the language 'English'?",
+      ),
+    ).toBeInTheDocument();
+
+    // Click confirm
+    await user.click(screen.getByText("Confirm"));
+
+    // Verify modal closes
+    await waitFor(() => {
+      expect(screen.queryByTestId("confirm-modal")).not.toBeInTheDocument();
     });
   });
 });

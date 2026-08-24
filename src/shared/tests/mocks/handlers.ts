@@ -19,9 +19,8 @@ const projectsApiTarget = (path: string) => {
 interface LanguageRequestBody {
   id?: number;
   name?: string;
-  code?: string;
-  isEnabled?: boolean;
-  isDefault?: boolean;
+  type?: string;
+  stateAccept?: string;
 }
 
 interface ProjectRequestBody {
@@ -313,16 +312,14 @@ export const handlers = [
         {
           id: 1,
           name: "English",
-          code: "en",
-          isEnabled: true,
-          isDefault: true,
+          type: "DSL",
+          stateAccept: "ACTIVE",
         },
         {
           id: 2,
           name: "Spanish",
-          code: "es",
-          isEnabled: false,
-          isDefault: false,
+          type: "DSL",
+          stateAccept: "PENDING",
         },
       ],
     });
@@ -340,9 +337,8 @@ export const handlers = [
         data: {
           id: body.id || 1,
           name: body.name || "English",
-          code: body.code || "en",
-          isEnabled: body.isEnabled !== false,
-          isDefault: !!body.isDefault,
+          type: body.type || "DSL",
+          stateAccept: body.stateAccept || "ACTIVE",
         },
       });
     },
