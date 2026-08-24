@@ -1728,6 +1728,31 @@ ALTER TABLE ONLY variamos.user_role
 
 
 --
+-- Name: configurations; Type: TABLE; Schema: variamos; Owner: -
+--
+
+CREATE TABLE IF NOT EXISTS variamos.configurations (
+    id SERIAL PRIMARY KEY,
+    key VARCHAR(100) UNIQUE NOT NULL,
+    value JSONB NOT NULL,
+    type VARCHAR(30) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    requires_mfa BOOLEAN DEFAULT FALSE,
+    is_secret BOOLEAN DEFAULT FALSE,
+    environment_scope VARCHAR(20) DEFAULT 'all',
+    is_read_only BOOLEAN DEFAULT FALSE,
+    target_services VARCHAR(50)[] NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    updated_by VARCHAR(100)
+);
+
+CREATE INDEX IF NOT EXISTS idx_configurations_key ON variamos.configurations(key);
+CREATE INDEX IF NOT EXISTS idx_configurations_category ON variamos.configurations(category);
+CREATE INDEX IF NOT EXISTS idx_configurations_env ON variamos.configurations(environment_scope);
+
+--
 -- PostgreSQL database dump complete
 --
 

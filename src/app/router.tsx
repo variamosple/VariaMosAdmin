@@ -12,6 +12,7 @@ import {
   SignUpPage,
 } from "@/features/auth";
 import { BugListPage } from "@/features/bug-tracker";
+import { ConfigurationListPage } from "@/features/global-configuration";
 import { HomePage } from "@/features/home";
 import { LanguageListPage } from "@/features/language-management";
 import { MetricsPage } from "@/features/metrics-dashboard";
@@ -241,6 +242,22 @@ export const ROUTES: RouteObject[] = [
           {
             index: true,
             element: <BugListPage />,
+          },
+        ],
+      },
+      {
+        path: "configurations",
+        children: [
+          {
+            index: true,
+            element: (
+              <ProtectedRoute
+                notAuthorizedPath={NOT_AUTHORIZED_PATH}
+                allowedPermissions={["configurations::query"]}
+              >
+                <ConfigurationListPage />
+              </ProtectedRoute>
+            ),
           },
         ],
       },
