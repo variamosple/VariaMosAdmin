@@ -411,6 +411,289 @@ SELECT pg_catalog.setval('variamos.roles_id_seq', 7, true);
 
 
 --
+-- Data for Name: configurations; Type: TABLE DATA; Schema: variamos; Owner: -
+--
+
+SET search_path TO variamos;
+
+INSERT INTO "configurations" (
+    "key",
+    "value",
+    "type",
+    "category",
+    "requires_mfa",
+    "is_secret",
+    "environment_scope",
+    "is_read_only",
+    "target_services",
+    "description",
+    "updated_by",
+    "created_at",
+    "updated_at"
+) VALUES
+-- GENERAL
+(
+    'general.site_name',
+    '"VariaMos"'::jsonb,
+    'string',
+    'general',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['all']::varchar[],
+    'Platform name displayed on the user interface.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'general.default_language',
+    '"en"'::jsonb,
+    'string',
+    'general',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['all']::varchar[],
+    'Default language of the application (e.g. "fr", "en").',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'general.admin_home_uri',
+    '"http://localhost:3000"'::jsonb,
+    'string',
+    'general',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['all']::varchar[],
+    'Welcome URI of the administration dashboard.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'general.api_base_url',
+    '"http://localhost:4000"'::jsonb,
+    'string',
+    'general',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['all']::varchar[],
+    'Root URL of the global API microservice.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+
+-- SECURITY (requires_mfa is set to FALSE since MFA is not yet implemented on the frontend)
+(
+    'security.password.min_length',
+    '12'::jsonb,
+    'number',
+    'security',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_security']::varchar[],
+    'Minimum length required for user passwords.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'security.password.require_special',
+    'true'::jsonb,
+    'boolean',
+    'security',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_security']::varchar[],
+    'Require a special character in user passwords.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'security.password.require_numbers',
+    'true'::jsonb,
+    'boolean',
+    'security',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_security']::varchar[],
+    'Require at least one digit in user passwords.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'security.password.require_uppercase',
+    'true'::jsonb,
+    'boolean',
+    'security',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_security']::varchar[],
+    'Require at least one uppercase letter.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'security.password.reset_expiry',
+    '86400000'::jsonb, -- 24 hours in ms
+    'number',
+    'security',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_security']::varchar[],
+    'Password reset token expiration time (in milliseconds).',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'security.bcrypt_salt_rounds',
+    '10'::jsonb,
+    'number',
+    'security',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_security']::varchar[],
+    'Bcrypt salt rounds for password hashing.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'security.mfa.global_enabled',
+    'false'::jsonb,
+    'boolean',
+    'security',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_security', 'variamos_ms_admin']::varchar[],
+    'Indicates if Multi-Factor Authentication (MFA) is globally required.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'security.cookie.max_age',
+    '86400000'::jsonb, -- 24 hours in ms
+    'number',
+    'security',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['all']::varchar[],
+    'Maximum expiration time for session cookies (in milliseconds).',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+
+-- NOTIFICATION
+(
+    'notification.smtp.host',
+    '"smtp-relay.brevo.com"'::jsonb,
+    'string',
+    'notification',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_notifications']::varchar[],
+    'SMTP server host for sending emails.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'notification.smtp.port',
+    '587'::jsonb,
+    'number',
+    'notification',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_notifications']::varchar[],
+    'SMTP port for sending emails.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'notification.smtp.from',
+    '"\"VariaMos\" <noreply@variamos.com>"'::jsonb,
+    'string',
+    'notification',
+    FALSE,
+    FALSE,
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_notifications']::varchar[],
+    'Sender email address displayed on outgoing emails.',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'notification.smtp.user',
+    '""'::jsonb,
+    'string',
+    'notification',
+    FALSE,
+    TRUE, -- Secret
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_notifications']::varchar[],
+    'Username for SMTP authentication (empty by default).',
+    'system_seed',
+    NOW(),
+    NOW()
+),
+(
+    'notification.smtp.password',
+    '""'::jsonb,
+    'string',
+    'notification',
+    FALSE,
+    TRUE, -- Secret
+    'all',
+    FALSE,
+    ARRAY['variamos_ms_notifications']::varchar[],
+    'Password for SMTP authentication (empty by default).',
+    'system_seed',
+    NOW(),
+    NOW()
+)
+ON CONFLICT (key) DO NOTHING;
+
+--
 -- PostgreSQL database dump complete
 --
 
