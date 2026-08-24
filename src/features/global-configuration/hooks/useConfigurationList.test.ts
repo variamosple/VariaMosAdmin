@@ -31,9 +31,15 @@ vi.mock("@variamosple/variamos-components", async () => {
   };
 });
 
+import { ResponseModel } from "@variamosple/variamos-components";
+
 describe("useConfigurationList Hook Tests", () => {
-  let queryConfigurationsSpy: any;
-  let updateConfigurationSpy: any;
+  let queryConfigurationsSpy: import("vitest").MockInstance<
+    typeof ConfigurationRepository.queryConfigurations
+  >;
+  let updateConfigurationSpy: import("vitest").MockInstance<
+    typeof ConfigurationRepository.updateConfiguration
+  >;
 
   const mockConfigs: Configuration[] = [
     {
@@ -65,19 +71,29 @@ describe("useConfigurationList Hook Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    const queryResponse = new ResponseModel<Configuration[]>("success");
+    queryResponse.data = mockConfigs;
+
     queryConfigurationsSpy = vi
       .spyOn(ConfigurationRepository, "queryConfigurations")
-      .mockResolvedValue({
-        data: mockConfigs,
-        type: "success",
-      } as any);
+      .mockResolvedValue(queryResponse);
+
+    const updateResponse = new ResponseModel<Configuration>("success");
+    updateResponse.data = {
+      key: "general.site_name",
+      value: "VariaMos",
+      type: "string",
+      category: "general",
+      requiresMfa: false,
+      isSecret: false,
+      environmentScope: "all",
+      isReadOnly: false,
+      targetServices: ["all"],
+    };
 
     updateConfigurationSpy = vi
       .spyOn(ConfigurationRepository, "updateConfiguration")
-      .mockResolvedValue({
-        data: {},
-        type: "success",
-      } as any);
+      .mockResolvedValue(updateResponse);
   });
 
   afterEach(() => {
@@ -184,11 +200,11 @@ describe("useConfigurationList Hook Tests", () => {
       result.current.setLocalValue("security.password.min_length", 16);
     });
 
-    updateConfigurationSpy.mockResolvedValueOnce({
-      errorCode: 400,
-      message: "Validation failed",
-      type: "error",
-    } as any);
+    const errorResponse = new ResponseModel<Configuration>("error").withError(
+      400,
+      "Validation failed",
+    );
+    updateConfigurationSpy.mockResolvedValueOnce(errorResponse);
 
     await act(async () => {
       await result.current.saveChanges();

@@ -9,7 +9,7 @@ vi.mock("@variamosple/variamos-components", async () => ({
   ProtectedRoute: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
-  withPageVisit: (component: any) => component,
+  withPageVisit: <T,>(component: T): T => component,
 }));
 
 // Mock SecurityWrapper and Layouts
