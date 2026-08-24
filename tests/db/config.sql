@@ -315,6 +315,8 @@ COPY variamos.permission (id, name) FROM stdin;
 41	languages::delete::own
 42	languages::manage-collaborators::own
 43	languages::manage-collaborators::all
+44	configurations::query
+45	configurations::update
 \.
 
 
@@ -400,6 +402,8 @@ COPY variamos.role_permission (role_id, permission_id) FROM stdin;
 3	42
 4	42
 1	43
+1	44
+1	45
 \.
 
 
