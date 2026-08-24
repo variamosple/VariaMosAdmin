@@ -1,12 +1,8 @@
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 import { useToast } from "@/shared/context/ToastContext";
-import {
-  deleteLanguage,
-  queryLanguages,
-  updateLanguage,
-} from "../api/LanguageRepository";
-import type { Language } from "../domain/Entity/Language";
+import { queryLanguages, updateLanguage } from "../api/LanguageRepository";
+import { type Language, LanguageStatus } from "../domain/Entity/Language";
 import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
 
 export const useLanguageList = () => {
@@ -82,11 +78,15 @@ export const useLanguageList = () => {
   const performDeleteLanguage = (language: Language) => {
     pushToast({
       title: "Language delete",
-      message: "Deleting language...",
+      message: "Deleting language (soft delete)...",
     });
 
     if (language.id !== undefined) {
-      deleteLanguage(language.id).then((response) => {
+      updateLanguage({
+        id: language.id,
+        name: language.name,
+        stateAccept: LanguageStatus.DELETED,
+      }).then((response) => {
         if (response.errorCode) {
           pushToast({
             title: "Language delete",
@@ -96,7 +96,7 @@ export const useLanguageList = () => {
         } else {
           pushToast({
             title: "Language delete",
-            message: "Language deleted successfully",
+            message: "Language deleted (soft delete) successfully",
             variant: "success",
           });
           onPageChange(currentPage);

@@ -27,7 +27,7 @@ describe("LanguageSearchForm Component", () => {
     expect(
       screen.getByPlaceholderText("Search by language name"),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText("Access level")).toBeInTheDocument();
+    expect(screen.getByLabelText("Status")).toBeInTheDocument();
   });
 
   it("triggers debounced onSubmit when typing in search field", async () => {

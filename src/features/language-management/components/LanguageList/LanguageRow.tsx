@@ -2,12 +2,16 @@ import { type FC, useMemo, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
 import {
   DashCircle,
+  EnvelopeFill,
   PencilFill,
+  PlayFill,
   PlusCircle,
+  StopFill,
   TrashFill,
 } from "react-bootstrap-icons";
 import { formatDate, formatDateTime } from "@/shared/constants";
-import type { Language } from "../../domain/Entity/Language";
+import { type Language, LanguageStatus } from "../../domain/Entity/Language";
+import { ContactOwnerModal } from "../ContactOwnerModal";
 
 export interface LanguageRowProps {
   language: Language;
@@ -21,11 +25,22 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
   onLanguageDelete,
 }) => {
   const [show, setShow] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
   const owner = useMemo(() => {
     if (!language.owners) return null;
 
     return language.owners?.find((owner) => owner.accessLevel === "OWNER");
   }, [language.owners]);
+
+  const isActive =
+    language.stateAccept === LanguageStatus.ACTIVE ||
+    language.stateAccept === LanguageStatus.APPROVED;
+
+  const isDisabledOrPending =
+    language.stateAccept === LanguageStatus.DISABLED ||
+    language.stateAccept === LanguageStatus.PENDING ||
+    language.stateAccept === LanguageStatus.DRAFT ||
+    language.stateAccept === LanguageStatus.REQUEST_CHANGES;
 
   return (
     <>
@@ -93,13 +108,45 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
               <PencilFill />
             </Button>
 
-            <Button
-              variant="danger"
-              onClick={() => onLanguageDelete(language)}
-              title="Delete language"
-            >
-              <TrashFill />
-            </Button>
+            {isActive && (
+              <Button
+                variant="warning"
+                onClick={() =>
+                  onLanguageEdit({
+                    ...language,
+                    stateAccept: LanguageStatus.PENDING,
+                  })
+                }
+                title="Deactivate language"
+              >
+                <StopFill />
+              </Button>
+            )}
+
+            {isDisabledOrPending && (
+              <Button
+                variant="success"
+                onClick={() =>
+                  onLanguageEdit({
+                    ...language,
+                    stateAccept: LanguageStatus.ACTIVE,
+                  })
+                }
+                title="Activate language"
+              >
+                <PlayFill />
+              </Button>
+            )}
+
+            {!isActive && (
+              <Button
+                variant="danger"
+                onClick={() => onLanguageDelete(language)}
+                title="Delete language"
+              >
+                <TrashFill />
+              </Button>
+            )}
 
             <Button
               size="sm"
@@ -116,9 +163,21 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
       {show && (
         <tr>
           <td colSpan={7}>
-            <LanguageDetails language={language} />
+            <LanguageDetails
+              language={language}
+              onContactClick={() => setShowContactModal(true)}
+            />
           </td>
         </tr>
+      )}
+
+      {showContactModal && (
+        <ContactOwnerModal
+          show={showContactModal}
+          onClose={() => setShowContactModal(false)}
+          owners={language.owners || []}
+          languageName={language.name || ""}
+        />
       )}
     </>
   );
@@ -126,12 +185,16 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
 
 interface LanguageDetailsProps {
   language: Language;
+  onContactClick: () => void;
 }
 
-const LanguageDetails: FC<LanguageDetailsProps> = ({ language }) => {
+const LanguageDetails: FC<LanguageDetailsProps> = ({
+  language,
+  onContactClick,
+}) => {
   return (
     <Container>
-      <Row>
+      <Row className="align-items-center">
         <Col xs={2} className="fw-bold">
           Name
         </Col>
@@ -139,15 +202,28 @@ const LanguageDetails: FC<LanguageDetailsProps> = ({ language }) => {
         <Col xs={10}>{language.name}</Col>
       </Row>
 
-      <Row>
+      <Row className="align-items-center mt-2">
         <Col xs={2} className="fw-bold">
           Owners
         </Col>
 
-        <Col xs={10}>
+        <Col xs={6}>
           {(language.owners || [])
             .map((owner) => `${owner.name} (${owner.email})`)
-            .join(", ")}
+            .join(", ") || "No owners registered"}
+        </Col>
+
+        <Col xs={4} className="text-end">
+          {language.owners && language.owners.length > 0 && (
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={onContactClick}
+              title="Contact Language Owners"
+            >
+              <EnvelopeFill className="me-1" /> Contact Owners
+            </Button>
+          )}
         </Col>
       </Row>
     </Container>
