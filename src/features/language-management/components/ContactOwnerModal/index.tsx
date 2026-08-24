@@ -35,10 +35,8 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
     const subject = encodeURIComponent(
       subjects[subjectKey] || subjects.GENERAL_INQUIRY,
     );
-    const body = encodeURIComponent(
-      customBody ||
-        "Hello,\n\nI am contacting you regarding your language registered on VariaMos Admin.",
-    );
+    const defaultBody = `Hello,\n\nI am reaching out to you as the owner of the language '${languageName}' registered on VariaMos Admin.\n\nBest regards,\nVariaMos Administration Team`;
+    const body = encodeURIComponent(customBody || defaultBody);
     window.location.href = `mailto:${emailList}?subject=${subject}&body=${body}`;
     onClose();
   };
@@ -50,9 +48,10 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="contact-subject">
             <Form.Label>Subject</Form.Label>
             <Form.Select
+              id="contact-subject"
               value={subjectKey}
               onChange={(e) => setSubjectKey(e.target.value)}
             >
@@ -62,9 +61,10 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
               <option value="STATUS_UPDATE">Status Update Request</option>
             </Form.Select>
           </Form.Group>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="contact-body">
             <Form.Label>Message Body (Optional)</Form.Label>
             <Form.Control
+              id="contact-body"
               as="textarea"
               rows={4}
               placeholder="Write your message here..."
