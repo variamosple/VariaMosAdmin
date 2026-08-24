@@ -51,7 +51,10 @@ test.describe("Language Management - Real E2E Flows", () => {
     const confirmModal = page.locator(".modal", { hasText: "Are you sure you want to delete the language?" });
     await confirmModal.getByRole("button", { name: "Accept" }).click();
 
-    await expect(page.locator("tbody tr", { hasText: `Test Custom Language-Pending-${suffix}` })).not.toBeVisible();
+    // Verify the language is now DELETED and its delete button is hidden (soft-delete)
+    const deletedRow = page.locator("tbody tr", { hasText: `Test Custom Language-Pending-${suffix}` });
+    await expect(deletedRow.locator("td").nth(2)).toHaveText("DELETED");
+    await expect(deletedRow.locator('button[title="Delete language"]')).not.toBeVisible();
   });
 
   test.afterAll(async () => {

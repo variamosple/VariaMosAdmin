@@ -120,12 +120,16 @@ describe("useLanguageList Hook", () => {
       });
     });
 
-    expect(deleteLanguageSpy).toHaveBeenCalledWith(1);
+    expect(updateLanguageSpy).toHaveBeenCalledWith({
+      id: 1,
+      name: "Language One",
+      stateAccept: "DELETED",
+    });
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Language delete",
-        message: "Language deleted successfully",
+        message: "Language deleted (soft delete) successfully",
       }),
     );
   });

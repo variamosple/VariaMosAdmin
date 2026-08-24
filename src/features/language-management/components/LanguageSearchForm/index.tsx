@@ -2,6 +2,7 @@ import { type FC, useCallback, useEffect, useRef } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import { LanguageStatus } from "../../domain/Entity/Language";
 import type { LanguagesFilter } from "../../domain/Entity/LanguageFilter";
 
 export interface LanguageSearchFormProps {
@@ -75,17 +76,25 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
 
         <Col xs={12} sm lg={4} className="mt-2 mt-sm-0">
           <Form.Group className="w-100" controlId="status">
-            <Form.Label>Access level</Form.Label>
+            <Form.Label>Status</Form.Label>
             <InputGroup>
               <Form.Select
                 className="form-control"
-                aria-label="Access level"
+                aria-label="Status"
                 {...register("status")}
                 isInvalid={!!errors.name}
               >
                 <option value="">All</option>
-                <option value="PENDING">Pending</option>
-                <option value="ACTIVE">Active</option>
+                <option value={LanguageStatus.ACTIVE}>Active / Approved</option>
+                <option value={LanguageStatus.PENDING}>
+                  Pending / In Review
+                </option>
+                <option value={LanguageStatus.DRAFT}>Draft</option>
+                <option value={LanguageStatus.REQUEST_CHANGES}>
+                  Request Changes
+                </option>
+                <option value={LanguageStatus.DISABLED}>Disabled</option>
+                <option value={LanguageStatus.DELETED}>Deleted</option>
               </Form.Select>
 
               <Button
