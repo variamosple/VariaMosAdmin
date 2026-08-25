@@ -64,7 +64,7 @@ describe("ProjectFormModal Component", () => {
 
   it("displays default values when editing a project", () => {
     const defaultValue = {
-      id: 42,
+      id: "42",
       name: "Super Project",
       template: true,
       author: "Nathan",

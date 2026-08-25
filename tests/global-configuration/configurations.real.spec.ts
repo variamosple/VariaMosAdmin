@@ -33,7 +33,8 @@ test.describe("Global Configurations - Real E2E Flows", () => {
 
     // Modify the value
     const input = page.locator('.modal-body input[type="text"]');
-    await input.fill("VariaMos Real Test Name");
+    const newSiteName = `VariaMos Real Test Name ${suffix}`;
+    await input.fill(newSiteName);
     await page.click('button[type="submit"]');
 
     // Verify Sandbox state

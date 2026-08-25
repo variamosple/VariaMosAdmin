@@ -92,13 +92,13 @@ describe("useProjectList Hook", () => {
 
     await act(async () => {
       await result.current.performEditProject({
-        id: 1,
+        id: "1",
         name: "Project One Edited",
       });
     });
 
     expect(updateProjectSpy).toHaveBeenCalledWith({
-      id: 1,
+      id: "1",
       name: "Project One Edited",
     });
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
@@ -111,10 +111,13 @@ describe("useProjectList Hook", () => {
     const { result } = renderHook(() => useProjectList());
 
     await act(async () => {
-      await result.current.performDeleteProject({ id: 1, name: "Project One" });
+      await result.current.performDeleteProject({
+        id: "1",
+        name: "Project One",
+      });
     });
 
-    expect(deleteProjectSpy).toHaveBeenCalledWith(1);
+    expect(deleteProjectSpy).toHaveBeenCalledWith("1");
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -133,7 +136,7 @@ describe("useProjectList Hook", () => {
 
     await act(async () => {
       await result.current.performEditProject({
-        id: 1,
+        id: "1",
         name: "Project One Edited",
       });
     });
