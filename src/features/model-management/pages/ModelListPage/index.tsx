@@ -1,7 +1,8 @@
 import { withPageVisit } from "@variamosple/variamos-components";
 import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import type { FC } from "react";
-import { Container } from "react-bootstrap";
+import { Button, Col, Container, Row } from "react-bootstrap";
+import { Plus } from "react-bootstrap-icons";
 import { ModelFormModal } from "@/features/model-management/components/ModelFormModal";
 import { ModelList } from "@/features/model-management/components/ModelList";
 import { ModelSearchForm } from "@/features/model-management/components/ModelSearchForm";
@@ -20,6 +21,10 @@ const ModelListPageComponent: FC = () => {
     toEditModel,
     showEdit,
     setShowEdit,
+    showCreate,
+    setShowCreate,
+    performCreateModel,
+    isCreating,
     performEditModel,
     isEditing,
     onModelDelete,
@@ -28,10 +33,23 @@ const ModelListPageComponent: FC = () => {
     showDelete,
     setShowDelete,
     performDeleteModel,
+    onModelToggleLevel,
+    onModelToggleVisibility,
+    projects,
+    languages,
   } = useModelList();
   return (
     <Container fluid="sm" className="my-2">
-      <h1 className="mb-0">Models list</h1>
+      <Row className="align-items-center">
+        <Col>
+          <h1 className="mb-0">Models list</h1>
+        </Col>
+        <Col className="text-end">
+          <Button variant="primary" onClick={() => setShowCreate(true)}>
+            <Plus className="me-1" /> Create Model
+          </Button>
+        </Col>
+      </Row>
       <hr />
 
       <ModelFormModal
@@ -42,6 +60,19 @@ const ModelListPageComponent: FC = () => {
         onModelSubmit={performEditModel}
         submitText="Edit model"
         isLoading={isEditing}
+        projects={projects}
+        languages={languages}
+      />
+
+      <ModelFormModal
+        modalTitle="Create a Model"
+        showModal={showCreate}
+        onClose={() => setShowCreate(false)}
+        onModelSubmit={performCreateModel}
+        submitText="Create model"
+        isLoading={isCreating}
+        projects={projects}
+        languages={languages}
       />
 
       <ModelSearchForm
@@ -57,6 +88,8 @@ const ModelListPageComponent: FC = () => {
         onPageChange={onPageChange}
         onModelEdit={onModelEdit}
         onModelDelete={onModelDelete}
+        onModelToggleLevel={onModelToggleLevel}
+        onModelToggleVisibility={onModelToggleVisibility}
       />
 
       <ConfirmationModal

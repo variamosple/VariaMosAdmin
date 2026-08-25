@@ -9,6 +9,8 @@ export interface ModelListProps extends PaginationControlsProps {
   items: Model[];
   onModelEdit: (model: Model) => void;
   onModelDelete: (model: Model) => void;
+  onModelToggleLevel: (model: Model) => void;
+  onModelToggleVisibility: (model: Model) => void;
 }
 
 export const ModelList: FC<ModelListProps> = ({
@@ -18,6 +20,8 @@ export const ModelList: FC<ModelListProps> = ({
   onPageChange,
   onModelEdit,
   onModelDelete,
+  onModelToggleLevel,
+  onModelToggleVisibility,
 }) => {
   return (
     <>
@@ -38,9 +42,15 @@ export const ModelList: FC<ModelListProps> = ({
 
             <th>Source</th>
 
-            <th>Level</th>
+            <th>Engineering Type</th>
 
             <th>Project</th>
+
+            <th>Access level</th>
+
+            <th>Level</th>
+
+            <th>Status</th>
 
             <th>Actions</th>
           </tr>
@@ -53,6 +63,8 @@ export const ModelList: FC<ModelListProps> = ({
               model={model}
               onModelEdit={onModelEdit}
               onModelDelete={onModelDelete}
+              onModelToggleLevel={onModelToggleLevel}
+              onModelToggleVisibility={onModelToggleVisibility}
             />
           ))}
         </tbody>
