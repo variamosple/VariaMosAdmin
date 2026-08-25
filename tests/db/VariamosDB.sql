@@ -722,7 +722,10 @@ CREATE TABLE variamos.model (
     author text,
     source text,
     language_id integer NOT NULL,
-    model jsonb NOT NULL
+    model jsonb NOT NULL,
+    is_deleted boolean DEFAULT false,
+    model_level character varying DEFAULT 'domain'::character varying,
+    is_public boolean DEFAULT true
 );
 
 
@@ -781,7 +784,8 @@ CREATE TABLE variamos.project (
     date timestamp with time zone,
     type_models text,
     owner_id character varying DEFAULT 'default_owner'::character varying NOT NULL,
-    is_collaborative boolean DEFAULT false
+    is_collaborative boolean DEFAULT false,
+    is_deleted boolean DEFAULT false
 );
 
 
