@@ -33,12 +33,19 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
   languages = [],
 }) => {
   const [languageSearch, setLanguageSearch] = useState("");
+  const [projectSearch, setProjectSearch] = useState("");
+  const [selectedLanguageId, setSelectedLanguageId] = useState<
+    number | undefined
+  >(defaultValue?.languageId);
+  const [selectedProjectId, setSelectedProjectId] = useState<
+    string | undefined
+  >(defaultValue?.projectId);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
     setValue,
   } = useForm<ModelFormFields>();
 
@@ -50,6 +57,8 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
           ? String(defaultValue.isPublic)
           : "true",
     });
+    setSelectedLanguageId(defaultValue?.languageId);
+    setSelectedProjectId(defaultValue?.projectId);
   }, [defaultValue, reset]);
 
   const onSubmit: SubmitHandler<ModelFormFields> = (data) => {
@@ -63,6 +72,8 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
       onModelSubmit(formattedData).then((response) => {
         if (!response.errorCode) {
           reset();
+          setSelectedLanguageId(undefined);
+          setSelectedProjectId(undefined);
         }
       });
     }
@@ -71,12 +82,17 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
   const onCloseModal = () => {
     onClose();
     reset();
+    setSelectedLanguageId(defaultValue?.languageId);
+    setSelectedProjectId(defaultValue?.projectId);
   };
 
-  const selectedLanguageId = watch("languageId");
   const selectedLanguageName =
-    languages.find((l) => l.id === Number(selectedLanguageId))?.name ||
+    languages.find((l) => l.id === selectedLanguageId)?.name ||
     "Select a language...";
+
+  const selectedProjectName =
+    projects.find((p) => p.id === selectedProjectId)?.name ||
+    "Select a project...";
 
   const isEdit = !!defaultValue?.id;
 
@@ -109,21 +125,67 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
           {!isEdit && (
             <Form.Group className="col-12" controlId="projectId">
               <Form.Label className="form-label">Project</Form.Label>
-              <Form.Select
-                className="form-control"
+              <Dropdown className="w-100">
+                <Dropdown.Toggle
+                  variant="outline-secondary"
+                  className={`w-100 text-start d-flex justify-content-between align-items-center ${errors.projectId ? "is-invalid border-danger text-danger" : ""}`}
+                >
+                  {selectedProjectName}
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu
+                  className="w-100"
+                  style={{ maxHeight: "300px", overflowY: "auto" }}
+                >
+                  <Form.Control
+                    autoFocus
+                    className="mx-3 my-2 w-auto"
+                    placeholder="Type to filter..."
+                    onChange={(e) => setProjectSearch(e.target.value)}
+                    value={projectSearch}
+                  />
+                  <Dropdown.Divider />
+                  {projects
+                    .filter((p) =>
+                      p.name
+                        .toLowerCase()
+                        .includes(projectSearch.toLowerCase()),
+                    )
+                    .map((p) => (
+                      <Dropdown.Item
+                        key={p.id}
+                        active={selectedProjectId === p.id}
+                        onClick={() => {
+                          setSelectedProjectId(p.id);
+                          setValue("projectId", p.id, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                          setProjectSearch("");
+                        }}
+                      >
+                        {p.name}
+                      </Dropdown.Item>
+                    ))}
+                  {projects.filter((p) =>
+                    p.name.toLowerCase().includes(projectSearch.toLowerCase()),
+                  ).length === 0 && (
+                    <Dropdown.Item disabled>No projects found</Dropdown.Item>
+                  )}
+                </Dropdown.Menu>
+              </Dropdown>
+              <input
+                type="hidden"
                 {...register("projectId", { required: "Project is required" })}
-                isInvalid={!!errors.projectId}
-              >
-                <option value="">Select a project...</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                {errors.projectId?.message}
-              </Form.Control.Feedback>
+              />
+              {errors.projectId && (
+                <div
+                  className="text-danger mt-1"
+                  style={{ fontSize: "0.875em" }}
+                >
+                  {errors.projectId.message}
+                </div>
+              )}
             </Form.Group>
           )}
 
@@ -158,6 +220,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
                       key={l.id}
                       active={Number(selectedLanguageId) === l.id}
                       onClick={() => {
+                        setSelectedLanguageId(l.id);
                         setValue("languageId", l.id, {
                           shouldValidate: true,
                           shouldDirty: true,
