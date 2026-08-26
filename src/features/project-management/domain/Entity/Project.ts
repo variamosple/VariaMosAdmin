@@ -1,5 +1,5 @@
 export interface Project {
-  id?: number;
+  id?: string;
   name?: string;
   description?: string;
   author?: string;
@@ -7,6 +7,8 @@ export interface Project {
   date?: Date;
   template?: boolean;
   project?: ProjectProject;
+  owners?: { id?: string; name?: string; email: string }[];
+  isDeleted?: boolean;
 }
 
 interface ProjectProject {

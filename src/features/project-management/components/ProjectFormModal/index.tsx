@@ -4,6 +4,10 @@ import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 
+interface ProjectFormFields extends Omit<Project, "template"> {
+  template?: string;
+}
+
 export interface ProjectFormModalProps {
   modalTitle: string;
   showModal: boolean;
@@ -28,13 +32,19 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<Project>();
+  } = useForm<ProjectFormFields>();
 
   useEffect(() => {
-    reset({ ...defaultValue });
+    reset({
+      ...defaultValue,
+      template:
+        defaultValue?.template !== undefined
+          ? String(defaultValue.template)
+          : "false",
+    });
   }, [defaultValue, reset]);
 
-  const onSubmit: SubmitHandler<Project> = (data) => {
+  const onSubmit: SubmitHandler<ProjectFormFields> = (data) => {
     if (!isLoading) {
       let template = false;
       if (data?.template !== undefined && data?.template !== null) {
@@ -47,7 +57,7 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
         ...defaultValue,
         ...data,
         template,
-      };
+      } as Project;
 
       onProjectSubmit(updatedProject).then((response) => {
         if (!response.errorCode) {

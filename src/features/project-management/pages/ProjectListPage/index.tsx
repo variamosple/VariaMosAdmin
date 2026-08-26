@@ -1,7 +1,8 @@
 import { withPageVisit } from "@variamosple/variamos-components";
 import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import type { FC } from "react";
-import { Container } from "react-bootstrap";
+import { Button, Col, Container, Row } from "react-bootstrap";
+import { Plus } from "react-bootstrap-icons";
 import { ProjectFormModal } from "@/features/project-management/components/ProjectFormModal";
 import { ProjectList } from "@/features/project-management/components/ProjectList";
 import { ProjectSearchForm } from "@/features/project-management/components/ProjectsSearchForm";
@@ -20,6 +21,10 @@ const ProjectListPageComponent: FC = () => {
     toEditProject,
     showEdit,
     setShowEdit,
+    showCreate,
+    setShowCreate,
+    performCreateProject,
+    isCreating,
     performEditProject,
     isEditing,
     onProjectDelete,
@@ -31,7 +36,16 @@ const ProjectListPageComponent: FC = () => {
   } = useProjectList();
   return (
     <Container fluid="sm" className="my-2">
-      <h1 className="mb-0">Projects list</h1>
+      <Row className="align-items-center">
+        <Col>
+          <h1 className="mb-0">Projects list</h1>
+        </Col>
+        <Col className="text-end">
+          <Button variant="primary" onClick={() => setShowCreate(true)}>
+            <Plus className="me-1" /> Create Project
+          </Button>
+        </Col>
+      </Row>
       <hr />
 
       <ProjectFormModal
@@ -42,6 +56,15 @@ const ProjectListPageComponent: FC = () => {
         onProjectSubmit={performEditProject}
         submitText="Edit project"
         isLoading={isEditing}
+      />
+
+      <ProjectFormModal
+        modalTitle="Create a Project"
+        showModal={showCreate}
+        onClose={() => setShowCreate(false)}
+        onProjectSubmit={performCreateProject}
+        submitText="Create project"
+        isLoading={isCreating}
       />
 
       <ProjectSearchForm

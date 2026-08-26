@@ -10,6 +10,10 @@ test.describe("Model Management - Mocked Flows", () => {
       source: "Source One",
       engineeringType: "domain",
       projectName: "Project One",
+      modelLevel: "domain",
+      isPublic: true,
+      isDeleted: false,
+      languageId: 1,
       owners: [{ id: "admin1", name: "Admin User", email: "admin@example.com", accessLevel: "OWNER" }]
     },
     {
@@ -20,6 +24,10 @@ test.describe("Model Management - Mocked Flows", () => {
       source: "Source Two",
       engineeringType: "application",
       projectName: "Project Two",
+      modelLevel: "application",
+      isPublic: false,
+      isDeleted: false,
+      languageId: 1,
       owners: []
     }
   ];
@@ -39,7 +47,7 @@ test.describe("Model Management - Mocked Flows", () => {
               name: "Admin User",
               email: "admin@example.com",
               roles: ["Admin"],
-              permissions: ["admin::models::query"]
+              permissions: ["admin::models::query", "admin::models::create", "admin::models::update"]
             }
           }
         })
@@ -51,6 +59,22 @@ test.describe("Model Management - Mocked Flows", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({ data: mockModels, totalItems: 2, totalPages: 1, currentPage: 1 })
+      });
+    });
+
+    await page.route("**/v1/admin/projects*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: [{ id: "p1", name: "Project One" }] })
+      });
+    });
+
+    await page.route("**/v1/admin/languages*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: [{ id: 1, name: "Java" }, { id: 2, name: "Python" }] })
       });
     });
 
@@ -67,6 +91,8 @@ test.describe("Model Management - Mocked Flows", () => {
     await expect(row).toContainText("Source One");
     await expect(row).toContainText("domain");
     await expect(row).toContainText("Project One");
+    await expect(row).toContainText("Public");
+    await expect(row).toContainText("Domain Model");
 
     await row.locator('button[title="Show/Hide model details"]').click();
     await expect(page.locator("div.row", { hasText: "Owners" }).getByText("Admin User (admin@example.com)")).toBeVisible();
@@ -113,5 +139,56 @@ test.describe("Model Management - Mocked Flows", () => {
 
     await page.locator(".modal-footer").getByRole("button", { name: "Edit model" }).click();
     await expect(page.locator(".modal-title")).not.toBeVisible();
+  });
+
+  test("should perform quick toggles for level and visibility", async ({ page }) => {
+    const row = page.locator("tr", { hasText: "First Model" });
+    
+    // Toggle Level
+    await row.locator('button[title="Toggle model level (Domain/Application)"]').click();
+    await expect(page.locator(".modal-body")).toContainText("Are you sure you want to change this model level to Application Model?");
+    
+    await page.route("**/v1/admin/models/1", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: { ...mockModels[0], modelLevel: "application" } })
+      });
+    });
+    await page.getByRole("button", { name: "Accept" }).click();
+
+    // Toggle Visibility
+    await row.locator('button[title="Toggle model visibility (Public/Private)"]').click();
+    await expect(page.locator(".modal-body")).toContainText("Are you sure you want to change this model visibility to Private?");
+    
+    await page.route("**/v1/admin/models/1", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: { ...mockModels[0], isPublic: false } })
+      });
+    });
+    await page.getByRole("button", { name: "Accept" }).click();
+  });
+
+  test("should support searchable language dropdown when creating a model", async ({ page }) => {
+    await page.getByRole("button", { name: "Create Model" }).click();
+    await expect(page.locator(".modal-title")).toHaveText("Create a Model");
+
+    // Open language dropdown
+    await page.getByRole("button", { name: "Select a language..." }).click();
+    
+    // Search for Python
+    const searchInput = page.locator('.modal input[placeholder="Type to filter..."]');
+    await searchInput.fill("Py");
+    
+    // Check Java is hidden, Python is shown
+    await expect(page.getByRole("button", { name: "Java" })).not.toBeVisible();
+    const pythonItem = page.getByRole("button", { name: "Python" });
+    await expect(pythonItem).toBeVisible();
+    
+    // Select Python
+    await pythonItem.click();
+    await expect(page.getByRole("button", { name: "Python" })).toBeVisible(); // Selected name displayed on toggle button
   });
 });

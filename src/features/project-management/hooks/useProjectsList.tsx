@@ -1,6 +1,7 @@
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 import {
+  createProject,
   deleteProject,
   queryProjects,
   updateProject,
@@ -11,8 +12,10 @@ import { useToast } from "@/shared/context/ToastContext";
 
 export const useProjectList = () => {
   const [showEdit, setShowEdit] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const [toEditProject, setToEditProject] = useState<Project>();
   const [toDeleteProject, setToDeleteProject] = useState<Project>();
@@ -75,6 +78,34 @@ export const useProjectList = () => {
       });
   };
 
+  const performCreateProject = (project: Project) => {
+    setIsCreating(true);
+    return createProject(project)
+      .then((response) => {
+        if (!response.errorCode) {
+          onPageChange(currentPage);
+          setShowCreate(false);
+
+          pushToast({
+            title: "Project create",
+            message: "Project created successfully",
+            variant: "success",
+          });
+        } else {
+          pushToast({
+            title: "Project create",
+            message: response.message ?? "An error occurred",
+            variant: "danger",
+          });
+        }
+
+        return response;
+      })
+      .finally(() => {
+        setIsCreating(false);
+      });
+  };
+
   const performDeleteProject = (project: Project) => {
     pushToast({
       title: "Project delete",
@@ -119,25 +150,33 @@ export const useProjectList = () => {
   };
 
   const onSearchSubmit = (search?: ProjectsFilter) => {
-    loadData(new ProjectsFilter(search?.name, search?.isTemplate)).then(
-      (response) => {
-        if (response.errorCode) {
-          pushToast({
-            title: "Project query error",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-      },
-    );
+    loadData(
+      new ProjectsFilter(
+        search?.name,
+        search?.isTemplate,
+        search?.isDeleted,
+        search?.includeDeleted,
+      ),
+    ).then((response) => {
+      if (response.errorCode) {
+        pushToast({
+          title: "Project query error",
+          message: response.message ?? "An error occurred",
+          variant: "danger",
+        });
+      }
+    });
   };
 
   return {
     showEdit,
     setShowEdit,
+    showCreate,
+    setShowCreate,
     showDelete,
     setShowDelete,
     isEditing,
+    isCreating,
     toEditProject,
     toDeleteProject,
     setToDeleteProject,
@@ -148,6 +187,7 @@ export const useProjectList = () => {
     onPageChange,
     onProjectEdit,
     performEditProject,
+    performCreateProject,
     performDeleteProject,
     onProjectDelete,
     onSearchReset,

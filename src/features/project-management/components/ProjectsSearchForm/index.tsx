@@ -13,6 +13,7 @@ export interface ProjectSearchFormProps {
 interface ProjectSearchFormFields {
   name?: string;
   isTemplate?: string;
+  isDeleted?: string;
 }
 
 export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
@@ -27,20 +28,28 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
     reset,
     formState: { errors, isDirty },
     watch,
-  } = useForm<ProjectSearchFormFields>();
+  } = useForm<ProjectSearchFormFields>({
+    defaultValues: {
+      name: "",
+      isTemplate: "all",
+      isDeleted: "false",
+    },
+  });
 
   const _values = watch();
 
   const onReset = () => {
-    reset({ name: "", isTemplate: "all" });
+    reset({ name: "", isTemplate: "all", isDeleted: "false" });
     onSearchReset();
   };
 
   const submit: SubmitHandler<ProjectSearchFormFields> = useCallback(
     (data) => {
-      const { isTemplate } = data;
+      const { isTemplate, isDeleted } = data;
 
       let template: boolean | undefined;
+      let deleted: boolean | undefined;
+      let includeDeleted: boolean | undefined;
 
       if (isTemplate === "all") {
         template = undefined;
@@ -50,7 +59,20 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
         template = false;
       }
 
-      onSubmit(new ProjectsFilter(data?.name, template));
+      if (isDeleted === "all") {
+        deleted = undefined;
+        includeDeleted = true;
+      } else if (isDeleted === "true") {
+        deleted = true;
+        includeDeleted = true;
+      } else if (isDeleted === "false") {
+        deleted = false;
+        includeDeleted = false;
+      }
+
+      onSubmit(
+        new ProjectsFilter(data?.name, template, deleted, includeDeleted),
+      );
       reset(data);
     },
     [onSubmit, reset],
@@ -93,16 +115,30 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
         <Col xs={12} sm lg={4} className="mt-2 mt-sm-0">
           <Form.Group className="w-100" controlId="isTemplate">
             <Form.Label>Access level</Form.Label>
+            <Form.Select
+              className="form-control"
+              aria-label="Access level"
+              {...register("isTemplate")}
+            >
+              <option value="all">All</option>
+              <option value="true">Public</option>
+              <option value="false">Private</option>
+            </Form.Select>
+          </Form.Group>
+        </Col>
+
+        <Col xs={12} sm lg={4} className="mt-2 mt-sm-0">
+          <Form.Group className="w-100" controlId="isDeleted">
+            <Form.Label>Status</Form.Label>
             <InputGroup>
               <Form.Select
                 className="form-control"
-                aria-label="Access level"
-                {...register("isTemplate")}
-                isInvalid={!!errors.name}
+                aria-label="Status"
+                {...register("isDeleted")}
               >
+                <option value="false">Active</option>
+                <option value="true">Deleted</option>
                 <option value="all">All</option>
-                <option value="true">Public</option>
-                <option value="false">Private</option>
               </Form.Select>
               <Button
                 title="Clear results"

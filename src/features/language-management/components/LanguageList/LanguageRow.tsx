@@ -9,9 +9,9 @@ import {
   StopFill,
   TrashFill,
 } from "react-bootstrap-icons";
+import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
 import { formatDate, formatDateTime } from "@/shared/constants";
 import { type Language, LanguageStatus } from "../../domain/Entity/Language";
-import { ContactOwnerModal } from "../ContactOwnerModal";
 
 export interface LanguageRowProps {
   language: Language;
@@ -172,7 +172,8 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
           show={showContactModal}
           onClose={() => setShowContactModal(false)}
           owners={language.owners || []}
-          languageName={language.name || ""}
+          entityName={language.name || ""}
+          entityType="Language"
         />
       )}
     </>

@@ -42,6 +42,8 @@ export const ProjectList: FC<ProjectListProps> = ({
 
             <th>Access level</th>
 
+            <th>Status</th>
+
             <th>Actions</th>
           </tr>
         </thead>

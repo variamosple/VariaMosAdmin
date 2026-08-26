@@ -1,12 +1,21 @@
 import { type FC, useState } from "react";
-import { Accordion, Button, ButtonGroup } from "react-bootstrap";
+import {
+  Accordion,
+  Button,
+  ButtonGroup,
+  Col,
+  Container,
+  Row,
+} from "react-bootstrap";
 import {
   DashCircle,
+  EnvelopeFill,
   PencilFill,
   PlusCircle,
   TrashFill,
 } from "react-bootstrap-icons";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
+import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
 import { formatBoolean, formatDate } from "@/shared/constants";
 
 export interface ProjectRowProps {
@@ -21,6 +30,7 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
   onProjectDelete,
 }) => {
   const [show, setShow] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   return (
     <>
@@ -70,6 +80,8 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
 
         <td>{formatBoolean(project.template, "Public", "Private")}</td>
 
+        <td>{project.isDeleted ? "Deleted" : "Active"}</td>
+
         <td>
           <ButtonGroup size="sm">
             <Button
@@ -102,10 +114,23 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
 
       {show && (
         <tr>
-          <td colSpan={7}>
-            <ProjectDetails project={project} />
+          <td colSpan={8}>
+            <ProjectDetails
+              project={project}
+              onContactClick={() => setShowContactModal(true)}
+            />
           </td>
         </tr>
+      )}
+
+      {showContactModal && (
+        <ContactOwnerModal
+          show={showContactModal}
+          onClose={() => setShowContactModal(false)}
+          owners={project.owners || []}
+          entityName={project.name || ""}
+          entityType="Project"
+        />
       )}
     </>
   );
@@ -113,77 +138,111 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
 
 interface ProjectDetailsProps {
   project: Project;
+  onContactClick: () => void;
 }
 
-const ProjectDetails: FC<ProjectDetailsProps> = ({ project }) => {
-  if (!project?.project?.productLines?.length) {
-    return <div>No data</div>;
-  }
-
+const ProjectDetails: FC<ProjectDetailsProps> = ({
+  project,
+  onContactClick,
+}) => {
+  const productLines = project?.project?.productLines || [];
   return (
-    <Accordion alwaysOpen flush>
-      {project.project.productLines.map((productLine) => (
-        <Accordion.Item key={productLine.id} eventKey={`${productLine.id}`}>
-          <Accordion.Header>
-            Product Line: {productLine.name} - Type: {productLine.type} -
-            Domain: {productLine.domain}
-          </Accordion.Header>
+    <Container className="p-2">
+      <Row className="align-items-center mb-3">
+        <Col xs={2} className="fw-bold">
+          Owners
+        </Col>
+        <Col xs={6}>
+          {(project.owners || [])
+            .map((owner) => `${owner.name || "N/A"} (${owner.email})`)
+            .join(", ") || "No owners registered"}
+        </Col>
+        <Col xs={4} className="text-end">
+          {project.owners && project.owners.length > 0 && (
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={onContactClick}
+              title="Contact Project Owners"
+            >
+              <EnvelopeFill className="me-1" /> Contact Owners
+            </Button>
+          )}
+        </Col>
+      </Row>
 
-          <Accordion.Body>
-            <Accordion alwaysOpen flush>
-              <Accordion.Item
-                key={`${productLine.id}-domainEngineering`}
-                eventKey={`${productLine.id}-domainEngineering`}
-              >
-                <Accordion.Header>Domain Engineering - Models</Accordion.Header>
-                <Accordion.Body>
-                  <div
-                    className="d-grid gap-1"
-                    style={{
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(200px, 1fr))",
-                    }}
+      {!productLines.length ? (
+        <div>No product lines registered</div>
+      ) : (
+        <Accordion alwaysOpen flush>
+          {productLines.map((productLine) => (
+            <Accordion.Item key={productLine.id} eventKey={`${productLine.id}`}>
+              <Accordion.Header>
+                Product Line: {productLine.name} - Type: {productLine.type} -
+                Domain: {productLine.domain}
+              </Accordion.Header>
+
+              <Accordion.Body>
+                <Accordion alwaysOpen flush>
+                  <Accordion.Item
+                    key={`${productLine.id}-domainEngineering`}
+                    eventKey={`${productLine.id}-domainEngineering`}
                   >
-                    {productLine.domainEngineering?.models?.map?.((model) => (
-                      <div key={model.id}>{model.name}</div>
-                    ))}
+                    <Accordion.Header>
+                      Domain Engineering - Models
+                    </Accordion.Header>
+                    <Accordion.Body>
+                      <div
+                        className="d-grid gap-1"
+                        style={{
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(200px, 1fr))",
+                        }}
+                      >
+                        {productLine.domainEngineering?.models?.map?.(
+                          (model) => (
+                            <div key={model.id}>{model.name}</div>
+                          ),
+                        )}
 
-                    {!productLine.domainEngineering?.models?.length &&
-                      "There are no domain engineering models in this product line."}
-                  </div>
-                </Accordion.Body>
-              </Accordion.Item>
+                        {!productLine.domainEngineering?.models?.length &&
+                          "There are no domain engineering models in this product line."}
+                      </div>
+                    </Accordion.Body>
+                  </Accordion.Item>
 
-              <Accordion.Item
-                key={`${productLine.id}-applicationEngineering`}
-                eventKey={`${productLine.id}-applicationEngineering`}
-              >
-                <Accordion.Header>
-                  Application Engineering - Models
-                </Accordion.Header>
-                <Accordion.Body>
-                  <div
-                    className="d-grid gap-1"
-                    style={{
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(200px, 1fr))",
-                    }}
+                  <Accordion.Item
+                    key={`${productLine.id}-applicationEngineering`}
+                    eventKey={`${productLine.id}-applicationEngineering`}
                   >
-                    {productLine.applicationEngineering?.models?.map?.(
-                      (model) => (
-                        <div key={model.id}>{model.name}</div>
-                      ),
-                    )}
+                    <Accordion.Header>
+                      Application Engineering - Models
+                    </Accordion.Header>
+                    <Accordion.Body>
+                      <div
+                        className="d-grid gap-1"
+                        style={{
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(200px, 1fr))",
+                        }}
+                      >
+                        {productLine.applicationEngineering?.models?.map?.(
+                          (model) => (
+                            <div key={model.id}>{model.name}</div>
+                          ),
+                        )}
 
-                    {!productLine.applicationEngineering?.models?.length &&
-                      "There are no application engineering models in this product line."}
-                  </div>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </Accordion.Body>
-        </Accordion.Item>
-      ))}
-    </Accordion>
+                        {!productLine.applicationEngineering?.models?.length &&
+                          "There are no application engineering models in this product line."}
+                      </div>
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
+              </Accordion.Body>
+            </Accordion.Item>
+          ))}
+        </Accordion>
+      )}
+    </Container>
   );
 };

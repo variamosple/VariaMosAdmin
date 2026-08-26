@@ -36,7 +36,7 @@ export const queryProjects = (
 };
 
 export const deleteProject = (
-  projectId: number,
+  projectId: string,
 ): Promise<ResponseModel<void>> => {
   return PROJECTS_CLIENT.delete(`/v1/admin/projects/${projectId}`)
     .then((response) => response.data)
@@ -119,6 +119,36 @@ export const updateProject = (
         return new ResponseModel("APP-ERROR").withError(
           500,
           `Error when trying to update the project with id: ${request.id}, please try again later.`,
+        );
+      }
+    });
+};
+
+export const createProject = (
+  request: Project,
+): Promise<ResponseModel<Project>> => {
+  return PROJECTS_CLIENT.post("/v1/admin/projects", request)
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        if (response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500", 10),
+          "Network/communication error.",
+        );
+      } else {
+        console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          "Error when trying to create the project, please try again later.",
         );
       }
     });

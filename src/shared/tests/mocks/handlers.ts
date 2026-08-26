@@ -464,8 +464,20 @@ export const handlers = [
   http.get(projectsApiTarget("/v1/admin/models"), () => {
     return HttpResponse.json({
       data: [
-        { id: "1", name: "Model One", description: "First model" },
-        { id: "2", name: "Model Two", description: "Second model" },
+        {
+          id: "1",
+          name: "Model One",
+          description: "First model",
+          languageId: 1,
+          projectId: "p1",
+        },
+        {
+          id: "2",
+          name: "Model Two",
+          description: "Second model",
+          languageId: 1,
+          projectId: "p1",
+        },
       ],
     });
   }),
@@ -473,8 +485,20 @@ export const handlers = [
   http.get(projectsApiTarget("/v1/models"), () => {
     return HttpResponse.json({
       data: [
-        { id: "1", name: "Model One", description: "First model" },
-        { id: "2", name: "Model Two", description: "Second model" },
+        {
+          id: "1",
+          name: "Model One",
+          description: "First model",
+          languageId: 1,
+          projectId: "p1",
+        },
+        {
+          id: "2",
+          name: "Model Two",
+          description: "Second model",
+          languageId: 1,
+          projectId: "p1",
+        },
       ],
     });
   }),

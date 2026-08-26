@@ -28,6 +28,8 @@ vi.mock("@variamosple/variamos-components", async () => {
 describe("ModelList Component", () => {
   const mockOnModelEdit = vi.fn();
   const mockOnModelDelete = vi.fn();
+  const mockOnModelToggleLevel = vi.fn();
+  const mockOnModelToggleVisibility = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -42,6 +44,8 @@ describe("ModelList Component", () => {
         onPageChange={vi.fn()}
         onModelEdit={mockOnModelEdit}
         onModelDelete={mockOnModelDelete}
+        onModelToggleLevel={mockOnModelToggleLevel}
+        onModelToggleVisibility={mockOnModelToggleVisibility}
       />,
     );
 
@@ -59,6 +63,8 @@ describe("ModelList Component", () => {
         onPageChange={vi.fn()}
         onModelEdit={mockOnModelEdit}
         onModelDelete={mockOnModelDelete}
+        onModelToggleLevel={mockOnModelToggleLevel}
+        onModelToggleVisibility={mockOnModelToggleVisibility}
       />,
     );
 

@@ -317,6 +317,8 @@ COPY variamos.permission (id, name) FROM stdin;
 43	languages::manage-collaborators::all
 44	configurations::query
 45	configurations::update
+46	admin::projects::create
+47	admin::models::create
 \.
 
 
@@ -404,6 +406,8 @@ COPY variamos.role_permission (role_id, permission_id) FROM stdin;
 1	43
 1	44
 1	45
+1	46
+1	47
 \.
 
 

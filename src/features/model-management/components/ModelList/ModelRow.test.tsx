@@ -4,9 +4,45 @@ import "@testing-library/jest-dom";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
 import { ModelRowComponent } from "./ModelRow";
 
+// Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
+vi.mock(
+  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
+  async () => {
+    return {
+      __esModule: true,
+      default: ({
+        show,
+        message,
+        onConfirm,
+        onCancel,
+      }: {
+        show: boolean;
+        message: string;
+        onConfirm: () => void;
+        onCancel: () => void;
+      }) => {
+        if (!show) return null;
+        return (
+          <div data-testid="confirm-modal">
+            <span>{message}</span>
+            <button type="button" onClick={onConfirm}>
+              Confirm Delete
+            </button>
+            <button type="button" onClick={onCancel}>
+              Cancel Delete
+            </button>
+          </div>
+        );
+      },
+    };
+  },
+);
+
 describe("ModelRowComponent", () => {
   const mockOnModelEdit = vi.fn();
   const mockOnModelDelete = vi.fn();
+  const mockOnModelToggleLevel = vi.fn();
+  const mockOnModelToggleVisibility = vi.fn();
 
   const sampleModel: Model = {
     id: "model-1",
@@ -36,6 +72,8 @@ describe("ModelRowComponent", () => {
             model={model}
             onModelEdit={mockOnModelEdit}
             onModelDelete={mockOnModelDelete}
+            onModelToggleLevel={mockOnModelToggleLevel}
+            onModelToggleVisibility={mockOnModelToggleVisibility}
           />
         </tbody>
       </table>,
@@ -90,5 +128,61 @@ describe("ModelRowComponent", () => {
 
     // Owners title is rendered, but content description is empty
     expect(screen.getByText("Owners")).toBeInTheDocument();
+  });
+
+  it("renders quick action buttons for active models and opens confirmation dialogs", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    const levelBtn = screen.getByTitle(
+      "Toggle model level (Domain/Application)",
+    );
+    const visibilityBtn = screen.getByTitle(
+      "Toggle model visibility (Public/Private)",
+    );
+
+    expect(levelBtn).toBeInTheDocument();
+    expect(visibilityBtn).toBeInTheDocument();
+
+    // Test Level Toggle
+    await user.click(levelBtn);
+    expect(
+      screen.getByText(/Are you sure you want to change this model level/i),
+    ).toBeInTheDocument();
+
+    // Confirm Level Toggle
+    const confirmLevelBtn = screen.getByRole("button", { name: /confirm/i });
+    await user.click(confirmLevelBtn);
+    expect(mockOnModelToggleLevel).toHaveBeenCalledWith(sampleModel);
+
+    // Test Visibility Toggle
+    await user.click(visibilityBtn);
+    expect(
+      screen.getByText(
+        /Are you sure you want to change this model visibility/i,
+      ),
+    ).toBeInTheDocument();
+
+    // Confirm Visibility Toggle
+    const confirmVisibilityBtn = screen.getByRole("button", {
+      name: /confirm/i,
+    });
+    await user.click(confirmVisibilityBtn);
+    expect(mockOnModelToggleVisibility).toHaveBeenCalledWith(sampleModel);
+  });
+
+  it("does not render quick action buttons when the model is deleted", () => {
+    const deletedModel: Model = {
+      ...sampleModel,
+      isDeleted: true,
+    };
+    renderComponent(deletedModel);
+
+    expect(
+      screen.queryByTitle("Toggle model level (Domain/Application)"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTitle("Toggle model visibility (Public/Private)"),
+    ).not.toBeInTheDocument();
   });
 });

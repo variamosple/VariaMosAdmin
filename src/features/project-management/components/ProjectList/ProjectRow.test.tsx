@@ -11,7 +11,7 @@ describe("ProjectRowComponent", () => {
   const mockOnProjectDelete = vi.fn();
 
   const sampleProject: Project = {
-    id: 42,
+    id: "42",
     name: "Quantum Project",
     description: "A project exploring quantum mechanics",
     author: "Dr. Schrodinger",
@@ -119,6 +119,6 @@ describe("ProjectRowComponent", () => {
     const toggleBtn = screen.getByTitle("Show/Hide project details");
     await user.click(toggleBtn);
 
-    expect(screen.getByText("No data")).toBeInTheDocument();
+    expect(screen.getByText("No product lines registered")).toBeInTheDocument();
   });
 });

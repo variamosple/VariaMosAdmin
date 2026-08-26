@@ -119,3 +119,31 @@ export const updateModel = (request: Model): Promise<ResponseModel<Model>> => {
       }
     });
 };
+
+export const createModel = (request: Model): Promise<ResponseModel<Model>> => {
+  return PROJECTS_CLIENT.post("/v1/admin/models", request)
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+
+        const response = error.response?.data;
+
+        if (response) {
+          return response;
+        }
+
+        return new ResponseModel("BACK-ERROR").withError(
+          Number.parseInt(error.code || "500", 10),
+          "Network/communication error.",
+        );
+      } else {
+        console.error("Unexpected error:", error);
+
+        return new ResponseModel("APP-ERROR").withError(
+          500,
+          "Error when trying to create the model, please try again later.",
+        );
+      }
+    });
+};

@@ -5,13 +5,13 @@ import { ProjectList } from "./index";
 
 const mockProjects: Project[] = [
   {
-    id: 1,
+    id: "1",
     name: "Project One",
     template: false,
     description: "Description One",
   },
   {
-    id: 2,
+    id: "2",
     name: "Project Two",
     template: true,
     description: "Description Two",

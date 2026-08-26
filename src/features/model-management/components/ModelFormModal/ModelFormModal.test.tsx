@@ -108,6 +108,7 @@ describe("ModelFormModal Component", () => {
           projectId: "project-123",
           name: "VariaMos Model",
           author: "VariaMos Team",
+          languageId: 1,
         }}
       />,
     );
