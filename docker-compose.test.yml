@@ -33,6 +33,7 @@ services:
       - LOGIN_REDIRECT_URI=http://localhost:3000/variamos_admin/#/login
       - HOME_REDIRECT_URI=http://localhost:3000/variamos_admin/
       - ADMIN_HOME_URI=http://localhost:3000/variamos_admin
+      - NOTIFICATION_SERVICE_URL=http://host.docker.internal:3005
     user: root
 
   variamos-ms-languages:

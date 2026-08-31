@@ -7,6 +7,7 @@ import { TextDecoder, TextEncoder } from "node:util";
 
 import "@testing-library/jest-dom";
 
+import type { ReactNode } from "react";
 import { vi } from "vitest";
 import { server } from "./shared/tests/mocks/server";
 
@@ -151,6 +152,10 @@ vi.mock("@variamosple/variamos-components", () => {
   }
   return {
     withPageVisit: <T>(component: T): T => component,
+    NotificationProvider: ({ children }: { children: ReactNode }) => children,
+    AuthWrapper: ({ children }: { children: ReactNode }) => children,
+    NotAuthorized: () => null,
+    ProtectedRoute: ({ children }: { children: ReactNode }) => children,
     PagedModel: class PagedModel {},
     ResponseModel,
     useRouter: vi.fn(),
