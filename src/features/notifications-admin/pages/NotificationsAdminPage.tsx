@@ -186,7 +186,7 @@ const NotificationsAdminPageComponent: FC = () => {
                   </p>
                 </div>
               ) : (
-                <Form onSubmit={handleSubmit}>
+                <Form onSubmit={handleSubmit} noValidate>
                   <Form.Group className="mb-4">
                     <Form.Label className="fw-semibold">
                       Audience Selection

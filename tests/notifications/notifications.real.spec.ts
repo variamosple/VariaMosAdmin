@@ -15,7 +15,11 @@ test.describe("Notifications Admin - Real E2E Flows", () => {
 
   test("should login, navigate to notifications admin page, and broadcast notification successfully", async ({ page }) => {
     await login(page, adminEmail, adminPassword);
-    await page.goto("http://localhost:3000/variamos_admin/#/admin/notifications");
+    await page.goto("http://localhost:3000/variamos_admin/");
+
+    // Click the Notifications tab in the sub-menu navbar (avoiding the header bell icon)
+    await page.locator("text=Notifications").last().click();
+    await expect(page).toHaveURL(/.*notifications.*/);
 
     // Verify page loads
     await expect(page.locator("h4")).toContainText("Manual Notifications Dashboard");
