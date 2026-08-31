@@ -18,6 +18,7 @@ import { LanguageListPage } from "@/features/language-management";
 import { MetricsPage } from "@/features/metrics-dashboard";
 import { MicroServiceListPage } from "@/features/microservices";
 import { ModelListPage } from "@/features/model-management";
+import { NotificationsAdminPage } from "@/features/notifications-admin";
 import { PermissionListPage } from "@/features/permission-management";
 import { ProjectListPage } from "@/features/project-management";
 import { RoleDetailsPage, RoleListPage } from "@/features/role-management";
@@ -260,6 +261,17 @@ export const ROUTES: RouteObject[] = [
             ),
           },
         ],
+      },
+      {
+        path: "admin/notifications",
+        element: (
+          <ProtectedRoute
+            notAuthorizedPath={NOT_AUTHORIZED_PATH}
+            allowedPermissions={["admin::notifications::dispatch"]}
+          >
+            <NotificationsAdminPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
