@@ -67,7 +67,7 @@ describe("NotificationsAdminPage Component Tests", () => {
     expect(
       screen.getByText("Manual Notifications Dashboard"),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/Broadcast/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Broadcast/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/By Role/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Specific Users/i)).toBeInTheDocument();
   });
@@ -75,7 +75,7 @@ describe("NotificationsAdminPage Component Tests", () => {
   it("allows selecting by roles and toggling specific roles", async () => {
     render(<NotificationsAdminPage />);
 
-    const roleRadio = screen.getByLabelText(/By Role/i);
+    const roleRadio = await screen.findByLabelText(/By Role/i);
     await userEvent.click(roleRadio);
 
     await waitFor(() => {
@@ -92,7 +92,7 @@ describe("NotificationsAdminPage Component Tests", () => {
   it("renders search input, filters users, selects tags, and removes tags", async () => {
     render(<NotificationsAdminPage />);
 
-    const userRadio = screen.getByLabelText(/Specific Users/i);
+    const userRadio = await screen.findByLabelText(/Specific Users/i);
     await userEvent.click(userRadio);
 
     // Search input should appear
@@ -133,7 +133,7 @@ describe("NotificationsAdminPage Component Tests", () => {
     render(<NotificationsAdminPage />);
 
     // Fill title and message
-    const titleInput = screen.getByLabelText("Notification Title");
+    const titleInput = await screen.findByLabelText("Notification Title");
     const bodyInput = screen.getByLabelText("Message Body");
     await userEvent.type(titleInput, "Maintenance");
     await userEvent.type(bodyInput, "Platform offline tonight.");

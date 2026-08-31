@@ -143,6 +143,7 @@ vi.mock("@variamosple/variamos-components", () => {
     data: T | null = null;
     constructor(status = "success") {
       this.status = status;
+      this.errorCode = status === "success" ? 0 : null;
     }
     withError(code: number, msg: string) {
       this.errorCode = code;

@@ -379,7 +379,7 @@ const NotificationsAdminPageComponent: FC = () => {
                     </Card>
                   )}
 
-                  <Form.Group className="mb-3">
+                  <Form.Group className="mb-3" controlId="notification-title">
                     <Form.Label className="fw-semibold">
                       Notification Title
                     </Form.Label>
@@ -392,7 +392,7 @@ const NotificationsAdminPageComponent: FC = () => {
                     />
                   </Form.Group>
 
-                  <Form.Group className="mb-4">
+                  <Form.Group className="mb-4" controlId="notification-body">
                     <Form.Label className="fw-semibold">
                       Message Body
                     </Form.Label>
