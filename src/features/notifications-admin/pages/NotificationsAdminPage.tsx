@@ -305,43 +305,52 @@ const NotificationsAdminPageComponent: FC = () => {
                             onFocus={() => setShowDropdown(true)}
                           />
 
-                          {showDropdown && userSearch.trim().length > 0 && (
+                          {showDropdown && (
                             <div
                               className="position-absolute w-100 bg-white border rounded shadow-lg mt-1"
                               style={{
                                 zIndex: 1000,
-                                maxHeight: "200px",
+                                maxHeight: "220px",
                                 overflowY: "auto",
                               }}
                             >
                               {users
-                                .filter(
-                                  (user) =>
-                                    (user.name
-                                      .toLowerCase()
-                                      .includes(userSearch.toLowerCase()) ||
-                                      user.email
-                                        .toLowerCase()
-                                        .includes(userSearch.toLowerCase())) &&
-                                    !selectedUsers.includes(user.id as string),
-                                )
+                                .filter((user) => {
+                                  if (
+                                    selectedUsers.includes(user.id as string)
+                                  ) {
+                                    return false;
+                                  }
+                                  const searchTrim = userSearch
+                                    .trim()
+                                    .toLowerCase();
+                                  if (!searchTrim) {
+                                    return true;
+                                  }
+                                  const nameMatch = user.name
+                                    ?.toLowerCase()
+                                    .includes(searchTrim);
+                                  const emailMatch = user.email
+                                    ?.toLowerCase()
+                                    .includes(searchTrim);
+                                  const userMatch = user.user
+                                    ?.toLowerCase()
+                                    .includes(searchTrim);
+                                  return Boolean(
+                                    nameMatch || emailMatch || userMatch,
+                                  );
+                                })
                                 .map((user) => (
                                   <button
                                     key={user.id}
                                     type="button"
                                     className="p-2 border-bottom text-dark w-100 text-start bg-transparent border-0 d-block"
                                     style={{ cursor: "pointer" }}
-                                    onClick={() => {
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
                                       handleUserToggle(user.id as string);
                                       setUserSearch("");
                                       setShowDropdown(false);
-                                    }}
-                                    onKeyPress={(e) => {
-                                      if (e.key === "Enter") {
-                                        handleUserToggle(user.id as string);
-                                        setUserSearch("");
-                                        setShowDropdown(false);
-                                      }
                                     }}
                                     onMouseEnter={(e) =>
                                       (e.currentTarget.style.backgroundColor =
@@ -352,22 +361,37 @@ const NotificationsAdminPageComponent: FC = () => {
                                         "transparent")
                                     }
                                   >
-                                    <strong>{user.name}</strong>{" "}
+                                    <strong>
+                                      {user.name || user.user || "User"}
+                                    </strong>{" "}
                                     <span className="text-muted">
-                                      ({user.email})
+                                      ({user.email || user.user || user.id})
                                     </span>
                                   </button>
                                 ))}
-                              {users.filter(
-                                (user) =>
-                                  (user.name
-                                    .toLowerCase()
-                                    .includes(userSearch.toLowerCase()) ||
-                                    user.email
-                                      .toLowerCase()
-                                      .includes(userSearch.toLowerCase())) &&
-                                  !selectedUsers.includes(user.id as string),
-                              ).length === 0 && (
+                              {users.filter((user) => {
+                                if (selectedUsers.includes(user.id as string)) {
+                                  return false;
+                                }
+                                const searchTrim = userSearch
+                                  .trim()
+                                  .toLowerCase();
+                                if (!searchTrim) {
+                                  return true;
+                                }
+                                const nameMatch = user.name
+                                  ?.toLowerCase()
+                                  .includes(searchTrim);
+                                const emailMatch = user.email
+                                  ?.toLowerCase()
+                                  .includes(searchTrim);
+                                const userMatch = user.user
+                                  ?.toLowerCase()
+                                  .includes(searchTrim);
+                                return Boolean(
+                                  nameMatch || emailMatch || userMatch,
+                                );
+                              }).length === 0 && (
                                 <div className="p-2 text-muted text-center">
                                   No matching users found
                                 </div>
