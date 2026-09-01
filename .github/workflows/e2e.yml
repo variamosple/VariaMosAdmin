@@ -47,6 +47,12 @@ jobs:
           repository: variamosple/vms_projects
           path: vms_projects
 
+      - name: Checkout variamos_ms_notifications
+        uses: actions/checkout@v7
+        with:
+          repository: variamosple/variamos_ms_notifications
+          path: variamos_ms_notifications
+
       - name: Generate E2E Test Credentials & Keys
         run: |
           # Generate RS256 private and public keys for token authentication
