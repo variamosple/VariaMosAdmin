@@ -33,7 +33,8 @@ services:
       - LOGIN_REDIRECT_URI=http://localhost:3000/variamos_admin/#/login
       - HOME_REDIRECT_URI=http://localhost:3000/variamos_admin/
       - ADMIN_HOME_URI=http://localhost:3000/variamos_admin
-      - NOTIFICATION_SERVICE_URL=http://host.docker.internal:3005
+      - NOTIFICATION_SERVICE_URL=http://variamos-ms-notifications:3005
+      - NOTIFICATION_INTERNAL_TOKEN=dev-secret-token-12345678
     user: root
 
   variamos-ms-languages:
@@ -102,4 +103,5 @@ services:
       - DATABASE_NAME=VariamosDB
       - DATABASE_SCHEMA=variamos
       - DATABASE_SSL=false
+      - NOTIFICATION_INTERNAL_TOKEN=dev-secret-token-12345678
 
