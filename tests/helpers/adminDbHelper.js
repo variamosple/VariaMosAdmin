@@ -128,6 +128,25 @@ module.exports = {
           INSERT INTO "variamos"."user_role" ("user_id", "role_id") 
           VALUES ($1, $2)
         `, [adminId, adminRoleId]);
+
+        // Ensure notification permission exists and is assigned to Administrator role
+        await client.query(`
+          INSERT INTO "variamos"."permission" ("name", "description")
+          VALUES ('admin::notifications::dispatch', 'Permission to dispatch manual notifications')
+          ON CONFLICT ("name") DO NOTHING
+        `);
+
+        const permRes = await client.query(`
+          SELECT "id" FROM "variamos"."permission" WHERE "name" = 'admin::notifications::dispatch' LIMIT 1
+        `);
+
+        if (permRes.rows[0]) {
+          await client.query(`
+            INSERT INTO "variamos"."role_permission" ("role_id", "permission_id")
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING
+          `, [adminRoleId, permRes.rows[0].id]);
+        }
       }
 
       // Active User (Admin flow)
