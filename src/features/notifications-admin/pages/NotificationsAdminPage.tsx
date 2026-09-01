@@ -296,7 +296,7 @@ const NotificationsAdminPageComponent: FC = () => {
                         <div className="position-relative">
                           <Form.Control
                             type="text"
-                            placeholder="Search user by username, name or email..."
+                            placeholder="Search user by name or email..."
                             value={userSearch}
                             onChange={(e) => {
                               setUserSearch(e.target.value);
