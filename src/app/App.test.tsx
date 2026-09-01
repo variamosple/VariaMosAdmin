@@ -6,6 +6,9 @@ import App from "./App";
 vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react");
   return {
+    NotificationProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="mock-notification-provider">{children}</div>
+    ),
     AnalyticsProvider: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="mock-analytics-provider">{children}</div>
     ),

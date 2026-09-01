@@ -1,5 +1,6 @@
 import {
   AnalyticsProvider,
+  NotificationProvider,
   SessionProvider,
 } from "@variamosple/variamos-components";
 import type { FC } from "react";
@@ -34,11 +35,13 @@ function App() {
         requestSignInAsGuest={requestSignInAsGuest}
         requestLogout={requestLogout}
       >
-        <HashRouter>
-          <RouterProvider>
-            <Routes />
-          </RouterProvider>
-        </HashRouter>
+        <NotificationProvider apiUrl={AppConfig.NOTIFICATION_API_URL}>
+          <HashRouter>
+            <RouterProvider>
+              <Routes />
+            </RouterProvider>
+          </HashRouter>
+        </NotificationProvider>
       </SessionProvider>
     </ToastProvider>
   );

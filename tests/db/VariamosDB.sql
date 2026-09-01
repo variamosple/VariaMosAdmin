@@ -1757,6 +1757,50 @@ CREATE INDEX IF NOT EXISTS idx_configurations_category ON variamos.configuration
 CREATE INDEX IF NOT EXISTS idx_configurations_env ON variamos.configurations(environment_scope);
 
 --
+-- Name: notification_templates; Type: TABLE; Schema: variamos; Owner: -
+--
+
+CREATE TABLE IF NOT EXISTS variamos.notification_templates (
+    key VARCHAR(100) PRIMARY KEY,
+    title_template TEXT NOT NULL,
+    body_template TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+);
+
+--
+-- Name: user_preferences; Type: TABLE; Schema: variamos; Owner: -
+--
+
+CREATE TABLE IF NOT EXISTS variamos.user_preferences (
+    user_id VARCHAR(100) PRIMARY KEY,
+    email_enabled BOOLEAN DEFAULT TRUE NOT NULL,
+    in_app_enabled BOOLEAN DEFAULT TRUE NOT NULL,
+    muted_event_types TEXT[] DEFAULT '{}'::text[] NOT NULL
+);
+
+--
+-- Name: notifications; Type: TABLE; Schema: variamos; Owner: -
+--
+
+CREATE TABLE IF NOT EXISTS variamos.notifications (
+    id UUID PRIMARY KEY,
+    recipient_id VARCHAR(100) NOT NULL,
+    actor_id VARCHAR(100),
+    template_key VARCHAR(100) NOT NULL,
+    variables JSONB DEFAULT '{}'::jsonb NOT NULL,
+    metadata JSONB DEFAULT '{}'::jsonb NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE NOT NULL,
+    read_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON variamos.notifications(recipient_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON variamos.notifications(is_read) WHERE is_read = FALSE;
+CREATE INDEX IF NOT EXISTS idx_notifications_deleted_at ON variamos.notifications(deleted_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notifications_template_key ON variamos.notifications(template_key);
+
+--
 -- PostgreSQL database dump complete
 --
 

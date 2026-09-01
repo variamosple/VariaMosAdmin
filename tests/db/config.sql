@@ -319,6 +319,7 @@ COPY variamos.permission (id, name) FROM stdin;
 45	configurations::update
 46	admin::projects::create
 47	admin::models::create
+48	admin::notifications::dispatch
 \.
 
 
@@ -360,6 +361,7 @@ COPY variamos.role_permission (role_id, permission_id) FROM stdin;
 1	14
 1	16
 1	17
+1	48
 2	18
 2	19
 2	20
@@ -700,6 +702,17 @@ INSERT INTO "configurations" (
     NOW()
 )
 ON CONFLICT (key) DO NOTHING;
+
+--
+-- Data for Name: notification_templates; Type: TABLE DATA; Schema: variamos; Owner: -
+--
+
+COPY variamos.notification_templates (key, title_template, body_template, created_at) FROM stdin;
+review_assigned	Language Review Assigned	You have been assigned to review the translation for {{languageName}}.	2026-08-31 00:00:00+00
+project_created	Project Created	The project '{{projectName}}' has been created successfully.	2026-08-31 00:00:00+00
+test_template	Notification Test	Hello {{name}}, this is a real-time notification test.	2026-08-31 00:00:00+00
+admin_alert	{{title}}	{{body}}	2026-08-31 00:00:00+00
+\.
 
 --
 -- PostgreSQL database dump complete

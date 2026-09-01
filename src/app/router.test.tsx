@@ -1,17 +1,5 @@
 import { ROUTES } from "./router";
 
-// Mock @variamosple/variamos-components
-vi.mock("@variamosple/variamos-components", async () => ({
-  AuthWrapper: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  NotAuthorized: () => <div>Not Authorized</div>,
-  ProtectedRoute: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  withPageVisit: <T,>(component: T): T => component,
-}));
-
 // Mock SecurityWrapper and Layouts
 vi.mock("@/shared/components/SecurityWrapper", async () => ({
   SecurityWrapper: ({ children }: { children: React.ReactNode }) => (

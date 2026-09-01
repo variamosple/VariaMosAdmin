@@ -33,6 +33,8 @@ services:
       - LOGIN_REDIRECT_URI=http://localhost:3000/variamos_admin/#/login
       - HOME_REDIRECT_URI=http://localhost:3000/variamos_admin/
       - ADMIN_HOME_URI=http://localhost:3000/variamos_admin
+      - NOTIFICATION_SERVICE_URL=http://variamos-ms-notifications:3005
+      - NOTIFICATION_INTERNAL_TOKEN=dev-secret-token-12345678
     user: root
 
   variamos-ms-languages:
@@ -81,4 +83,25 @@ services:
       - VARIAMOS_MS_LANGUAGES_DB_SCHEMA=variamos
       - VARIAMOS_PUBLIC_KEY_PATH=/service/jwtRS256.key.pub
       - VARIAMOS_CORS_ALLOWED_ORIGINS_PATTERNS=http://localhost:3000
+
+  variamos-ms-notifications:
+    build:
+      context: ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_notifications
+      dockerfile: Dockerfile
+    container_name: variamos-ms-notifications-test
+    ports:
+      - "3005:3005"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NODE_ENV=test
+      - PORT=3005
+      - DATABASE_HOST=host.docker.internal
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=variamos_admin
+      - DATABASE_PASSWORD=variamos_db_password
+      - DATABASE_NAME=VariamosDB
+      - DATABASE_SCHEMA=variamos
+      - DATABASE_SSL=false
+      - NOTIFICATION_INTERNAL_TOKEN=dev-secret-token-12345678
 

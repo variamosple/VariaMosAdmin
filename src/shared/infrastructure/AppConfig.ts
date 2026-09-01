@@ -10,4 +10,6 @@ export const AppConfig = {
   },
   LOGIN_URL: import.meta.env.VITE_LOGIN_URL || "",
   HOME_PAGE: import.meta.env.VITE_HOME_PAGE || "",
+  NOTIFICATION_API_URL:
+    import.meta.env.VITE_NOTIFICATION_API_URL || "http://localhost:3005",
 };
