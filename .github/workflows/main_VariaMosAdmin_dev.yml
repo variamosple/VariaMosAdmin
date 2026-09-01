@@ -49,6 +49,8 @@ jobs:
           echo "VITE_LOGIN_URL=\"${{vars.REACT_APP_LOGIN_URL}}\"" >> .env
           echo "REACT_APP_HOME_PAGE=\"${{vars.REACT_APP_HOME_PAGE}}\"" >> .env
           echo "VITE_HOME_PAGE=\"${{vars.REACT_APP_HOME_PAGE}}\"" >> .env
+          echo "REACT_APP_NOTIFICATION_API_URL=\"${{vars.REACT_APP_NOTIFICATION_API_URL}}\"" >> .env
+          echo "VITE_NOTIFICATION_API_URL=\"${{vars.REACT_APP_NOTIFICATION_API_URL}}\"" >> .env
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v7
