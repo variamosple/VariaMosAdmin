@@ -97,18 +97,46 @@ describe("MicroServiceListPage Integration", () => {
         return HttpResponse.json({
           data: [
             {
-              id: "service-a",
-              names: ["Service A"],
-              state: "running",
-              status: "up",
-              created: "2026-07-20T22:00:00.000Z",
+              serviceName: "service-a",
+              displayName: "Service A",
+              health: {
+                status: "UP",
+                serviceName: "service-a",
+                responseTimeMs: 25,
+                checkedAt: new Date().toISOString(),
+              },
+              replicasCount: 1,
+              containers: [
+                {
+                  id: "c-1",
+                  name: "service-a",
+                  state: "running",
+                  status: "up",
+                  created: new Date(),
+                  labels: {},
+                },
+              ],
             },
             {
-              id: "service-b",
-              names: ["Service B"],
-              state: "exited",
-              status: "down",
-              created: "2026-07-20T22:00:00.000Z",
+              serviceName: "service-b",
+              displayName: "Service B",
+              health: {
+                status: "DOWN",
+                serviceName: "service-b",
+                responseTimeMs: 0,
+                checkedAt: new Date().toISOString(),
+              },
+              replicasCount: 0,
+              containers: [
+                {
+                  id: "c-2",
+                  name: "service-b",
+                  state: "exited",
+                  status: "down",
+                  created: new Date(),
+                  labels: {},
+                },
+              ],
             },
           ],
         });
@@ -132,7 +160,7 @@ describe("MicroServiceListPage Integration", () => {
   it("renders page header and list of microservices correctly", async () => {
     renderWithProviders(<MicroServiceListPage />);
     expect(
-      screen.getByRole("heading", { name: "Monitoring - Microservices list" }),
+      screen.getByRole("heading", { name: "Microservices & System Status" }),
     ).toBeInTheDocument();
 
     // Wait for MSW responses
@@ -140,76 +168,83 @@ describe("MicroServiceListPage Integration", () => {
     expect(screen.getByText("Service B")).toBeInTheDocument();
   });
 
-  it("orchestrates the Start confirmation modal triggers correctly", async () => {
+  it("handles start microservice action correctly", async () => {
     const user = userEvent.setup();
     renderWithProviders(<MicroServiceListPage />);
     expect(await screen.findByText("Service B")).toBeInTheDocument();
 
-    // Click Start Microservice button for Service B (running play fill icon)
-    const startBtn = screen.getByTitle("Start Microservice");
-    await user.click(startBtn);
+    // Click Start Microservice button for Service B
+    const startButton = screen.getByTitle("Start Service");
+    await user.click(startButton);
 
+    // Modal should be visible
     expect(
-      screen.getByText("Are you sure you want to start the microservice?"),
+      screen.getByText("Are you sure you want to start Service B?"),
     ).toBeInTheDocument();
 
-    // Test Confirm click (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm action (Button label in ConfirmationModal is Accept)
+    const confirmButton = screen.getByRole("button", {
+      name: /accept|confirm|yes/i,
+    });
+    await user.click(confirmButton);
 
-    // Modal should close
     await waitFor(() => {
       expect(
-        screen.queryByText("Are you sure you want to start the microservice?"),
+        screen.queryByText("Are you sure you want to start Service B?"),
       ).not.toBeInTheDocument();
     });
   });
 
-  it("orchestrates the Restart confirmation modal triggers correctly", async () => {
+  it("handles restart microservice action correctly", async () => {
     const user = userEvent.setup();
     renderWithProviders(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
 
     // Click Restart Microservice button for Service A
-    const restartBtn = screen.getByTitle("Restart Microservice");
-    await user.click(restartBtn);
+    const restartButton = screen.getByTitle("Restart Service");
+    await user.click(restartButton);
 
+    // Modal should be visible
     expect(
-      screen.getByText("Are you sure you want to restart the microservice?"),
+      screen.getByText("Are you sure you want to restart Service A?"),
     ).toBeInTheDocument();
 
-    // Confirm click (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm action
+    const confirmButton = screen.getByRole("button", {
+      name: /accept|confirm|yes/i,
+    });
+    await user.click(confirmButton);
 
-    // Modal should close
     await waitFor(() => {
       expect(
-        screen.queryByText(
-          "Are you sure you want to restart the microservice?",
-        ),
+        screen.queryByText("Are you sure you want to restart Service A?"),
       ).not.toBeInTheDocument();
     });
   });
 
-  it("orchestrates the Stop confirmation modal triggers correctly", async () => {
+  it("handles stop microservice action correctly", async () => {
     const user = userEvent.setup();
     renderWithProviders(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
 
     // Click Stop Microservice button for Service A
-    const stopBtn = screen.getByTitle("Stop Microservice");
-    await user.click(stopBtn);
+    const stopButton = screen.getByTitle("Stop Service");
+    await user.click(stopButton);
 
+    // Modal should be visible
     expect(
-      screen.getByText("Are you sure you want to stop the microservice?"),
+      screen.getByText("Are you sure you want to stop Service A?"),
     ).toBeInTheDocument();
 
-    // Confirm click (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm action
+    const confirmButton = screen.getByRole("button", {
+      name: /accept|confirm|yes/i,
+    });
+    await user.click(confirmButton);
 
-    // Modal should close
     await waitFor(() => {
       expect(
-        screen.queryByText("Are you sure you want to stop the microservice?"),
+        screen.queryByText("Are you sure you want to stop Service A?"),
       ).not.toBeInTheDocument();
     });
   });

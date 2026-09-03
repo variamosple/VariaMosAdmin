@@ -86,7 +86,11 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
       <tr key={microService.id}>
         <td className="word-break-all">{microService.id}</td>
 
-        <td className="word-break-all">{microService.names.join(", ")}</td>
+        <td className="word-break-all">
+          {microService.names?.join(", ") ||
+            microService.displayName ||
+            microService.serviceName}
+        </td>
 
         <td>{microService.state}</td>
 

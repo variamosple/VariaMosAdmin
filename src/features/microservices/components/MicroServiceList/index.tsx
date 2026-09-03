@@ -1,15 +1,15 @@
 import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
-import { Table } from "react-bootstrap";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import type { MicroService } from "../../domain/Entity/MicroService";
-import { MicroServiceRowComponent } from "./MicroserviceRow";
+import { MicroServiceCard } from "../MicroServiceCard";
 
 export interface MicroServiceListParameters extends PaginationControlsProps {
   items: MicroService[];
   onMicroServiceStart: (microservice: MicroService) => void;
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
+  onMicroServiceScale?: (microservice: MicroService, replicas: number) => void;
 }
 
 export const MicroServiceList: FC<MicroServiceListParameters> = ({
@@ -20,56 +20,34 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
   onMicroServiceStart,
   onMicroServiceRestart,
   onMicroServiceStop,
+  onMicroServiceScale = () => {},
 }) => {
   return (
     <>
-      <Paginator
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <div className="my-3">
+        {items?.map((microService) => (
+          <MicroServiceCard
+            key={
+              microService.serviceName ||
+              microService.id ||
+              microService.displayName
+            }
+            microService={microService}
+            onStart={onMicroServiceStart}
+            onRestart={onMicroServiceRestart}
+            onStop={onMicroServiceStop}
+            onScale={onMicroServiceScale}
+          />
+        ))}
+      </div>
 
-      <Table
-        striped
-        bordered
-        hover
-        className="w-100"
-        style={{ tableLayout: "fixed" }}
-      >
-        <thead>
-          <tr>
-            <th>ID</th>
-
-            <th>Name</th>
-
-            <th>State</th>
-
-            <th>Status</th>
-
-            <th>Created At</th>
-
-            <th className="text-center">Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {items?.map((microService) => (
-            <MicroServiceRowComponent
-              key={microService.id}
-              microService={microService}
-              onMicroServiceStart={onMicroServiceStart}
-              onMicroServiceRestart={onMicroServiceRestart}
-              onMicroServiceStop={onMicroServiceStop}
-            />
-          ))}
-        </tbody>
-      </Table>
-
-      <Paginator
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      {totalPages > 1 && (
+        <Paginator
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      )}
     </>
   );
 };

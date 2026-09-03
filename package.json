@@ -23,7 +23,10 @@
     "playwright:run:mocked": "bash ./scripts/run-mocked-playwright.sh",
     "docker:test:up": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml up -d --build",
     "docker:test:down": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml down && docker image prune -f",
-    "playwright:run:real": "npm run build && npm run docker:test:up && start-server-and-test \"npx vite preview --port 3000\" http://localhost:3000 \"npx playwright test --grep .real.\" ; status=$?; npm run docker:test:down; exit $status"
+    "playwright:run:real": "npm run build && npm run docker:test:up && start-server-and-test \"npx vite preview --port 3000\" http://localhost:3000 \"npx playwright test --grep .real.\" ; status=$?; npm run docker:test:down; exit $status",
+    "microservices:docker:up": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml up -d --build",
+    "microservices:docker:down": "docker compose -f docker-compose.test.yml down",
+    "microservices:docker:logs": "docker compose -f docker-compose.test.yml logs -f"
   },
   "dependencies": {
     "@patternfly/react-core": "^6.6.1",

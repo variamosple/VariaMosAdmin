@@ -125,6 +125,114 @@ export const stopMicroservice = (
     });
 };
 
+export const getMicroServiceHistory = (
+  serviceName: string,
+  days: number = 30,
+): Promise<
+  ResponseModel<
+    import("../domain/Entity/MicroService").MicroServiceUptimeSummary
+  >
+> => {
+  return ADMIN_CLIENT.get(`/v1/micro-services/${serviceName}/history`, {
+    params: { days },
+  })
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        return (
+          error.response?.data ||
+          new ResponseModel("BACK-ERROR").withError(500, "Network error")
+        );
+      }
+      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
+    });
+};
+
+export const scaleMicroservice = (
+  serviceName: string,
+  replicas: number,
+): Promise<ResponseModel<void>> => {
+  return ADMIN_CLIENT.put(`/v1/micro-services/${serviceName}/scale`, {
+    replicas,
+  })
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        return (
+          error.response?.data ||
+          new ResponseModel("BACK-ERROR").withError(500, "Network error")
+        );
+      }
+      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
+    });
+};
+
+export const getMicroServiceConfigurations = (
+  serviceName: string,
+): Promise<
+  ResponseModel<
+    import("../domain/Entity/MicroService").MicroServiceConfigItem[]
+  >
+> => {
+  return ADMIN_CLIENT.get(`/v1/micro-services/${serviceName}/configurations`)
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        return (
+          error.response?.data ||
+          new ResponseModel("BACK-ERROR").withError(500, "Network error")
+        );
+      }
+      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
+    });
+};
+
+export const updateMicroServiceConfiguration = (
+  serviceName: string,
+  key: string,
+  value: string,
+): Promise<
+  ResponseModel<import("../domain/Entity/MicroService").MicroServiceConfigItem>
+> => {
+  return ADMIN_CLIENT.put(
+    `/v1/micro-services/${serviceName}/configurations/${key}`,
+    { value },
+  )
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        return (
+          error.response?.data ||
+          new ResponseModel("BACK-ERROR").withError(500, "Network error")
+        );
+      }
+      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
+    });
+};
+
+export const getMicroServiceAuditLogs = (
+  serviceName: string,
+  limit: number = 50,
+): Promise<
+  ResponseModel<
+    import("../domain/Entity/MicroService").MicroServiceAuditEntry[]
+  >
+> => {
+  return ADMIN_CLIENT.get(`/v1/micro-services/${serviceName}/audit-logs`, {
+    params: { limit },
+  })
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        return (
+          error.response?.data ||
+          new ResponseModel("BACK-ERROR").withError(500, "Network error")
+        );
+      }
+      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
+    });
+};
+
 export const watchMicroserviceLogs = (): WebSocket => {
   return new WebSocket(AppConfig.ADMIN_WS_URL);
 };

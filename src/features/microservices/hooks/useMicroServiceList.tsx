@@ -1,8 +1,9 @@
 import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   queryMicroServices,
   restartMicroservice,
+  scaleMicroservice,
   startMicroservice,
   stopMicroservice,
 } from "../api/MicroServiceRepository";
@@ -13,6 +14,9 @@ export const useMicroServiceList = () => {
   const [showStart, setShowStart] = useState(false);
   const [showRestart, setShowRestart] = useState(false);
   const [showStop, setShowStop] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState<number>(30000); // 30s default
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const [toStartMicroService, setToStartMicroService] =
     useState<MicroService>();
@@ -31,9 +35,31 @@ export const useMicroServiceList = () => {
     initialFilter: new MicroServiceFilter(),
   });
 
-  useEffect(() => {
-    loadData(new MicroServiceFilter());
+  const refreshList = useCallback(() => {
+    setIsRefreshing(true);
+    return loadData(new MicroServiceFilter())
+      .then(() => {
+        setLastRefreshedAt(new Date());
+      })
+      .finally(() => {
+        setIsRefreshing(false);
+      });
   }, [loadData]);
+
+  useEffect(() => {
+    refreshList();
+  }, [refreshList]);
+
+  // Periodic Auto-refresh
+  useEffect(() => {
+    if (refreshInterval <= 0) return;
+
+    const timer = setInterval(() => {
+      refreshList();
+    }, refreshInterval);
+
+    return () => clearInterval(timer);
+  }, [refreshInterval, refreshList]);
 
   const onMicroSerViceStart = (microService: MicroService) => {
     setToStartMicroService(microService);
@@ -41,9 +67,11 @@ export const useMicroServiceList = () => {
   };
 
   const performMicroSerViceStart = (microService: MicroService) => {
-    return startMicroservice(microService.id).then((response) => {
+    const serviceKey =
+      microService.serviceName || microService.id || microService.displayName;
+    return startMicroservice(serviceKey).then((response) => {
       if (!response.errorCode) {
-        onPageChange(currentPage);
+        refreshList();
       }
       return response;
     });
@@ -55,9 +83,11 @@ export const useMicroServiceList = () => {
   };
 
   const performMicroSerViceRestart = (microService: MicroService) => {
-    return restartMicroservice(microService.id).then((response) => {
+    const serviceKey =
+      microService.serviceName || microService.id || microService.displayName;
+    return restartMicroservice(serviceKey).then((response) => {
       if (!response.errorCode) {
-        onPageChange(currentPage);
+        refreshList();
       }
       return response;
     });
@@ -69,9 +99,25 @@ export const useMicroServiceList = () => {
   };
 
   const performMicroSerViceStop = (microService: MicroService) => {
-    return stopMicroservice(microService.id).then((response) => {
+    const serviceKey =
+      microService.serviceName || microService.id || microService.displayName;
+    return stopMicroservice(serviceKey).then((response) => {
       if (!response.errorCode) {
-        onPageChange(currentPage);
+        refreshList();
+      }
+      return response;
+    });
+  };
+
+  const performMicroServiceScale = (
+    microService: MicroService,
+    replicas: number,
+  ) => {
+    const serviceKey =
+      microService.serviceName || microService.id || microService.displayName;
+    return scaleMicroservice(serviceKey, replicas).then((response) => {
+      if (!response.errorCode) {
+        refreshList();
       }
       return response;
     });
@@ -89,7 +135,8 @@ export const useMicroServiceList = () => {
     toRestartMicroService,
     setToRestartMicroService,
     toStopMicroService,
-    setToDeleteMicroService: setToStopMicroService, // aligning with expected pattern or naming
+    setToStopMicroService,
+    setToDeleteMicroService: setToStopMicroService,
     microServices,
     currentPage,
     totalPages,
@@ -100,5 +147,11 @@ export const useMicroServiceList = () => {
     performMicroSerViceRestart,
     onMicroServiceStop: onMicroSerViceStop,
     performMicroSerViceStop,
+    performMicroServiceScale,
+    refreshInterval,
+    setRefreshInterval,
+    lastRefreshedAt,
+    refreshList,
+    isRefreshing,
   };
 };
