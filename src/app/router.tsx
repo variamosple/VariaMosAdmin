@@ -230,6 +230,10 @@ export const ROUTES: RouteObject[] = [
         ],
       },
       {
+        path: "micro-services",
+        element: <Navigate to="/monitoring" replace />,
+      },
+      {
         path: "bugs",
         element: (
           <ProtectedRoute
