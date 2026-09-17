@@ -1,8 +1,9 @@
 import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
+import { Table } from "react-bootstrap";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import type { MicroService } from "../../domain/Entity/MicroService";
-import { MicroServiceCard } from "../MicroServiceCard";
+import { MicroServiceRowComponent } from "./MicroserviceRow";
 
 export interface MicroServiceListParameters extends PaginationControlsProps {
   items: MicroService[];
@@ -20,34 +21,58 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
   onMicroServiceStart,
   onMicroServiceRestart,
   onMicroServiceStop,
-  onMicroServiceScale = () => {},
+  onMicroServiceScale,
 }) => {
   return (
     <>
-      <div className="my-3">
-        {items?.map((microService) => (
-          <MicroServiceCard
-            key={
-              microService.serviceName ||
-              microService.id ||
-              microService.displayName
-            }
-            microService={microService}
-            onStart={onMicroServiceStart}
-            onRestart={onMicroServiceRestart}
-            onStop={onMicroServiceStop}
-            onScale={onMicroServiceScale}
-          />
-        ))}
-      </div>
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
-      {totalPages > 1 && (
-        <Paginator
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
-      )}
+      <Table
+        striped
+        bordered
+        hover
+        responsive
+        className="w-100 align-middle my-2"
+      >
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Latency</th>
+            <th>Uptime (30d)</th>
+            <th>Port</th>
+            <th>Containers</th>
+            <th className="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {items?.map((microService) => (
+            <MicroServiceRowComponent
+              key={
+                microService.id ||
+                microService.serviceName ||
+                microService.displayName
+              }
+              microService={microService}
+              onMicroServiceStart={onMicroServiceStart}
+              onMicroServiceRestart={onMicroServiceRestart}
+              onMicroServiceStop={onMicroServiceStop}
+              onMicroServiceScale={onMicroServiceScale}
+            />
+          ))}
+        </tbody>
+      </Table>
+
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };

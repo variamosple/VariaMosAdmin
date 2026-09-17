@@ -1,17 +1,19 @@
-import { formatDateTime } from "@/shared/constants";
 import { useLineBuffer } from "@/shared/hooks/useLineBuffer";
 import { useSocket } from "@/shared/hooks/useSocket";
 import { watchMicroserviceLogs } from "../../api/MicroServiceRepository";
 import type { MicroService } from "../../domain/Entity/MicroService";
+import { MicroServiceConfigModal } from "../MicroServiceConfigModal";
+import { UptimeBar } from "../UptimeBar";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
 import { type FC, useEffect, useState } from "react";
-import { Button, ButtonGroup, Spinner } from "react-bootstrap";
+import { Badge, Button, ButtonGroup, Spinner } from "react-bootstrap";
 import {
   ArrowClockwise,
   DashCircle,
   PlayFill,
   Search,
+  Sliders,
   StopFill,
 } from "react-bootstrap-icons";
 
@@ -20,6 +22,7 @@ export interface MicroServiceRowProps {
   onMicroServiceStart: (microservice: MicroService) => void;
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
+  onMicroServiceScale?: (microservice: MicroService, replicas: number) => void;
 }
 
 export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
@@ -29,11 +32,31 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
   onMicroServiceStop,
 }) => {
   const [show, setShow] = useState(false);
+  const [showConfigModal, setShowConfigModal] = useState(false);
   const { buffer: logs, addToBuffer: addToLogsBuffer } = useLineBuffer(40960);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   const { connect, socket } = useSocket(watchMicroserviceLogs, false);
+
+  const status =
+    microService.health?.status ||
+    (microService.state === "running" ? "UP" : "DOWN");
+  const isUp = status === "UP";
+  const isDegraded = status === "DEGRADED";
+
+  let port = "—";
+  if (microService.targetUrl) {
+    try {
+      port = new URL(microService.targetUrl).port || "80";
+    } catch {
+      port = "—";
+    }
+  }
+
+  const containerCount =
+    microService.replicasCount ??
+    (microService.containers?.length || (isUp ? 1 : 0));
 
   useEffect(() => {
     if (!show) {
@@ -47,33 +70,46 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
     try {
       setIsLoading(true);
-      const socket = connect();
+      const socketInstance = connect();
 
-      if (!socket) {
+      if (!socketInstance) {
         return;
       }
 
-      socket.onopen = () => {
-        socket.send(JSON.stringify({ microserviceId: microService.id }));
+      socketInstance.onopen = () => {
+        const targetId =
+          microService.id ||
+          microService.containers?.[0]?.id ||
+          microService.serviceName;
+        socketInstance.send(JSON.stringify({ microserviceId: targetId }));
       };
 
-      socket.onmessage = (event) => {
+      socketInstance.onmessage = (event) => {
         setIsLoading(false);
         addToLogsBuffer(event.data);
       };
 
-      socket.onclose = (_event) => {
+      socketInstance.onclose = (_event) => {
         // WebSocket connection closed
       };
 
-      socket.onerror = (error) => {
+      socketInstance.onerror = (error) => {
         console.error("WebSocket error:", error);
       };
     } finally {
       setIsLoading(false);
       setIsLoaded(true);
     }
-  }, [microService.id, show, isLoaded, isLoading, addToLogsBuffer, connect]);
+  }, [
+    microService.id,
+    microService.containers,
+    microService.serviceName,
+    show,
+    isLoaded,
+    isLoading,
+    addToLogsBuffer,
+    connect,
+  ]);
 
   useEffect(() => {
     if (socket && !show) {
@@ -83,63 +119,110 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
   return (
     <>
-      <tr key={microService.id}>
-        <td className="word-break-all">{microService.id}</td>
-
-        <td className="word-break-all">
-          {microService.names?.join(", ") ||
-            microService.displayName ||
-            microService.serviceName}
+      <tr key={microService.id || microService.serviceName}>
+        <td>
+          <div className="fw-semibold">
+            {microService.displayName || microService.serviceName}
+          </div>
+          {microService.serviceName &&
+            microService.displayName &&
+            microService.serviceName !== microService.displayName && (
+              <small className="text-muted">{microService.serviceName}</small>
+            )}
         </td>
 
-        <td>{microService.state}</td>
-
-        <td>{microService.status}</td>
+        <td>
+          <Badge
+            bg={isUp ? "success" : isDegraded ? "warning" : "danger"}
+            className="text-uppercase"
+          >
+            {status}
+          </Badge>
+        </td>
 
         <td>
-          {microService.created
-            ? formatDateTime(new Date(microService.created))
-            : null}
+          {isUp && microService.health?.responseTimeMs !== undefined
+            ? `${microService.health.responseTimeMs} ms`
+            : "—"}
+        </td>
+
+        <td style={{ minWidth: "120px" }}>
+          <div className="small fw-semibold mb-1">
+            {microService.uptimeSummary
+              ? `${microService.uptimeSummary.uptime30dPercentage.toFixed(1)}%`
+              : "100%"}
+          </div>
+          <UptimeBar
+            compact
+            history={microService.uptimeSummary?.history}
+            uptimePercentage={
+              microService.uptimeSummary?.uptime30dPercentage ?? 100
+            }
+            days={30}
+          />
+        </td>
+
+        <td>
+          {port !== "—" ? (
+            <code>{port}</code>
+          ) : (
+            <span className="text-muted">—</span>
+          )}
+        </td>
+
+        <td>
+          <span className="small">
+            {containerCount} {containerCount === 1 ? "container" : "containers"}
+          </span>
         </td>
 
         <td className="text-center">
           <ButtonGroup size="sm">
-            {microService.state === "exited" && (
+            {!isUp && (
               <Button
                 variant="success"
                 onClick={() => onMicroServiceStart(microService)}
-                title="Start Microservice"
+                title="Start Service"
               >
                 <PlayFill />
               </Button>
             )}
 
-            {microService.state === "running" && (
-              <Button
-                variant="warning"
-                onClick={() => onMicroServiceRestart(microService)}
-                title="Restart Microservice"
-              >
-                <ArrowClockwise />
-              </Button>
-            )}
+            {isUp && (
+              <>
+                <Button
+                  variant="warning"
+                  onClick={() => onMicroServiceRestart(microService)}
+                  title="Restart Service"
+                >
+                  <ArrowClockwise />
+                </Button>
 
-            {microService.state === "running" && (
-              <Button
-                variant="danger"
-                onClick={() => onMicroServiceStop(microService)}
-                title="Stop Microservice"
-              >
-                <StopFill />
-              </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => onMicroServiceStop(microService)}
+                  title="Stop Service"
+                >
+                  <StopFill />
+                </Button>
+              </>
             )}
 
             <Button
+              variant="outline-secondary"
+              onClick={() => setShowConfigModal(true)}
+              title="Configure service parameters"
+            >
+              <Sliders size={14} />
+            </Button>
+
+            <Button
+              variant="outline-secondary"
               size="sm"
               onClick={() => setShow((isShown) => !isShown)}
               title="Show/Hide logs"
             >
-              {!show ? <Search /> : <DashCircle />}
+              {!show ? <Search size={14} /> : <DashCircle size={14} />}
             </Button>
           </ButtonGroup>
         </td>
@@ -147,7 +230,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
       {show && isLoading && (
         <tr>
-          <td colSpan={8}>
+          <td colSpan={7}>
             <div className="w-100 text-center my-3">
               <Spinner animation="border" variant="primary" />
             </div>
@@ -155,13 +238,22 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         </tr>
       )}
 
-      {show && (
+      {show && !isLoading && (
         <tr>
-          <td colSpan={6}>
-            <MicroServiceLogs isLoading={isLoading} logs={logs} />
+          <td colSpan={7} className="p-0">
+            <div className="p-2 bg-dark">
+              <MicroServiceLogs isLoading={isLoading} logs={logs} />
+            </div>
           </td>
         </tr>
       )}
+
+      <MicroServiceConfigModal
+        show={showConfigModal}
+        serviceName={microService.serviceName}
+        displayName={microService.displayName}
+        onHide={() => setShowConfigModal(false)}
+      />
     </>
   );
 };
