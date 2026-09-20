@@ -236,3 +236,19 @@ export const getMicroServiceAuditLogs = (
 export const watchMicroserviceLogs = (): WebSocket => {
   return new WebSocket(AppConfig.ADMIN_WS_URL);
 };
+
+export const triggerMicroServicesCheck = (
+  serviceName?: string,
+): Promise<ResponseModel<void>> => {
+  return ADMIN_CLIENT.post("/v1/micro-services/check", { serviceName })
+    .then((response) => response.data)
+    .catch((error) => {
+      if (axios.isAxiosError(error)) {
+        return (
+          error.response?.data ||
+          new ResponseModel("BACK-ERROR").withError(500, "Network error")
+        );
+      }
+      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
+    });
+};

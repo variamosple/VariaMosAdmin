@@ -6,6 +6,7 @@ import {
   scaleMicroservice,
   startMicroservice,
   stopMicroservice,
+  triggerMicroServicesCheck,
 } from "../api/MicroServiceRepository";
 import type { MicroService } from "../domain/Entity/MicroService";
 import { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
@@ -35,16 +36,24 @@ export const useMicroServiceList = () => {
     initialFilter: new MicroServiceFilter(),
   });
 
-  const refreshList = useCallback(() => {
-    setIsRefreshing(true);
-    return loadData(new MicroServiceFilter())
-      .then(() => {
-        setLastRefreshedAt(new Date());
-      })
-      .finally(() => {
-        setIsRefreshing(false);
-      });
-  }, [loadData]);
+  const refreshList = useCallback(
+    (triggerCheck: boolean = false) => {
+      setIsRefreshing(true);
+      const preAction = triggerCheck
+        ? triggerMicroServicesCheck().catch(() => {})
+        : Promise.resolve();
+
+      return preAction
+        .then(() => loadData(new MicroServiceFilter()))
+        .then(() => {
+          setLastRefreshedAt(new Date());
+        })
+        .finally(() => {
+          setIsRefreshing(false);
+        });
+    },
+    [loadData],
+  );
 
   useEffect(() => {
     refreshList();

@@ -160,4 +160,21 @@ describe("useMicroServiceList Hook", () => {
     expect(stopMicroserviceSpy).toHaveBeenCalledWith("service-1");
     expect(mockLoadData).toHaveBeenCalled();
   });
+
+  it("should call triggerMicroServicesCheck when refreshList(true) is invoked", async () => {
+    const triggerCheckSpy = vi
+      .spyOn(MicroServiceRepository, "triggerMicroServicesCheck")
+      .mockResolvedValue(new ResponseModel<void>("success"));
+
+    const { result } = renderHook(() => useMicroServiceList());
+
+    await act(async () => {
+      await result.current.refreshList(true);
+    });
+
+    expect(triggerCheckSpy).toHaveBeenCalledTimes(1);
+    expect(mockLoadData).toHaveBeenCalled();
+
+    triggerCheckSpy.mockRestore();
+  });
 });

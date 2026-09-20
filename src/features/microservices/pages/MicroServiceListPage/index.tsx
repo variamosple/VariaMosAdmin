@@ -48,21 +48,22 @@ const MicroServiceListPageComponent: FC = () => {
         <Col xs="auto" className="d-flex align-items-center gap-2">
           <Form.Select
             size="sm"
-            style={{ width: "150px" }}
+            style={{ width: "160px" }}
             value={refreshInterval}
             onChange={(e) => setRefreshInterval(Number(e.target.value))}
-            aria-label="Auto-refresh interval"
+            aria-label="Page auto-refresh interval"
+            title="Page display auto-refresh interval (browser only)"
           >
-            <option value={10000}>Auto-refresh: 10s</option>
-            <option value={30000}>Auto-refresh: 30s</option>
-            <option value={60000}>Auto-refresh: 60s</option>
-            <option value={0}>Auto-refresh: Off</option>
+            <option value={10000}>Page Refresh: 10s</option>
+            <option value={30000}>Page Refresh: 30s</option>
+            <option value={60000}>Page Refresh: 60s</option>
+            <option value={0}>Page Refresh: Off</option>
           </Form.Select>
 
           <Button
             size="sm"
             variant="outline-primary"
-            onClick={refreshList}
+            onClick={() => refreshList(true)}
             disabled={isRefreshing}
             title="Refresh"
             className="d-inline-flex align-items-center"
