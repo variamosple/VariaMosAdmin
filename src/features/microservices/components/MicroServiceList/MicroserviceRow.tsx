@@ -2,7 +2,6 @@ import { useLineBuffer } from "@/shared/hooks/useLineBuffer";
 import { useSocket } from "@/shared/hooks/useSocket";
 import { watchMicroserviceLogs } from "../../api/MicroServiceRepository";
 import type { MicroService } from "../../domain/Entity/MicroService";
-import { MicroServiceConfigModal } from "../MicroServiceConfigModal";
 import { UptimeBar } from "../UptimeBar";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
@@ -23,6 +22,7 @@ export interface MicroServiceRowProps {
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
   onMicroServiceScale?: (microservice: MicroService, replicas: number) => void;
+  onMicroServiceConfigure?: (microservice: MicroService) => void;
 }
 
 export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
@@ -30,9 +30,9 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
   onMicroServiceStart,
   onMicroServiceRestart,
   onMicroServiceStop,
+  onMicroServiceConfigure,
 }) => {
   const [show, setShow] = useState(false);
-  const [showConfigModal, setShowConfigModal] = useState(false);
   const { buffer: logs, addToBuffer: addToLogsBuffer } = useLineBuffer(40960);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
@@ -119,7 +119,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
   return (
     <>
-      <tr key={microService.id || microService.serviceName}>
+      <tr>
         <td>
           <div className="fw-semibold">
             {microService.displayName || microService.serviceName}
@@ -210,7 +210,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
             <Button
               variant="outline-secondary"
-              onClick={() => setShowConfigModal(true)}
+              onClick={() => onMicroServiceConfigure?.(microService)}
               title="Configure service parameters"
             >
               <Sliders size={14} />
@@ -247,13 +247,6 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
           </td>
         </tr>
       )}
-
-      <MicroServiceConfigModal
-        show={showConfigModal}
-        serviceName={microService.serviceName}
-        displayName={microService.displayName}
-        onHide={() => setShowConfigModal(false)}
-      />
     </>
   );
 };

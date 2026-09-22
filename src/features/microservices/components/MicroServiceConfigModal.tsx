@@ -131,7 +131,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
+    <Modal show={show} onHide={onHide} size="lg" centered animation={false}>
       <Modal.Header closeButton>
         <Modal.Title>
           ⚙️ Settings & Audit -{" "}
@@ -349,7 +349,11 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
+        <Button
+          variant="secondary"
+          onClick={onHide}
+          data-testid="config-modal-close-btn"
+        >
           Close
         </Button>
       </Modal.Footer>

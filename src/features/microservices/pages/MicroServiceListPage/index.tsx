@@ -1,12 +1,18 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import type { FC } from "react";
+import { type FC, useState } from "react";
 import { Button, Col, Container, Form, Row, Spinner } from "react-bootstrap";
 import { ArrowClockwise } from "react-bootstrap-icons";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { MicroServiceConfigModal } from "../../components/MicroServiceConfigModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
+import type { MicroService } from "../../domain/Entity/MicroService";
 import { useMicroServiceList } from "../../hooks/useMicroServiceList";
 
 const MicroServiceListPageComponent: FC = () => {
+  const [selectedConfigService, setSelectedConfigService] = useState<
+    MicroService | undefined
+  >(undefined);
+
   const {
     showStart,
     setShowStart,
@@ -102,7 +108,21 @@ const MicroServiceListPageComponent: FC = () => {
         onMicroServiceRestart={onMicroServiceRestart}
         onMicroServiceStop={onMicroServiceStop}
         onMicroServiceScale={performMicroServiceScale}
+        onMicroServiceConfigure={(ms) => setSelectedConfigService(ms)}
       />
+
+      {/* Service Configuration & Audit Modal */}
+      {selectedConfigService && (
+        <MicroServiceConfigModal
+          show={!!selectedConfigService}
+          serviceName={selectedConfigService.serviceName}
+          displayName={
+            selectedConfigService.displayName ||
+            selectedConfigService.serviceName
+          }
+          onHide={() => setSelectedConfigService(undefined)}
+        />
+      )}
 
       {/* Confirmation Modals */}
       <ConfirmationModal

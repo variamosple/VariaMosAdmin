@@ -11,11 +11,13 @@ import {
 import type { MicroService } from "../domain/Entity/MicroService";
 import { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
 
-export const useMicroServiceList = () => {
+export const useMicroServiceList = (initialRefreshInterval: number = 0) => {
   const [showStart, setShowStart] = useState(false);
   const [showRestart, setShowRestart] = useState(false);
   const [showStop, setShowStop] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState<number>(30000); // 30s default
+  const [refreshInterval, setRefreshInterval] = useState<number>(
+    initialRefreshInterval,
+  );
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
@@ -25,6 +27,8 @@ export const useMicroServiceList = () => {
     useState<MicroService>();
   const [toStopMicroService, setToStopMicroService] = useState<MicroService>();
 
+  const [initialFilter] = useState(() => new MicroServiceFilter());
+
   const {
     data: microServices,
     currentPage,
@@ -33,7 +37,7 @@ export const useMicroServiceList = () => {
     onPageChange,
   } = usePaginatedQuery<MicroServiceFilter, MicroService>({
     queryFunction: queryMicroServices,
-    initialFilter: new MicroServiceFilter(),
+    initialFilter,
   });
 
   const refreshList = useCallback(
@@ -44,7 +48,7 @@ export const useMicroServiceList = () => {
         : Promise.resolve();
 
       return preAction
-        .then(() => loadData(new MicroServiceFilter()))
+        .then(() => loadData(initialFilter))
         .then(() => {
           setLastRefreshedAt(new Date());
         })
@@ -52,12 +56,12 @@ export const useMicroServiceList = () => {
           setIsRefreshing(false);
         });
     },
-    [loadData],
+    [loadData, initialFilter],
   );
 
   useEffect(() => {
-    refreshList();
-  }, [refreshList]);
+    loadData(initialFilter);
+  }, [loadData, initialFilter]);
 
   // Periodic Auto-refresh
   useEffect(() => {
