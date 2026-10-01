@@ -19,7 +19,7 @@ test.describe("Monitoring - Real E2E Flows", () => {
     await page.getByRole("button", { name: "Monitoring" }).first().click();
     await expect(page).toHaveURL(/.*monitoring.*/);
 
-    await expect(page.locator("h1")).toHaveText("Monitoring - Microservices list");
+    await expect(page.locator("h1")).toHaveText("Microservices & System Status");
 
     const adminRow = page.locator("tr", { hasText: "ms-admin" });
     await expect(adminRow.locator("td").nth(2)).toHaveText("running");
