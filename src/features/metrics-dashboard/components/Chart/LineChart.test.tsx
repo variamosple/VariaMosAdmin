@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import type { Metric, MetricData } from "../../domain/Entity/Metric";
 import { LineChart } from "./LineChart";
 

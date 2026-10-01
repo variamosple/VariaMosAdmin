@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { useQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
 import type { User } from "@/features/user-management/domain/Entity/User";

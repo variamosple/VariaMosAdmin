@@ -5,7 +5,7 @@ import {
 } from "node:stream/web";
 import { TextDecoder, TextEncoder } from "node:util";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import type { ReactNode } from "react";
 import { vi } from "vitest";

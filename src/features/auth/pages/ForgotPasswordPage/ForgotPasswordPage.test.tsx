@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router-dom";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";

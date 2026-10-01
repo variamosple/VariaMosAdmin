@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { usePaginatedQuery, useRouter } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
 import type { ComponentType } from "react";
