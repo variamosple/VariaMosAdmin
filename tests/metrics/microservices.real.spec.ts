@@ -21,13 +21,13 @@ test.describe("Monitoring - Real E2E Flows", () => {
 
     await expect(page.locator("h1")).toHaveText("Microservices & System Status");
 
-    const adminRow = page.locator("tr", { hasText: "ms-admin" });
-    await expect(adminRow.locator("td").nth(2)).toHaveText("running");
+    const adminRow = page.locator("tr", { hasText: "Admin Service" });
+    await expect(adminRow.locator("td").nth(1)).toHaveText(/running/i);
     await expect(adminRow.locator('button[title="Stop Microservice"]')).toBeVisible();
     await expect(adminRow.locator('button[title="Restart Microservice"]')).toBeVisible();
 
-    const langRow = page.locator("tr", { hasText: "ms-languages" });
-    await expect(langRow.locator("td").nth(2)).toHaveText("running");
+    const langRow = page.locator("tr", { hasText: "Languages Service" });
+    await expect(langRow.locator("td").nth(1)).toHaveText(/running/i);
     await expect(langRow.locator('button[title="Stop Microservice"]')).toBeVisible();
     await expect(langRow.locator('button[title="Restart Microservice"]')).toBeVisible();
   });
