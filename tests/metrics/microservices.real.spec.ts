@@ -18,20 +18,51 @@ test.describe("Monitoring - Real E2E Flows", () => {
     await login(page, adminEmail, adminPassword);
     await page.goto("http://localhost:3000/variamos_admin/");
 
+    page.on("response", async (response) => {
+      if (response.url().includes("/microservices") || response.url().includes("/health")) {
+        console.log(`[API] ${response.url()} - ${response.status()}`);
+        try {
+          const body = await response.text();
+          console.log(`[API BODY] ${body}`);
+        } catch (e) {
+          console.log(`[API BODY ERROR] Could not read body`);
+        }
+      }
+    });
+
     await page.getByRole("button", { name: "Monitoring" }).first().click();
     await expect(page).toHaveURL(/.*monitoring.*/);
 
     await expect(page.locator("h1")).toHaveText("Microservices & System Status");
 
-    const adminRow = page.locator("tr", { hasText: "Admin Service" });
-    await expect(adminRow.locator("td").nth(1)).toHaveText(/up/i, { timeout: 30000 });
-    await expect(adminRow.locator('button[title="Stop Service"]')).toBeVisible();
-    await expect(adminRow.locator('button[title="Restart Service"]')).toBeVisible();
+    try {
+      const adminRow = page.locator("tr", { hasText: "Admin Service" });
+      await expect(adminRow.locator("td").nth(1)).toHaveText(/up/i, { timeout: 30000 });
+      await expect(adminRow.locator('button[title="Stop Service"]')).toBeVisible();
+      await expect(adminRow.locator('button[title="Restart Service"]')).toBeVisible();
 
-    const langRow = page.locator("tr", { hasText: "Languages Service" });
-    await expect(langRow.locator("td").nth(1)).toHaveText(/up/i, { timeout: 30000 });
-    await expect(langRow.locator('button[title="Stop Service"]')).toBeVisible();
-    await expect(langRow.locator('button[title="Restart Service"]')).toBeVisible();
+      const langRow = page.locator("tr", { hasText: "Languages Service" });
+      await expect(langRow.locator("td").nth(1)).toHaveText(/up/i, { timeout: 30000 });
+      await expect(langRow.locator('button[title="Stop Service"]')).toBeVisible();
+      await expect(langRow.locator('button[title="Restart Service"]')).toBeVisible();
+    } catch (error) {
+      console.error("Test failed, dumping diagnostic info...");
+      try {
+        const tableContent = await page.locator("table").innerText({ timeout: 2000 });
+        console.error("=== TABLE CONTENT ===");
+        console.error(tableContent);
+      } catch (e) {
+        console.error("Could not get table content", e);
+      }
+      try {
+        const bodyContent = await page.locator("body").innerText({ timeout: 2000 });
+        console.error("=== BODY CONTENT ===");
+        console.error(bodyContent);
+      } catch (e) {
+        console.error("Could not get body content", e);
+      }
+      throw error;
+    }
   });
 
   test.afterAll(async () => {

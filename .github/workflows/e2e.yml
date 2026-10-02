@@ -71,6 +71,16 @@ jobs:
           repository: variamosple/vms_requirements_autocomplete
           path: vms_requirements_autocomplete
 
+      - name: Ensure Docker socket permissions
+        run: |
+          sudo chmod 666 /var/run/docker.sock
+          ls -la /var/run/docker.sock
+
+      - name: Patch Backend for verbose Docker logging
+        run: |
+          sed -i 's/logger.warn(`Failed to dynamically discover/logger.err(`[CRITICAL] Failed to dynamically discover service definitions: ${err.message}\\n${err.stack}`/g' variamos_ms_admin/src/DataProviders/MicroService/MicroServiceRepository.ts
+          sed -i 's/logger.warn(`Docker listContainers warning/logger.err(`Docker listContainers CRITICAL/g' variamos_ms_admin/src/DataProviders/MicroService/MicroServiceRepository.ts
+
       - name: Generate E2E Test Credentials & Keys
         run: |
           # Generate RS256 private and public keys for token authentication
