@@ -34,6 +34,7 @@ jobs:
         with:
           repository: variamosple/variamos_ms_admin
           path: variamos_ms_admin
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Checkout variamos_ms_languages
         uses: actions/checkout@v7
