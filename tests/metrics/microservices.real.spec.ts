@@ -13,6 +13,8 @@ test.describe("Monitoring - Real E2E Flows", () => {
   });
 
   test("should query local microservices and verify they are running", async ({ page }) => {
+    test.setTimeout(60000); // Docker API discovery can take a while on Github Actions
+
     await login(page, adminEmail, adminPassword);
     await page.goto("http://localhost:3000/variamos_admin/");
 

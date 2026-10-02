@@ -266,12 +266,15 @@ test.describe("Admin - Password Reset Flow", () => {
 
     await page.goto("http://localhost:3000/variamos_admin/#/forgot-password");
     await page.locator('input[type="email"]').fill(targetUserEmail);
+    // Blur the input to guarantee React Hook Form registers the value before we click
+    await page.locator('input[type="email"]').blur();
 
     const submitBtn = page.locator('button[type="submit"]');
     await expect(submitBtn).toBeEnabled();
     
     try {
       await submitBtn.click();
+      await expect(submitBtn).toHaveText(/Sending/);
       await expect(submitBtn).toBeDisabled();
     } finally {
       // Ensure the request finishes so Playwright can close the page
