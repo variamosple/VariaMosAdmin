@@ -5,6 +5,16 @@ import type { MicroService } from "../../domain/Entity/MicroService";
 import { MicroServiceRowComponent } from "./MicroserviceRow";
 
 const mockMicroservice: MicroService = {
+  serviceName: "test-micro",
+  displayName: "Test Microservice",
+  health: {
+    status: "UP",
+    serviceName: "test-micro",
+    responseTimeMs: 15,
+    checkedAt: new Date().toISOString(),
+  },
+  replicasCount: 1,
+  containers: [],
   id: "test-id",
   names: ["test-micro"],
   state: "running",

@@ -22,7 +22,7 @@ export default function ConfirmationModal({
   cancelLabel = "Cancel",
 }: ConfirmationModalProps) {
   return (
-    <Modal show={show} onHide={onCancel}>
+    <Modal show={show} onHide={onCancel} animation={false}>
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
         <Button variant={cancelButtonVariant} onClick={onCancel}>

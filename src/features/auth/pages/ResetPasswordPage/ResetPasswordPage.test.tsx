@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { HttpResponse, http } from "msw";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";

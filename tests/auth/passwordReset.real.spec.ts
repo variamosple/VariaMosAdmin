@@ -256,18 +256,30 @@ test.describe("Admin - Password Reset Flow", () => {
   });
 
   test("should prevent double-clicking the submit button", async ({ page }) => {
+    let resolveRequest: () => void;
+    const requestPromise = new Promise<void>((r) => { resolveRequest = r; });
+
     await page.route("**/auth/forgot-password", async (route) => {
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await requestPromise;
       await route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
     });
 
     await page.goto("http://localhost:3000/variamos_admin/#/forgot-password");
     await page.locator('input[type="email"]').fill(targetUserEmail);
+    // Blur the input to guarantee React Hook Form registers the value before we click
+    await page.locator('input[type="email"]').blur();
 
     const submitBtn = page.locator('button[type="submit"]');
-    await submitBtn.click();
-    await expect(submitBtn).toBeDisabled();
+    await expect(submitBtn).toBeEnabled();
+    
+    try {
+      await submitBtn.click();
+      await expect(submitBtn).toHaveText(/Sending/);
+      await expect(submitBtn).toBeDisabled();
+    } finally {
+      // Ensure the request finishes so Playwright can close the page
+      resolveRequest!();
+    }
   });
 
   test("should validate form rules (email and password inputs)", async ({ page }) => {

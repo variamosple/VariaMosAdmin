@@ -34,6 +34,7 @@ jobs:
         with:
           repository: variamosple/variamos_ms_admin
           path: variamos_ms_admin
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Checkout variamos_ms_languages
         uses: actions/checkout@v7
@@ -52,6 +53,34 @@ jobs:
         with:
           repository: variamosple/variamos_ms_notifications
           path: variamos_ms_notifications
+
+      - name: Checkout semantic_translator
+        uses: actions/checkout@v7
+        with:
+          repository: variamosple/semantic_translator
+          path: semantic_translator
+
+      - name: Checkout vms_domain_application
+        uses: actions/checkout@v7
+        with:
+          repository: variamosple/vms_domain_application
+          path: vms_domain_application
+
+      - name: Checkout vms_requirements_autocomplete
+        uses: actions/checkout@v7
+        with:
+          repository: variamosple/vms_requirements_autocomplete
+          path: vms_requirements_autocomplete
+
+      - name: Ensure Docker socket permissions
+        run: |
+          sudo chmod 666 /var/run/docker.sock
+          ls -la /var/run/docker.sock
+
+      - name: Patch Backend for verbose Docker logging
+        run: |
+          sed -i 's/logger.warn(`Failed to dynamically discover/logger.err(`[CRITICAL] Failed to dynamically discover service definitions: ${err.message}\\n${err.stack}`/g' variamos_ms_admin/src/DataProviders/MicroService/MicroServiceRepository.ts
+          sed -i 's/logger.warn(`Docker listContainers warning/logger.err(`Docker listContainers CRITICAL/g' variamos_ms_admin/src/DataProviders/MicroService/MicroServiceRepository.ts
 
       - name: Generate E2E Test Credentials & Keys
         run: |

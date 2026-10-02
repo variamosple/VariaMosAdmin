@@ -10,6 +10,8 @@ export interface MicroServiceListParameters extends PaginationControlsProps {
   onMicroServiceStart: (microservice: MicroService) => void;
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
+  onMicroServiceScale?: (microservice: MicroService, replicas: number) => void;
+  onMicroServiceConfigure?: (microservice: MicroService) => void;
 }
 
 export const MicroServiceList: FC<MicroServiceListParameters> = ({
@@ -20,6 +22,8 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
   onMicroServiceStart,
   onMicroServiceRestart,
   onMicroServiceStop,
+  onMicroServiceScale,
+  onMicroServiceConfigure,
 }) => {
   return (
     <>
@@ -33,21 +37,17 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
         striped
         bordered
         hover
-        className="w-100"
-        style={{ tableLayout: "fixed" }}
+        responsive
+        className="w-100 align-middle my-2"
       >
         <thead>
           <tr>
-            <th>ID</th>
-
             <th>Name</th>
-
-            <th>State</th>
-
             <th>Status</th>
-
-            <th>Created At</th>
-
+            <th>Latency</th>
+            <th>Uptime (30d)</th>
+            <th>Port</th>
+            <th>Containers</th>
             <th className="text-center">Actions</th>
           </tr>
         </thead>
@@ -55,11 +55,17 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
         <tbody>
           {items?.map((microService) => (
             <MicroServiceRowComponent
-              key={microService.id}
+              key={
+                microService.id ||
+                microService.serviceName ||
+                microService.displayName
+              }
               microService={microService}
               onMicroServiceStart={onMicroServiceStart}
               onMicroServiceRestart={onMicroServiceRestart}
               onMicroServiceStop={onMicroServiceStop}
+              onMicroServiceScale={onMicroServiceScale}
+              onMicroServiceConfigure={onMicroServiceConfigure}
             />
           ))}
         </tbody>

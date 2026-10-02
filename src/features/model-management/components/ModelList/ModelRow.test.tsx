@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
 import { ModelRowComponent } from "./ModelRow";
 

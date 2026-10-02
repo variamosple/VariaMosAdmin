@@ -1,118 +1,63 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import * as MicroServiceRepository from "../../api/MicroServiceRepository";
+import type React from "react";
+import { ToastProvider } from "@/shared/context/ToastContext";
 import type { MicroService } from "../../domain/Entity/MicroService";
 import { MicroServiceList } from "./index";
 
-const mockMicroservices: MicroService[] = [
-  {
-    id: "1",
-    names: ["micro-1"],
-    state: "exited",
-    status: "down",
-    created: new Date(),
-    labels: {},
-  },
-  {
-    id: "2",
-    names: ["micro-2"],
-    state: "running",
-    status: "up",
-    created: new Date(),
-    labels: {},
-  },
-];
+vi.mock("@variamosple/variamos-components", () => ({
+  Paginator: () => <div data-testid="paginator">Paginator</div>,
+}));
 
-// Mock the variamos-components library which has Paginator
-vi.mock("@variamosple/variamos-components", async () => {
-  return {
-    Paginator: () => <div data-testid="paginator">Paginator</div>,
-    ResponseModel: class ResponseModel<T> {
-      errorCode?: number;
-      message?: string;
-      data?: T;
-      type: string;
-      constructor(type: string) {
-        this.type = type;
-      }
-      withError(code: number, msg: string) {
-        this.errorCode = code;
-        this.message = msg;
-        return this;
-      }
+vi.mock("@patternfly/react-log-viewer", () => ({
+  LogViewer: ({ data }: { data: string }) => <div>{data}</div>,
+}));
+
+describe("MicroServiceList", () => {
+  const mockMicroServices: MicroService[] = [
+    {
+      serviceName: "service-1",
+      displayName: "Service 1",
+      health: {
+        status: "UP",
+        serviceName: "service-1",
+        responseTimeMs: 30,
+        checkedAt: new Date().toISOString(),
+      },
+      replicasCount: 1,
+      containers: [],
     },
+    {
+      serviceName: "service-2",
+      displayName: "Service 2",
+      health: {
+        status: "DOWN",
+        serviceName: "service-2",
+        responseTimeMs: 0,
+        checkedAt: new Date().toISOString(),
+      },
+      replicasCount: 0,
+      containers: [],
+    },
+  ];
+
+  const defaultProps = {
+    items: mockMicroServices,
+    currentPage: 1,
+    totalPages: 2,
+    onPageChange: vi.fn(),
+    onMicroServiceStart: vi.fn(),
+    onMicroServiceRestart: vi.fn(),
+    onMicroServiceStop: vi.fn(),
+    onMicroServiceScale: vi.fn(),
   };
-});
 
-// Mock the patternfly log viewer to avoid importing style files or complex web socket interactions
-vi.mock("@patternfly/react-log-viewer", async () => {
-  return {
-    LogViewer: () => <div data-testid="log-viewer">LogViewer</div>,
+  const renderWithProviders = (ui: React.ReactElement) => {
+    return render(<ToastProvider>{ui}</ToastProvider>);
   };
-});
 
-describe("MicroServiceList Component", () => {
-  const mockOnStart = vi.fn();
-  const mockOnRestart = vi.fn();
-  const mockOnStop = vi.fn();
-  let watchLogsSpy: import("vitest").MockInstance;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    watchLogsSpy = vi
-      .spyOn(MicroServiceRepository, "watchMicroserviceLogs")
-      .mockReturnValue({
-        close: vi.fn(),
-      } as object as WebSocket);
-  });
-
-  afterEach(() => {
-    watchLogsSpy.mockRestore();
-  });
-
-  it("renders a list of microservices correctly", () => {
-    render(
-      <MicroServiceList
-        items={mockMicroservices}
-        currentPage={1}
-        totalPages={1}
-        onPageChange={vi.fn()}
-        onMicroServiceStart={mockOnStart}
-        onMicroServiceRestart={mockOnRestart}
-        onMicroServiceStop={mockOnStop}
-      />,
-    );
-
-    expect(screen.getByText("micro-1")).toBeInTheDocument();
-    expect(screen.getByText("micro-2")).toBeInTheDocument();
-  });
-
-  it("triggers start/restart/stop calls appropriately", async () => {
-    const user = userEvent.setup();
-    render(
-      <MicroServiceList
-        items={mockMicroservices}
-        currentPage={1}
-        totalPages={1}
-        onPageChange={vi.fn()}
-        onMicroServiceStart={mockOnStart}
-        onMicroServiceRestart={mockOnRestart}
-        onMicroServiceStop={mockOnStop}
-      />,
-    );
-
-    // micro-1 is exited, so it has a start button
-    const startButton = screen.getByTitle("Start Microservice");
-    await user.click(startButton);
-    expect(mockOnStart).toHaveBeenCalledWith(mockMicroservices[0]);
-
-    // micro-2 is running, so it has restart and stop buttons
-    const restartButton = screen.getByTitle("Restart Microservice");
-    await user.click(restartButton);
-    expect(mockOnRestart).toHaveBeenCalledWith(mockMicroservices[1]);
-
-    const stopButton = screen.getByTitle("Stop Microservice");
-    await user.click(stopButton);
-    expect(mockOnStop).toHaveBeenCalledWith(mockMicroservices[1]);
+  it("renders list of microservices correctly", () => {
+    renderWithProviders(<MicroServiceList {...defaultProps} />);
+    expect(screen.getByText("Service 1")).toBeInTheDocument();
+    expect(screen.getByText("Service 2")).toBeInTheDocument();
   });
 });

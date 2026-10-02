@@ -10,7 +10,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key:/variaMosAdminService/jwtRS256.key
       - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key.pub:/variaMosAdminService/jwtRS256.key.pub
-    command: ["node", "-r", "module-alias/register", "./dist", "--env=development"]
+    command: ["node", "--env-file=env/development.env", "./dist/index.js", "--env=development"]
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -35,6 +35,12 @@ services:
       - ADMIN_HOME_URI=http://localhost:3000/variamos_admin
       - NOTIFICATION_SERVICE_URL=http://variamos-ms-notifications:3005
       - NOTIFICATION_INTERNAL_TOKEN=dev-secret-token-12345678
+    labels:
+      - "variamos.service.monitored=true"
+      - "variamos.service.name=variamos_ms_admin"
+      - "variamos.service.display-name=Admin Service"
+      - "variamos.service.internal-port=4000"
+      - "variamos.service.health-path=/health"
     user: root
 
   variamos-ms-languages:
@@ -61,6 +67,12 @@ services:
       - VARIAMOS_PUBLIC_KEY_PATH=/variaMosLenguageService/jwtRS256.key.pub
       - CORS_ALLOWED_ORIGINS_PATTERNS=http://localhost:3000
       - SECURE_COOKIE=false
+    labels:
+      - "variamos.service.monitored=true"
+      - "variamos.service.name=variamos_ms_languages"
+      - "variamos.service.display-name=Languages Service"
+      - "variamos.service.internal-port=4000"
+      - "variamos.service.health-path=/health"
 
   variamos-ms-projects:
     build:
@@ -83,6 +95,12 @@ services:
       - VARIAMOS_MS_LANGUAGES_DB_SCHEMA=variamos
       - VARIAMOS_PUBLIC_KEY_PATH=/service/jwtRS256.key.pub
       - VARIAMOS_CORS_ALLOWED_ORIGINS_PATTERNS=http://localhost:3000
+    labels:
+      - "variamos.service.monitored=true"
+      - "variamos.service.name=vms_projects"
+      - "variamos.service.display-name=Projects Service"
+      - "variamos.service.internal-port=10000"
+      - "variamos.service.health-path=/health"
 
   variamos-ms-notifications:
     build:
@@ -104,4 +122,72 @@ services:
       - DATABASE_SCHEMA=variamos
       - DATABASE_SSL=false
       - NOTIFICATION_INTERNAL_TOKEN=dev-secret-token-12345678
+    labels:
+      - "variamos.service.monitored=true"
+      - "variamos.service.name=variamos_ms_notifications"
+      - "variamos.service.display-name=Notifications Service"
+      - "variamos.service.internal-port=3005"
+      - "variamos.service.health-path=/health"
+
+  semantic-translator:
+    build:
+      context: ${VARIAMOS_WORKSPACE_DIR:-../}semantic_translator
+      dockerfile: Dockerfile
+    container_name: semantic-translator-test
+    ports:
+      - "5001:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SEMANTIC_TRANSLATOR_DB_DIALECT=postgresql
+      - SEMANTIC_TRANSLATOR_DB_HOST=host.docker.internal
+      - SEMANTIC_TRANSLATOR_DB_PORT=5432
+      - SEMANTIC_TRANSLATOR_DB_NAME=VariamosDB
+      - SEMANTIC_TRANSLATOR_DB_SCHEMA=variamos
+      - SEMANTIC_TRANSLATOR_DB_USER=variamos_admin
+      - SEMANTIC_TRANSLATOR_DB_PASSWORD=variamos_db_password
+    labels:
+      - "variamos.service.monitored=true"
+      - "variamos.service.name=semantic_translator"
+      - "variamos.service.display-name=Semantic Translator"
+      - "variamos.service.internal-port=5000"
+      - "variamos.service.health-path=/health"
+
+  vms-domain-application:
+    build:
+      context: ${VARIAMOS_WORKSPACE_DIR:-../}vms_domain_application
+      dockerfile: Dockerfile
+    container_name: vms-domain-application-test
+    ports:
+      - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NODE_ENV=development
+      - PORT=8081
+    labels:
+      - "variamos.service.monitored=true"
+      - "variamos.service.name=vms_domain_application"
+      - "variamos.service.display-name=Domain Application"
+      - "variamos.service.internal-port=8081"
+      - "variamos.service.health-path=/health"
+
+  vms-requirements-autocomplete:
+    build:
+      context: ${VARIAMOS_WORKSPACE_DIR:-../}vms_requirements_autocomplete
+      dockerfile: Dockerfile
+    container_name: vms-requirements-autocomplete-test
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+    labels:
+      - "variamos.service.monitored=true"
+      - "variamos.service.name=vms_requirements_autocomplete"
+      - "variamos.service.display-name=Requirements Autocomplete"
+      - "variamos.service.internal-port=8080"
+      - "variamos.service.health-path=/health"
 
