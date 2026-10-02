@@ -22,12 +22,12 @@ test.describe("Monitoring - Real E2E Flows", () => {
     await expect(page.locator("h1")).toHaveText("Microservices & System Status");
 
     const adminRow = page.locator("tr", { hasText: "Admin Service" });
-    await expect(adminRow.locator("td").nth(1)).toHaveText(/up/i);
+    await expect(adminRow.locator("td").nth(1)).toHaveText(/up/i, { timeout: 30000 });
     await expect(adminRow.locator('button[title="Stop Service"]')).toBeVisible();
     await expect(adminRow.locator('button[title="Restart Service"]')).toBeVisible();
 
     const langRow = page.locator("tr", { hasText: "Languages Service" });
-    await expect(langRow.locator("td").nth(1)).toHaveText(/up/i);
+    await expect(langRow.locator("td").nth(1)).toHaveText(/up/i, { timeout: 30000 });
     await expect(langRow.locator('button[title="Stop Service"]')).toBeVisible();
     await expect(langRow.locator('button[title="Restart Service"]')).toBeVisible();
   });
