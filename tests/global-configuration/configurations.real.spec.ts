@@ -42,8 +42,12 @@ test.describe("Global Configurations - Real E2E Flows", () => {
     await expect(siteNameRow.locator(".badge", { hasText: "UNSAVED" })).toBeVisible();
 
     // Persist changes
-    const savePromise = page.waitForResponse("**/v1/configurations/general.site_name");
-    await page.click('button:has-text("Save Changes")');
+    const savePromise = page.waitForResponse(response => 
+      response.url().includes('/v1/configurations/general.site_name') && 
+      response.request().method() === 'PUT'
+    );
+    // Be very explicit about which button to click
+    await page.locator('.alert-warning button', { hasText: 'Save Changes' }).click();
     await savePromise;
 
     // Alert banner should be gone, and toast should display success
@@ -53,9 +57,14 @@ test.describe("Global Configurations - Real E2E Flows", () => {
     // Cleanup: Restore original site name
     await siteNameRow.locator('button[title="Edit setting"]').click();
     await input.fill("VariaMos");
-    await page.click('button[type="submit"]');
-    await page.click('button:has-text("Save Changes")');
-    await page.waitForResponse("**/v1/configurations/general.site_name");
+    await page.click('.modal-content button[type="submit"]');
+    
+    const cleanupPromise = page.waitForResponse(response => 
+      response.url().includes('/v1/configurations/general.site_name') && 
+      response.request().method() === 'PUT'
+    );
+    await page.locator('.alert-warning button', { hasText: 'Save Changes' }).click();
+    await cleanupPromise;
   });
 
   test.afterEach(async () => {
