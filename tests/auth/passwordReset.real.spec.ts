@@ -260,7 +260,6 @@ test.describe("Admin - Password Reset Flow", () => {
     const requestPromise = new Promise<void>((r) => { resolveRequest = r; });
 
     await page.route("**/auth/forgot-password", async (route) => {
-      // Wait for the test to explicitly allow the request to finish
       await requestPromise;
       await route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
     });
@@ -269,14 +268,15 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.locator('input[type="email"]').fill(targetUserEmail);
 
     const submitBtn = page.locator('button[type="submit"]');
-    // Ensure form is valid and button is enabled before clicking
     await expect(submitBtn).toBeEnabled();
     
-    await submitBtn.click();
-    await expect(submitBtn).toBeDisabled();
-
-    // Let the request finish
-    resolveRequest!();
+    try {
+      await submitBtn.click();
+      await expect(submitBtn).toBeDisabled();
+    } finally {
+      // Ensure the request finishes so Playwright can close the page
+      resolveRequest!();
+    }
   });
 
   test("should validate form rules (email and password inputs)", async ({ page }) => {
