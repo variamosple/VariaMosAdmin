@@ -1,7 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ResponseModel } from "@variamosple/variamos-components";
 import { describe, expect, it, vi } from "vitest";
 import * as MicroServiceRepository from "../api/MicroServiceRepository";
+import type {
+  MicroServiceAuditEntry,
+  MicroServiceConfigItem,
+} from "../domain/Entity/MicroService";
 import { MicroServiceConfigModal } from "./MicroServiceConfigModal";
 
 vi.mock("../api/MicroServiceRepository", () => ({
@@ -11,24 +16,28 @@ vi.mock("../api/MicroServiceRepository", () => ({
 }));
 
 describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
-  const defaultConfigs = [
+  const defaultConfigs: MicroServiceConfigItem[] = [
     {
       id: 1,
       serviceName: "ms_admin",
       key: "MAX_CONNECTIONS",
       value: "100",
-      type: "number" as const,
+      type: "number",
+      isSecret: false,
+      isReadOnly: false,
     },
     {
       id: 2,
       serviceName: "ms_admin",
       key: "API_SECRET_KEY",
       value: "super_secret_token",
-      type: "string" as const,
+      type: "string",
+      isSecret: false,
+      isReadOnly: false,
     },
   ];
 
-  const defaultAuditLogs = [
+  const defaultAuditLogs: MicroServiceAuditEntry[] = [
     {
       id: 1,
       serviceName: "ms_admin",
@@ -43,16 +52,14 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     vi.clearAllMocks();
     vi.mocked(
       MicroServiceRepository.getMicroServiceConfigurations,
-    ).mockResolvedValue({
-      // biome-ignore lint/suspicious/noExplicitAny: mock response shape
-      data: defaultConfigs as any,
-    });
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceConfigItem[]>().withData(defaultConfigs),
+    );
     vi.mocked(
       MicroServiceRepository.getMicroServiceAuditLogs,
-    ).mockResolvedValue({
-      // biome-ignore lint/suspicious/noExplicitAny: mock response shape
-      data: defaultAuditLogs as any,
-    });
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceAuditEntry[]>().withData(defaultAuditLogs),
+    );
   });
 
   it("renders modal header with service display name and loads configuration list", async () => {
@@ -75,20 +82,21 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
 
   it("allows toggling the add parameter form and creating a new configuration item", async () => {
     const user = userEvent.setup();
-    const createdConfig = {
+    const createdConfig: MicroServiceConfigItem = {
       id: 3,
       serviceName: "ms_admin",
       key: "LOG_LEVEL",
       value: "debug",
-      type: "string" as const,
+      type: "string",
+      isSecret: false,
+      isReadOnly: false,
     };
 
     vi.mocked(
       MicroServiceRepository.updateMicroServiceConfiguration,
-    ).mockResolvedValue({
-      // biome-ignore lint/suspicious/noExplicitAny: mock response shape
-      data: createdConfig as any,
-    });
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceConfigItem>().withData(createdConfig),
+    );
 
     render(
       <MicroServiceConfigModal
@@ -147,23 +155,23 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
 
   it("masks secret configurations and reveals them when eye button is toggled", async () => {
     const user = userEvent.setup();
-    const configsWithSecret = [
+    const configsWithSecret: MicroServiceConfigItem[] = [
       {
         id: 1,
         serviceName: "ms_admin",
         key: "DB_PASSWORD",
         value: "super_secret_pw",
-        type: "string" as const,
+        type: "string",
         isSecret: true,
+        isReadOnly: false,
       },
     ];
 
     vi.mocked(
       MicroServiceRepository.getMicroServiceConfigurations,
-    ).mockResolvedValue({
-      // biome-ignore lint/suspicious/noExplicitAny: mock response shape
-      data: configsWithSecret as any,
-    });
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceConfigItem[]>().withData(configsWithSecret),
+    );
 
     render(
       <MicroServiceConfigModal
