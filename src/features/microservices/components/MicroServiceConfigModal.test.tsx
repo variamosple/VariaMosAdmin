@@ -195,6 +195,153 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     expect(screen.getByText("super_secret_pw")).toBeInTheDocument();
   });
 
+  it("prevents editing read-only configuration parameters", async () => {
+    const readOnlyConfigs: MicroServiceConfigItem[] = [
+      {
+        id: 10,
+        serviceName: "ms_admin",
+        key: "SYSTEM_VERSION",
+        value: "2.4.0",
+        type: "string",
+        isSecret: false,
+        isReadOnly: true,
+      },
+    ];
+
+    vi.mocked(
+      MicroServiceRepository.getMicroServiceConfigurations,
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceConfigItem[]>().withData(readOnlyConfigs),
+    );
+
+    render(
+      <MicroServiceConfigModal
+        show={true}
+        serviceName="ms_admin"
+        displayName="Administration Service"
+        onHide={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("SYSTEM_VERSION")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Read-only")).toBeInTheDocument();
+    expect(screen.queryByTitle("Edit parameter")).not.toBeInTheDocument();
+  });
+
+  it("supports inline editing of editable parameters", async () => {
+    const user = userEvent.setup();
+    const updatedConfig: MicroServiceConfigItem = {
+      id: 1,
+      serviceName: "ms_admin",
+      key: "MAX_CONNECTIONS",
+      value: "250",
+      type: "number",
+      isSecret: false,
+      isReadOnly: false,
+    };
+
+    vi.mocked(
+      MicroServiceRepository.updateMicroServiceConfiguration,
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceConfigItem>().withData(updatedConfig),
+    );
+
+    render(
+      <MicroServiceConfigModal
+        show={true}
+        serviceName="ms_admin"
+        displayName="Administration Service"
+        onHide={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("MAX_CONNECTIONS")).toBeInTheDocument();
+    });
+
+    const editButtons = screen.getAllByTitle("Edit parameter");
+    await user.click(editButtons[0]);
+
+    const inlineInput = screen.getByDisplayValue("100");
+    await user.clear(inlineInput);
+    await user.type(inlineInput, "250");
+
+    const saveCheckBtn = screen.getByRole("button", {
+      name: /Save MAX_CONNECTIONS/i,
+    });
+    await user.click(saveCheckBtn);
+
+    await waitFor(() => {
+      expect(
+        MicroServiceRepository.updateMicroServiceConfiguration,
+      ).toHaveBeenCalledWith("ms_admin", "MAX_CONNECTIONS", "250");
+    });
+  });
+
+  it("resiliently recovers when update API call rejects without breaking the UI", async () => {
+    const user = userEvent.setup();
+    vi.mocked(
+      MicroServiceRepository.updateMicroServiceConfiguration,
+    ).mockRejectedValue(new Error("Network timeout"));
+
+    render(
+      <MicroServiceConfigModal
+        show={true}
+        serviceName="ms_admin"
+        displayName="Administration Service"
+        onHide={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("MAX_CONNECTIONS")).toBeInTheDocument();
+    });
+
+    const editButtons = screen.getAllByTitle("Edit parameter");
+    await user.click(editButtons[0]);
+
+    const inlineInput = screen.getByDisplayValue("100");
+    await user.clear(inlineInput);
+    await user.type(inlineInput, "500");
+
+    const saveCheckBtn = screen.getByRole("button", {
+      name: /Save MAX_CONNECTIONS/i,
+    });
+    // Should not throw or crash component
+    await user.click(saveCheckBtn);
+
+    // Modal remains fully functional and accessible
+    await waitFor(() => {
+      expect(screen.getByText("MAX_CONNECTIONS")).toBeInTheDocument();
+    });
+  });
+
+  it("displays empty state placeholder when no configurations exist", async () => {
+    vi.mocked(
+      MicroServiceRepository.getMicroServiceConfigurations,
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceConfigItem[]>().withData([]),
+    );
+
+    render(
+      <MicroServiceConfigModal
+        show={true}
+        serviceName="ms_admin"
+        displayName="Administration Service"
+        onHide={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/No custom configuration parameters found/i),
+      ).toBeInTheDocument();
+    });
+  });
+
   it("triggers onHide when close button is clicked", async () => {
     const user = userEvent.setup();
     const onHideMock = vi.fn();
