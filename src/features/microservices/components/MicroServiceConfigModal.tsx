@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   Form,
-  InputGroup,
   Modal,
   Spinner,
   Tab,

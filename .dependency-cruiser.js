@@ -2,10 +2,10 @@ module.exports = {
   forbidden: [
     {
       name: "domain-is-pure",
-      comment: "The Domain folder must not depend on any external layers (Infrastructure, DataProviders, or UI).",
+      comment: "Domain layers (in features and shared) must not depend on UI (components/pages/layouts) or API/infrastructure.",
       severity: "error",
-      from: { path: "^src/Domain" },
-      to: { path: "^src/Infrastructure|^src/DataProviders|^src/UI" }
+      from: { path: "(^src/features/[^/]+/domain|^src/shared/domain)" },
+      to: { path: "(^src/features/[^/]+/(components|pages|api)|^src/shared/(components|layouts|infrastructure))" }
     },
     {
       name: "no-circular-dependencies",

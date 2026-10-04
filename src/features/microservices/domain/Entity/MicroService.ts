@@ -1,4 +1,4 @@
-export type HealthStatus = "UP" | "DEGRADED" | "DOWN";
+export type HealthStatus = "UP" | "DEGRADED" | "DOWN" | "NO_DATA";
 
 export interface Labels {
   [label: string]: string;
