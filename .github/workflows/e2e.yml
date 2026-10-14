@@ -29,12 +29,25 @@ jobs:
       - name: Checkout VariaMosAdmin (frontend)
         uses: actions/checkout@v7
 
+      - name: Resolve backend ref (same branch name if it exists, else main)
+        id: backend-ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if gh api "repos/variamosple/variamos_ms_admin/branches/${BRANCH//\//%2F}" >/dev/null 2>&1; then
+            echo "ref=${BRANCH}" >> "$GITHUB_OUTPUT"
+          else
+            echo "No backend branch named ${BRANCH}; using main."
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout variamos_ms_admin (backend)
         uses: actions/checkout@v7
         with:
           repository: variamosple/variamos_ms_admin
           path: variamos_ms_admin
-          ref: ${{ github.head_ref || github.ref_name }}
+          ref: ${{ steps.backend-ref.outputs.ref }}
 
       - name: Checkout variamos_ms_languages
         uses: actions/checkout@v7
