@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   Form,
-  InputGroup,
   Modal,
   Spinner,
   Tab,
@@ -98,6 +97,8 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
         const auditRes = await getMicroServiceAuditLogs(serviceName);
         if (auditRes.data) setAuditLogs(auditRes.data);
       }
+    } catch (error) {
+      console.error("Error saving microservice configuration:", error);
     } finally {
       setIsSaving(false);
       setEditingKey(null);
@@ -125,6 +126,8 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
         const auditRes = await getMicroServiceAuditLogs(serviceName);
         if (auditRes.data) setAuditLogs(auditRes.data);
       }
+    } catch (error) {
+      console.error("Error creating microservice configuration:", error);
     } finally {
       setIsAdding(false);
     }
@@ -275,6 +278,8 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                                   variant="success"
                                   onClick={() => handleSaveConfig(config.key)}
                                   disabled={isSaving}
+                                  aria-label={`Save ${config.key}`}
+                                  title="Save parameter"
                                 >
                                   <Check size={16} />
                                 </Button>
@@ -283,6 +288,8 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                                   size="sm"
                                   variant="outline-primary"
                                   onClick={() => handleStartEdit(config)}
+                                  aria-label={`Edit ${config.key}`}
+                                  title="Edit parameter"
                                 >
                                   <PencilSquare size={14} />
                                 </Button>

@@ -22,7 +22,7 @@ export const UptimeBar: FC<UptimeBarProps> = ({
     ? history
     : Array.from({ length: 30 }, (_, i) => ({
         timestamp: new Date(Date.now() - (29 - i) * 86400000).toISOString(),
-        status: "NO_DATA" as any,
+        status: "NO_DATA",
         responseTimeMs: 0,
         uptimePercentage: 0,
       }));
