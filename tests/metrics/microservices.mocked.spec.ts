@@ -214,7 +214,11 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
       "Settings & Audit - Administration Service",
     );
     await expect(modalTitle).toBeVisible();
-    await expect(page.getByRole("cell", { name: "PORT" })).toBeVisible();
+    // Scope to the modal: the monitoring table behind it also renders cells
+    // containing "port", so an unscoped, non-exact match resolves to two elements.
+    await expect(
+      page.getByRole("dialog").getByRole("cell", { name: "PORT", exact: true }),
+    ).toBeVisible();
 
     // Close modal via modal footer Close button
     await page.getByTestId("config-modal-close-btn").click();
