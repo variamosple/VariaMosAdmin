@@ -13,9 +13,28 @@ test.describe("Monitoring - Real E2E Flows", () => {
   });
 
   test("should query local microservices and verify they are running", async ({ page }) => {
-    test.setTimeout(60000); // Docker API discovery can take a while on Github Actions
+    test.setTimeout(180000); // Docker API discovery and the readiness wait can take a while on Github Actions
 
     await login(page, adminEmail, adminPassword);
+
+    // Services boot in parallel with the stack, and the health collector only
+    // reports them after its first probes. Wait until a probe has been recorded
+    // and reported UP, so the assertions below do not race the first health cycle.
+    await expect
+      .poll(
+        async () => {
+          const res = await page.request.get("http://localhost:4000/v1/micro-services?page=1&limit=20");
+          const body = await res.json();
+          return ["Admin Service", "Languages Service"].every((name) => {
+            // Without a persisted probe the backend derives UP from the container state.
+            const health = body.data?.find((s: { displayName: string }) => s.displayName === name)?.health;
+            return health?.status === "UP" && health?.checkedAt !== undefined;
+          });
+        },
+        { timeout: 120000, intervals: [3000] },
+      )
+      .toBe(true);
+
     await page.goto("http://localhost:3000/variamos_admin/");
 
     page.on("response", async (response) => {
