@@ -153,13 +153,13 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     });
   });
 
-  it("masks secret configurations and reveals them when eye button is toggled", async () => {
-    const user = userEvent.setup();
-    const configsWithSecret: MicroServiceConfigItem[] = [
+  describe("secret parameters", () => {
+    const secretConfigs: MicroServiceConfigItem[] = [
       {
         id: 1,
         serviceName: "ms_admin",
         key: "DB_PASSWORD",
+        // The API sends the mask; a raw value here proves it is never shown
         value: "super_secret_pw",
         type: "string",
         isSecret: true,
@@ -167,32 +167,89 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
       },
     ];
 
-    vi.mocked(
-      MicroServiceRepository.getMicroServiceConfigurations,
-    ).mockResolvedValue(
-      new ResponseModel<MicroServiceConfigItem[]>().withData(configsWithSecret),
-    );
+    const renderWithSecret = async () => {
+      vi.mocked(
+        MicroServiceRepository.getMicroServiceConfigurations,
+      ).mockResolvedValue(
+        new ResponseModel<MicroServiceConfigItem[]>().withData(secretConfigs),
+      );
+      render(
+        <MicroServiceConfigModal
+          show={true}
+          serviceName="ms_admin"
+          displayName="Administration Service"
+          onHide={vi.fn()}
+        />,
+      );
+      await waitFor(() => {
+        expect(screen.getByText("DB_PASSWORD")).toBeInTheDocument();
+      });
+    };
 
-    render(
-      <MicroServiceConfigModal
-        show={true}
-        serviceName="ms_admin"
-        displayName="Administration Service"
-        onHide={vi.fn()}
-      />,
-    );
+    it("shows only the mask and offers no way to reveal the value", async () => {
+      await renderWithSecret();
 
-    await waitFor(() => {
-      expect(screen.getByText("DB_PASSWORD")).toBeInTheDocument();
+      expect(screen.getByText("********")).toBeInTheDocument();
+      expect(screen.queryByText("super_secret_pw")).not.toBeInTheDocument();
+      expect(screen.queryByTitle("Reveal value")).not.toBeInTheDocument();
     });
 
-    // Verify secret is masked initially
-    expect(screen.getByText("••••••••")).toBeInTheDocument();
+    it("replaces a secret from an empty password field", async () => {
+      const user = userEvent.setup();
+      vi.mocked(
+        MicroServiceRepository.updateMicroServiceConfiguration,
+      ).mockResolvedValue(
+        new ResponseModel<MicroServiceConfigItem>().withData({
+          ...secretConfigs[0],
+          value: "********",
+        } as MicroServiceConfigItem),
+      );
+      await renderWithSecret();
 
-    // Click toggle button via accessible title
-    const eyeBtn = screen.getByTitle("Reveal value");
-    await user.click(eyeBtn);
-    expect(screen.getByText("super_secret_pw")).toBeInTheDocument();
+      await user.click(screen.getByTitle("Edit parameter"));
+      const input = screen.getByLabelText("New value for DB_PASSWORD");
+      expect(input).toHaveValue("");
+      expect(input).toHaveAttribute("type", "password");
+      const saveButton = screen.getByRole("button", {
+        name: /Save DB_PASSWORD/i,
+      });
+      expect(saveButton).toBeDisabled();
+
+      await user.type(input, "new_pw");
+      await user.click(saveButton);
+
+      await waitFor(() => {
+        expect(
+          MicroServiceRepository.updateMicroServiceConfiguration,
+        ).toHaveBeenCalledWith("ms_admin", "DB_PASSWORD", "new_pw");
+      });
+    });
+
+    it("shows the reason when the API refuses the update", async () => {
+      const user = userEvent.setup();
+      vi.mocked(
+        MicroServiceRepository.updateMicroServiceConfiguration,
+      ).mockResolvedValue(
+        new ResponseModel<MicroServiceConfigItem>().withError(
+          403,
+          "Updating configuration 'DB_PASSWORD' requires MFA validation: use the configuration page.",
+        ),
+      );
+      await renderWithSecret();
+
+      await user.click(screen.getByTitle("Edit parameter"));
+      await user.type(
+        screen.getByLabelText("New value for DB_PASSWORD"),
+        "new_pw",
+      );
+      await user.click(
+        screen.getByRole("button", { name: /Save DB_PASSWORD/i }),
+      );
+
+      expect(
+        await screen.findByText(/requires MFA validation/),
+      ).toBeInTheDocument();
+    });
   });
 
   it("prevents editing read-only configuration parameters", async () => {
