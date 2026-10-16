@@ -27,6 +27,9 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
       setValidationError(null);
       if (config.type === "boolean") {
         setBoolValue(Boolean(config.value));
+      } else if (config.isSecret) {
+        // The API only sends a mask for a secret: it is replaced, not edited
+        setInputValue("");
       } else if (config.type === "object" || config.type === "array") {
         setInputValue(JSON.stringify(config.value, null, 2));
       } else {
@@ -40,6 +43,11 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
     if (!config) return;
 
     let finalValue: ConfigurationValue;
+
+    if (config.isSecret && config.type !== "boolean" && !inputValue.trim()) {
+      setValidationError("Enter a new value for this secret.");
+      return;
+    }
 
     try {
       if (config.type === "boolean") {
@@ -156,12 +164,24 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
               />
             ) : (
               <Form.Control
-                type={config.type === "number" ? "number" : "text"}
+                type={
+                  config.isSecret
+                    ? "password"
+                    : config.type === "number"
+                      ? "number"
+                      : "text"
+                }
                 value={inputValue}
                 disabled={config.isReadOnly}
+                autoComplete={config.isSecret ? "new-password" : "off"}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Enter value"
+                placeholder={config.isSecret ? "New value" : "Enter value"}
               />
+            )}
+            {config.isSecret && (
+              <Form.Text muted>
+                The current value is hidden. Enter a new value to replace it.
+              </Form.Text>
             )}
           </Form.Group>
         </Modal.Body>

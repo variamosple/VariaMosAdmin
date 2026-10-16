@@ -1,5 +1,6 @@
 import { type FC, useEffect, useState } from "react";
 import {
+  Alert,
   Badge,
   Button,
   Form,
@@ -9,13 +10,7 @@ import {
   Table,
   Tabs,
 } from "react-bootstrap";
-import {
-  Check,
-  Eye,
-  EyeSlash,
-  PencilSquare,
-  PlusLg,
-} from "react-bootstrap-icons";
+import { Check, PencilSquare, PlusLg } from "react-bootstrap-icons";
 import {
   getMicroServiceAuditLogs,
   getMicroServiceConfigurations,
@@ -25,6 +20,9 @@ import type {
   MicroServiceAuditEntry,
   MicroServiceConfigItem,
 } from "../domain/Entity/MicroService";
+
+// The API never sends a secret value: only this mask is shown
+const SECRET_MASK = "********";
 
 export interface MicroServiceConfigModalProps {
   show: boolean;
@@ -43,12 +41,10 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
   const [configs, setConfigs] = useState<MicroServiceConfigItem[]>([]);
   const [auditLogs, setAuditLogs] = useState<MicroServiceAuditEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [revealedSecrets, setRevealedSecrets] = useState<
-    Record<string, boolean>
-  >({});
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // New parameter form
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
@@ -71,13 +67,11 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
       .finally(() => setLoading(false));
   }, [show, serviceName]);
 
-  const toggleSecret = (key: string) => {
-    setRevealedSecrets((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
   const handleStartEdit = (config: MicroServiceConfigItem) => {
     setEditingKey(config.key);
-    setEditValue(config.value);
+    setSaveError(null);
+    // A secret is replaced, never edited: start from an empty field
+    setEditValue(config.isSecret ? "" : config.value);
   };
 
   const handleSaveConfig = async (key: string) => {
@@ -96,6 +90,8 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
         // Refresh audit logs
         const auditRes = await getMicroServiceAuditLogs(serviceName);
         if (auditRes.data) setAuditLogs(auditRes.data);
+      } else {
+        setSaveError(res.message ?? `The parameter ${key} could not be saved.`);
       }
     } catch (error) {
       console.error("Error saving microservice configuration:", error);
@@ -149,6 +145,15 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
           className="mb-3"
         >
           <Tab eventKey="configs" title={`Configurations (${configs.length})`}>
+            {saveError && (
+              <Alert
+                variant="danger"
+                dismissible
+                onClose={() => setSaveError(null)}
+              >
+                {saveError}
+              </Alert>
+            )}
             <div className="d-flex justify-content-between align-items-center mb-3">
               <span className="small text-muted">
                 Runtime parameters & environment overrides for this service.
@@ -221,7 +226,6 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                 <tbody>
                   {configs.map((config) => {
                     const isSecret = config.isSecret;
-                    const isRevealed = revealedSecrets[config.key];
                     const isEditing = editingKey === config.key;
 
                     return (
@@ -231,15 +235,17 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                           {isEditing ? (
                             <Form.Control
                               size="sm"
+                              type={isSecret ? "password" : "text"}
                               value={editValue}
+                              placeholder={isSecret ? "New value" : undefined}
+                              aria-label={`New value for ${config.key}`}
+                              autoComplete={isSecret ? "new-password" : "off"}
                               onChange={(e) => setEditValue(e.target.value)}
                               disabled={isSaving}
                             />
                           ) : (
                             <span className="font-monospace text-break">
-                              {isSecret && !isRevealed
-                                ? "••••••••"
-                                : config.value}
+                              {isSecret ? SECRET_MASK : config.value}
                             </span>
                           )}
                         </td>
@@ -255,29 +261,16 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                         </td>
                         <td className="text-end">
                           <div className="d-flex justify-content-end gap-1">
-                            {isSecret && (
-                              <Button
-                                size="sm"
-                                variant="outline-secondary"
-                                onClick={() => toggleSecret(config.key)}
-                                title={
-                                  isRevealed ? "Hide value" : "Reveal value"
-                                }
-                              >
-                                {isRevealed ? (
-                                  <EyeSlash size={14} />
-                                ) : (
-                                  <Eye size={14} />
-                                )}
-                              </Button>
-                            )}
                             {!config.isReadOnly &&
                               (isEditing ? (
                                 <Button
                                   size="sm"
                                   variant="success"
                                   onClick={() => handleSaveConfig(config.key)}
-                                  disabled={isSaving}
+                                  disabled={
+                                    isSaving ||
+                                    (isSecret && editValue.trim() === "")
+                                  }
                                   aria-label={`Save ${config.key}`}
                                   title="Save parameter"
                                 >
