@@ -35,7 +35,10 @@ function App() {
         requestSignInAsGuest={requestSignInAsGuest}
         requestLogout={requestLogout}
       >
-        <NotificationProvider apiUrl={AppConfig.NOTIFICATION_API_URL}>
+        <NotificationProvider
+          apiUrl={AppConfig.NOTIFICATION_API_URL}
+          adminApiUrl={AppConfig.ADMIN_API_URL}
+        >
           <HashRouter>
             <RouterProvider>
               <Routes />
