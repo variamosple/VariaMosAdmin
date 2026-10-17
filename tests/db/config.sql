@@ -320,6 +320,9 @@ COPY variamos.permission (id, name) FROM stdin;
 46	admin::projects::create
 47	admin::models::create
 48	admin::notifications::dispatch
+49	bugs::update
+50	bugs::sync
+51	roles::assign
 \.
 
 
@@ -410,6 +413,9 @@ COPY variamos.role_permission (role_id, permission_id) FROM stdin;
 1	45
 1	46
 1	47
+1	49
+1	50
+1	51
 \.
 
 
