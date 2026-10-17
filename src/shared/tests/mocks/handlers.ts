@@ -545,6 +545,19 @@ export const handlers = [
     return HttpResponse.json({ data: null });
   }),
 
+  http.get(apiTarget("/auth/password-policy"), () => {
+    return HttpResponse.json({
+      data: {
+        minLength: 8,
+        maxLength: 64,
+        requireUppercase: true,
+        requireLowercase: true,
+        requireNumbers: true,
+        requireSpecial: true,
+      },
+    });
+  }),
+
   http.post(apiTarget("/auth/verify-token"), () => {
     return HttpResponse.json({ data: null });
   }),

@@ -3,8 +3,8 @@ import type { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
-import { PASSWORD_REGEXP } from "@/shared/constants";
 import "./styles.css";
+import { usePasswordPolicy } from "@/features/auth/hooks/usePasswordPolicy";
 
 export interface SignUpFormProps {
   onSignUp: (credentials: UserRegistration) => void;
@@ -18,6 +18,7 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
     watch,
     formState: { errors },
   } = useForm<UserRegistration>();
+  const passwordPolicy = usePasswordPolicy();
 
   const onSubmit: SubmitHandler<UserRegistration> = (data) => {
     if (!isLoading) {
@@ -81,17 +82,16 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           placeholder="Type your new password"
           {...register("password", {
             required: "password is required",
-            pattern: {
-              value: PASSWORD_REGEXP,
-              message:
-                "Password must be between 8 and 24 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.",
-            },
+            validate: passwordPolicy.validate,
           })}
           isInvalid={!!errors.password}
         />
         <Form.Control.Feedback type="invalid">
           {errors.password?.message}
         </Form.Control.Feedback>
+        {!errors.password && (
+          <Form.Text muted>{passwordPolicy.message}</Form.Text>
+        )}
       </Form.Group>
 
       <Form.Group className="w-100" controlId="passwordConfirm">
