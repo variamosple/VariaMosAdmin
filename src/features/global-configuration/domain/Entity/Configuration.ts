@@ -12,6 +12,8 @@ export interface Configuration {
   isSecret: boolean;
   environmentScope: "production" | "development" | "test" | "all";
   isReadOnly: boolean;
+  /** False when no service reads the key yet; absent from older backends. */
+  isApplied?: boolean;
   targetServices: string[];
   description?: string;
   updatedBy?: string;

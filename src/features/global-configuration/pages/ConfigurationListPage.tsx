@@ -169,6 +169,19 @@ const ConfigurationListPageComponent: FC = () => {
                               </Badge>
                             </OverlayTrigger>
                           )}
+                          {config.isApplied === false && (
+                            <OverlayTrigger
+                              placement="top"
+                              overlay={
+                                <Tooltip>
+                                  Saved, but no service reads this setting yet:
+                                  changing it has no effect.
+                                </Tooltip>
+                              }
+                            >
+                              <Badge bg="secondary">NOT APPLIED YET</Badge>
+                            </OverlayTrigger>
+                          )}
                         </div>
                       </td>
                       <td>
