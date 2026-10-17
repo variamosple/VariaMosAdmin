@@ -297,15 +297,8 @@ export const requestPasswordReset = (
 export const verifyPasswordResetToken = (
   token: string,
 ): Promise<ResponseModel<void>> => {
-  return ADMIN_CLIENT.get(
-    `/auth/verify-token?token=${token}&_t=${Date.now()}`,
-    {
-      headers: {
-        "Cache-Control": "no-cache",
-        Pragma: "no-cache",
-      },
-    },
-  )
+  // The token goes in the body: it stays out of URLs and access logs
+  return ADMIN_CLIENT.post("/auth/verify-token", { token })
     .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) =>
       handleRepositoryError(
