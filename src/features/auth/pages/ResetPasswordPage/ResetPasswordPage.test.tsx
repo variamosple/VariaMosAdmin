@@ -72,9 +72,10 @@ describe("ResetPasswordPage Component", () => {
   it("shows invalid token message if token verification fails", async () => {
     let verifyTokenCalledWith: string | null = null;
     server.use(
-      http.get(apiTarget("/auth/verify-token"), ({ request }) => {
-        const url = new URL(request.url);
-        verifyTokenCalledWith = url.searchParams.get("token");
+      http.post(apiTarget("/auth/verify-token"), async ({ request }) => {
+        expect(new URL(request.url).search).toBe("");
+        verifyTokenCalledWith = ((await request.json()) as { token: string })
+          .token;
         return HttpResponse.json({ errorCode: 400 });
       }),
     );
@@ -106,7 +107,7 @@ describe("ResetPasswordPage Component", () => {
 
   it("renders form when token is successfully verified", async () => {
     server.use(
-      http.get(apiTarget("/auth/verify-token"), () => {
+      http.post(apiTarget("/auth/verify-token"), () => {
         return HttpResponse.json({ errorCode: null });
       }),
     );
@@ -127,7 +128,7 @@ describe("ResetPasswordPage Component", () => {
     let resetPasswordPayload: { token?: string; password?: string } | null =
       null;
     server.use(
-      http.get(apiTarget("/auth/verify-token"), () => {
+      http.post(apiTarget("/auth/verify-token"), () => {
         return HttpResponse.json({ errorCode: null });
       }),
       http.post(apiTarget("/auth/reset-password"), async ({ request }) => {
@@ -165,7 +166,7 @@ describe("ResetPasswordPage Component", () => {
 
   it("handles failed password reset submit with specific same password error", async () => {
     server.use(
-      http.get(apiTarget("/auth/verify-token"), () => {
+      http.post(apiTarget("/auth/verify-token"), () => {
         return HttpResponse.json({ errorCode: null });
       }),
       http.post(apiTarget("/auth/reset-password"), () => {
@@ -196,7 +197,7 @@ describe("ResetPasswordPage Component", () => {
 
   it("handles generic failed password reset submit error", async () => {
     server.use(
-      http.get(apiTarget("/auth/verify-token"), () => {
+      http.post(apiTarget("/auth/verify-token"), () => {
         return HttpResponse.json({ errorCode: null });
       }),
       http.post(apiTarget("/auth/reset-password"), () => {
@@ -228,7 +229,7 @@ describe("ResetPasswordPage Component", () => {
       .mockRejectedValue(new Error("Reset password failed"));
 
     server.use(
-      http.get(apiTarget("/auth/verify-token"), () => {
+      http.post(apiTarget("/auth/verify-token"), () => {
         return HttpResponse.json({ errorCode: null });
       }),
     );

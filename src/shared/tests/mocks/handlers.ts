@@ -545,7 +545,7 @@ export const handlers = [
     return HttpResponse.json({ data: null });
   }),
 
-  http.get(apiTarget("/auth/verify-token"), () => {
+  http.post(apiTarget("/auth/verify-token"), () => {
     return HttpResponse.json({ data: null });
   }),
 
