@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
-import { login, disconnect } from "../helpers/commands";
+import { disconnect, login } from "../helpers/commands";
 
 test.describe("Admin - Password Reset Flow", () => {
   test.describe.configure({ mode: "serial" });
@@ -16,7 +16,9 @@ test.describe("Admin - Password Reset Flow", () => {
     await dbHelper.seedTestUsers(suffix);
   });
 
-  test("should allow admin to generate recovery link, and user to reset password", async ({ page }) => {
+  test("should allow admin to generate recovery link, and user to reset password", async ({
+    page,
+  }) => {
     await page.goto("http://localhost:3000/variamos_admin/#/login");
     await page.locator('input[name="email"]').fill(adminEmail);
     await page.locator('input[name="password"]').fill(adminPassword);
@@ -37,8 +39,9 @@ test.describe("Admin - Password Reset Flow", () => {
     await expect(page).toHaveURL(/.*\/users/);
     await initialUsersPromise;
 
-    const searchPromise = page.waitForResponse(response => 
-      response.url().includes("v1/users") && response.url().includes(suffix)
+    const searchPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("v1/users") && response.url().includes(suffix),
     );
     await page.locator('input[id="search"]').click();
     await page.locator('input[id="search"]').fill(targetUserEmail);
@@ -59,7 +62,10 @@ test.describe("Admin - Password Reset Flow", () => {
     const token = rawRecoveryLink.split("token=")[1];
     const recoveryLink = `/variamos_admin/#/reset-password?token=${token}`;
 
-    await modal.locator(".modal-footer").getByRole("button", { name: "Close" }).click();
+    await modal
+      .locator(".modal-footer")
+      .getByRole("button", { name: "Close" })
+      .click();
 
     await disconnect(page);
 
@@ -67,14 +73,18 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.goto(recoveryLink);
     await verifyTokenPromise1;
     await page.waitForURL(/.*reset-password.*/);
-    await page.locator('input[id="new_password"]').waitFor({ state: "visible" });
+    await page
+      .locator('input[id="new_password"]')
+      .waitFor({ state: "visible" });
 
     await page.locator('input[id="new_password"]').fill(adminPassword);
     await page.locator('input[id="confirm_password"]').fill(adminPassword);
     const resetPromise1 = page.waitForResponse("**/auth/reset-password");
     await page.locator('button[type="submit"]').click();
     await resetPromise1;
-    await expect(page.getByText("New password must be different from the current one.")).toBeVisible();
+    await expect(
+      page.getByText("New password must be different from the current one."),
+    ).toBeVisible();
 
     await page.locator('input[id="new_password"]').fill(newPassword);
     await page.locator('input[id="confirm_password"]').fill(newPassword);
@@ -82,7 +92,9 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.locator('button[type="submit"]').click();
     await resetPromise2;
 
-    await expect(page.getByText("Your password has been reset successfully !")).toBeVisible();
+    await expect(
+      page.getByText("Your password has been reset successfully !"),
+    ).toBeVisible();
     await page.getByText("Back to Sign In").click();
     await expect(page).toHaveURL(/.*\/login/);
 
@@ -100,17 +112,25 @@ test.describe("Admin - Password Reset Flow", () => {
     await expect(page).toHaveURL("http://localhost:3000/variamos_admin/#/");
   });
 
-  test("should allow public user to request password reset, receive simulated email, and reset password", async ({ page }) => {
+  test("should allow public user to request password reset, receive simulated email, and reset password", async ({
+    page,
+  }) => {
     const smtpEmail = `user-smtp-${suffix}@variamos-test.com`;
 
     await page.goto("http://localhost:3000/variamos_admin/#/forgot-password");
     await page.locator('input[type="email"]').fill(smtpEmail);
 
-    const forgotPasswordPromise = page.waitForResponse("**/auth/forgot-password");
+    const forgotPasswordPromise = page.waitForResponse(
+      "**/auth/forgot-password",
+    );
     await page.locator('button[type="submit"]').click();
     await forgotPasswordPromise;
 
-    await expect(page.getByText("If an account with this email exists, a password reset link has been sent. Please check your inbox!")).toBeVisible();
+    await expect(
+      page.getByText(
+        "If an account with this email exists, a password reset link has been sent. Please check your inbox!",
+      ),
+    ).toBeVisible();
 
     const tokenHash = await dbHelper.getLatestResetToken(smtpEmail);
     expect(tokenHash).not.toBeNull();
@@ -120,7 +140,9 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.goto(recoveryLink);
     await verifyTokenPromise2;
     await page.waitForURL(/.*reset-password.*/);
-    await page.locator('input[id="new_password"]').waitFor({ state: "visible" });
+    await page
+      .locator('input[id="new_password"]')
+      .waitFor({ state: "visible" });
 
     await page.locator('input[id="new_password"]').fill(newPassword);
     await page.locator('input[id="confirm_password"]').fill(newPassword);
@@ -128,12 +150,14 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.locator('button[type="submit"]').click();
     await resetPromise3;
 
-    await expect(page.getByText("Your password has been reset successfully !")).toBeVisible();
+    await expect(
+      page.getByText("Your password has been reset successfully !"),
+    ).toBeVisible();
     await expect(page).toHaveURL(/.*\/login/, { timeout: 6000 });
 
     await page.locator('input[name="email"]').fill(smtpEmail);
     await page.locator('input[name="password"]').fill(newPassword);
-    
+
     const signInPromise = page.waitForResponse("**/auth/sign-in");
     await page.locator('button[type="submit"]').click();
     const signInResponse = await signInPromise;
@@ -147,14 +171,17 @@ test.describe("Admin - Password Reset Flow", () => {
     await expect(page).toHaveURL("http://localhost:3000/variamos_admin/#/");
   });
 
-  test("should invalidate token after first use and prevent reuse", async ({ page }) => {
+  test("should invalidate token after first use and prevent reuse", async ({
+    page,
+  }) => {
     await login(page, adminEmail, adminPassword);
     const initialUsersPromise = page.waitForResponse("**/v1/users?*");
     await page.getByText("Users", { exact: true }).click();
     await initialUsersPromise;
 
-    const searchPromise = page.waitForResponse(response => 
-      response.url().includes("v1/users") && response.url().includes(suffix)
+    const searchPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("v1/users") && response.url().includes(suffix),
     );
     await page.locator('input[id="search"]').click();
     await page.locator('input[id="search"]').fill(targetUserEmail);
@@ -175,20 +202,27 @@ test.describe("Admin - Password Reset Flow", () => {
     const token = rawRecoveryLink.split("token=")[1];
     const recoveryLink = `/variamos_admin/#/reset-password?token=${token}`;
 
-    await modal.locator(".modal-footer").getByRole("button", { name: "Close" }).click();
+    await modal
+      .locator(".modal-footer")
+      .getByRole("button", { name: "Close" })
+      .click();
     await disconnect(page);
 
     const verifyTokenPromise3 = page.waitForResponse("**/auth/verify-token*");
     await page.goto(recoveryLink);
     await verifyTokenPromise3;
     await page.waitForURL(/.*reset-password.*/);
-    await page.locator('input[id="new_password"]').waitFor({ state: "visible" });
+    await page
+      .locator('input[id="new_password"]')
+      .waitFor({ state: "visible" });
     await page.locator('input[id="new_password"]').fill(newPassword);
     await page.locator('input[id="confirm_password"]').fill(newPassword);
     const resetPromise4 = page.waitForResponse("**/auth/reset-password");
     await page.locator('button[type="submit"]').click();
     await resetPromise4;
-    await expect(page.getByText("Your password has been reset successfully !")).toBeVisible();
+    await expect(
+      page.getByText("Your password has been reset successfully !"),
+    ).toBeVisible();
 
     await page.goto("/variamos_admin/#/login");
     await expect(page.locator('input[name="email"]')).toBeVisible();
@@ -197,71 +231,106 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.goto(recoveryLink);
     await verifyTokenPromise4;
     await page.waitForURL(/.*reset-password.*/);
-    await page.getByText("This password reset link is invalid, has expired, or has already been used.").waitFor({ state: "visible" });
-    await expect(page.getByText("This password reset link is invalid, has expired, or has already been used.")).toBeVisible();
+    await page
+      .getByText(
+        "This password reset link is invalid, has expired, or has already been used.",
+      )
+      .waitFor({ state: "visible" });
+    await expect(
+      page.getByText(
+        "This password reset link is invalid, has expired, or has already been used.",
+      ),
+    ).toBeVisible();
     await expect(page.locator('input[id="new_password"]')).not.toBeVisible();
   });
 
-  test("should not allow password recovery for disabled or deleted accounts", async ({ page, context }) => {
+  test("should not allow password recovery for disabled or deleted accounts", async ({
+    page,
+    context,
+  }) => {
     await login(page, adminEmail, adminPassword);
     const initialUsersPromise = page.waitForResponse("**/v1/users?*");
     await page.getByText("Users", { exact: true }).click();
     await initialUsersPromise;
 
-    const searchPromise1 = page.waitForResponse(response => 
-      response.url().includes("v1/users") && response.url().includes(suffix)
+    const searchPromise1 = page.waitForResponse(
+      (response) =>
+        response.url().includes("v1/users") && response.url().includes(suffix),
     );
     await page.locator('input[id="search"]').click();
     await page.locator('input[id="search"]').fill(disabledUserEmail);
     await searchPromise1;
 
     const disabledRow = page.locator("tr", { hasText: disabledUserEmail });
-    await expect(disabledRow.locator('button[title="Generate password reset link"]')).not.toBeVisible();
+    await expect(
+      disabledRow.locator('button[title="Generate password reset link"]'),
+    ).not.toBeVisible();
 
-    const searchPromise2 = page.waitForResponse(response => 
-      response.url().includes("v1/users") && response.url().includes(suffix)
+    const searchPromise2 = page.waitForResponse(
+      (response) =>
+        response.url().includes("v1/users") && response.url().includes(suffix),
     );
     await page.locator('input[id="search"]').click();
     await page.locator('input[id="search"]').fill(deletedUserEmail);
     await searchPromise2;
 
     const deletedRow = page.locator("tr", { hasText: deletedUserEmail });
-    await expect(deletedRow.locator('button[title="Generate password reset link"]')).not.toBeVisible();
+    await expect(
+      deletedRow.locator('button[title="Generate password reset link"]'),
+    ).not.toBeVisible();
 
     await disconnect(page);
 
     // Direct API call security check
     const requestContext = context.request;
     await requestContext.post("http://localhost:4000/auth/forgot-password", {
-      data: { email: disabledUserEmail }
+      data: { email: disabledUserEmail },
     });
 
     const token = await dbHelper.getLatestResetToken(disabledUserEmail);
     expect(token).toBeNull();
   });
 
-  test("should reject password reset if the token has expired", async ({ page }) => {
+  test("should reject password reset if the token has expired", async ({
+    page,
+  }) => {
     const expiredToken = "expired-token-uuid-1234";
-    await dbHelper.insertExpiredToken({ email: targetUserEmail, token: expiredToken });
+    await dbHelper.insertExpiredToken({
+      email: targetUserEmail,
+      token: expiredToken,
+    });
 
     const recoveryLink = `/variamos_admin/#/reset-password?token=${expiredToken}`;
     const verifyTokenPromise5 = page.waitForResponse("**/auth/verify-token*");
     await page.goto(recoveryLink);
     await verifyTokenPromise5;
     await page.waitForURL(/.*reset-password.*/);
-    await page.getByText("This password reset link is invalid, has expired, or has already been used.").waitFor({ state: "visible" });
+    await page
+      .getByText(
+        "This password reset link is invalid, has expired, or has already been used.",
+      )
+      .waitFor({ state: "visible" });
 
-    await expect(page.getByText("This password reset link is invalid, has expired, or has already been used.")).toBeVisible();
+    await expect(
+      page.getByText(
+        "This password reset link is invalid, has expired, or has already been used.",
+      ),
+    ).toBeVisible();
     await expect(page.locator('input[id="new_password"]')).not.toBeVisible();
   });
 
   test("should prevent double-clicking the submit button", async ({ page }) => {
     let resolveRequest: () => void;
-    const requestPromise = new Promise<void>((r) => { resolveRequest = r; });
+    const requestPromise = new Promise<void>((r) => {
+      resolveRequest = r;
+    });
 
     await page.route("**/auth/forgot-password", async (route) => {
       await requestPromise;
-      await route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
+      await route.fulfill({
+        status: 200,
+        body: JSON.stringify({ success: true }),
+      });
     });
 
     await page.goto("http://localhost:3000/variamos_admin/#/forgot-password");
@@ -271,7 +340,7 @@ test.describe("Admin - Password Reset Flow", () => {
 
     const submitBtn = page.locator('button[type="submit"]');
     await expect(submitBtn).toBeEnabled();
-    
+
     try {
       await submitBtn.click();
       await expect(submitBtn).toHaveText(/Sending/);
@@ -282,29 +351,45 @@ test.describe("Admin - Password Reset Flow", () => {
     }
   });
 
-  test("should validate form rules (email and password inputs)", async ({ page }) => {
+  test("should validate form rules (email and password inputs)", async ({
+    page,
+  }) => {
     await page.goto("http://localhost:3000/variamos_admin/#/forgot-password");
     await page.locator('input[type="email"]').fill("temp");
     await page.locator('input[type="email"]').clear();
     await expect(page.getByText("Email is required")).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeDisabled();
 
-    const dummyLink = "http://localhost:3000/variamos_admin/#/reset-password?token=dummy_valid_token";
-    await page.route("**/verify-token*", async (route) => route.fulfill({ status: 200 }));
+    const dummyLink =
+      "http://localhost:3000/variamos_admin/#/reset-password?token=dummy_valid_token";
+    await page.route("**/verify-token*", async (route) =>
+      route.fulfill({ status: 200 }),
+    );
 
     const verifyTokenPromise6 = page.waitForResponse("**/auth/verify-token*");
     await page.goto(dummyLink);
     await verifyTokenPromise6;
     await page.waitForURL(/.*reset-password.*/);
-    await page.locator('input[id="new_password"]').waitFor({ state: "visible" });
+    await page
+      .locator('input[id="new_password"]')
+      .waitFor({ state: "visible" });
     await page.locator('input[id="new_password"]').fill("Password123!");
-    await page.locator('input[id="confirm_password"]').fill("DifferentPassword123!");
+    await page
+      .locator('input[id="confirm_password"]')
+      .fill("DifferentPassword123!");
     await expect(page.locator('button[type="submit"]')).toBeDisabled();
     await expect(page.getByText("Passwords do not match")).toBeVisible();
 
     await page.locator('input[id="new_password"]').fill("short");
     await page.locator('input[id="confirm_password"]').fill("short");
-    await expect(page.getByText("Password must be between 8 and 24 characters and include uppercase, lowercase, number, and special character.")).toBeVisible();
+    // The E2E seed sets security.password.min_length to 12
+    await expect(
+      page
+        .getByText(
+          "Password must be between 12 and 64 characters long and contain uppercase, lowercase, number, and special character.",
+        )
+        .first(),
+    ).toBeVisible();
   });
 
   test.afterAll(async () => {

@@ -2,8 +2,8 @@ import type { ResponseModel } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import { usePasswordPolicy } from "@/features/auth/hooks/usePasswordPolicy";
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
-import { PASSWORD_REGEXP } from "@/shared/constants";
 
 export interface PasswordUpdateFormProps {
   onUpdatePasswordSubmit: (
@@ -27,6 +27,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
     formState: { errors },
     reset,
   } = useForm<PasswordUpdate>();
+  const passwordPolicy = usePasswordPolicy();
 
   const onSubmit: SubmitHandler<PasswordUpdate> = (data) => {
     if (!isLoading) {
@@ -88,17 +89,16 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
               placeholder="Type your new password"
               {...register("newPassword", {
                 required: "New password is required",
-                pattern: {
-                  value: PASSWORD_REGEXP,
-                  message:
-                    "New password must be between 8 and 24 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.",
-                },
+                validate: passwordPolicy.validate,
               })}
               isInvalid={!!errors.newPassword}
             />
             <Form.Control.Feedback type="invalid">
               {errors.newPassword?.message}
             </Form.Control.Feedback>
+            {!errors.newPassword && (
+              <Form.Text muted>{passwordPolicy.message}</Form.Text>
+            )}
           </Form.Group>
 
           <Form.Group className="w-100" controlId="passwordConfirm">

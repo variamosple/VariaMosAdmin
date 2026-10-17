@@ -11,6 +11,7 @@ import type { User } from "@/features/user-management/domain/Entity/User";
 import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
 import { handleRepositoryError } from "@/shared/api/RepositoryUtils";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { PasswordPolicy } from "../domain/PasswordPolicy";
 
 export const getSessionInfo = (): Promise<
   ResponseModel<SessionInfoResponse>
@@ -279,6 +280,14 @@ export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
         );
       }
     });
+};
+
+export const getPasswordPolicy = (): Promise<ResponseModel<PasswordPolicy>> => {
+  return ADMIN_CLIENT.get("/auth/password-policy")
+    .then((response) => Object.assign(new ResponseModel(), response.data))
+    .catch((error) =>
+      handleRepositoryError(error, "Could not read the password policy."),
+    );
 };
 
 export const requestPasswordReset = (

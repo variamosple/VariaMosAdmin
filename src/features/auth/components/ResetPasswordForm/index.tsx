@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { useForm } from "react-hook-form";
-import { PASSWORD_REGEXP } from "@/shared/constants";
+import { usePasswordPolicy } from "@/features/auth/hooks/usePasswordPolicy";
 
 interface FormData {
   new_password: string;
@@ -29,6 +29,7 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
     },
     mode: "onChange",
   });
+  const passwordPolicy = usePasswordPolicy();
 
   const newPassword = watch("new_password");
 
@@ -56,17 +57,16 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
           placeholder="Type your new password"
           {...register("new_password", {
             required: "New password is required",
-            pattern: {
-              value: PASSWORD_REGEXP,
-              message:
-                "Password must be between 8 and 24 characters and include uppercase, lowercase, number, and special character.",
-            },
+            validate: passwordPolicy.validate,
           })}
           isInvalid={!!errors.new_password}
         />
         <Form.Control.Feedback type="invalid">
           {errors.new_password?.message}
         </Form.Control.Feedback>
+        {!errors.new_password && (
+          <Form.Text muted>{passwordPolicy.message}</Form.Text>
+        )}
       </Form.Group>
 
       <Form.Group className="w-100 mb-3" controlId="confirm_password">
