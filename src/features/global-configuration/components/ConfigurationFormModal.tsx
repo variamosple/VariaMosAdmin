@@ -130,6 +130,12 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
             </Alert>
           )}
 
+          {config.isApplied === false && (
+            <Alert variant="secondary" className="py-2 small mb-0">
+              No service reads this configuration yet: saving it has no effect.
+            </Alert>
+          )}
+
           {config.requiresMfa && (
             <Alert variant="info" className="py-2 small mb-0">
               ℹ️ Modifying this configuration requires Multi-Factor

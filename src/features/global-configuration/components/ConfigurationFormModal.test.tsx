@@ -80,3 +80,22 @@ describe("ConfigurationFormModal secrets", () => {
     expect(screen.getByDisplayValue("VariaMos")).toBeInTheDocument();
   });
 });
+
+describe("ConfigurationFormModal applied keys", () => {
+  const notice = /No service reads this configuration yet/;
+
+  it("warns that a key without consumer has no effect", () => {
+    renderForm(configuration({ isSecret: false, isApplied: false }));
+
+    expect(screen.getByText(notice)).toBeTruthy();
+  });
+
+  it.each([true, undefined])(
+    "shows no warning when isApplied is %s",
+    (isApplied) => {
+      renderForm(configuration({ isSecret: false, isApplied }));
+
+      expect(screen.queryByText(notice)).toBeNull();
+    },
+  );
+});
