@@ -44,9 +44,13 @@ test.describe("Two-factor authentication - Real E2E", () => {
     await dbHelper.seedTestUsers(suffix);
   });
 
+  // A fresh page each time: the session library keeps the previous
+  // session in memory until the page is loaded again
   const signIn = async (page: Page) => {
     await page.context().clearCookies();
     await page.goto("http://localhost:3000/variamos_admin/#/login");
+    await page.evaluate(() => window.localStorage.clear());
+    await page.reload();
     await page.locator('input[name="email"]').fill(email);
     await page.locator('input[name="password"]').fill(password);
     await page.locator('button[type="submit"]').click();
