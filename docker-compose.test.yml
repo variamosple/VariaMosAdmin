@@ -35,6 +35,8 @@ services:
       - ADMIN_HOME_URI=http://localhost:3000/variamos_admin
       - NOTIFICATION_SERVICE_URL=http://variamos-ms-notifications:3005
       - NOTIFICATION_INTERNAL_TOKEN=dev-secret-token-12345678
+      # Test-only key of the two-factor secrets (32 bytes in base64)
+      - MFA_ENCRYPTION_KEY=dmFyaWFtb3MtZTJlLW9ubHktbWZhLWtleS0zMmJ5dGU=
     labels:
       - "variamos.service.monitored=true"
       - "variamos.service.name=variamos_ms_admin"
