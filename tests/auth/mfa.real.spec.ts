@@ -1,38 +1,11 @@
-import { createHmac } from "node:crypto";
 import { expect, type Page, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
+import { totp } from "../helpers/totp";
 
 // Two-factor authentication against the real admin (SPC-2026-10-17-001)
 
-const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-
 /** The home page, at the address the server gives (with or without hash). */
 const HOME = /^http:\/\/localhost:3000\/variamos_admin\/(#\/?)?$/;
-
-const base32Decode = (text: string): Buffer => {
-  let bits = 0;
-  let value = 0;
-  const bytes: number[] = [];
-  for (const char of text.replace(/\s/g, "").toUpperCase()) {
-    value = (value << 5) | BASE32.indexOf(char);
-    bits += 5;
-    if (bits >= 8) {
-      bytes.push((value >>> (bits - 8)) & 255);
-      bits -= 8;
-    }
-  }
-  return Buffer.from(bytes);
-};
-
-/** The code of an authenticator app, `steps` periods of 30 s ahead. */
-const totp = (secret: string, steps = 0): string => {
-  const counter = Buffer.alloc(8);
-  counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30000) + steps));
-  const hmac = createHmac("sha1", base32Decode(secret)).update(counter).digest();
-  const offset = (hmac[hmac.length - 1] as number) & 0x0f;
-  const binary = hmac.readUInt32BE(offset) & 0x7fffffff;
-  return String(binary % 1_000_000).padStart(6, "0");
-};
 
 test.describe("Two-factor authentication - Real E2E", () => {
   test.describe.configure({ mode: "serial" });
@@ -100,7 +73,9 @@ test.describe("Two-factor authentication - Real E2E", () => {
     await page.getByLabel("Authentication code").fill(totp(secret, 1));
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(HOME);
-    await expect(page.getByText(/Welcome to the VariaMos admin module/)).toBeVisible();
+    await expect(
+      page.getByText(/Welcome to the VariaMos admin module/),
+    ).toBeVisible();
     await page.goto("http://localhost:3000/variamos_admin/#/my-account");
     await expect(page.locator("h1")).toHaveText("My account");
 
@@ -109,7 +84,9 @@ test.describe("Two-factor authentication - Real E2E", () => {
     await page.getByLabel("Authentication code").fill(recoveryCode);
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(HOME);
-    await expect(page.getByText(/Welcome to the VariaMos admin module/)).toBeVisible();
+    await expect(
+      page.getByText(/Welcome to the VariaMos admin module/),
+    ).toBeVisible();
 
     await page.goto("http://localhost:3000/variamos_admin/#/my-account");
     await expect(page.getByText(/9 recovery code\(s\) left/)).toBeVisible();

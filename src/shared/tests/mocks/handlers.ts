@@ -217,6 +217,14 @@ export const handlers = [
     });
   }),
 
+  http.get(apiTarget("/v1/users/:userId/mfa"), () => {
+    return HttpResponse.json({ data: { enabled: false } });
+  }),
+
+  http.delete(apiTarget("/v1/users/:userId/mfa"), () => {
+    return HttpResponse.json({ data: { emailSent: true } });
+  }),
+
   http.get(apiTarget("/v1/users/:userId/roles"), () => {
     return HttpResponse.json({
       data: [

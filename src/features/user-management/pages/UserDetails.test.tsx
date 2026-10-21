@@ -70,6 +70,15 @@ vi.mock("@/features/user-management/components/UserDetails", async () => ({
   ),
 }));
 
+vi.mock(
+  "@/features/user-management/components/AccountMfaSection",
+  async () => ({
+    AccountMfaSection: ({ userId }: { userId: string }) => (
+      <div data-testid="account-mfa">MFA of {userId}</div>
+    ),
+  }),
+);
+
 vi.mock("../components/UserRoleForm", async () => ({
   UserRoleForm: ({
     onUserRoleSubmit,

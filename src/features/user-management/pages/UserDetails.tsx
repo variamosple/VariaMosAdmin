@@ -14,6 +14,7 @@ import {
   deleteUserRole,
   queryUserRoles,
 } from "@/features/user-management/api/UserRoleRepository";
+import { AccountMfaSection } from "@/features/user-management/components/AccountMfaSection";
 import { UserDetails } from "@/features/user-management/components/UserDetails";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import { UserRole } from "@/features/user-management/domain/Entity/UserRole";
@@ -181,6 +182,8 @@ const UserDetailsPageComponent: FC = () => {
       <hr />
 
       {!!user && <UserDetails user={user} />}
+
+      {!!userIdParam && <AccountMfaSection userId={userIdParam} />}
 
       <h2 className="mt-3">User roles</h2>
 
