@@ -11,6 +11,7 @@ import {
   updateUserPassword,
 } from "../api/AuthRepository";
 import { PasswordUpdateForm } from "../components/PasswordUpdateForm";
+import { TwoFactorCard } from "../components/TwoFactorCard";
 
 const MyAccountPageComponent: FC = () => {
   const [user, setUser] = useState<User>();
@@ -130,6 +131,8 @@ const MyAccountPageComponent: FC = () => {
           </Button>
         </Col>
       </Row>
+
+      <TwoFactorCard />
 
       <PasswordUpdateForm
         showModal={showPasswordUpdate}

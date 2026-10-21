@@ -76,11 +76,29 @@ export const requestLogout = (): Promise<ResponseModel<void>> => {
     });
 };
 
+/** The sign-in answer; `mfaRequired` when the code is still expected. */
+export type SignInResult = singInResponse & { mfaRequired?: boolean };
+
+/**
+ * Set on a sign-in that waits for the second factor: without a session yet,
+ * an error code stops the session library before it asks for one.
+ */
+export const MFA_REQUIRED_CODE = 428;
+
 export const requestSignIn = (
   request: Credentials,
-): Promise<ResponseModel<singInResponse>> => {
+): Promise<ResponseModel<SignInResult>> => {
   return ADMIN_CLIENT.post("/auth/sign-in", request)
-    .then((response) => Object.assign(new ResponseModel(), response.data))
+    .then((response) => {
+      const result: ResponseModel<SignInResult> = Object.assign(
+        new ResponseModel(),
+        response.data,
+      );
+      if (result.data?.mfaRequired) {
+        result.errorCode = MFA_REQUIRED_CODE;
+      }
+      return result;
+    })
     .catch((error) => {
       if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.message);

@@ -29,7 +29,10 @@
     "signups",
     "paginators",
     "worldmap",
-    "autohide"
+    "autohide",
+    "otpauth",
+    "qrcode",
+    "totp"
   ],
   "ignorePaths": [
     "node_modules/**",

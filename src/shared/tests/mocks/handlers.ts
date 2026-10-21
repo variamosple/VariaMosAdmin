@@ -587,6 +587,12 @@ export const handlers = [
     return HttpResponse.json({ data: null });
   }),
 
+  http.get(apiTarget("/auth/mfa"), () => {
+    return HttpResponse.json({
+      data: { available: true, enabled: false, recoveryCodesRemaining: 0 },
+    });
+  }),
+
   http.post(apiTarget("/auth/redirects"), () => {
     return HttpResponse.json({ data: null });
   }),

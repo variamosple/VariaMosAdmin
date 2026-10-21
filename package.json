@@ -36,6 +36,7 @@
     "@variamosple/variamos-components": "^0.2.3",
     "axios": "^1.19.0",
     "bootstrap": "^5.3.8",
+    "qrcode.react": "^4.2.0",
     "react": "^19.3.0",
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",
