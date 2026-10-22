@@ -116,7 +116,14 @@ test.describe("Two-factor authentication - Real E2E", () => {
 
   test("skips the code on a browser the user trusted, until forgotten", async ({
     page,
+    browserName,
   }) => {
+    // The trusted cookie is Secure: WebKit drops it over http://localhost,
+    // while production is served over HTTPS
+    test.skip(
+      browserName === "webkit",
+      "WebKit drops Secure cookies over http://localhost",
+    );
     test.setTimeout(90_000);
     // Signs out but keeps the browser, and so its trusted cookie
     const signInAgain = async () => {
