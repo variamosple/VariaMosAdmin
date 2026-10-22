@@ -149,4 +149,54 @@ describe("TwoFactorCard", () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Turn on" })).toBeNull();
   });
+
+  it.each([
+    ["a guest (FORBIDDEN)", "FORBIDDEN"],
+    ["an account without my-account rights (403)", 403],
+  ])("stays hidden for %s", async (_label, errorCode) => {
+    server.use(
+      http.get(apiTarget("/auth/mfa"), () =>
+        HttpResponse.json({ errorCode, message: "no" }, { status: 403 }),
+      ),
+    );
+
+    const { container } = render(<TwoFactorCard />);
+
+    await waitFor(() => expect(container).toBeEmptyDOMElement());
+  });
+
+  it("says when the status cannot be read, and tries again", async () => {
+    let calls = 0;
+    server.use(
+      http.get(apiTarget("/auth/mfa"), () => {
+        calls += 1;
+        return calls === 1
+          ? HttpResponse.json(
+              { errorCode: "SYSTEM_ERROR", message: "Internal server error" },
+              { status: 500 },
+            )
+          : HttpResponse.json({
+              data: {
+                available: true,
+                enabled: false,
+                recoveryCodesRemaining: 0,
+              },
+            });
+      }),
+    );
+    render(<TwoFactorCard />);
+
+    expect(
+      await screen.findByText("Two-factor authentication could not be loaded."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Loading…")).toBeNull();
+    expect(screen.queryByText("Off")).toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Turn on" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Off")).toBeInTheDocument();
+  });
 });
