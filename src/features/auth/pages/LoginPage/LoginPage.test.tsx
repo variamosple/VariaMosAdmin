@@ -182,10 +182,10 @@ describe("LoginPage Page Component", () => {
         ),
       );
 
-    const reachCodeStep = async () => {
+    const reachCodeStep = async (trustedDeviceDays = 0) => {
       mockSignIn.mockResolvedValueOnce({
         errorCode: 428,
-        data: { mfaRequired: true },
+        data: { mfaRequired: true, trustedDeviceDays },
       });
       renderLoginPage();
       const user = userEvent.setup();
@@ -266,10 +266,39 @@ describe("LoginPage Page Component", () => {
 
     it("asks for the code after a Google sign-in", () => {
       mockQueryParams.set("mfa", "required");
+      mockQueryParams.set("trustedDeviceDays", "7");
 
       renderLoginPage();
 
       expect(screen.getByLabelText("Authentication code")).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(
+          "Don't ask for a code on this browser for 7 days",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("sends the choice not to be asked again on this browser", async () => {
+      vi.spyOn(pageLoader, "load").mockImplementation(() => {});
+      let body: { code: string; rememberDevice: boolean } | undefined;
+      server.use(
+        http.post(apiTarget("/auth/sign-in/mfa"), async ({ request }) => {
+          body = (await request.json()) as typeof body;
+          return HttpResponse.json({ data: { redirect: "/" } });
+        }),
+      );
+      const user = await reachCodeStep(14);
+
+      await user.click(
+        screen.getByLabelText(
+          "Don't ask for a code on this browser for 14 days",
+        ),
+      );
+      await typeCode(user, "123456");
+
+      await waitFor(() =>
+        expect(body).toEqual({ code: "123456", rememberDevice: true }),
+      );
     });
   });
 });
