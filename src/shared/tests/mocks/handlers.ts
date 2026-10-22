@@ -217,6 +217,14 @@ export const handlers = [
     });
   }),
 
+  http.get(apiTarget("/v1/users/:userId/mfa"), () => {
+    return HttpResponse.json({ data: { enabled: false } });
+  }),
+
+  http.delete(apiTarget("/v1/users/:userId/mfa"), () => {
+    return HttpResponse.json({ data: { emailSent: true } });
+  }),
+
   http.get(apiTarget("/v1/users/:userId/roles"), () => {
     return HttpResponse.json({
       data: [
@@ -587,6 +595,12 @@ export const handlers = [
     return HttpResponse.json({ data: null });
   }),
 
+  http.delete(apiTarget("/auth/mfa/trusted-devices"), () =>
+    HttpResponse.json({
+      transactionId: "forgetTrustedDevices",
+      data: { removed: 1 },
+    }),
+  ),
   http.get(apiTarget("/auth/mfa"), () => {
     return HttpResponse.json({
       data: { available: true, enabled: false, recoveryCodesRemaining: 0 },

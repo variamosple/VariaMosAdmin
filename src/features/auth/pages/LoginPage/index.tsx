@@ -16,13 +16,19 @@ export const LoginPage: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isMfaStep, setIsMfaStep] = useState(false);
   const [isCheckingCode, setIsCheckingCode] = useState(false);
+  const [trustedDeviceDays, setTrustedDeviceDays] = useState(0);
   const { signIn, signInAsGuest, isLoading } = useSession();
 
   const onSignIn = (credentials: Credentials) => {
     signIn(credentials).then((response) => {
       // Right password, second factor on: the code is still expected
-      if ((response.data as { mfaRequired?: boolean } | null)?.mfaRequired) {
+      const data = response.data as {
+        mfaRequired?: boolean;
+        trustedDeviceDays?: number;
+      } | null;
+      if (data?.mfaRequired) {
         setErrorMessage(undefined);
+        setTrustedDeviceDays(data.trustedDeviceDays ?? 0);
         setIsMfaStep(true);
       } else if (response.errorCode) {
         setErrorMessage(response.message);
@@ -32,9 +38,9 @@ export const LoginPage: FC = () => {
     });
   };
 
-  const onSubmitCode = (code: string) => {
+  const onSubmitCode = (code: string, rememberDevice: boolean) => {
     setIsCheckingCode(true);
-    requestSignInMfa(code)
+    requestSignInMfa(code, rememberDevice)
       .then((response) => {
         if (!response.errorCode) {
           pageLoader.load(response.data?.redirect || AppConfig.HOME_PAGE);
@@ -67,6 +73,7 @@ export const LoginPage: FC = () => {
 
     // Google sign-in of an account with a second factor
     if (queryParams.get("mfa") === "required") {
+      setTrustedDeviceDays(Number(queryParams.get("trustedDeviceDays")) || 0);
       setIsMfaStep(true);
     }
 
@@ -99,6 +106,7 @@ export const LoginPage: FC = () => {
             setErrorMessage(undefined);
           }}
           isLoading={isCheckingCode}
+          trustedDeviceDays={trustedDeviceDays}
         />
       ) : (
         <LoginForm onSignIn={onSignIn} />

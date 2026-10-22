@@ -13,10 +13,17 @@ import {
 import {
   confirmMfaEnrollment,
   disableMfa,
+  forgetTrustedDevices,
   getMfaStatus,
   startMfaEnrollment,
 } from "../../api/MfaRepository";
 import type { MfaEnrollment, MfaStatus } from "../../domain/Mfa";
+
+/** Refused to a guest or without my-account rights: nothing to show. */
+const isRefused = (errorCode?: number | string | null) =>
+  errorCode === 403 || errorCode === "FORBIDDEN";
+
+type Load = "loading" | "ready" | "failed" | "refused";
 
 type Step =
   | { name: "closed" }
@@ -45,17 +52,31 @@ const downloadCodes = (codes: string[]) => {
  */
 export const TwoFactorCard: FC = () => {
   const [status, setStatus] = useState<MfaStatus | null>(null);
+  const [load, setLoad] = useState<Load>("loading");
   const [step, setStep] = useState<Step>({ name: "closed" });
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string>();
   const [isBusy, setIsBusy] = useState(false);
+  const [isForgetting, setIsForgetting] = useState(false);
+  const [forgetMessage, setForgetMessage] = useState<string>();
 
   const refresh = useCallback(() => {
     getMfaStatus().then((response) => {
-      setStatus(response.errorCode ? null : (response.data ?? null));
+      if (response.errorCode || !response.data) {
+        setStatus(null);
+        setLoad(isRefused(response.errorCode) ? "refused" : "failed");
+        return;
+      }
+      setStatus(response.data);
+      setLoad("ready");
     });
   }, []);
+
+  const retry = () => {
+    setLoad("loading");
+    refresh();
+  };
 
   useEffect(() => {
     refresh();
@@ -109,6 +130,21 @@ export const TwoFactorCard: FC = () => {
     run(disableMfa(password, code.trim()), () => close());
   };
 
+  const onForgetBrowsers = () => {
+    setIsForgetting(true);
+    forgetTrustedDevices()
+      .then((response) =>
+        setForgetMessage(
+          response.errorCode
+            ? response.message || "Could not forget your browsers."
+            : "Done: every browser will ask for the code again.",
+        ),
+      )
+      .finally(() => setIsForgetting(false));
+  };
+
+  if (load === "refused") return null;
+
   return (
     <Card className="mt-3">
       <Card.Body>
@@ -116,15 +152,18 @@ export const TwoFactorCard: FC = () => {
           <div>
             <Card.Title className="mb-1">
               Two-factor authentication{" "}
-              {status?.enabled ? (
-                <Badge bg="success">On</Badge>
-              ) : (
-                <Badge bg="secondary">Off</Badge>
-              )}
+              {status &&
+                (status.enabled ? (
+                  <Badge bg="success">On</Badge>
+                ) : (
+                  <Badge bg="secondary">Off</Badge>
+                ))}
             </Card.Title>
             <Card.Text className="text-muted mb-0">
               {status === null
-                ? "Loading…"
+                ? load === "failed"
+                  ? "Two-factor authentication could not be loaded."
+                  : "Loading…"
                 : !status.available
                   ? "Two-factor authentication is not available yet."
                   : status.enabled
@@ -132,6 +171,11 @@ export const TwoFactorCard: FC = () => {
                     : "Ask for a code from an authenticator app at sign-in, on top of your password."}
             </Card.Text>
           </div>
+          {load === "failed" && (
+            <Button variant="outline-secondary" size="sm" onClick={retry}>
+              Try again
+            </Button>
+          )}
           {status?.available &&
             (status.enabled ? (
               <Button
@@ -147,6 +191,24 @@ export const TwoFactorCard: FC = () => {
               </Button>
             ))}
         </div>
+        {status?.enabled && (
+          <div className="mt-2 d-flex flex-wrap align-items-center gap-2">
+            <Button
+              variant="link"
+              size="sm"
+              className="p-0"
+              onClick={onForgetBrowsers}
+              disabled={isForgetting}
+            >
+              Ask for the code again on all my browsers
+            </Button>
+            {forgetMessage && (
+              <span className="small text-muted" role="status">
+                {forgetMessage}
+              </span>
+            )}
+          </div>
+        )}
       </Card.Body>
 
       <Modal

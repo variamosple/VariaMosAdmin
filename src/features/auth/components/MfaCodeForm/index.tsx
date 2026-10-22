@@ -4,12 +4,15 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 
 interface MfaCodeFields {
   code: string;
+  rememberDevice: boolean;
 }
 
 export interface MfaCodeFormProps {
-  onSubmitCode: (code: string) => void;
+  onSubmitCode: (code: string, rememberDevice: boolean) => void;
   onCancel: () => void;
   isLoading: boolean;
+  /** Days this browser may skip the code; the choice is hidden at 0. */
+  trustedDeviceDays?: number;
 }
 
 /** The second step of sign-in: a code from the app or a recovery code. */
@@ -17,16 +20,17 @@ export const MfaCodeForm: FC<MfaCodeFormProps> = ({
   onSubmitCode,
   onCancel,
   isLoading,
+  trustedDeviceDays = 0,
 }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<MfaCodeFields>();
+  } = useForm<MfaCodeFields>({ defaultValues: { rememberDevice: false } });
 
-  const onSubmit: SubmitHandler<MfaCodeFields> = ({ code }) => {
+  const onSubmit: SubmitHandler<MfaCodeFields> = ({ code, rememberDevice }) => {
     if (!isLoading) {
-      onSubmitCode(code.trim());
+      onSubmitCode(code.trim(), trustedDeviceDays > 0 && rememberDevice);
     }
   };
 
@@ -57,6 +61,15 @@ export const MfaCodeForm: FC<MfaCodeFormProps> = ({
           Open your authenticator app, or type one of your recovery codes.
         </Form.Text>
       </Form.Group>
+
+      {trustedDeviceDays > 0 && (
+        <Form.Check
+          id="mfa-remember-device"
+          type="checkbox"
+          label={`Don't ask for a code on this browser for ${trustedDeviceDays} day${trustedDeviceDays > 1 ? "s" : ""}`}
+          {...register("rememberDevice")}
+        />
+      )}
 
       <Button
         className="w-100"
