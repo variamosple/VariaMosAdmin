@@ -56,12 +56,26 @@ export const disableMfa = (
       ),
     );
 
-/** The code after the password; opens the session when it is right. */
+/**
+ * The code after the password; opens the session when it is right. With
+ * `rememberDevice`, this browser is not asked the code for a while.
+ */
 export const requestSignInMfa = (
   code: string,
+  rememberDevice = false,
 ): Promise<ResponseModel<singInResponse>> =>
-  ADMIN_CLIENT.post("/auth/sign-in/mfa", { code })
+  ADMIN_CLIENT.post("/auth/sign-in/mfa", { code, rememberDevice })
     .then((response) => asResponse<singInResponse>(response.data))
     .catch((error) =>
       handleRepositoryError(error, "Could not check the code."),
+    );
+
+/** Asks the code again on every browser where it was skipped. */
+export const forgetTrustedDevices = (): Promise<
+  ResponseModel<{ removed: number }>
+> =>
+  ADMIN_CLIENT.delete("/auth/mfa/trusted-devices")
+    .then((response) => asResponse<{ removed: number }>(response.data))
+    .catch((error) =>
+      handleRepositoryError(error, "Could not forget your browsers."),
     );

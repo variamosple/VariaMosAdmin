@@ -595,6 +595,12 @@ export const handlers = [
     return HttpResponse.json({ data: null });
   }),
 
+  http.delete(apiTarget("/auth/mfa/trusted-devices"), () =>
+    HttpResponse.json({
+      transactionId: "forgetTrustedDevices",
+      data: { removed: 1 },
+    }),
+  ),
   http.get(apiTarget("/auth/mfa"), () => {
     return HttpResponse.json({
       data: { available: true, enabled: false, recoveryCodesRemaining: 0 },

@@ -199,4 +199,39 @@ describe("TwoFactorCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Off")).toBeInTheDocument();
   });
+
+  it("asks for the code again on all browsers", async () => {
+    mfaServer({ enabled: true });
+    let forgotten = 0;
+    server.use(
+      http.delete(apiTarget("/auth/mfa/trusted-devices"), () => {
+        forgotten += 1;
+        return HttpResponse.json({ data: { removed: 2 } });
+      }),
+    );
+    render(<TwoFactorCard />);
+
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Ask for the code again on all my browsers",
+      }),
+    );
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Done: every browser will ask for the code again.",
+    );
+    expect(forgotten).toBe(1);
+  });
+
+  it("offers it only once the factor is on", async () => {
+    mfaServer({ enabled: false });
+    render(<TwoFactorCard />);
+
+    await screen.findByRole("button", { name: "Turn on" });
+    expect(
+      screen.queryByRole("button", {
+        name: "Ask for the code again on all my browsers",
+      }),
+    ).toBeNull();
+  });
 });

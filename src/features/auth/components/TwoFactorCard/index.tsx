@@ -13,6 +13,7 @@ import {
 import {
   confirmMfaEnrollment,
   disableMfa,
+  forgetTrustedDevices,
   getMfaStatus,
   startMfaEnrollment,
 } from "../../api/MfaRepository";
@@ -57,6 +58,8 @@ export const TwoFactorCard: FC = () => {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string>();
   const [isBusy, setIsBusy] = useState(false);
+  const [isForgetting, setIsForgetting] = useState(false);
+  const [forgetMessage, setForgetMessage] = useState<string>();
 
   const refresh = useCallback(() => {
     getMfaStatus().then((response) => {
@@ -127,6 +130,19 @@ export const TwoFactorCard: FC = () => {
     run(disableMfa(password, code.trim()), () => close());
   };
 
+  const onForgetBrowsers = () => {
+    setIsForgetting(true);
+    forgetTrustedDevices()
+      .then((response) =>
+        setForgetMessage(
+          response.errorCode
+            ? response.message || "Could not forget your browsers."
+            : "Done: every browser will ask for the code again.",
+        ),
+      )
+      .finally(() => setIsForgetting(false));
+  };
+
   if (load === "refused") return null;
 
   return (
@@ -175,6 +191,24 @@ export const TwoFactorCard: FC = () => {
               </Button>
             ))}
         </div>
+        {status?.enabled && (
+          <div className="mt-2 d-flex flex-wrap align-items-center gap-2">
+            <Button
+              variant="link"
+              size="sm"
+              className="p-0"
+              onClick={onForgetBrowsers}
+              disabled={isForgetting}
+            >
+              Ask for the code again on all my browsers
+            </Button>
+            {forgetMessage && (
+              <span className="small text-muted" role="status">
+                {forgetMessage}
+              </span>
+            )}
+          </div>
+        )}
       </Card.Body>
 
       <Modal
