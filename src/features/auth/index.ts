@@ -1,4 +1,5 @@
 export * from "./api/AuthRepository";
+export { MfaInvitationBanner } from "./components/MfaInvitationBanner";
 export { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 export { LoginPage } from "./pages/LoginPage";
 export { MyAccountPage } from "./pages/MyAccountPage";

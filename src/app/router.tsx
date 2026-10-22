@@ -7,6 +7,7 @@ import { Navigate, Outlet, type RouteObject } from "react-router-dom";
 import {
   ForgotPasswordPage,
   LoginPage,
+  MfaInvitationBanner,
   MyAccountPage,
   ResetPasswordPage,
   SignUpPage,
@@ -37,6 +38,7 @@ export const ROUTES: RouteObject[] = [
       <SecurityWrapper>
         <AuthWrapper redirectPath={AppConfig.LOGIN_URL}>
           <MainLayout>
+            <MfaInvitationBanner />
             <Outlet />
           </MainLayout>
         </AuthWrapper>
