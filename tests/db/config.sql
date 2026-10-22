@@ -323,6 +323,7 @@ COPY variamos.permission (id, name) FROM stdin;
 49	bugs::update
 50	bugs::sync
 51	roles::assign
+52	users::reset-mfa
 \.
 
 
@@ -416,6 +417,7 @@ COPY variamos.role_permission (role_id, permission_id) FROM stdin;
 1	49
 1	50
 1	51
+1	52
 \.
 
 
