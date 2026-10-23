@@ -93,7 +93,7 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
-          errorCode: 0,
+          transactionId: "dispatchNotification",
           message: "Notification dispatched successfully.",
         }),
       });
