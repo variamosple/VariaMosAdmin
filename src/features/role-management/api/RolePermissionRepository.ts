@@ -1,8 +1,8 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import type { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
 import type { RolePermissionFilter } from "@/features/role-management/domain/Entity/RolePermissionFilter";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryRolePermissions = (
@@ -12,29 +12,12 @@ export const queryRolePermissions = (
     params: filter,
   })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query role permissions, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query role permissions, please try again later.",
+      ),
+    );
 };
 
 export const createRolePermission = (
@@ -42,29 +25,12 @@ export const createRolePermission = (
 ): Promise<ResponseModel<RolePermission>> => {
   return ADMIN_CLIENT.post(`/v1/roles/${request.roleId}/permissions`, request)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to create the role and permission association, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to create the role and permission association, please try again later.",
+      ),
+    );
 };
 
 export const deleteRolePermission = (
@@ -74,27 +40,10 @@ export const deleteRolePermission = (
     `/v1/roles/${request.roleId}/permissions/${request.permissionId}`,
   )
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to delete the role and permission association, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to delete the role and permission association, please try again later.",
+      ),
+    );
 };

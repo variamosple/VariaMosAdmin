@@ -1,8 +1,8 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
 
 import type { Model } from "@/features/model-management/domain/Entity/Model";
 import type { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { PROJECTS_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryModels = (
@@ -10,57 +10,23 @@ export const queryModels = (
 ): Promise<ResponseModel<Model[]>> => {
   return PROJECTS_CLIENT.get("/v1/admin/models", { params: filter })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query model, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query model, please try again later.",
+      ),
+    );
 };
 
 export const deleteModel = (modelId: string): Promise<ResponseModel<void>> => {
   return PROJECTS_CLIENT.delete(`/v1/admin/models/${modelId}`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to delete the model, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to delete the model, please try again later.",
+      ),
+    );
 };
 
 // ARCHIVED: Unused in frontend currently
@@ -95,55 +61,21 @@ export const deleteModel = (modelId: string): Promise<ResponseModel<void>> => {
 export const updateModel = (request: Model): Promise<ResponseModel<Model>> => {
   return PROJECTS_CLIENT.put(`/v1/admin/models/${request.id}`, request)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to update the model with id: ${request.id}, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        `Error when trying to update the model with id: ${request.id}, please try again later.`,
+      ),
+    );
 };
 
 export const createModel = (request: Model): Promise<ResponseModel<Model>> => {
   return PROJECTS_CLIENT.post("/v1/admin/models", request)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to create the model, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to create the model, please try again later.",
+      ),
+    );
 };

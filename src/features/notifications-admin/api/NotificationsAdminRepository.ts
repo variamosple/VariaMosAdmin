@@ -1,5 +1,5 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export interface DispatchNotificationRequest {
@@ -15,23 +15,10 @@ export const dispatchNotification = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/v1/admin/notifications/dispatch", request)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error dispatching notification:", error.message);
-        const response = error.response?.data;
-        if (response) {
-          return response;
-        }
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error dispatching notification:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to dispatch notification, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to dispatch notification, please try again later.",
+      ),
+    );
 };

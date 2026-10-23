@@ -4,11 +4,6 @@ import { HttpResponse, http } from "msw";
 import { server } from "@/shared/tests/mocks/server";
 import { BugListPage } from "./BugListPage";
 
-// Mock only @variamosple/variamos-components to avoid page visit tracker external side effects
-vi.mock("@variamosple/variamos-components", async () => ({
-  withPageVisit: <T,>(component: T) => component,
-}));
-
 describe("BugListPage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
