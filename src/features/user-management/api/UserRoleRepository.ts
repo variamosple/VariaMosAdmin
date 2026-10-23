@@ -1,11 +1,11 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
 import type {
   Role,
   RoleDetails,
 } from "@/features/role-management/domain/Entity/Role";
 import type { UserRole } from "@/features/user-management/domain/Entity/UserRole";
 import type { UserRoleFilter } from "@/features/user-management/domain/Entity/UserRoleFilter";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryUserRoles = (
@@ -15,29 +15,12 @@ export const queryUserRoles = (
     params: filter,
   })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to query the user roles, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query the user roles, please try again later.",
+      ),
+    );
 };
 
 export const queryUserRolesDetails = (
@@ -45,29 +28,12 @@ export const queryUserRolesDetails = (
 ): Promise<ResponseModel<RoleDetails[]>> => {
   return ADMIN_CLIENT.get(`/v1/users/${filter.userId}/roles/details`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to query the user roles with details, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query the user roles with details, please try again later.",
+      ),
+    );
 };
 
 export const createUserRole = (
@@ -75,29 +41,12 @@ export const createUserRole = (
 ): Promise<ResponseModel<UserRole>> => {
   return ADMIN_CLIENT.post(`/v1/users/${request.userId}/roles`, request)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to create the user and role association, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to create the user and role association, please try again later.",
+      ),
+    );
 };
 
 export const deleteUserRole = (
@@ -107,27 +56,10 @@ export const deleteUserRole = (
     `/v1/users/${request.userId}/roles/${request.roleId}`,
   )
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to delete the user and role association, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to delete the user and role association, please try again later.",
+      ),
+    );
 };

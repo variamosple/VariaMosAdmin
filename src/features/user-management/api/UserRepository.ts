@@ -1,5 +1,5 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { User } from "../domain/Entity/User";
 import type { UsersFilter } from "../domain/Entity/UsersFilter";
@@ -9,120 +9,56 @@ export const queryUsers = (
 ): Promise<ResponseModel<User[]>> => {
   return ADMIN_CLIENT.get("/v1/users", { params: filter })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query users, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query users, please try again later.",
+      ),
+    );
 };
 
 export const queryUserById = (userId: string): Promise<ResponseModel<User>> => {
   return ADMIN_CLIENT.get(`/v1/users/${userId}`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query the user with id: ${userId}, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        `Error when trying to query the user with id: ${userId}, please try again later.`,
+      ),
+    );
 };
 
 export const disableUser = (userId: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/users/${userId}/disable`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        return response;
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to disable the user with id: ${userId}, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        `Error when trying to disable the user with id: ${userId}, please try again later.`,
+      ),
+    );
 };
 
 export const enableUser = (userId: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/users/${userId}/enable`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        return response;
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to enable the user with id: ${userId}, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        `Error when trying to enable the user with id: ${userId}, please try again later.`,
+      ),
+    );
 };
 
 export const deleteUser = (userId: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.delete(`/v1/users/${userId}`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        return response;
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to delete the user with id: ${userId}, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        `Error when trying to delete the user with id: ${userId}, please try again later.`,
+      ),
+    );
 };
 
 export const generateRecoveryLink = (
@@ -130,16 +66,10 @@ export const generateRecoveryLink = (
 ): Promise<ResponseModel<{ recoveryUrl: string }>> => {
   return ADMIN_CLIENT.post(`/v1/users/${userId}/recovery-link`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        return error.response?.data;
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to generate recovery link, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to generate recovery link, please try again later.",
+      ),
+    );
 };
