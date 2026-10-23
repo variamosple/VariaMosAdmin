@@ -164,16 +164,53 @@ describe("ResetPasswordPage Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 
-  it("handles failed password reset submit with specific same password error", async () => {
+  it("decides from the code, not from the text of the message", async () => {
     server.use(
       http.post(apiTarget("/auth/verify-token"), () => {
         return HttpResponse.json({ errorCode: null });
       }),
       http.post(apiTarget("/auth/reset-password"), () => {
-        return HttpResponse.json({
-          errorCode: 400,
-          message: "New password cannot be the same as the old password",
-        });
+        return HttpResponse.json(
+          {
+            errorCode: "INVALID_INPUT",
+            message: "New password cannot be the same as the old password.",
+          },
+          { status: 400 },
+        );
+      }),
+    );
+
+    mockSearchParams.set("token", "valid-token");
+
+    render(<ResetPasswordPage />);
+
+    await screen.findByTestId("mock-reset-form");
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
+    await user.click(screen.getByTestId("mock-reset-form"));
+
+    expect(
+      await screen.findByText(
+        "New password cannot be the same as the old password.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows its own message for PASSWORD_REUSED", async () => {
+    server.use(
+      http.post(apiTarget("/auth/verify-token"), () => {
+        return HttpResponse.json({ errorCode: null });
+      }),
+      http.post(apiTarget("/auth/reset-password"), () => {
+        return HttpResponse.json(
+          {
+            errorCode: "PASSWORD_REUSED",
+            message: "New password cannot be the same as the old password.",
+          },
+          { status: 400 },
+        );
       }),
     );
 

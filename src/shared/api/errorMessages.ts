@@ -22,6 +22,7 @@ const EXPECTED_ERROR_MESSAGES: Record<
   MFA_REQUIRED: "Enter the code from your authenticator app.",
   TOO_MANY_REQUESTS: "Too many attempts. Please wait a moment and try again.",
   UNAVAILABLE: "This feature is not available right now.",
+  PASSWORD_REUSED: "The new password must be different from the current one.",
 };
 
 // For services that answer an HTTP status instead of a code

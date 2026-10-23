@@ -12,6 +12,16 @@ export const ErrorCodes = {
   MFA_REQUIRED: "MFA_REQUIRED",
   TOO_MANY_REQUESTS: "TOO_MANY_REQUESTS",
   UNAVAILABLE: "UNAVAILABLE",
+  PASSWORD_REUSED: "PASSWORD_REUSED",
 } as const;
 
 export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
+
+/**
+ * Whether a response carries this code. The shared ResponseModel types
+ * errorCode as a number, but the admin API sends these strings.
+ */
+export const isErrorCode = (
+  errorCode: number | string | null | undefined,
+  code: ErrorCode,
+): boolean => errorCode === code;

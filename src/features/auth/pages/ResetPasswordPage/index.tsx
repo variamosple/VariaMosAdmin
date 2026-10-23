@@ -1,6 +1,7 @@
 import { type FC, useEffect, useState } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ErrorCodes, isErrorCode } from "@/shared/api/errorCodes";
 import {
   resetPassword,
   verifyPasswordResetToken,
@@ -57,19 +58,12 @@ export const ResetPasswordPage: FC = () => {
 
     try {
       const response = await resetPassword(token, password);
-      if (response.errorCode) {
-        const serverMessage = response.message || "";
-        if (
-          serverMessage.includes(
-            "New password cannot be the same as the old password",
-          )
-        ) {
-          setError("New password must be different from the current one.");
-        } else {
-          setError(
-            serverMessage || "Error modifying password. Please try again.",
-          );
-        }
+      if (isErrorCode(response.errorCode, ErrorCodes.PASSWORD_REUSED)) {
+        setError("New password must be different from the current one.");
+      } else if (response.errorCode) {
+        setError(
+          response.message || "Error modifying password. Please try again.",
+        );
       } else {
         setMessage("Your password has been reset successfully !");
         setTimeout(() => {
