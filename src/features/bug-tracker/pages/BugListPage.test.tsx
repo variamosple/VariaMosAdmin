@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
+import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { server } from "@/shared/tests/mocks/server";
 import { BugListPage } from "./BugListPage";
 
@@ -40,7 +41,7 @@ describe("BugListPage Component", () => {
     );
 
     render(<BugListPage />);
-    expect(await screen.findByText("Failed to fetch bugs")).toBeInTheDocument();
+    expect(await screen.findByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
     consoleSpy.mockRestore();
   });
 
@@ -352,7 +353,7 @@ describe("BugListPage Component", () => {
     // Error message should show inside modal
     const modal = screen.getByRole("dialog");
     expect(
-      await within(modal).findByText("Failed to approve bug"),
+      await within(modal).findByText(SYSTEM_ERROR_MESSAGE),
     ).toBeInTheDocument();
     expect(
       screen.getByText("Review and Approve Local Bug"),

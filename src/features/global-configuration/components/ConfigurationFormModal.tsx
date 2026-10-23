@@ -85,8 +85,9 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
 
       onConfigSubmit(config.key, finalValue);
       onClose();
-    } catch (err) {
-      setValidationError(`Invalid JSON format: ${(err as Error).message}`);
+    } catch {
+      // The parser message is technical: it is not shown
+      setValidationError("The value is not valid JSON.");
     }
   };
 

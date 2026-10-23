@@ -150,10 +150,24 @@ describe("LoginPage Page Component", () => {
     });
   });
 
-  it("shows error message if queryParams contains errorMessage", () => {
-    mockQueryParams.set("errorMessage", "Session expired");
+  it("shows the message of the reason in the address", () => {
+    mockQueryParams.set("reason", "session-expired");
     renderLoginPage();
-    expect(screen.getByText("Session expired")).toBeInTheDocument();
+    expect(
+      screen.getByText("Your session has ended. Please sign in again."),
+    ).toBeInTheDocument();
+  });
+
+  it("never shows a text read from the address", () => {
+    mockQueryParams.set(
+      "errorMessage",
+      "Call +1 555 0100 to unlock your account",
+    );
+    renderLoginPage();
+    expect(screen.queryByText(/555 0100/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Sign-in failed. Please try again."),
+    ).toBeInTheDocument();
   });
 
   it("registers redirect if queryParams contains redirectTo", async () => {

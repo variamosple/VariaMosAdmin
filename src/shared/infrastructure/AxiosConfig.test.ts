@@ -66,10 +66,10 @@ describe("AxiosConfig Interceptors", () => {
     );
 
     await expect(testClient.get("/secure")).rejects.toThrow();
-    expect(navigateMock).toHaveBeenCalledWith("/login?errorMessage=");
+    expect(navigateMock).toHaveBeenCalledWith("/login?reason=session-expired");
   });
 
-  it("should navigate to login with message on 401 error if route is not public", async () => {
+  it("should navigate to login with a reason, not the server message, on 401", async () => {
     window.location.hash = "#/dashboard";
     server.use(
       http.get("http://api.test/secure", () => {
@@ -81,9 +81,8 @@ describe("AxiosConfig Interceptors", () => {
     );
 
     await expect(testClient.get("/secure")).rejects.toThrow();
-    expect(navigateMock).toHaveBeenCalledWith(
-      "/login?errorMessage=Token expired",
-    );
+    // The server text is not put in the address
+    expect(navigateMock).toHaveBeenCalledWith("/login?reason=session-expired");
   });
 
   it("should not navigate to login on 401 error if route is public", async () => {

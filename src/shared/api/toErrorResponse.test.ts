@@ -1,9 +1,6 @@
 import { AxiosError, AxiosHeaders, type AxiosResponse } from "axios";
-import {
-  BACK_END_ERROR_MESSAGE,
-  toErrorResponse,
-  UNREACHABLE_ERROR_CODE,
-} from "./toErrorResponse";
+import { SYSTEM_ERROR_MESSAGE, UNREACHABLE_MESSAGE } from "./errorMessages";
+import { toErrorResponse, UNREACHABLE_ERROR_CODE } from "./toErrorResponse";
 
 const failedWith = (status: number, data: object | string | null) =>
   new AxiosError("Request failed", "ERR_BAD_RESPONSE", undefined, undefined, {
@@ -23,7 +20,7 @@ describe("toErrorResponse", () => {
     vi.restoreAllMocks();
   });
 
-  it("keeps the error body written by the server", () => {
+  it("keeps the error body and the message of an expected error", () => {
     const response = toErrorResponse(
       failedWith(400, {
         transactionId: "createBug",
@@ -50,19 +47,30 @@ describe("toErrorResponse", () => {
     expect(response.message).toBe("Language not found.");
   });
 
-  it.each([
-    [
-      "an HTML page from the proxy",
-      "<html><body>502 Bad Gateway</body></html>",
-    ],
-    ["an empty body", ""],
-    ["a body without code or message", { error: "boom" }],
-    ["a list", []],
-  ])("answers an error with the status for %s", (_label, data) => {
-    const response = toErrorResponse(failedWith(502, data), "Fallback");
+  it("shows the generic message for a server error, whatever its text", () => {
+    const response = toErrorResponse(
+      failedWith(500, { errorCode: 500, message: "Internal Server Error" }),
+      "Fallback",
+    );
 
-    expect(response.errorCode).toBe(502);
-    expect(response.message).toBe(BACK_END_ERROR_MESSAGE);
+    expect(response.errorCode).toBe(500);
+    expect(response.message).toBe(SYSTEM_ERROR_MESSAGE);
+  });
+
+  it.each([
+    ["an HTML page from the proxy", 502, UNREACHABLE_MESSAGE],
+    ["a gateway timeout", 504, UNREACHABLE_MESSAGE],
+    ["an empty body", 500, SYSTEM_ERROR_MESSAGE],
+    ["a body without code or message", 400, SYSTEM_ERROR_MESSAGE],
+  ])("answers an error with the status for %s", (_label, status, message) => {
+    const body = status === 502 ? "<html>502 Bad Gateway</html>" : "";
+    const response = toErrorResponse(
+      failedWith(status, _label.includes("without") ? { error: "x" } : body),
+      "Fallback",
+    );
+
+    expect(response.errorCode).toBe(status);
+    expect(response.message).toBe(message);
   });
 
   it.each([
@@ -76,7 +84,7 @@ describe("toErrorResponse", () => {
 
     // parseInt(code) used to give NaN, which pages read as a success
     expect(response.errorCode).toBe(UNREACHABLE_ERROR_CODE);
-    expect(response.message).toBe(BACK_END_ERROR_MESSAGE);
+    expect(response.message).toBe(UNREACHABLE_MESSAGE);
   });
 
   it("answers the fallback message for an error outside the request", () => {

@@ -10,6 +10,7 @@ import {
   Modal,
   Spinner,
 } from "react-bootstrap";
+import { ErrorCodes } from "@/shared/api/errorCodes";
 import {
   confirmMfaEnrollment,
   disableMfa,
@@ -21,7 +22,7 @@ import type { MfaEnrollment, MfaStatus } from "../../domain/Mfa";
 
 /** Refused to a guest or without my-account rights: nothing to show. */
 const isRefused = (errorCode?: number | string | null) =>
-  errorCode === 403 || errorCode === "FORBIDDEN";
+  errorCode === 403 || errorCode === ErrorCodes.FORBIDDEN;
 
 type Load = "loading" | "ready" | "failed" | "refused";
 

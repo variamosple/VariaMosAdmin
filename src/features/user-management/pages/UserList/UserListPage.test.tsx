@@ -9,6 +9,7 @@ import { UserListPage } from "./index";
 const mockNavigate = vi.fn();
 
 import type { ComponentType } from "react";
+import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import type { User } from "../../domain/Entity/User";
 import type { UsersFilter } from "../../domain/Entity/UsersFilter";
 
@@ -327,9 +328,7 @@ describe("UserListPage Integration", () => {
 
     renderWithProviders(<UserListPage />);
     expect(await screen.findByText("User query error")).toBeInTheDocument();
-    expect(
-      screen.getByText("Network/communication error."),
-    ).toBeInTheDocument();
+    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
     consoleSpy.mockRestore();
   });
 });

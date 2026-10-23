@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import type React from "react";
+import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
 import { ProjectListPage } from "./index";
@@ -224,9 +225,7 @@ describe("ProjectListPage Integration", () => {
 
     renderWithProviders(<ProjectListPage />);
     expect(await screen.findByText("Project query error")).toBeInTheDocument();
-    expect(
-      screen.getByText("Network/communication error."),
-    ).toBeInTheDocument();
+    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
     consoleSpy.mockRestore();
   });
 });
