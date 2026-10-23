@@ -154,4 +154,32 @@ describe("NotificationsAdminPage Component Tests", () => {
       ).toBeInTheDocument();
     });
   });
+
+  it("shows the message of a failed dispatch", async () => {
+    const failed = new ResponseModel<void>("dispatchNotification").withError(
+      500,
+      "An unexpected error occurred. Please try again later.",
+    );
+    vi.mocked(dispatchNotification).mockResolvedValue(failed);
+    render(<NotificationsAdminPage />);
+
+    await userEvent.type(
+      await screen.findByLabelText("Notification Title"),
+      "Maintenance",
+    );
+    await userEvent.type(
+      screen.getByLabelText("Message Body"),
+      "Platform offline tonight.",
+    );
+    await userEvent.click(screen.getByRole("button", { name: /Dispatch/i }));
+
+    expect(
+      await screen.findByText(
+        "An unexpected error occurred. Please try again later.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Notifications dispatched successfully!"),
+    ).not.toBeInTheDocument();
+  });
 });

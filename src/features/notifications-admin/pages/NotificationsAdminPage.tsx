@@ -126,7 +126,8 @@ const NotificationsAdminPageComponent: FC = () => {
         userIds: audience === "users" ? selectedUsers : undefined,
       });
 
-      if (response.errorCode === 0) {
+      // Success has no error code; older servers answered errorCode 0
+      if (!response.errorCode) {
         setFeedback({
           type: "success",
           message: "Notifications dispatched successfully!",
