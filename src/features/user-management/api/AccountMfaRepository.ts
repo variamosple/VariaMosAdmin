@@ -1,5 +1,5 @@
 import { ResponseModel } from "@variamosple/variamos-components";
-import { handleRepositoryError } from "@/shared/api/RepositoryUtils";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type {
   AccountMfaReset,
@@ -15,7 +15,7 @@ export const getAccountMfaStatus = (
   ADMIN_CLIENT.get(`/v1/users/${encodeURIComponent(userId)}/mfa`)
     .then((response) => asResponse<AccountMfaStatus>(response.data))
     .catch((error) =>
-      handleRepositoryError(
+      toErrorResponse(
         error,
         "Could not read the two-factor authentication of the user.",
       ),
@@ -28,7 +28,7 @@ export const resetAccountMfa = (
   ADMIN_CLIENT.delete(`/v1/users/${encodeURIComponent(userId)}/mfa`)
     .then((response) => asResponse<AccountMfaReset>(response.data))
     .catch((error) =>
-      handleRepositoryError(
+      toErrorResponse(
         error,
         "Could not turn off the two-factor authentication of the user.",
       ),

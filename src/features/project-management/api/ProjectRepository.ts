@@ -1,8 +1,8 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
 
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import type { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { PROJECTS_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const queryProjects = (
@@ -10,29 +10,12 @@ export const queryProjects = (
 ): Promise<ResponseModel<Project[]>> => {
   return PROJECTS_CLIENT.get("/v1/admin/projects", { params: filter })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query project, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query project, please try again later.",
+      ),
+    );
 };
 
 export const deleteProject = (
@@ -40,29 +23,12 @@ export const deleteProject = (
 ): Promise<ResponseModel<void>> => {
   return PROJECTS_CLIENT.delete(`/v1/admin/projects/${projectId}`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to delete the project, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to delete the project, please try again later.",
+      ),
+    );
 };
 
 // ARCHIVED: Unused in frontend currently
@@ -99,29 +65,12 @@ export const updateProject = (
 ): Promise<ResponseModel<Project>> => {
   return PROJECTS_CLIENT.put(`/v1/admin/projects/${request.id}`, request)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to update the project with id: ${request.id}, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        `Error when trying to update the project with id: ${request.id}, please try again later.`,
+      ),
+    );
 };
 
 export const createProject = (
@@ -129,27 +78,10 @@ export const createProject = (
 ): Promise<ResponseModel<Project>> => {
   return PROJECTS_CLIENT.post("/v1/admin/projects", request)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to create the project, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to create the project, please try again later.",
+      ),
+    );
 };

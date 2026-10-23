@@ -3,13 +3,12 @@ import {
   type SessionInfoResponse,
   type singInResponse,
 } from "@variamosple/variamos-components";
-import axios from "axios";
 import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
-import { handleRepositoryError } from "@/shared/api/RepositoryUtils";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { PasswordPolicy } from "../domain/PasswordPolicy";
 
@@ -23,57 +22,23 @@ export const getSessionInfo = (): Promise<
     },
   })
     .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to get session info, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to get session info, please try again later.",
+      ),
+    );
 };
 
 export const requestLogout = (): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/auth/logout")
-    .then(() => {})
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to logout, please try again later.",
-        );
-      }
-    });
+    .then(() => new ResponseModel<void>())
+    .catch((error) =>
+      toErrorResponse<void>(
+        error,
+        "Error when trying to logout, please try again later.",
+      ),
+    );
 };
 
 /** The sign-in answer; `mfaRequired` when the code is still expected. */
@@ -99,29 +64,12 @@ export const requestSignIn = (
       }
       return result;
     })
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to sign in, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to sign in, please try again later.",
+      ),
+    );
 };
 
 export const requestSignInAsGuest = (
@@ -129,29 +77,12 @@ export const requestSignInAsGuest = (
 ): Promise<ResponseModel<singInResponse>> => {
   return ADMIN_CLIENT.post("/auth/guest/sign-in", { guestId })
     .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to sign in as guest, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to sign in as guest, please try again later.",
+      ),
+    );
 };
 
 export const requestSignUp = (
@@ -159,57 +90,23 @@ export const requestSignUp = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/auth/sign-up", request)
     .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to sign up, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to sign up, please try again later.",
+      ),
+    );
 };
 
 export const getMyAccount = (): Promise<ResponseModel<User>> => {
   return ADMIN_CLIENT.get("/auth/my-account")
     .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to get account details, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to get account details, please try again later.",
+      ),
+    );
 };
 
 export const updatePersonalInformation = (
@@ -217,29 +114,12 @@ export const updatePersonalInformation = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put("/auth/my-account/information", personalInformation)
     .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to get account details, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to get account details, please try again later.",
+      ),
+    );
 };
 
 export const updateUserPassword = (
@@ -247,64 +127,30 @@ export const updateUserPassword = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put("/auth/password-update", passwordUpdate)
     .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to update password, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to update password, please try again later.",
+      ),
+    );
 };
 
 export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/auth/redirects", { url })
     .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return Object.assign(new ResponseModel(), response);
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Error when communicating with the back-end.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to register redirect, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to register redirect, please try again later.",
+      ),
+    );
 };
 
 export const getPasswordPolicy = (): Promise<ResponseModel<PasswordPolicy>> => {
   return ADMIN_CLIENT.get("/auth/password-policy")
     .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) =>
-      handleRepositoryError(error, "Could not read the password policy."),
+      toErrorResponse(error, "Could not read the password policy."),
     );
 };
 
@@ -314,7 +160,7 @@ export const requestPasswordReset = (
   return ADMIN_CLIENT.post("/auth/forgot-password", { email })
     .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) =>
-      handleRepositoryError(
+      toErrorResponse(
         error,
         "Error when trying to request password reset, please try again later.",
       ),
@@ -328,7 +174,7 @@ export const verifyPasswordResetToken = (
   return ADMIN_CLIENT.post("/auth/verify-token", { token })
     .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) =>
-      handleRepositoryError(
+      toErrorResponse(
         error,
         "Error when trying to verify token, please try again later.",
       ),
@@ -345,7 +191,7 @@ export const resetPassword = (
   })
     .then((response) => Object.assign(new ResponseModel(), response.data))
     .catch((error) =>
-      handleRepositoryError(
+      toErrorResponse(
         error,
         "Error when trying to reset password, please try again later.",
       ),

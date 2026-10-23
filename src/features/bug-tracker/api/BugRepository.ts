@@ -1,5 +1,5 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type {
   Bug,
@@ -12,23 +12,12 @@ import type { BugFilter } from "../domain/BugFilter";
 export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
   return ADMIN_CLIENT.get("/bugs", { params: filter })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to query bugs, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query bugs, please try again later.",
+      ),
+    );
 };
 
 export const createBug = (
@@ -53,23 +42,12 @@ export const createBug = (
 
   return ADMIN_CLIENT.post("/bugs", formData)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to create bug, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to create bug, please try again later.",
+      ),
+    );
 };
 
 // ARCHIVED: Unused in frontend currently
@@ -115,23 +93,12 @@ export const updateBugStatus = (
     githubRepo,
   })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to update bug status, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to update bug status, please try again later.",
+      ),
+    );
 };
 
 export const addBugNote = (
@@ -140,89 +107,45 @@ export const addBugNote = (
 ): Promise<ResponseModel<BugStatusLog>> => {
   return ADMIN_CLIENT.post(`/bugs/${bugId}/notes`, { body })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to add bug comment, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to add bug comment, please try again later.",
+      ),
+    );
 };
 
 export const queryBugRepos = (): Promise<ResponseModel<string[]>> => {
   return ADMIN_CLIENT.get("/bugs/repos")
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to query bug repositories, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query bug repositories, please try again later.",
+      ),
+    );
 };
 
 export const queryCategories = (): Promise<ResponseModel<string[]>> => {
   return ADMIN_CLIENT.get("/bugs/categories")
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to query bug categories, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query bug categories, please try again later.",
+      ),
+    );
 };
 
 export const syncBugs = (): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/bugs/sync")
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to synchronize bugs, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to synchronize bugs, please try again later.",
+      ),
+    );
 };
 
 export const queryLocalBugs = (
@@ -230,67 +153,34 @@ export const queryLocalBugs = (
 ): Promise<ResponseModel<Bug[]>> => {
   return ADMIN_CLIENT.get("/bugs/local", { params: filter })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to query local bugs, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query local bugs, please try again later.",
+      ),
+    );
 };
 
 export const rejectLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
   return ADMIN_CLIENT.post(`/bugs/${id}/reject`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to reject local bug, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to reject local bug, please try again later.",
+      ),
+    );
 };
 
 export const restoreLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
   return ADMIN_CLIENT.post(`/bugs/${id}/restore`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to restore local bug, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to restore local bug, please try again later.",
+      ),
+    );
 };
 
 export const uploadAttachment = (
@@ -301,23 +191,12 @@ export const uploadAttachment = (
   formData.append("file", file);
   return ADMIN_CLIENT.post(`/bugs/${bugId}/attachments`, formData)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to upload attachment, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to upload attachment, please try again later.",
+      ),
+    );
 };
 
 export const deleteAttachment = (
@@ -325,23 +204,12 @@ export const deleteAttachment = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.delete(`/bugs/attachments/${attachmentId}`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to delete attachment, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to delete attachment, please try again later.",
+      ),
+    );
 };
 
 export const queryBugNotes = (
@@ -349,21 +217,10 @@ export const queryBugNotes = (
 ): Promise<ResponseModel<RawBugNote[]>> => {
   return ADMIN_CLIENT.get(`/bugs/${bugId}/notes`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-        const response = error.response?.data;
-        if (response) return response;
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to query bug notes, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query bug notes, please try again later.",
+      ),
+    );
 };

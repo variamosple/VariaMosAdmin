@@ -135,4 +135,33 @@ describe("ForgotPasswordPage Component", () => {
     consoleSpy.mockRestore();
     requestSpy.mockRestore();
   });
+
+  it.each([
+    ["the server cannot be reached", () => HttpResponse.error()],
+    [
+      "the proxy answers an HTML page",
+      () =>
+        new HttpResponse("<html><body>502 Bad Gateway</body></html>", {
+          status: 502,
+          headers: { "Content-Type": "text/html" },
+        }),
+    ],
+  ])("shows an error, not a success, when %s", async (_label, answer) => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    server.use(http.post(apiTarget("/auth/forgot-password"), answer));
+    render(
+      <MemoryRouter>
+        <ForgotPasswordPage />
+      </MemoryRouter>,
+    );
+
+    await userEvent.click(screen.getByTestId("mock-forgot-form"));
+
+    expect(
+      await screen.findByText("Error when communicating with the back-end."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/reset link has been sent/),
+    ).not.toBeInTheDocument();
+  });
 });

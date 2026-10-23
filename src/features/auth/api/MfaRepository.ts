@@ -2,7 +2,7 @@ import {
   ResponseModel,
   type singInResponse,
 } from "@variamosple/variamos-components";
-import { handleRepositoryError } from "@/shared/api/RepositoryUtils";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { MfaEnrollment, MfaRecoveryCodes, MfaStatus } from "../domain/Mfa";
 
@@ -13,7 +13,7 @@ export const getMfaStatus = (): Promise<ResponseModel<MfaStatus>> =>
   ADMIN_CLIENT.get("/auth/mfa")
     .then((response) => asResponse<MfaStatus>(response.data))
     .catch((error) =>
-      handleRepositoryError(
+      toErrorResponse(
         error,
         "Could not read the two-factor authentication status.",
       ),
@@ -25,10 +25,7 @@ export const startMfaEnrollment = (
   ADMIN_CLIENT.post("/auth/mfa/enrollment", { password })
     .then((response) => asResponse<MfaEnrollment>(response.data))
     .catch((error) =>
-      handleRepositoryError(
-        error,
-        "Could not start the two-factor authentication.",
-      ),
+      toErrorResponse(error, "Could not start the two-factor authentication."),
     );
 
 export const confirmMfaEnrollment = (
@@ -37,7 +34,7 @@ export const confirmMfaEnrollment = (
   ADMIN_CLIENT.post("/auth/mfa/enrollment/confirm", { code })
     .then((response) => asResponse<MfaRecoveryCodes>(response.data))
     .catch((error) =>
-      handleRepositoryError(
+      toErrorResponse(
         error,
         "Could not turn on the two-factor authentication.",
       ),
@@ -50,7 +47,7 @@ export const disableMfa = (
   ADMIN_CLIENT.post("/auth/mfa/disable", { password, code })
     .then((response) => asResponse<void>(response.data))
     .catch((error) =>
-      handleRepositoryError(
+      toErrorResponse(
         error,
         "Could not turn off the two-factor authentication.",
       ),
@@ -66,9 +63,7 @@ export const requestSignInMfa = (
 ): Promise<ResponseModel<singInResponse>> =>
   ADMIN_CLIENT.post("/auth/sign-in/mfa", { code, rememberDevice })
     .then((response) => asResponse<singInResponse>(response.data))
-    .catch((error) =>
-      handleRepositoryError(error, "Could not check the code."),
-    );
+    .catch((error) => toErrorResponse(error, "Could not check the code."));
 
 /** Asks the code again on every browser where it was skipped. */
 export const forgetTrustedDevices = (): Promise<
@@ -77,5 +72,5 @@ export const forgetTrustedDevices = (): Promise<
   ADMIN_CLIENT.delete("/auth/mfa/trusted-devices")
     .then((response) => asResponse<{ removed: number }>(response.data))
     .catch((error) =>
-      handleRepositoryError(error, "Could not forget your browsers."),
+      toErrorResponse(error, "Could not forget your browsers."),
     );

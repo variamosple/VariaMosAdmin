@@ -1,5 +1,5 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { LANGUAGES_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { Language } from "../domain/Entity/Language";
 import type { LanguagesFilter } from "../domain/Entity/LanguageFilter";
@@ -9,29 +9,12 @@ export const queryLanguages = (
 ): Promise<ResponseModel<Language[]>> => {
   return LANGUAGES_CLIENT.get("/v1/admin/languages", { params: filter })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query language, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query language, please try again later.",
+      ),
+    );
 };
 
 export const deleteLanguage = (
@@ -39,29 +22,12 @@ export const deleteLanguage = (
 ): Promise<ResponseModel<void>> => {
   return LANGUAGES_CLIENT.delete(`/v1/admin/languages/${languageId}`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to delete the language, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to delete the language, please try again later.",
+      ),
+    );
 };
 
 // ARCHIVED: Unused in frontend currently
@@ -98,27 +64,10 @@ export const updateLanguage = (
 ): Promise<ResponseModel<Language>> => {
   return LANGUAGES_CLIENT.put(`/v1/admin/languages/${request.id}`, request)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to update the language with id: ${request.id}, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        `Error when trying to update the language with id: ${request.id}, please try again later.`,
+      ),
+    );
 };

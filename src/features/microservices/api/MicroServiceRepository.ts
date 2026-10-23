@@ -1,5 +1,5 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { MicroService } from "../domain/Entity/MicroService";
@@ -10,29 +10,12 @@ export const queryMicroServices = (
 ): Promise<ResponseModel<MicroService[]>> => {
   return ADMIN_CLIENT.get("/v1/micro-services", { params: filter })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query micro services, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query micro services, please try again later.",
+      ),
+    );
 };
 
 export const startMicroservice = (
@@ -40,29 +23,12 @@ export const startMicroservice = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/micro-services/${microserviceId}/start`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to start the microservice, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to start the microservice, please try again later.",
+      ),
+    );
 };
 
 export const restartMicroservice = (
@@ -70,29 +36,12 @@ export const restartMicroservice = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/micro-services/${microserviceId}/restart`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to restart the microservice, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to restart the microservice, please try again later.",
+      ),
+    );
 };
 
 export const stopMicroservice = (
@@ -100,29 +49,12 @@ export const stopMicroservice = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.put(`/v1/micro-services/${microserviceId}/stop`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          "Error when trying to stop the microservice, please try again later.",
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to stop the microservice, please try again later.",
+      ),
+    );
 };
 
 export const getMicroServiceHistory = (
@@ -137,15 +69,7 @@ export const getMicroServiceHistory = (
     params: { days },
   })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        return (
-          error.response?.data ||
-          new ResponseModel("BACK-ERROR").withError(500, "Network error")
-        );
-      }
-      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
-    });
+    .catch((error) => toErrorResponse(error, "Unexpected error"));
 };
 
 export const scaleMicroservice = (
@@ -156,15 +80,7 @@ export const scaleMicroservice = (
     replicas,
   })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        return (
-          error.response?.data ||
-          new ResponseModel("BACK-ERROR").withError(500, "Network error")
-        );
-      }
-      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
-    });
+    .catch((error) => toErrorResponse(error, "Unexpected error"));
 };
 
 export const getMicroServiceConfigurations = (
@@ -176,15 +92,7 @@ export const getMicroServiceConfigurations = (
 > => {
   return ADMIN_CLIENT.get(`/v1/micro-services/${serviceName}/configurations`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        return (
-          error.response?.data ||
-          new ResponseModel("BACK-ERROR").withError(500, "Network error")
-        );
-      }
-      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
-    });
+    .catch((error) => toErrorResponse(error, "Unexpected error"));
 };
 
 export const updateMicroServiceConfiguration = (
@@ -199,15 +107,7 @@ export const updateMicroServiceConfiguration = (
     { value },
   )
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        return (
-          error.response?.data ||
-          new ResponseModel("BACK-ERROR").withError(500, "Network error")
-        );
-      }
-      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
-    });
+    .catch((error) => toErrorResponse(error, "Unexpected error"));
 };
 
 export const getMicroServiceAuditLogs = (
@@ -222,15 +122,7 @@ export const getMicroServiceAuditLogs = (
     params: { limit },
   })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        return (
-          error.response?.data ||
-          new ResponseModel("BACK-ERROR").withError(500, "Network error")
-        );
-      }
-      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
-    });
+    .catch((error) => toErrorResponse(error, "Unexpected error"));
 };
 
 export const watchMicroserviceLogs = (): WebSocket => {
@@ -242,13 +134,5 @@ export const triggerMicroServicesCheck = (
 ): Promise<ResponseModel<void>> => {
   return ADMIN_CLIENT.post("/v1/micro-services/check", { serviceName })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        return (
-          error.response?.data ||
-          new ResponseModel("BACK-ERROR").withError(500, "Network error")
-        );
-      }
-      return new ResponseModel("APP-ERROR").withError(500, "Unexpected error");
-    });
+    .catch((error) => toErrorResponse(error, "Unexpected error"));
 };

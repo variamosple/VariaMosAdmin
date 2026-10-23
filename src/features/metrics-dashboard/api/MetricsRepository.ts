@@ -1,5 +1,5 @@
-import { ResponseModel } from "@variamosple/variamos-components";
-import axios from "axios";
+import type { ResponseModel } from "@variamosple/variamos-components";
+import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { Metric } from "../domain/Entity/Metric";
 import type { MetricsFilter } from "../domain/Entity/MetricsFilter";
@@ -7,29 +7,12 @@ import type { MetricsFilter } from "../domain/Entity/MetricsFilter";
 export const queryMetrics = (): Promise<ResponseModel<Metric[]>> => {
   return ADMIN_CLIENT.get(`/v1/metrics`)
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query metrics, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query metrics, please try again later.",
+      ),
+    );
 };
 
 export const queryMetric = (
@@ -37,27 +20,10 @@ export const queryMetric = (
 ): Promise<ResponseModel<Metric>> => {
   return ADMIN_CLIENT.get(`/v1/metrics/${filter.id}`, { params: filter })
     .then((response) => response.data)
-    .catch((error) => {
-      if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
-
-        const response = error.response?.data;
-
-        if (response) {
-          return response;
-        }
-
-        return new ResponseModel("BACK-ERROR").withError(
-          Number.parseInt(error.code || "500", 10),
-          "Network/communication error.",
-        );
-      } else {
-        console.error("Unexpected error:", error);
-
-        return new ResponseModel("APP-ERROR").withError(
-          500,
-          `Error when trying to query metric data, please try again later.`,
-        );
-      }
-    });
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query metric data, please try again later.",
+      ),
+    );
 };
