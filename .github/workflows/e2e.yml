@@ -8,6 +8,7 @@ on:
 jobs:
   e2e-real:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Stop native PostgreSQL and start test container
@@ -120,15 +121,13 @@ jobs:
         run: |
           npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
       - name: Run Real E2E Tests (Playwright)
         run: |
           npm run playwright:run:real
         env:
           VARIAMOS_WORKSPACE_DIR: ./
           PLAYWRIGHT_WORKERS: 1
+          PLAYWRIGHT_IN_DOCKER: 1
 
       - name: Print Docker Container Logs on Failure
         if: failure()

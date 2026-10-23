@@ -11,8 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -66,13 +67,33 @@ jobs:
         with:
           path: ./
 
-      - name: Install Playwright Browsers
+  # Runs next to the checks. Playwright runs in its official image, which
+  # already holds the browsers: no apt-get on the Ubuntu mirror, which can
+  # take more than 45 minutes.
+  e2e-mocked:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
         run: |
-          npx playwright install --with-deps
+          npm ci
 
       - name: Run Mocked E2E Tests (Playwright in Docker)
         run: |
           npm run playwright:run:mocked
+        env:
+          PLAYWRIGHT_IN_DOCKER: 1
 
       - name: Upload Playwright Report
         if: failure()
@@ -81,3 +102,17 @@ jobs:
           name: playwright-mocked-report
           path: playwright-report/
           retention-days: 7
+
+  # The required check: it passes only when the checks and the mocked e2e
+  # both pass (a skipped required check would count as passed)
+  build-and-test:
+    needs: [checks, e2e-mocked]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Require the checks and the mocked e2e
+        run: |
+          test "${{ needs.checks.result }}" = success
+          test "${{ needs.e2e-mocked.result }}" = success

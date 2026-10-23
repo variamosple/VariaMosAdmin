@@ -38,7 +38,7 @@ echo " Ready!"
 # Run Playwright
 echo "Running Playwright mocked tests..."
 status=0
-npx playwright test --grep .mocked. || status=$?
+bash ./scripts/playwright-test.sh --grep .mocked. || status=$?
 
 # Cleanup
 echo "Cleaning up Docker container..."
