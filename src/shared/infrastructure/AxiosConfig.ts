@@ -55,9 +55,8 @@ export const setupAxiosInterceptors = (
           currentHash.includes("/sign-up");
 
         if (!isPublicRoute) {
-          navigate(
-            `/login?errorMessage=${error.response?.data?.message || ""}`,
-          );
+          // A code, never the server text: the login page shows its own
+          navigate("/login?reason=session-expired");
         }
       }
 

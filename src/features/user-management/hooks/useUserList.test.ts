@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import type { User } from "../domain/Entity/User";
@@ -161,7 +162,7 @@ describe("useUserList Hook", () => {
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "User disable",
-        message: "Disable failed",
+        message: SYSTEM_ERROR_MESSAGE,
         variant: "danger",
       }),
     );

@@ -3,6 +3,7 @@ import { type FC, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
+import { loginMessageOf } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { pageLoader } from "@/shared/infrastructure/PageLoader";
 import { registerRedirect } from "../../api/AuthRepository";
@@ -66,9 +67,9 @@ export const LoginPage: FC = () => {
   };
 
   useEffect(() => {
-    const errorMsg = queryParams.get("errorMessage");
-    if (errorMsg) {
-      setErrorMessage(errorMsg);
+    const loginMessage = loginMessageOf(queryParams);
+    if (loginMessage) {
+      setErrorMessage(loginMessage);
     }
 
     // Google sign-in of an account with a second factor

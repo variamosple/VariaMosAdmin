@@ -158,7 +158,9 @@ describe("ForgotPasswordPage Component", () => {
     await userEvent.click(screen.getByTestId("mock-forgot-form"));
 
     expect(
-      await screen.findByText("Error when communicating with the back-end."),
+      await screen.findByText(
+        "The server cannot be reached. Check your connection and try again.",
+      ),
     ).toBeInTheDocument();
     expect(
       screen.queryByText(/reset link has been sent/),

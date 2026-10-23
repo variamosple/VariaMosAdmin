@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
+import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import type { Bug } from "../domain/Bug";
@@ -173,7 +174,7 @@ describe("useBugList Hook", () => {
     });
 
     expect(result.current.bugs).toEqual([]);
-    expect(result.current.error).toBe("Server Error");
+    expect(result.current.error).toBe(SYSTEM_ERROR_MESSAGE);
 
     consoleErrorSpy.mockRestore();
   });

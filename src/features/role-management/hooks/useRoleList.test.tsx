@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
+import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { useRoleList } from "./useRoleList";
@@ -193,7 +194,7 @@ describe("useRoleList Hook", () => {
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Role edit",
-        message: "Edit failed",
+        message: SYSTEM_ERROR_MESSAGE,
         variant: "danger",
       }),
     );
