@@ -55,6 +55,9 @@ vi.mock("@/features/user-management", async () => ({
   UserDetailsPage: () => <div>UserDetailsPage</div>,
   UserListPage: () => <div>UserListPage</div>,
 }));
+vi.mock("@/features/activity-journal", async () => ({
+  JournalPage: () => <div>JournalPage</div>,
+}));
 vi.mock("@/features/bug-tracker", async () => ({
   BugListPage: () => <div>BugListPage</div>,
 }));
@@ -79,6 +82,7 @@ describe("Router Configuration", () => {
     expect(paths).toContain("models");
     expect(paths).toContain("metrics");
     expect(paths).toContain("bugs");
+    expect(paths).toContain("journal");
 
     // Check auth layouts paths
     const loginRoute = ROUTES.find((r) => r.path === "/login");
