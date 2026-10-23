@@ -4,6 +4,7 @@ import {
   ProtectedRoute,
 } from "@variamosple/variamos-components";
 import { Navigate, Outlet, type RouteObject } from "react-router-dom";
+import { JournalPage } from "@/features/activity-journal";
 import {
   ForgotPasswordPage,
   LoginPage,
@@ -263,6 +264,17 @@ export const ROUTES: RouteObject[] = [
             ),
           },
         ],
+      },
+      {
+        path: "journal",
+        element: (
+          <ProtectedRoute
+            notAuthorizedPath={NOT_AUTHORIZED_PATH}
+            allowedPermissions={["activity-logs::query"]}
+          >
+            <JournalPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "admin/notifications",
