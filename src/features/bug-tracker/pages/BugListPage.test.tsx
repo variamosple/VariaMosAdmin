@@ -194,6 +194,15 @@ describe("BugListPage Component", () => {
         sent.push({ id: String(params.bugId), userIds });
         return HttpResponse.json({ data: [{ id: "admin-2", name: "Ben" }] });
       }),
+      // The API notes the change in the timeline once it is saved
+      http.get("*/bugs/:bugId/notes", () =>
+        HttpResponse.json({
+          data:
+            sent.length > 0
+              ? [{ id: 1, body: "[Audit] Assigned to: Ben (was: nobody)." }]
+              : [],
+        }),
+      ),
     );
     render(<BugListPage />);
     // Each tab renders the list: the GitHub one comes first
@@ -220,6 +229,9 @@ describe("BugListPage Component", () => {
     });
     const [githubTable] = screen.getAllByRole("table");
     expect(within(githubTable).getByText("Ben")).toBeInTheDocument();
+    expect(
+      await within(modal).findByText("Assigned to: Ben (was: nobody)."),
+    ).toBeInTheDocument();
   });
 
   it("does not offer a status change without bugs::update", async () => {
