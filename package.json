@@ -76,7 +76,7 @@
     "start-server-and-test": "^3.0.13",
     "taze": "^21.3.0",
     "typescript": "^6.0.3",
-    "undici": "^8.12.1",
+    "undici": "^8.12.3",
     "vite": "^8.3.4",
     "vitest": "^4.1.11"
   },
