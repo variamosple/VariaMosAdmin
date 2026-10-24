@@ -139,6 +139,10 @@ describe("BugFormModal Component", () => {
       "Test Description content",
     );
     await user.selectOptions(screen.getByLabelText(/Category \*/i), "Backend");
+    await user.selectOptions(
+      screen.getByLabelText("Component"),
+      "microservice",
+    );
 
     fireEvent.submit(screen.getByRole("button", { name: "Report Bug" }));
 
@@ -148,6 +152,7 @@ describe("BugFormModal Component", () => {
           title: "Test Bug Title",
           description: "Test Description content",
           category: "Backend",
+          component: "microservice",
         }),
         undefined,
       );

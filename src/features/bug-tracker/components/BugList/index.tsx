@@ -32,6 +32,7 @@ export const BugList: FC<BugListProps> = ({
           <th>Description</th>
           <th>Repository</th>
           <th>Priority</th>
+          <th>Component</th>
           <th>Status</th>
           <th>Creator / Date</th>
           {showAttachment ? <th>Attachment</th> : <th>Assigned to</th>}
@@ -54,7 +55,7 @@ export const BugList: FC<BugListProps> = ({
           ))
         ) : (
           <tr>
-            <td colSpan={9} className="text-center text-muted py-4">
+            <td colSpan={10} className="text-center text-muted py-4">
               No bugs found.
             </td>
           </tr>

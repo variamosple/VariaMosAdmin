@@ -169,4 +169,18 @@ describe("BugList Component", () => {
     expect(screen.queryByText("Assigned to")).not.toBeInTheDocument();
     expect(screen.getByText("Attachment")).toBeInTheDocument();
   });
+
+  it("shows the component of each bug", () => {
+    render(
+      <BugList
+        items={[{ ...mockBugs[0], component: "admin" }, mockBugs[1]]}
+        onViewDetails={mockOnViewDetails}
+        activeTab="local"
+      />,
+    );
+
+    expect(screen.getByText("Component")).toBeInTheDocument();
+    expect(screen.getByText("Administration interface")).toBeInTheDocument();
+    expect(screen.getByText("Not specified")).toBeInTheDocument();
+  });
 });

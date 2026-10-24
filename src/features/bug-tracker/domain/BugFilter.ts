@@ -5,4 +5,5 @@ export interface BugFilter {
   search?: string;
   // Account id: bugs assigned to this administrator
   assignee?: string;
+  component?: string;
 }

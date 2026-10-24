@@ -2,6 +2,11 @@ import { type ChangeEvent, type FC, useEffect, useRef, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import type { Bug } from "../../domain/Bug";
+import {
+  BUG_COMPONENT_LABELS,
+  BUG_COMPONENTS,
+} from "../../domain/BugComponent";
+import { BUG_PRIORITIES, BUG_PRIORITY_LABELS } from "../../domain/BugPriority";
 
 interface BugFormModalProps {
   show: boolean;
@@ -38,6 +43,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
       description: "",
       priority: "medium",
       category: "Other",
+      component: "",
       githubRepo: "",
     },
   });
@@ -49,6 +55,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
         description: "",
         priority: "medium",
         category: categories[0] || "Other",
+        component: "",
         githubRepo: "",
       });
       setSelectedFile(null);
@@ -151,9 +158,11 @@ export const BugFormModal: FC<BugFormModalProps> = ({
                 <Form.Group className="mb-3" controlId="bugPriority">
                   <Form.Label>Priority *</Form.Label>
                   <Form.Select {...register("priority", { required: true })}>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    {BUG_PRIORITIES.map((priority) => (
+                      <option key={priority} value={priority}>
+                        {BUG_PRIORITY_LABELS[priority]}
+                      </option>
+                    ))}
                   </Form.Select>
                 </Form.Group>
               </div>
@@ -173,6 +182,20 @@ export const BugFormModal: FC<BugFormModalProps> = ({
                 </Form.Group>
               </div>
             )}
+
+            <div className="col-md-12">
+              <Form.Group className="mb-3" controlId="bugComponent">
+                <Form.Label>Component</Form.Label>
+                <Form.Select {...register("component")}>
+                  <option value="">Not specified</option>
+                  {BUG_COMPONENTS.map((component) => (
+                    <option key={component} value={component}>
+                      {BUG_COMPONENT_LABELS[component]}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </div>
           </div>
 
           <Form.Group className="mb-3" controlId="bugFile">

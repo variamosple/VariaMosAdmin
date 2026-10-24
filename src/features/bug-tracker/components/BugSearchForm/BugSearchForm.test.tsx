@@ -206,4 +206,35 @@ describe("BugSearchForm Component", () => {
     );
     expect(screen.queryByLabelText("Assigned to")).not.toBeInTheDocument();
   });
+
+  it("filters by component and priority, critical included, on every tab", async () => {
+    render(
+      <BugSearchForm
+        onSubmit={mockOnSubmit}
+        isLoading={false}
+        onSearchReset={mockOnSearchReset}
+        repos={sampleRepos}
+        activeTab="local"
+      />,
+    );
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
+
+    await user.selectOptions(screen.getByLabelText("Component"), "language");
+    await user.selectOptions(screen.getByLabelText("Priority"), "critical");
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          component: "language",
+          priority: "critical",
+        }),
+      );
+    });
+  });
 });

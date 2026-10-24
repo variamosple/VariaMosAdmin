@@ -16,6 +16,7 @@ import {
 } from "../api/BugRepository";
 import type { Bug, BugStatusLog, BugUserRef, RawBugNote } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
+import type { BugPriority } from "../domain/BugPriority";
 
 export const useBugList = () => {
   // 1. States for data
@@ -138,10 +139,11 @@ export const useBugList = () => {
   const handleCreateBug = async (
     title: string,
     description: string,
-    priority: "low" | "medium" | "high",
+    priority: BugPriority,
     category: string,
     githubRepo?: string,
     file?: File,
+    component?: string,
   ) => {
     setIsSubmitting(true);
     setCreateError(null);
@@ -152,6 +154,7 @@ export const useBugList = () => {
       category,
       githubRepo,
       file,
+      component,
     );
 
     if (response.errorCode) {
@@ -241,6 +244,7 @@ export const useBugList = () => {
     priority?: string,
     category?: string,
     githubRepo?: string,
+    component?: string,
   ) => {
     setError(null);
     const response = await updateBugStatus(
@@ -252,6 +256,7 @@ export const useBugList = () => {
       priority,
       category,
       githubRepo,
+      component,
     );
     if (response.errorCode) {
       setError(response.message || "Failed to approve bug");

@@ -9,6 +9,7 @@ import type {
   RawBugNote,
 } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
+import type { BugPriority } from "../domain/BugPriority";
 
 export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
   return ADMIN_CLIENT.get("/bugs", { params: filter })
@@ -24,16 +25,20 @@ export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
 export const createBug = (
   title: string,
   description: string,
-  priority: "low" | "medium" | "high",
+  priority: BugPriority,
   category: string,
   githubRepo?: string,
   file?: File,
+  component?: string,
 ): Promise<ResponseModel<Bug>> => {
   const formData = new FormData();
   formData.append("title", title);
   formData.append("description", description);
   formData.append("priority", priority);
   formData.append("category", category);
+  if (component) {
+    formData.append("component", component);
+  }
   if (githubRepo) {
     formData.append("githubRepo", githubRepo);
   }
@@ -83,6 +88,7 @@ export const updateBugStatus = (
   priority?: string,
   category?: string,
   githubRepo?: string,
+  component?: string,
 ): Promise<ResponseModel<Bug>> => {
   return ADMIN_CLIENT.post(`/bugs/${bugId}/status`, {
     status,
@@ -92,6 +98,7 @@ export const updateBugStatus = (
     priority,
     category,
     githubRepo,
+    component: component || undefined,
   })
     .then((response) => response.data)
     .catch((error) =>
