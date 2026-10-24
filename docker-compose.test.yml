@@ -10,7 +10,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key:/variaMosAdminService/jwtRS256.key
       - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key.pub:/variaMosAdminService/jwtRS256.key.pub
-    command: ["node", "--env-file=env/development.env", "./dist/index.js", "--env=development"]
+    # No env file: since variamos_ms_admin#108 it is neither in git nor in the
+    # image; the variables below and the code defaults are enough
+    command: ["node", "./dist/index.js", "--env=development"]
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
