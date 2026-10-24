@@ -17,6 +17,7 @@ import { ArrowRepeat, Github, Plus } from "react-bootstrap-icons";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { attachmentUrl } from "../api/attachmentUrl";
 import { BugApprovalModal } from "../components/BugApprovalModal";
+import { BugAssigneesForm } from "../components/BugAssigneesForm";
 import { BugFormModal } from "../components/BugFormModal";
 import { BugList } from "../components/BugList";
 import { BugSearchForm } from "../components/BugSearchForm";
@@ -24,6 +25,7 @@ import { BugStatusBadge } from "../components/BugStatusBadge";
 import { BugStatusForm } from "../components/BugStatusForm";
 import type { Bug, BugAttachment, BugStatusLog } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
+import { useAssignableUsers } from "../hooks/useAssignableUsers";
 import { useBugList } from "../hooks/useBugList";
 import { useBugPermissions } from "../hooks/useBugPermissions";
 
@@ -45,6 +47,7 @@ const BugListPageComponent: FC = () => {
     handleRestore,
     handleApprove,
     handleChangeStatus,
+    handleSetAssignees,
     error,
     loadError,
     createError,
@@ -55,6 +58,7 @@ const BugListPageComponent: FC = () => {
     handleAddNote,
   } = useBugList();
   const { canUpdate, canSync } = useBugPermissions();
+  const assignableUsers = useAssignableUsers(canUpdate);
 
   const [showUserCreateModal, setShowUserCreateModal] = useState(false);
   const [showAdminCreateModal, setShowAdminCreateModal] = useState(false);
@@ -199,6 +203,7 @@ const BugListPageComponent: FC = () => {
         isLoading={isLoading}
         repos={repos}
         activeTab={activeTab}
+        assignees={assignableUsers}
       />
 
       <Tabs
@@ -353,6 +358,17 @@ const BugListPageComponent: FC = () => {
                 </Col>
               </Row>
 
+              <Row className="mb-3">
+                <Col>
+                  <strong>Assigned to: </strong>{" "}
+                  {selectedBugForDetails.assignedAdmins?.length
+                    ? selectedBugForDetails.assignedAdmins
+                        .map((user) => user.name)
+                        .join(", ")
+                    : "Nobody"}
+                </Col>
+              </Row>
+
               {selectedBugForDetails.githubRepo &&
                 selectedBugForDetails.gitIssueNumber && (
                   <div
@@ -395,6 +411,26 @@ const BugListPageComponent: FC = () => {
                     </ul>
                   </div>
                 )}
+
+              {canUpdate && selectedBugForDetails.id && (
+                <BugAssigneesForm
+                  key={(selectedBugForDetails.assignedAdmins ?? [])
+                    .map((user) => user.id)
+                    .join()}
+                  assignees={selectedBugForDetails.assignedAdmins ?? []}
+                  candidates={assignableUsers}
+                  onSave={async (userIds) => {
+                    const bugId = selectedBugForDetails.id as string;
+                    const result = await handleSetAssignees(bugId, userIds);
+                    if ("error" in result) return result.error;
+                    setSelectedBugForDetails({
+                      ...selectedBugForDetails,
+                      assignedAdmins: result.assignees,
+                    });
+                    return null;
+                  }}
+                />
+              )}
 
               {canUpdate &&
                 selectedBugForDetails.id &&

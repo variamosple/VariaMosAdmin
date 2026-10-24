@@ -135,4 +135,38 @@ describe("BugList Component", () => {
     expect(mockOnRestore).toHaveBeenCalledTimes(1);
     expect(mockOnRestore).toHaveBeenCalledWith(mockBugs[0].id);
   });
+
+  it("shows who a GitHub bug is assigned to, and the attachment elsewhere", () => {
+    const assigned: Bug[] = [
+      {
+        ...mockBugs[0],
+        assignedAdmins: [
+          { id: "admin-1", name: "Ana" },
+          { id: "admin-2", name: "Ben" },
+        ],
+      },
+      mockBugs[1],
+    ];
+    const { rerender } = render(
+      <BugList
+        items={assigned}
+        onViewDetails={mockOnViewDetails}
+        activeTab="github"
+      />,
+    );
+
+    expect(screen.getByText("Assigned to")).toBeInTheDocument();
+    expect(screen.getByText("Ana, Ben")).toBeInTheDocument();
+    expect(screen.getByText("Unassigned")).toBeInTheDocument();
+
+    rerender(
+      <BugList
+        items={assigned}
+        onViewDetails={mockOnViewDetails}
+        activeTab="local"
+      />,
+    );
+    expect(screen.queryByText("Assigned to")).not.toBeInTheDocument();
+    expect(screen.getByText("Attachment")).toBeInTheDocument();
+  });
 });

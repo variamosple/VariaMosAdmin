@@ -114,6 +114,16 @@ export const BugRowComponent: FC<BugRowProps> = ({
         </div>
       </td>
 
+      {activeTab === "github" && (
+        <td className="align-middle small">
+          {bug.assignedAdmins && bug.assignedAdmins.length > 0 ? (
+            bug.assignedAdmins.map((user) => user.name).join(", ")
+          ) : (
+            <span className="text-muted">Unassigned</span>
+          )}
+        </td>
+      )}
+
       {activeTab !== "github" && (
         <td className="align-middle">
           {bug.attachments && bug.attachments.length > 0 ? (

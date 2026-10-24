@@ -2,6 +2,7 @@ import { type FC, useCallback, useEffect, useRef } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import type { BugUserRef } from "../../domain/Bug";
 import type { BugFilter } from "../../domain/BugFilter";
 import { GITHUB_BUG_STATUSES, statusLabel } from "../../domain/BugStatus";
 
@@ -11,6 +12,8 @@ export interface BugSearchFormProps {
   onSearchReset: () => void;
   repos: string[];
   activeTab: "github" | "local" | "trash";
+  // Offered as the "Assigned to" filter; empty without bugs::update
+  assignees?: BugUserRef[];
 }
 export const BugSearchForm: FC<BugSearchFormProps> = ({
   onSubmit,
@@ -18,6 +21,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
   onSearchReset,
   repos,
   activeTab,
+  assignees = [],
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
@@ -37,6 +41,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
       status: "",
       priority: "",
       search: "",
+      assignee: "",
     });
     onSearchReset();
   };
@@ -62,6 +67,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
       status: undefined,
       priority: undefined,
       search: undefined,
+      assignee: undefined,
     });
   }, [reset]);
 
@@ -214,6 +220,37 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
             </InputGroup>
           </Form.Group>
         </Col>
+
+        {isGitHub && assignees.length > 0 && (
+          <Col xs={12} sm={6} lg={3} className="mt-2">
+            <Form.Group className="w-100" controlId="assignee">
+              <Form.Label>Assigned to</Form.Label>
+              <InputGroup>
+                <Form.Select
+                  className="form-select"
+                  aria-label="Assigned to"
+                  {...register("assignee")}
+                >
+                  <option value="">Anyone</option>
+                  {assignees.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}
+                    </option>
+                  ))}
+                </Form.Select>
+                <Button
+                  title="Clear assignee filter"
+                  variant="outline-secondary"
+                  onClick={() => clearField("assignee")}
+                  className="fw-bold"
+                  disabled={isLoading}
+                >
+                  <Trash />
+                </Button>
+              </InputGroup>
+            </Form.Group>
+          </Col>
+        )}
       </Row>
     </Form>
   );

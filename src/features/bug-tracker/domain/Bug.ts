@@ -1,3 +1,9 @@
+// An administrator, as the bug tracker shows them
+export interface BugUserRef {
+  id: string;
+  name: string;
+}
+
 export interface Bug {
   id?: string;
   title: string;
@@ -13,6 +19,7 @@ export interface Bug {
   createdBy?: { id: string; name: string; email: string };
   attachments?: BugAttachment[];
   reporterEmail?: string;
+  assignedAdmins?: BugUserRef[];
 }
 
 export interface BugAttachment {
