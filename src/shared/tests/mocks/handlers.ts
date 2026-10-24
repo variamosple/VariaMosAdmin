@@ -88,6 +88,26 @@ export const handlers = [
     });
   }),
 
+  http.get(apiTarget("/bugs/assignable-users"), () => {
+    return HttpResponse.json({
+      data: [
+        { id: "admin-1", name: "Ana" },
+        { id: "admin-2", name: "Ben" },
+      ],
+    });
+  }),
+
+  http.put(apiTarget("/bugs/:bugId/assignees"), async ({ request }) => {
+    const { userIds } = (await request.json()) as { userIds: string[] };
+    const names: Record<string, string> = {
+      "admin-1": "Ana",
+      "admin-2": "Ben",
+    };
+    return HttpResponse.json({
+      data: userIds.map((id) => ({ id, name: names[id] ?? id })),
+    });
+  }),
+
   http.get(apiTarget("/bugs/categories"), () => {
     return HttpResponse.json({
       data: ["cat-1", "cat-2"],

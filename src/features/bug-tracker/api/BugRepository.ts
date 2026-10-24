@@ -5,6 +5,7 @@ import type {
   Bug,
   BugAttachment,
   BugStatusLog,
+  BugUserRef,
   RawBugNote,
 } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
@@ -111,6 +112,33 @@ export const addBugNote = (
       toErrorResponse(
         error,
         "Error when trying to add bug comment, please try again later.",
+      ),
+    );
+};
+
+export const queryAssignableUsers = (): Promise<
+  ResponseModel<BugUserRef[]>
+> => {
+  return ADMIN_CLIENT.get("/bugs/assignable-users")
+    .then((response) => response.data)
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to query assignable administrators, please try again later.",
+      ),
+    );
+};
+
+export const setBugAssignees = (
+  bugId: string,
+  userIds: string[],
+): Promise<ResponseModel<BugUserRef[]>> => {
+  return ADMIN_CLIENT.put(`/bugs/${bugId}/assignees`, { userIds })
+    .then((response) => response.data)
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to assign the bug, please try again later.",
       ),
     );
 };

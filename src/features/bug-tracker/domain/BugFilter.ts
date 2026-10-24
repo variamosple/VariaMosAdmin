@@ -3,4 +3,6 @@ export interface BugFilter {
   status?: string;
   priority?: string;
   search?: string;
+  // Account id: bugs assigned to this administrator
+  assignee?: string;
 }

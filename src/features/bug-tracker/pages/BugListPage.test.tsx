@@ -167,10 +167,69 @@ describe("BugListPage Component", () => {
     expect(await within(modal).findByText("Resolved")).toBeInTheDocument();
   });
 
+  it("assigns a GitHub bug to administrators from its details", async () => {
+    const user = userEvent.setup();
+    const sent: { id: string; userIds: string[] }[] = [];
+    server.use(
+      http.get("*/bugs", () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: "gh-1",
+              title: "GitHub Bug",
+              description: "Desc",
+              priority: "high",
+              category: "frontend",
+              status: "open",
+              githubRepo: "owner/repo",
+              gitIssueNumber: 12,
+              assignedAdmins: [],
+            },
+          ],
+        }),
+      ),
+      http.put("*/bugs/:bugId/assignees", async ({ request, params }) => {
+        const { userIds } = (await request.json()) as { userIds: string[] };
+        sent.push({ id: String(params.bugId), userIds });
+        return HttpResponse.json({ data: [{ id: "admin-2", name: "Ben" }] });
+      }),
+    );
+    render(<BugListPage />);
+    // Each tab renders the list: the GitHub one comes first
+    expect(await screen.findAllByText("Unassigned")).not.toHaveLength(0);
+    const [details] = screen.getAllByRole("button", { name: /details/i });
+    await user.click(details);
+
+    const modal = await screen.findByRole("dialog");
+    expect(
+      within(modal).getByText("Assigned to:").parentElement,
+    ).toHaveTextContent("Assigned to: Nobody");
+    await user.click(await within(modal).findByLabelText("Ben"));
+    await user.click(
+      within(modal).getByRole("button", { name: "Save assignees" }),
+    );
+
+    await waitFor(() => {
+      expect(sent).toEqual([{ id: "gh-1", userIds: ["admin-2"] }]);
+    });
+    await waitFor(() => {
+      expect(
+        within(modal).getByText("Assigned to:").parentElement,
+      ).toHaveTextContent("Assigned to: Ben");
+    });
+    const [githubTable] = screen.getAllByRole("table");
+    expect(within(githubTable).getByText("Ben")).toBeInTheDocument();
+  });
+
   it("does not offer a status change without bugs::update", async () => {
     const user = userEvent.setup();
     givePermissions(["bugs::query"]);
+    const assignableRequests: string[] = [];
     server.use(
+      http.get("*/bugs/assignable-users", ({ request }) => {
+        assignableRequests.push(request.url);
+        return HttpResponse.json({ data: [] });
+      }),
       http.get("*/bugs", () =>
         HttpResponse.json({
           data: [
@@ -196,6 +255,9 @@ describe("BugListPage Component", () => {
 
     await screen.findByRole("dialog");
     expect(screen.queryByLabelText("New status")).not.toBeInTheDocument();
+    expect(screen.queryByText("Assign administrators")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Assigned to")).not.toBeInTheDocument();
+    expect(assignableRequests).toEqual([]);
   });
 
   it("rejects a bug only after confirmation", async () => {

@@ -201,6 +201,47 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     await expect(rows.nth(0)).not.toContainText("GitHub UI Crash");
   });
 
+  test("should assign a GitHub bug to administrators and filter by assignee", async ({ page }) => {
+    const ana = { id: "admin-1", name: "Ana" };
+    const ben = { id: "admin-2", name: "Ben" };
+    const issue = { id: "gh-1", title: "GitHub UI Crash", priority: "high", status: "open", category: "Editor", description: "Crashes on click", githubRepo: "owner/repo", gitIssueNumber: 7, attachments: [], assignedAdmins: [] };
+    const sentAssignees: string[][] = [];
+
+    await page.route("**/bugs*", async (route) => {
+      const assigned = route.request().url().includes("assignee=admin-2");
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: assigned ? [] : [issue] })
+      });
+    });
+    await page.route("**/bugs/assignable-users", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: [ana, ben] }) });
+    });
+    await page.route("**/bugs/gh-1/assignees", async (route) => {
+      const { userIds } = route.request().postDataJSON() as { userIds: string[] };
+      sentAssignees.push(userIds);
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: [ana, ben].filter((u) => userIds.includes(u.id)) }) });
+    });
+
+    await loginAndGoToBugs(page);
+
+    const rows = page.locator(".tab-pane.active table tbody tr");
+    await expect(rows.nth(0)).toContainText("Unassigned");
+    await rows.nth(0).getByRole("button", { name: "Details" }).click();
+
+    const modal = page.locator(".modal");
+    await modal.getByLabel("Ben").check();
+    await modal.getByRole("button", { name: "Save assignees" }).click();
+    await expect(modal.getByText("Assigned to:").locator("..")).toContainText("Assigned to: Ben");
+    expect(sentAssignees).toEqual([["admin-2"]]);
+    await modal.locator(".modal-footer").getByRole("button", { name: "Close" }).click();
+    await expect(rows.nth(0)).toContainText("Ben");
+
+    await page.getByLabel("Assigned to").selectOption("admin-2");
+    await expect(page.locator(".tab-pane.active table tbody")).toContainText("No bugs found.");
+  });
+
   test("should display Local Inbox bugs, access attachments, and perform Approve/Reject actions", async ({ page }) => {
     const mockLocalBugs = [
       { id: "local-1", title: "Local UI Crash", priority: "medium", status: "pending", category: "Editor", description: "Crash log", reporterEmail: "reporter@test.com", attachments: [{ filePath: "/uploads/screenshot.png" }] }

@@ -149,4 +149,61 @@ describe("BugSearchForm Component", () => {
       expect(mockOnSubmit).toHaveBeenCalledTimes(1);
     });
   });
+
+  it("filters GitHub bugs by assignee when administrators are given", async () => {
+    const assignees = [
+      { id: "admin-1", name: "Ana" },
+      { id: "admin-2", name: "Ben" },
+    ];
+    const { rerender } = render(
+      <BugSearchForm
+        onSubmit={mockOnSubmit}
+        isLoading={false}
+        onSearchReset={mockOnSearchReset}
+        repos={sampleRepos}
+        activeTab="github"
+        assignees={assignees}
+      />,
+    );
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime,
+      delay: null,
+    });
+
+    await user.selectOptions(screen.getByLabelText("Assigned to"), "admin-2");
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ assignee: "admin-2" }),
+      );
+    });
+
+    rerender(
+      <BugSearchForm
+        onSubmit={mockOnSubmit}
+        isLoading={false}
+        onSearchReset={mockOnSearchReset}
+        repos={sampleRepos}
+        activeTab="local"
+        assignees={assignees}
+      />,
+    );
+    expect(screen.queryByLabelText("Assigned to")).not.toBeInTheDocument();
+  });
+
+  it("has no assignee filter without administrators to choose from", () => {
+    render(
+      <BugSearchForm
+        onSubmit={mockOnSubmit}
+        isLoading={false}
+        onSearchReset={mockOnSearchReset}
+        repos={sampleRepos}
+        activeTab="github"
+      />,
+    );
+    expect(screen.queryByLabelText("Assigned to")).not.toBeInTheDocument();
+  });
 });

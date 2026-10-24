@@ -10,10 +10,11 @@ import {
   queryLocalBugs,
   rejectLocalBug,
   restoreLocalBug,
+  setBugAssignees,
   syncBugs,
   updateBugStatus,
 } from "../api/BugRepository";
-import type { Bug, BugStatusLog, RawBugNote } from "../domain/Bug";
+import type { Bug, BugStatusLog, BugUserRef, RawBugNote } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 
 export const useBugList = () => {
@@ -213,6 +214,24 @@ export const useBugList = () => {
     return null;
   };
 
+  // Resolves to the saved assignees, or to the error message
+  const handleSetAssignees = async (
+    id: string,
+    userIds: string[],
+  ): Promise<{ assignees: BugUserRef[] } | { error: string }> => {
+    const response = await setBugAssignees(id, userIds);
+    if (response.errorCode) {
+      return { error: response.message || "Failed to assign the bug" };
+    }
+    const assignees = response.data ?? [];
+    setBugs((current) =>
+      current.map((bug) =>
+        bug.id === id ? { ...bug, assignedAdmins: assignees } : bug,
+      ),
+    );
+    return { assignees };
+  };
+
   const handleApprove = async (
     id: string,
     status: string,
@@ -265,6 +284,7 @@ export const useBugList = () => {
     handleRestore,
     handleApprove,
     handleChangeStatus,
+    handleSetAssignees,
     refreshBugs: fetchBugs,
     notes,
     isLoadingNotes,

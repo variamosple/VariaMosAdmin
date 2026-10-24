@@ -20,6 +20,7 @@ export const BugList: FC<BugListProps> = ({
   onRestore,
   onApprove,
 }) => {
+  // GitHub bugs show their assignees, the others their attachment
   const showAttachment = activeTab !== "github";
 
   return (
@@ -33,7 +34,7 @@ export const BugList: FC<BugListProps> = ({
           <th>Priority</th>
           <th>Status</th>
           <th>Creator / Date</th>
-          {showAttachment && <th>Attachment</th>}
+          {showAttachment ? <th>Attachment</th> : <th>Assigned to</th>}
           <th className="text-center">Actions</th>
         </tr>
       </thead>
@@ -53,10 +54,7 @@ export const BugList: FC<BugListProps> = ({
           ))
         ) : (
           <tr>
-            <td
-              colSpan={showAttachment ? 9 : 8}
-              className="text-center text-muted py-4"
-            >
+            <td colSpan={9} className="text-center text-muted py-4">
               No bugs found.
             </td>
           </tr>
