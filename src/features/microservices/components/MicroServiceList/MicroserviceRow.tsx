@@ -1,7 +1,10 @@
 import { useLineBuffer } from "@/shared/hooks/useLineBuffer";
 import { useSocket } from "@/shared/hooks/useSocket";
 import { watchMicroserviceLogs } from "../../api/MicroServiceRepository";
-import type { MicroService } from "../../domain/Entity/MicroService";
+import type {
+  HealthStatus,
+  MicroService,
+} from "../../domain/Entity/MicroService";
 import { UptimeBar } from "../UptimeBar";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
@@ -21,9 +24,19 @@ export interface MicroServiceRowProps {
   onMicroServiceStart: (microservice: MicroService) => void;
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
-  onMicroServiceScale?: (microservice: MicroService, replicas: number) => void;
   onMicroServiceConfigure?: (microservice: MicroService) => void;
 }
+
+const STATUS_BADGES: Record<
+  HealthStatus,
+  { bg: string; text?: "dark"; label: string }
+> = {
+  UP: { bg: "success", label: "UP" },
+  DEGRADED: { bg: "warning", text: "dark", label: "DEGRADED" },
+  DOWN: { bg: "danger", label: "DOWN" },
+  // Never checked: neither up nor down (EV-106)
+  NO_DATA: { bg: "secondary", label: "NO DATA" },
+};
 
 export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
   microService,
@@ -43,7 +56,13 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
     microService.health?.status ||
     (microService.state === "running" ? "UP" : "DOWN");
   const isUp = status === "UP";
-  const isDegraded = status === "DEGRADED";
+  // Actions follow the container, not the health check: a running service
+  // that answers badly, or was never checked, can be restarted or stopped
+  const isRunning = microService.containers?.length
+    ? microService.containers.some((c) => c.state === "running")
+    : microService.state === "running" || isUp;
+  const badge = STATUS_BADGES[status] ?? STATUS_BADGES.DOWN;
+  const hasUptime = !!microService.uptimeSummary?.history?.length;
 
   let port = "—";
   if (microService.targetUrl) {
@@ -56,7 +75,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
   const containerCount =
     microService.replicasCount ??
-    (microService.containers?.length || (isUp ? 1 : 0));
+    (microService.containers?.length || (isRunning ? 1 : 0));
 
   useEffect(() => {
     if (!show) {
@@ -132,11 +151,8 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         </td>
 
         <td>
-          <Badge
-            bg={isUp ? "success" : isDegraded ? "warning" : "danger"}
-            className="text-uppercase"
-          >
-            {status}
+          <Badge bg={badge.bg} text={badge.text} className="text-uppercase">
+            {badge.label}
           </Badge>
         </td>
 
@@ -148,9 +164,9 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
         <td style={{ minWidth: "120px" }}>
           <div className="small fw-semibold mb-1">
-            {microService.uptimeSummary
+            {hasUptime && microService.uptimeSummary
               ? `${microService.uptimeSummary.uptime30dPercentage.toFixed(1)}%`
-              : "100%"}
+              : "—"}
           </div>
           <UptimeBar
             compact
@@ -178,7 +194,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
 
         <td className="text-center">
           <ButtonGroup size="sm">
-            {!isUp && (
+            {!isRunning && (
               <Button
                 variant="success"
                 onClick={() => onMicroServiceStart(microService)}
@@ -188,7 +204,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
               </Button>
             )}
 
-            {isUp && (
+            {isRunning && (
               <>
                 <Button
                   variant="warning"

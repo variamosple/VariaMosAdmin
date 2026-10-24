@@ -72,17 +72,6 @@ export const getMicroServiceHistory = (
     .catch((error) => toErrorResponse(error, "Unexpected error"));
 };
 
-export const scaleMicroservice = (
-  serviceName: string,
-  replicas: number,
-): Promise<ResponseModel<void>> => {
-  return ADMIN_CLIENT.put(`/v1/micro-services/${serviceName}/scale`, {
-    replicas,
-  })
-    .then((response) => response.data)
-    .catch((error) => toErrorResponse(error, "Unexpected error"));
-};
-
 export const getMicroServiceConfigurations = (
   serviceName: string,
 ): Promise<

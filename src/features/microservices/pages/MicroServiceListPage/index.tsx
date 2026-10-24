@@ -36,7 +36,6 @@ const MicroServiceListPageComponent: FC = () => {
     performMicroSerViceRestart,
     onMicroServiceStop,
     performMicroSerViceStop,
-    performMicroServiceScale,
     refreshInterval,
     setRefreshInterval,
     refreshList,
@@ -107,7 +106,6 @@ const MicroServiceListPageComponent: FC = () => {
         onMicroServiceStart={onMicroServiceStart}
         onMicroServiceRestart={onMicroServiceRestart}
         onMicroServiceStop={onMicroServiceStop}
-        onMicroServiceScale={performMicroServiceScale}
         onMicroServiceConfigure={(ms) => setSelectedConfigService(ms)}
       />
 

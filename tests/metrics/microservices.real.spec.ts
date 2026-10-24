@@ -26,9 +26,9 @@ test.describe("Monitoring - Real E2E Flows", () => {
           const res = await page.request.get("http://localhost:4000/v1/micro-services?page=1&limit=20");
           const body = await res.json();
           return ["Admin Service", "Languages Service"].every((name) => {
-            // Without a persisted probe the backend derives UP from the container state.
+            // UP now means a probe was recorded: before it, the status is NO_DATA (EV-106).
             const health = body.data?.find((s: { displayName: string }) => s.displayName === name)?.health;
-            return health?.status === "UP" && health?.checkedAt !== undefined;
+            return health?.status === "UP";
           });
         },
         { timeout: 120000, intervals: [3000] },
