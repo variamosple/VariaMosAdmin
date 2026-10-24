@@ -199,6 +199,20 @@ export const useBugList = () => {
     }
   };
 
+  // Resolves to the error message, or null when the status changed
+  const handleChangeStatus = async (
+    id: string,
+    status: string,
+    comment?: string,
+  ): Promise<string | null> => {
+    const response = await updateBugStatus(id, status, comment);
+    if (response.errorCode) {
+      return response.message || "Failed to change the status";
+    }
+    await fetchBugs();
+    return null;
+  };
+
   const handleApprove = async (
     id: string,
     status: string,
@@ -250,6 +264,7 @@ export const useBugList = () => {
     handleReject,
     handleRestore,
     handleApprove,
+    handleChangeStatus,
     refreshBugs: fetchBugs,
     notes,
     isLoadingNotes,

@@ -3,6 +3,7 @@ import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { BugFilter } from "../../domain/BugFilter";
+import { GITHUB_BUG_STATUSES, statusLabel } from "../../domain/BugStatus";
 
 export interface BugSearchFormProps {
   onSubmit: (search?: BugFilter) => void;
@@ -159,8 +160,11 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
                   isInvalid={!!errors.status}
                 >
                   <option value="">All</option>
-                  <option value="open">Open</option>
-                  <option value="closed">Closed</option>
+                  {GITHUB_BUG_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {statusLabel(status)}
+                    </option>
+                  ))}
                 </Form.Select>
 
                 <Button

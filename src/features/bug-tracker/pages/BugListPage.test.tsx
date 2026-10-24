@@ -118,6 +118,86 @@ describe("BugListPage Component", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("changes the status of a GitHub bug from its details", async () => {
+    const user = userEvent.setup();
+    const sent: { id: string; status?: string }[] = [];
+    server.use(
+      http.get("*/bugs", () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: "gh-1",
+              title: "GitHub Bug",
+              description: "Desc",
+              priority: "high",
+              category: "frontend",
+              status: "open",
+              githubRepo: "owner/repo",
+              gitIssueNumber: 12,
+            },
+          ],
+        }),
+      ),
+      http.post("*/bugs/:bugId/status", async ({ request, params }) => {
+        const body = (await request.json()) as { status?: string };
+        sent.push({ id: String(params.bugId), status: body.status });
+        return HttpResponse.json({ data: { id: params.bugId } });
+      }),
+    );
+    render(<BugListPage />);
+    const [details] = await screen.findAllByRole("button", {
+      name: /details/i,
+    });
+    await user.click(details);
+
+    const modal = await screen.findByRole("dialog");
+    await user.selectOptions(
+      within(modal).getByLabelText("New status"),
+      "resolved",
+    );
+    await user.click(
+      within(modal).getByRole("button", { name: "Update status" }),
+    );
+
+    await waitFor(() => {
+      expect(sent).toEqual([
+        expect.objectContaining({ id: "gh-1", status: "resolved" }),
+      ]);
+    });
+    expect(await within(modal).findByText("Resolved")).toBeInTheDocument();
+  });
+
+  it("does not offer a status change without bugs::update", async () => {
+    const user = userEvent.setup();
+    givePermissions(["bugs::query"]);
+    server.use(
+      http.get("*/bugs", () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: "gh-1",
+              title: "GitHub Bug",
+              description: "Desc",
+              priority: "high",
+              category: "frontend",
+              status: "open",
+              githubRepo: "owner/repo",
+              gitIssueNumber: 12,
+            },
+          ],
+        }),
+      ),
+    );
+    render(<BugListPage />);
+    const [details] = await screen.findAllByRole("button", {
+      name: /details/i,
+    });
+    await user.click(details);
+
+    await screen.findByRole("dialog");
+    expect(screen.queryByLabelText("New status")).not.toBeInTheDocument();
+  });
+
   it("rejects a bug only after confirmation", async () => {
     const user = userEvent.setup();
     const rejected: string[] = [];
