@@ -420,6 +420,8 @@ const BugListPageComponent: FC = () => {
                       ...selectedBugForDetails,
                       assignedAdmins: result.assignees,
                     });
+                    // The API notes the change in the timeline
+                    fetchNotes(bugId);
                     return null;
                   }}
                 />
