@@ -204,6 +204,15 @@ describe("BugApprovalModal Component", () => {
       screen.getByRole("button", { name: "Approve & Send to GitHub" }),
     );
 
+    // Nothing is published before the explicit confirmation
+    const publishBtn = await screen.findByRole("button", {
+      name: "Publish to GitHub",
+    });
+    expect(mockOnConfirmApprove).not.toHaveBeenCalled();
+    expect(screen.getByText(/visible to anyone/i)).toHaveTextContent("repo1");
+    expect(screen.getByLabelText(/Title \*/i)).toBeDisabled();
+    await user.click(publishBtn);
+
     await waitFor(() => {
       expect(mockOnConfirmApprove).toHaveBeenCalledWith(
         "bug-123",
@@ -262,8 +271,20 @@ describe("BugApprovalModal Component", () => {
     );
 
     const user = userEvent.setup();
-    const deleteBtn = screen.getByRole("button", { name: "" }); // the trash button
-    await user.click(deleteBtn);
+
+    // First click asks; "Keep" cancels without a request
+    await user.click(
+      screen.getByRole("button", { name: "Delete attachment att1.jpg" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Keep" }));
+    expect(deleteAttachmentParams).toEqual([]);
+
+    await user.click(
+      screen.getByRole("button", { name: "Delete attachment att1.jpg" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /^Delete attachment$/ }),
+    );
 
     expect(deleteAttachmentParams[0]).toBe("1");
 
@@ -272,6 +293,28 @@ describe("BugApprovalModal Component", () => {
         screen.queryByText("att1.jpg (image/jpeg)"),
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("opens the file picker from a keyboard-reachable button", async () => {
+    render(
+      <BugApprovalModal
+        show={true}
+        bug={sampleBug}
+        onHide={mockOnHide}
+        onConfirmApprove={mockOnConfirmApprove}
+        repos={sampleRepos}
+        categories={sampleCategories}
+      />,
+    );
+
+    const input = screen.getByLabelText(/Add Attachment/i) as HTMLInputElement;
+    const pickerSpy = vi.spyOn(input, "click");
+    screen.getByRole("button", { name: /Add Attachment/i }).focus();
+
+    const user = userEvent.setup();
+    await user.keyboard("{Enter}");
+
+    expect(pickerSpy).toHaveBeenCalledTimes(1);
   });
 
   it("shows error alert if upload or deletion fails", async () => {

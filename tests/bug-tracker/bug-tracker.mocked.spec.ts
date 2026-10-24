@@ -20,7 +20,7 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
               name: "Admin Test",
               email: "admin@variamos-test.com",
               roles: ["Admin"],
-              permissions: ["bugs::query", "users::query", "admin::languages::query", "admin::projects::query", "admin::models::query"]
+              permissions: ["bugs::query", "bugs::update", "bugs::sync", "users::query", "admin::languages::query", "admin::projects::query", "admin::models::query"]
             },
             authToken: "fake-jwt-token"
           }
@@ -40,7 +40,7 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
               name: "Admin Test",
               email: "admin@variamos-test.com",
               roles: ["Admin"],
-              permissions: ["bugs::query", "users::query", "admin::languages::query", "admin::projects::query", "admin::models::query"]
+              permissions: ["bugs::query", "bugs::update", "bugs::sync", "users::query", "admin::languages::query", "admin::projects::query", "admin::models::query"]
             }
           }
         })
@@ -244,8 +244,15 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     await row.getByRole("button", { name: "Approve" }).click();
     await page.locator('.modal select[name="githubRepo"]').selectOption("VariaMos/VariaMosPLE");
     await page.locator(".modal-footer").getByRole("button", { name: "Approve & Send to GitHub" }).click();
+    // Approval publishes a public issue: it waits for an explicit confirmation
+    await expect(page.locator(".modal-footer")).toContainText("visible to anyone");
+    await page.locator(".modal-footer").getByRole("button", { name: "Publish to GitHub" }).click();
+    await expect(page.locator(".modal-title")).not.toBeVisible();
 
     await row.getByRole("button", { name: "Reject" }).click();
+    await expect(page.locator(".modal-body")).toContainText("Move \"Local UI Crash\" to the Trash Bin?");
+    await page.getByRole("button", { name: "Reject bug" }).click();
+    await expect(page.locator(".modal-body")).not.toBeVisible();
   });
 
   test("should display Trash Bin bugs and perform Restore action", async ({ page }) => {

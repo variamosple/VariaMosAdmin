@@ -174,7 +174,8 @@ describe("useBugList Hook", () => {
     });
 
     expect(result.current.bugs).toEqual([]);
-    expect(result.current.error).toBe(SYSTEM_ERROR_MESSAGE);
+    expect(result.current.loadError).toBe(SYSTEM_ERROR_MESSAGE);
+    expect(result.current.error).toBeNull();
 
     consoleErrorSpy.mockRestore();
   });

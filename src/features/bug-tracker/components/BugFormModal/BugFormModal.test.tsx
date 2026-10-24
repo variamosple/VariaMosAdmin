@@ -105,7 +105,9 @@ describe("BugFormModal Component", () => {
       />,
     );
 
-    fireEvent.submit(screen.getByRole("button", { name: "Report Bug" }));
+    fireEvent.submit(
+      screen.getByRole("button", { name: "Create Public GitHub Issue" }),
+    );
 
     expect(await screen.findByText("Title is required")).toBeInTheDocument();
     expect(
@@ -191,6 +193,65 @@ describe("BugFormModal Component", () => {
         file,
       );
     });
+  });
+
+  it("shows the chosen file and lets the user remove it", async () => {
+    render(
+      <BugFormModal
+        show={true}
+        onHide={mockOnHide}
+        onSubmit={mockOnSubmit}
+        repos={sampleRepos}
+        categories={sampleCategories}
+        isSubmitting={false}
+        mode="user"
+      />,
+    );
+
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText(/Title \*/i), "Title");
+    await user.type(screen.getByLabelText(/Description \*/i), "Content");
+    const fileInput = screen.getByLabelText(
+      /Attachment \(Optional\)/i,
+    ) as HTMLInputElement;
+    await user.upload(
+      fileInput,
+      new File(["x"], "screenshot.png", { type: "image/png" }),
+    );
+
+    expect(
+      screen.getByText("Selected file: screenshot.png"),
+    ).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Remove the file screenshot.png" }),
+    );
+    expect(
+      screen.queryByText("Selected file: screenshot.png"),
+    ).not.toBeInTheDocument();
+    expect(fileInput.value).toBe("");
+
+    fireEvent.submit(screen.getByRole("button", { name: "Report Bug" }));
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Title" }),
+        undefined,
+      );
+    });
+  });
+
+  it("shows the error of the last submission inside the form", () => {
+    render(
+      <BugFormModal
+        show={true}
+        onHide={mockOnHide}
+        onSubmit={mockOnSubmit}
+        repos={sampleRepos}
+        categories={sampleCategories}
+        isSubmitting={false}
+        error="Creation failed"
+      />,
+    );
+    expect(screen.getByRole("dialog")).toHaveTextContent("Creation failed");
   });
 
   it("calls onHide when Cancel button is clicked", async () => {

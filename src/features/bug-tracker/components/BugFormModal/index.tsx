@@ -1,5 +1,5 @@
-import { type ChangeEvent, type FC, useEffect, useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { type ChangeEvent, type FC, useEffect, useRef, useState } from "react";
+import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import type { Bug } from "../../domain/Bug";
 
@@ -11,6 +11,8 @@ interface BugFormModalProps {
   categories: string[];
   isSubmitting: boolean;
   mode?: "user" | "admin";
+  // Failure of the last submission: shown in the form, the input is kept
+  error?: string | null;
 }
 
 export const BugFormModal: FC<BugFormModalProps> = ({
@@ -21,8 +23,10 @@ export const BugFormModal: FC<BugFormModalProps> = ({
   categories,
   isSubmitting,
   mode = "user",
+  error,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     register,
     handleSubmit,
@@ -55,6 +59,11 @@ export const BugFormModal: FC<BugFormModalProps> = ({
     onSubmit(data, selectedFile || undefined);
   };
 
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   return (
     <Modal
       show={show}
@@ -71,6 +80,8 @@ export const BugFormModal: FC<BugFormModalProps> = ({
 
       <Form onSubmit={handleSubmit(handleFormSubmit)}>
         <Modal.Body>
+          {error && <Alert variant="danger">{error}</Alert>}
+
           <Form.Group className="mb-3" controlId="bugTitle">
             <Form.Label>Title *</Form.Label>
             <Form.Control
@@ -168,12 +179,27 @@ export const BugFormModal: FC<BugFormModalProps> = ({
             <Form.Label>Attachment (Optional)</Form.Label>
             <Form.Control
               type="file"
+              ref={fileInputRef}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                if (e.target.files && e.target.files.length > 0) {
-                  setSelectedFile(e.target.files[0]);
-                }
+                setSelectedFile(e.target.files?.[0] ?? null);
               }}
             />
+            {selectedFile && (
+              <div className="d-flex align-items-center gap-2 mt-2 small">
+                <span className="text-truncate">
+                  Selected file: {selectedFile.name}
+                </span>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="p-0"
+                  onClick={removeSelectedFile}
+                  aria-label={`Remove the file ${selectedFile.name}`}
+                >
+                  Remove
+                </Button>
+              </div>
+            )}
           </Form.Group>
         </Modal.Body>
 
@@ -182,7 +208,11 @@ export const BugFormModal: FC<BugFormModalProps> = ({
             Cancel
           </Button>
           <Button variant="primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Report Bug"}
+            {isSubmitting
+              ? "Creating..."
+              : mode === "admin"
+                ? "Create Public GitHub Issue"
+                : "Report Bug"}
           </Button>
         </Modal.Footer>
       </Form>

@@ -14,7 +14,8 @@ import {
   Tabs,
 } from "react-bootstrap";
 import { ArrowRepeat, Github, Plus } from "react-bootstrap-icons";
-import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { attachmentUrl } from "../api/attachmentUrl";
 import { BugApprovalModal } from "../components/BugApprovalModal";
 import { BugFormModal } from "../components/BugFormModal";
 import { BugList } from "../components/BugList";
@@ -22,6 +23,7 @@ import { BugSearchForm } from "../components/BugSearchForm";
 import type { Bug, BugAttachment, BugStatusLog } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 import { useBugList } from "../hooks/useBugList";
+import { useBugPermissions } from "../hooks/useBugPermissions";
 
 const BugListPageComponent: FC = () => {
   const {
@@ -33,6 +35,7 @@ const BugListPageComponent: FC = () => {
     isSyncing,
     setFilter,
     handleCreateBug,
+    refreshBugs,
     handleSyncBugs,
     activeTab,
     setActiveTab,
@@ -40,15 +43,20 @@ const BugListPageComponent: FC = () => {
     handleRestore,
     handleApprove,
     error,
+    loadError,
+    createError,
+    clearCreateError,
     notes,
     isLoadingNotes,
     fetchNotes,
     handleAddNote,
   } = useBugList();
+  const { canUpdate, canSync } = useBugPermissions();
 
   const [showUserCreateModal, setShowUserCreateModal] = useState(false);
   const [showAdminCreateModal, setShowAdminCreateModal] = useState(false);
   const [bugToApprove, setBugToApprove] = useState<Bug | null>(null);
+  const [bugToReject, setBugToReject] = useState<Bug | null>(null);
   const [selectedBugForDetails, setSelectedBugForDetails] =
     useState<Bug | null>(null);
   const [newNoteBody, setNewNoteBody] = useState("");
@@ -59,6 +67,69 @@ const BugListPageComponent: FC = () => {
     if (bug?.id) {
       fetchNotes(bug.id);
     }
+  };
+
+  // The form stays open with its input when the creation fails (UX-08)
+  const submitBug = async (data: Bug, file?: File) => {
+    const created = await handleCreateBug(
+      data.title,
+      data.description,
+      data.priority,
+      data.category,
+      data.githubRepo,
+      file,
+    );
+    if (created) {
+      setShowUserCreateModal(false);
+      setShowAdminCreateModal(false);
+    }
+  };
+
+  const hideCreateModals = () => {
+    setShowUserCreateModal(false);
+    setShowAdminCreateModal(false);
+    clearCreateError();
+  };
+
+  const renderTabContent = () => {
+    if (isLoading) {
+      return (
+        <div className="d-flex justify-content-center align-items-center p-5">
+          <Spinner animation="border" variant="primary" className="me-2" />
+          <span>Loading bugs...</span>
+        </div>
+      );
+    }
+    if (loadError) {
+      return (
+        <Alert variant="danger" className="d-flex align-items-center gap-2">
+          <span>{loadError}</span>
+          <Button
+            variant="outline-danger"
+            size="sm"
+            className="ms-auto"
+            onClick={() => refreshBugs()}
+          >
+            Retry
+          </Button>
+        </Alert>
+      );
+    }
+    return (
+      <BugList
+        items={bugs}
+        onViewDetails={handleViewDetails}
+        activeTab={activeTab}
+        onReject={
+          canUpdate
+            ? (id: string) =>
+                setBugToReject(bugs.find((bug) => bug.id === id) ?? null)
+            : undefined
+        }
+        onRestore={canUpdate ? handleRestore : undefined}
+        onApprove={canUpdate ? setBugToApprove : undefined}
+      />
+    );
   };
 
   const handleNoteSubmit = async (e: React.FormEvent) => {
@@ -79,7 +150,7 @@ const BugListPageComponent: FC = () => {
           <h1 className="mb-0">Bugs list</h1>
         </Col>
         <Col xs="auto" className="d-flex gap-2">
-          {activeTab === "github" && (
+          {activeTab === "github" && canSync && (
             <Button
               variant="outline-secondary"
               onClick={handleSyncBugs}
@@ -99,14 +170,16 @@ const BugListPageComponent: FC = () => {
           >
             <Plus size={20} className="me-1" /> Report a Bug
           </Button>
-          <Button
-            variant="success"
-            onClick={() => setShowAdminCreateModal(true)}
-            className="d-inline-flex align-items-center text-white"
-            disabled={isSyncing}
-          >
-            <Github size={16} className="me-1" /> Create GitHub Issue
-          </Button>
+          {canUpdate && (
+            <Button
+              variant="success"
+              onClick={() => setShowAdminCreateModal(true)}
+              className="d-inline-flex align-items-center text-white"
+              disabled={isSyncing}
+            >
+              <Github size={16} className="me-1" /> Create GitHub Issue
+            </Button>
+          )}
         </Col>
       </Row>
       <hr />
@@ -133,96 +206,49 @@ const BugListPageComponent: FC = () => {
         className="mb-3"
       >
         <Tab eventKey="github" title="GitHub Bugs">
-          {isLoading ? (
-            <div className="d-flex justify-content-center align-items-center p-5">
-              <Spinner animation="border" variant="primary" className="me-2" />
-              <span>Loading bugs...</span>
-            </div>
-          ) : (
-            <BugList
-              items={bugs}
-              onViewDetails={handleViewDetails}
-              activeTab={activeTab}
-              onReject={handleReject}
-              onRestore={handleRestore}
-              onApprove={setBugToApprove}
-            />
-          )}
+          {renderTabContent()}
         </Tab>
         <Tab eventKey="local" title="Local Inbox">
-          {isLoading ? (
-            <div className="d-flex justify-content-center align-items-center p-5">
-              <Spinner animation="border" variant="primary" className="me-2" />
-              <span>Loading bugs...</span>
-            </div>
-          ) : (
-            <BugList
-              items={bugs}
-              onViewDetails={handleViewDetails}
-              activeTab={activeTab}
-              onReject={handleReject}
-              onRestore={handleRestore}
-              onApprove={setBugToApprove}
-            />
-          )}
+          {renderTabContent()}
         </Tab>
         <Tab eventKey="trash" title="Trash Bin">
-          {isLoading ? (
-            <div className="d-flex justify-content-center align-items-center p-5">
-              <Spinner animation="border" variant="primary" className="me-2" />
-              <span>Loading bugs...</span>
-            </div>
-          ) : (
-            <BugList
-              items={bugs}
-              onViewDetails={handleViewDetails}
-              activeTab={activeTab}
-              onReject={handleReject}
-              onRestore={handleRestore}
-              onApprove={setBugToApprove}
-            />
-          )}
+          {renderTabContent()}
         </Tab>
       </Tabs>
 
       <BugFormModal
         mode="user"
         show={showUserCreateModal}
-        onHide={() => setShowUserCreateModal(false)}
-        onSubmit={async (data: Bug, file?: File) => {
-          await handleCreateBug(
-            data.title,
-            data.description,
-            data.priority,
-            data.category,
-            data.githubRepo,
-            file,
-          );
-          setShowUserCreateModal(false);
-        }}
+        onHide={hideCreateModals}
+        onSubmit={submitBug}
         repos={repos}
         categories={categories}
         isSubmitting={isSubmitting}
+        error={createError}
       />
 
       <BugFormModal
         mode="admin"
         show={showAdminCreateModal}
-        onHide={() => setShowAdminCreateModal(false)}
-        onSubmit={async (data: Bug, file?: File) => {
-          await handleCreateBug(
-            data.title,
-            data.description,
-            data.priority,
-            data.category,
-            data.githubRepo,
-            file,
-          );
-          setShowAdminCreateModal(false);
-        }}
+        onHide={hideCreateModals}
+        onSubmit={submitBug}
         repos={repos}
         categories={categories}
         isSubmitting={isSubmitting}
+        error={createError}
+      />
+
+      <ConfirmationModal
+        show={!!bugToReject}
+        message={`Move "${bugToReject?.title ?? "this bug"}" to the Trash Bin? It can be restored for 7 days, then it is deleted.`}
+        confirmLabel="Reject bug"
+        confirmButtonVariant="danger"
+        cancelLabel="Keep in inbox"
+        onConfirm={() => {
+          if (bugToReject?.id) handleReject(bugToReject.id);
+          setBugToReject(null);
+        }}
+        onCancel={() => setBugToReject(null)}
       />
 
       <BugApprovalModal
@@ -368,7 +394,7 @@ const BugListPageComponent: FC = () => {
                         (attachment: BugAttachment) => (
                           <li key={attachment.id} className="my-1">
                             <a
-                              href={`${AppConfig.ADMIN_API_URL || "http://localhost:4000"}${attachment.filePath}`}
+                              href={attachmentUrl(attachment.filePath)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-decoration-none"
@@ -542,7 +568,11 @@ const BugListPageComponent: FC = () => {
                   </div>
                 )}
 
-                {selectedBugForDetails.status === "pending" ? (
+                {selectedBugForDetails.status !== "pending" ? (
+                  <Alert variant="warning" className="m-0 py-2 small">
+                    This discussion is closed. Please use GitHub to communicate.
+                  </Alert>
+                ) : canUpdate ? (
                   <Form onSubmit={handleNoteSubmit} className="mt-3">
                     <Form.Group className="mb-2">
                       <Form.Control
@@ -566,11 +596,7 @@ const BugListPageComponent: FC = () => {
                       </Button>
                     </div>
                   </Form>
-                ) : (
-                  <Alert variant="warning" className="m-0 py-2 small">
-                    This discussion is closed. Please use GitHub to communicate.
-                  </Alert>
-                )}
+                ) : null}
               </div>
             </div>
           )}
