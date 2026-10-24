@@ -1,3 +1,4 @@
+// NO_DATA: no check was ever recorded for the service (EV-106)
 export type HealthStatus = "UP" | "DEGRADED" | "DOWN" | "NO_DATA";
 
 export interface Labels {
@@ -31,8 +32,9 @@ export interface MicroServiceHealthInfo {
   serviceName: string;
   version?: string;
   uptimeSeconds?: number;
-  responseTimeMs: number;
-  checkedAt: string;
+  // Absent until a check is recorded
+  responseTimeMs?: number;
+  checkedAt?: string;
   checks?: Record<string, HealthCheckDetail>;
 }
 

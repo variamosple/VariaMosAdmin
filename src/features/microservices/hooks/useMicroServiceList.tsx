@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   queryMicroServices,
   restartMicroservice,
-  scaleMicroservice,
   startMicroservice,
   stopMicroservice,
   triggerMicroServicesCheck,
@@ -122,20 +121,6 @@ export const useMicroServiceList = (initialRefreshInterval: number = 0) => {
     });
   };
 
-  const performMicroServiceScale = (
-    microService: MicroService,
-    replicas: number,
-  ) => {
-    const serviceKey =
-      microService.serviceName || microService.id || microService.displayName;
-    return scaleMicroservice(serviceKey, replicas).then((response) => {
-      if (!response.errorCode) {
-        refreshList();
-      }
-      return response;
-    });
-  };
-
   return {
     showStart,
     setShowStart,
@@ -160,7 +145,6 @@ export const useMicroServiceList = (initialRefreshInterval: number = 0) => {
     performMicroSerViceRestart,
     onMicroServiceStop: onMicroSerViceStop,
     performMicroSerViceStop,
-    performMicroServiceScale,
     refreshInterval,
     setRefreshInterval,
     lastRefreshedAt,
