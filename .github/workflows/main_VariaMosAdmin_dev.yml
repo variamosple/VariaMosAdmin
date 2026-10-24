@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Record the build start
+        run: echo "BUILD_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -71,3 +74,34 @@ jobs:
             sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml pull variamosadminaws
             sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml up -d --force-recreate variamosadminaws
             sudo docker image prune -f
+
+      # Alert only (T-25, decision D6): a red run on main warns whoever merged;
+      # nothing is rolled back. The page must come from this run's build (nginx
+      # gives the build time as Last-Modified) and its main script must load.
+      - name: Check the deployed page answers
+        env:
+          PAGE_URL: https://app.variamos.com/variamos_admin/
+        run: |
+          deadline=$(( $(date +%s) + 300 ))
+          while :; do
+            problem=""
+            headers=$(curl -sS --max-time 10 -o page.html -D - "$PAGE_URL" || true)
+            modified=$(echo "$headers" | tr -d '\r' | sed -n 's/^[Ll]ast-[Mm]odified: //p')
+            script=$(grep -oE 'assets/[A-Za-z0-9_.-]+\.js' page.html 2>/dev/null | head -1)
+            if ! echo "$headers" | head -1 | grep -q " 200"; then
+              problem="the page does not answer 200"
+            elif [ -z "$modified" ] || [ "$(date -d "$modified" +%s)" -lt "$BUILD_STARTED_AT" ]; then
+              problem="the page is not the one built by this run (Last-Modified: ${modified:-none})"
+            elif [ -z "$script" ] || ! curl -sf --max-time 10 -o /dev/null "$PAGE_URL$script"; then
+              problem="its main script does not load (${script:-not found})"
+            fi
+            if [ -z "$problem" ]; then
+              echo "The page built by this run answers (Last-Modified: $modified, $script)"
+              exit 0
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error::Within 5 minutes, $problem"
+              exit 1
+            fi
+            sleep 10
+          done
