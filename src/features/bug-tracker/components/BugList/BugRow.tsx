@@ -2,13 +2,15 @@ import type { FC } from "react";
 import { Badge, Button } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";
 import { formatDate } from "@/shared/constants";
-import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { attachmentUrl } from "../../api/attachmentUrl";
 import type { Bug } from "../../domain/Bug";
 
 interface BugRowProps {
   bug: Bug;
   onViewDetails: (bug: Bug) => void;
   activeTab?: "github" | "local" | "trash";
+  // An action without a handler has no button: the page leaves them out
+  // when the operator lacks the permission
   onReject?: (id: string) => void;
   onRestore?: (id: string) => void;
   onApprove?: (bug: Bug) => void;
@@ -129,7 +131,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
         <td className="align-middle">
           {bug.attachments && bug.attachments.length > 0 ? (
             <a
-              href={`${AppConfig.ADMIN_API_URL || "http://localhost:4000"}${bug.attachments[0].filePath}`}
+              href={attachmentUrl(bug.attachments[0].filePath)}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -153,30 +155,30 @@ export const BugRowComponent: FC<BugRowProps> = ({
             <Eye size={16} className="me-1" /> Details
           </Button>
 
-          {activeTab === "local" && (
-            <>
-              <Button
-                variant="success"
-                size="sm"
-                onClick={() => onApprove?.(bug)}
-                title="Approve"
-                style={{ minWidth: "80px" }}
-              >
-                Approve
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => bug.id && onReject?.(bug.id)}
-                title="Reject"
-                style={{ minWidth: "80px" }}
-              >
-                Reject
-              </Button>
-            </>
+          {activeTab === "local" && onApprove && (
+            <Button
+              variant="success"
+              size="sm"
+              onClick={() => onApprove?.(bug)}
+              title="Approve"
+              style={{ minWidth: "80px" }}
+            >
+              Approve
+            </Button>
+          )}
+          {activeTab === "local" && onReject && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => bug.id && onReject?.(bug.id)}
+              title="Reject"
+              style={{ minWidth: "80px" }}
+            >
+              Reject
+            </Button>
           )}
 
-          {activeTab === "trash" && (
+          {activeTab === "trash" && onRestore && (
             <Button
               variant="warning"
               size="sm"

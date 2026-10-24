@@ -23,6 +23,11 @@ export const useBugList = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  // Load failures are kept apart from action failures: the tab shows an
+  // error state instead of the list of another tab or filter (UX-10)
+  const [loadError, setLoadError] = useState<string | null>(null);
+  // Creation failures are shown in the form, which stays open (UX-08)
+  const [createError, setCreateError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"github" | "local" | "trash">(
     "github",
@@ -71,7 +76,7 @@ export const useBugList = () => {
   // 4. Function to load bugs (triggered on mount and filter changes)
   const fetchBugs = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
+    setLoadError(null);
 
     let response: ResponseModel<Bug[]>;
     if (activeTab === "github") {
@@ -82,7 +87,8 @@ export const useBugList = () => {
     }
 
     if (response.errorCode) {
-      setError(response.message || "Failed to load bugs");
+      setBugs([]);
+      setLoadError(response.message || "Failed to load bugs");
     } else {
       setBugs(response.data || []);
     }
@@ -137,6 +143,7 @@ export const useBugList = () => {
     file?: File,
   ) => {
     setIsSubmitting(true);
+    setCreateError(null);
     const response = await createBug(
       title,
       description,
@@ -147,7 +154,7 @@ export const useBugList = () => {
     );
 
     if (response.errorCode) {
-      setError(response.message || "Failed to create bug");
+      setCreateError(response.message || "Failed to create bug");
       setIsSubmitting(false);
       return false; // Indicates creation failure
     }
@@ -227,6 +234,9 @@ export const useBugList = () => {
     categories,
     isLoading,
     error,
+    loadError,
+    createError,
+    clearCreateError: () => setCreateError(null),
     filter,
     setFilter,
     showCreate,

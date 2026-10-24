@@ -1,13 +1,20 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSession } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { server } from "@/shared/tests/mocks/server";
 import { BugListPage } from "./BugListPage";
 
+const givePermissions = (permissions: string[]) =>
+  (useSession as import("vitest").Mock).mockReturnValue({
+    user: { id: "admin-1", permissions },
+  });
+
 describe("BugListPage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    givePermissions(["bugs::query", "bugs::update", "bugs::sync"]);
   });
 
   it("renders correctly with initial state", async () => {
@@ -41,7 +48,130 @@ describe("BugListPage Component", () => {
     );
 
     render(<BugListPage />);
-    expect(await screen.findByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
+    expect(await screen.findAllByText(SYSTEM_ERROR_MESSAGE)).not.toHaveLength(
+      0,
+    );
+    expect(screen.getAllByRole("button", { name: /retry/i })).not.toHaveLength(
+      0,
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("drops the previous list when a tab fails to load", async () => {
+    const user = userEvent.setup();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    server.use(
+      http.get("*/bugs/local", () =>
+        HttpResponse.json(
+          { errorCode: "500", message: "Failed" },
+          { status: 500 },
+        ),
+      ),
+    );
+
+    render(<BugListPage />);
+    expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
+
+    await user.click(screen.getByRole("tab", { name: /local inbox/i }));
+
+    expect(await screen.findAllByText(SYSTEM_ERROR_MESSAGE)).not.toHaveLength(
+      0,
+    );
+    expect(screen.queryByText("Bug One")).not.toBeInTheDocument();
+    consoleSpy.mockRestore();
+  });
+
+  it("hides the actions the operator has no permission for", async () => {
+    const user = userEvent.setup();
+    givePermissions(["bugs::query"]);
+    render(<BugListPage />);
+    expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
+
+    expect(screen.getByText("Report a Bug")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /sync github/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /create github issue/i }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: /local inbox/i }));
+    expect(await screen.findAllByText("Local Bug")).not.toHaveLength(0);
+    expect(
+      screen.queryByRole("button", { name: /^approve$/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^reject$/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows sync but not the bug actions with bugs::sync alone", async () => {
+    givePermissions(["bugs::query", "bugs::sync"]);
+    render(<BugListPage />);
+    expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
+
+    expect(
+      screen.getByRole("button", { name: /sync github/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /create github issue/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("rejects a bug only after confirmation", async () => {
+    const user = userEvent.setup();
+    const rejected: string[] = [];
+    server.use(
+      http.post("*/bugs/:id/reject", ({ params }) => {
+        rejected.push(String(params.id));
+        return HttpResponse.json({ data: { id: params.id } });
+      }),
+    );
+    render(<BugListPage />);
+    await user.click(await screen.findByRole("tab", { name: /local inbox/i }));
+
+    const [rejectBtn] = await screen.findAllByRole("button", {
+      name: /^reject$/i,
+    });
+    await user.click(rejectBtn);
+    expect(
+      screen.getByText(/move "local bug" to the trash bin/i),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /keep in inbox/i }));
+    expect(rejected).toEqual([]);
+
+    await user.click(rejectBtn);
+    await user.click(screen.getByRole("button", { name: /reject bug/i }));
+    await waitFor(() => {
+      expect(rejected).toEqual(["local-1"]);
+    });
+  });
+
+  it("keeps the report form open with its input when the creation fails", async () => {
+    const user = userEvent.setup();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    server.use(
+      http.post("*/bugs", () =>
+        HttpResponse.json(
+          { errorCode: "500", message: "Failed" },
+          { status: 500 },
+        ),
+      ),
+    );
+    render(<BugListPage />);
+    expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
+
+    await user.click(screen.getByRole("button", { name: /report a bug/i }));
+    await user.type(screen.getByLabelText(/title \*/i), "My Test Bug");
+    await user.type(screen.getByLabelText(/description \*/i), "Broken");
+    await user.click(screen.getByRole("button", { name: /report bug/i }));
+
+    const modal = screen.getByRole("dialog");
+    expect(
+      await within(modal).findByText(SYSTEM_ERROR_MESSAGE),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/title \*/i)).toHaveValue("My Test Bug");
+    expect(screen.getByLabelText(/description \*/i)).toHaveValue("Broken");
     consoleSpy.mockRestore();
   });
 
@@ -117,7 +247,9 @@ describe("BugListPage Component", () => {
     );
 
     // Submit
-    await user.click(screen.getByRole("button", { name: /report bug/i }));
+    await user.click(
+      screen.getByRole("button", { name: /create public github issue/i }),
+    );
 
     // Wait for modal to close
     await waitFor(() => {
@@ -270,6 +402,9 @@ describe("BugListPage Component", () => {
       name: /approve & send to github/i,
     });
     await user.click(submitBtn);
+    await user.click(
+      await screen.findByRole("button", { name: /publish to github/i }),
+    );
 
     // Modal should close
     await waitFor(() => {
@@ -349,6 +484,9 @@ describe("BugListPage Component", () => {
       name: /approve & send to github/i,
     });
     await user.click(submitBtn);
+    await user.click(
+      await screen.findByRole("button", { name: /publish to github/i }),
+    );
 
     // Error message should show inside modal
     const modal = screen.getByRole("dialog");

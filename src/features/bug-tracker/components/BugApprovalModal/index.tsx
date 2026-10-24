@@ -1,8 +1,8 @@
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { Trash, Upload } from "react-bootstrap-icons";
 import { useForm } from "react-hook-form";
-import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { attachmentUrl } from "../../api/attachmentUrl";
 import { deleteAttachment, uploadAttachment } from "../../api/BugRepository";
 import type { Bug, BugAttachment } from "../../domain/Bug";
 
@@ -45,6 +45,14 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+  // Approval publishes a public GitHub issue: the form is checked first,
+  // then the administrator confirms with the consequences in view (UX-13)
+  const [pendingApproval, setPendingApproval] =
+    useState<ApproveFormData | null>(null);
+  const [attachmentToDelete, setAttachmentToDelete] = useState<number | null>(
+    null,
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -74,12 +82,20 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
       });
       setAttachments(bug.attachments || []);
       setModalError(null);
+      setPendingApproval(null);
+      setAttachmentToDelete(null);
     }
   }, [show, bug, reset, categories]);
 
   if (!bug) return null;
 
-  const handleFormSubmit = async (data: ApproveFormData) => {
+  const handleFormSubmit = (data: ApproveFormData) => {
+    setPendingApproval(data);
+  };
+
+  const publishApproval = async () => {
+    const data = pendingApproval;
+    if (!data) return;
     if (!bug.id) {
       setModalError("Bug ID is missing.");
       return;
@@ -101,6 +117,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
     } catch (err) {
       const error = err as Error;
       setModalError(error.message || "Failed to approve bug");
+      setPendingApproval(null);
     } finally {
       setIsApproving(false);
     }
@@ -129,6 +146,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
   };
 
   const handleDeleteAttachment = async (attachmentId: number) => {
+    setAttachmentToDelete(null);
     setModalError(null);
     try {
       const response = await deleteAttachment(attachmentId.toString());
@@ -160,167 +178,227 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
         <Modal.Body>
           {modalError && <Alert variant="danger">{modalError}</Alert>}
 
-          <Form.Group className="mb-3" controlId="approveTitle">
-            <Form.Label>Title *</Form.Label>
-            <Form.Control
-              type="text"
-              isInvalid={!!errors.title}
-              {...register("title", { required: "Title is required" })}
-            />
-            {errors.title && (
-              <Form.Control.Feedback type="invalid">
-                {errors.title.message}
-              </Form.Control.Feedback>
-            )}
-          </Form.Group>
+          {/* Frozen while the approval waits for confirmation: what is
+              published is what was reviewed */}
+          <fieldset disabled={!!pendingApproval}>
+            <Form.Group className="mb-3" controlId="approveTitle">
+              <Form.Label>Title *</Form.Label>
+              <Form.Control
+                type="text"
+                isInvalid={!!errors.title}
+                {...register("title", { required: "Title is required" })}
+              />
+              {errors.title && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.title.message}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
 
-          <Form.Group className="mb-3" controlId="approveDescription">
-            <Form.Label>Description *</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={4}
-              isInvalid={!!errors.description}
-              {...register("description", {
-                required: "Description is required",
-              })}
-            />
-            {errors.description && (
-              <Form.Control.Feedback type="invalid">
-                {errors.description.message}
-              </Form.Control.Feedback>
-            )}
-          </Form.Group>
+            <Form.Group className="mb-3" controlId="approveDescription">
+              <Form.Label>Description *</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                isInvalid={!!errors.description}
+                {...register("description", {
+                  required: "Description is required",
+                })}
+              />
+              {errors.description && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.description.message}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
 
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <Form.Group controlId="approveRepo">
-                <Form.Label>Target Repository (GitHub) *</Form.Label>
-                <Form.Select
-                  isInvalid={!!errors.githubRepo}
-                  {...register("githubRepo", {
-                    required: "GitHub repository is required",
-                  })}
-                >
-                  <option value="">Select repository...</option>
-                  {repos.map((repo) => (
-                    <option key={repo} value={repo}>
-                      {repo}
-                    </option>
-                  ))}
-                </Form.Select>
-                {errors.githubRepo && (
-                  <Form.Control.Feedback type="invalid">
-                    {errors.githubRepo.message}
-                  </Form.Control.Feedback>
-                )}
-              </Form.Group>
-            </div>
-
-            <div className="col-md-3">
-              <Form.Group controlId="approvePriority">
-                <Form.Label>Priority *</Form.Label>
-                <Form.Select {...register("priority", { required: true })}>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </Form.Select>
-              </Form.Group>
-            </div>
-
-            <div className="col-md-3">
-              <Form.Group controlId="approveCategory">
-                <Form.Label>Category *</Form.Label>
-                <Form.Select {...register("category", { required: true })}>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </div>
-          </div>
-
-          <hr />
-
-          <div className="mb-3">
-            <h6>Manage Attachments</h6>
-            {attachments.length === 0 ? (
-              <p className="text-muted small">No attachments uploaded.</p>
-            ) : (
-              <ul className="list-group mb-2">
-                {attachments.map((att) => (
-                  <li
-                    key={att.id}
-                    className="list-group-item d-flex justify-content-between align-items-center py-2"
+            <div className="row mb-3">
+              <div className="col-md-6">
+                <Form.Group controlId="approveRepo">
+                  <Form.Label>Target Repository (GitHub) *</Form.Label>
+                  <Form.Select
+                    isInvalid={!!errors.githubRepo}
+                    {...register("githubRepo", {
+                      required: "GitHub repository is required",
+                    })}
                   >
-                    <a
-                      href={`${AppConfig.ADMIN_API_URL || "http://localhost:4000"}${att.filePath}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-decoration-none small text-truncate"
-                      style={{ maxWidth: "80%" }}
-                    >
-                      {att.filePath.split("/").pop()} ({att.fileType})
-                    </a>
-                    <Button
-                      variant="link"
-                      className="text-danger p-0 ms-2"
-                      onClick={() => handleDeleteAttachment(att.id)}
-                    >
-                      <Trash size={16} />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
+                    <option value="">Select repository...</option>
+                    {repos.map((repo) => (
+                      <option key={repo} value={repo}>
+                        {repo}
+                      </option>
+                    ))}
+                  </Form.Select>
+                  {errors.githubRepo && (
+                    <Form.Control.Feedback type="invalid">
+                      {errors.githubRepo.message}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </div>
 
-            <div className="d-flex align-items-center mt-2">
-              <Form.Group controlId="approveFile" className="mb-0">
-                <Form.Label className="btn btn-outline-secondary btn-sm mb-0 d-flex align-items-center gap-1">
-                  <Upload size={14} /> Add Attachment
-                </Form.Label>
-                <Form.Control
+              <div className="col-md-3">
+                <Form.Group controlId="approvePriority">
+                  <Form.Label>Priority *</Form.Label>
+                  <Form.Select {...register("priority", { required: true })}>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </Form.Select>
+                </Form.Group>
+              </div>
+
+              <div className="col-md-3">
+                <Form.Group controlId="approveCategory">
+                  <Form.Label>Category *</Form.Label>
+                  <Form.Select {...register("category", { required: true })}>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
+            </div>
+
+            <hr />
+
+            <div className="mb-3">
+              <h6>Manage Attachments</h6>
+              {attachments.length === 0 ? (
+                <p className="text-muted small">No attachments uploaded.</p>
+              ) : (
+                <ul className="list-group mb-2">
+                  {attachments.map((att) => {
+                    const fileName = att.filePath.split("/").pop();
+                    return (
+                      <li
+                        key={att.id}
+                        className="list-group-item d-flex justify-content-between align-items-center py-2"
+                      >
+                        <a
+                          href={attachmentUrl(att.filePath)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-decoration-none small text-truncate"
+                          style={{ maxWidth: "60%" }}
+                        >
+                          {fileName} ({att.fileType})
+                        </a>
+                        {attachmentToDelete === att.id ? (
+                          <div className="d-flex align-items-center gap-2 small">
+                            <span>Delete this attachment?</span>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleDeleteAttachment(att.id)}
+                            >
+                              Delete attachment
+                            </Button>
+                            <Button
+                              variant="outline-secondary"
+                              size="sm"
+                              onClick={() => setAttachmentToDelete(null)}
+                            >
+                              Keep
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="link"
+                            className="text-danger p-0 ms-2"
+                            onClick={() => setAttachmentToDelete(att.id)}
+                            aria-label={`Delete attachment ${fileName}`}
+                            title={`Delete attachment ${fileName}`}
+                          >
+                            <Trash size={16} aria-hidden="true" />
+                          </Button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              <div className="d-flex align-items-center mt-2">
+                {/* A real button opens the file picker: the hidden input alone
+                  cannot be reached with the keyboard (UX-12) */}
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  className="d-flex align-items-center gap-1"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  <Upload size={14} aria-hidden="true" /> Add Attachment
+                </Button>
+                <input
                   type="file"
+                  ref={fileInputRef}
                   onChange={handleFileChange}
-                  style={{ display: "none" }}
+                  aria-label="Add attachment"
+                  hidden
                   disabled={isUploading}
                 />
-              </Form.Group>
-              {isUploading && (
-                <div className="ms-2 d-flex align-items-center text-muted small">
-                  <Spinner animation="border" size="sm" className="me-1" />
-                  Uploading...
-                </div>
-              )}
+                {isUploading && (
+                  <div className="ms-2 d-flex align-items-center text-muted small">
+                    <Spinner animation="border" size="sm" className="me-1" />
+                    Uploading...
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <hr />
+            <hr />
 
-          <Form.Group className="mb-3" controlId="approveComment">
-            <Form.Label>Status Change Comment / Note (Optional)</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={2}
-              placeholder="Add details about why this bug is approved or notes for the devs..."
-              {...register("comment")}
-            />
-          </Form.Group>
+            <Form.Group className="mb-3" controlId="approveComment">
+              <Form.Label>Status Change Comment / Note (Optional)</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={2}
+                placeholder="Add details about why this bug is approved or notes for the devs..."
+                {...register("comment")}
+              />
+            </Form.Group>
+          </fieldset>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onHide} disabled={isApproving}>
-            Cancel
-          </Button>
-          <Button
-            variant="success"
-            type="submit"
-            disabled={isApproving || isUploading}
-          >
-            {isApproving ? "Approving..." : "Approve & Send to GitHub"}
-          </Button>
-        </Modal.Footer>
+        {pendingApproval ? (
+          <Modal.Footer className="flex-column align-items-stretch">
+            <Alert variant="warning" className="mb-2">
+              Approving publishes a <strong>public</strong> issue in{" "}
+              <strong>{pendingApproval.githubRepo}</strong>, visible to anyone.
+              It includes the title, the description, the comment, the
+              reporter&apos;s e-mail and yours.
+            </Alert>
+            <div className="d-flex justify-content-end gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setPendingApproval(null)}
+                disabled={isApproving}
+              >
+                Back to editing
+              </Button>
+              <Button
+                variant="success"
+                onClick={publishApproval}
+                disabled={isApproving || isUploading}
+              >
+                {isApproving ? "Publishing..." : "Publish to GitHub"}
+              </Button>
+            </div>
+          </Modal.Footer>
+        ) : (
+          <Modal.Footer>
+            <Button variant="secondary" onClick={onHide}>
+              Cancel
+            </Button>
+            <Button variant="success" type="submit" disabled={isUploading}>
+              Approve & Send to GitHub
+            </Button>
+          </Modal.Footer>
+        )}
       </Form>
     </Modal>
   );
