@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { useSession } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
+import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { BugListPage } from "./BugListPage";
 
@@ -365,6 +366,36 @@ describe("BugListPage Component", () => {
     await waitFor(() => {
       expect(screen.queryByText(/report a new bug/i)).not.toBeInTheDocument();
     });
+  });
+
+  it("sends the chosen component with a new report", async () => {
+    const user = userEvent.setup();
+    render(<BugListPage />);
+    expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
+
+    await user.click(screen.getByRole("button", { name: /report a bug/i }));
+    const modal = await screen.findByRole("dialog");
+    await user.type(within(modal).getByLabelText(/title \*/i), "My Test Bug");
+    await user.type(within(modal).getByLabelText(/description \*/i), "Broken");
+    await user.selectOptions(
+      within(modal).getByLabelText("Component"),
+      "language",
+    );
+    // Under jsdom, axios turns FormData into text: the request is read here
+    const post = vi
+      .spyOn(ADMIN_CLIENT, "post")
+      .mockResolvedValueOnce({ data: { data: { id: "new-1" } } });
+    await user.click(
+      within(modal).getByRole("button", { name: /report bug/i }),
+    );
+
+    await waitFor(() => {
+      expect(post).toHaveBeenCalledWith("/bugs", expect.any(FormData));
+    });
+    expect((post.mock.calls[0][1] as FormData).get("component")).toBe(
+      "language",
+    );
+    post.mockRestore();
   });
 
   it("opens Admin Report Modal when clicking Create GitHub Issue and submits it", async () => {

@@ -4,6 +4,8 @@ import { Eye } from "react-bootstrap-icons";
 import { formatDate } from "@/shared/constants";
 import { attachmentUrl } from "../../api/attachmentUrl";
 import type { Bug } from "../../domain/Bug";
+import { componentLabel } from "../../domain/BugComponent";
+import { BugPriorityBadge } from "../BugPriorityBadge";
 import { BugStatusBadge } from "../BugStatusBadge";
 
 interface BugRowProps {
@@ -25,28 +27,6 @@ export const BugRowComponent: FC<BugRowProps> = ({
   onRestore,
   onApprove,
 }) => {
-  // Helper for priority badges colors
-  const getPriorityBadge = (priority?: string) => {
-    switch (priority?.toLowerCase()) {
-      case "high":
-        return <Badge bg="danger">High</Badge>;
-      case "medium":
-        return (
-          <Badge bg="warning" text="dark">
-            Medium
-          </Badge>
-        );
-      case "low":
-        return (
-          <Badge bg="info" text="dark">
-            Low
-          </Badge>
-        );
-      default:
-        return <Badge bg="secondary">{priority || "None"}</Badge>;
-    }
-  };
-
   const githubUrl =
     bug.githubRepo && bug.gitIssueNumber
       ? `https://github.com/${bug.githubRepo}/issues/${bug.gitIssueNumber}`
@@ -97,7 +77,11 @@ export const BugRowComponent: FC<BugRowProps> = ({
         </Badge>
       </td>
 
-      <td className="align-middle">{getPriorityBadge(bug.priority)}</td>
+      <td className="align-middle">
+        <BugPriorityBadge priority={bug.priority} />
+      </td>
+
+      <td className="align-middle small">{componentLabel(bug.component)}</td>
 
       <td className="align-middle">
         <BugStatusBadge status={bug.status} />

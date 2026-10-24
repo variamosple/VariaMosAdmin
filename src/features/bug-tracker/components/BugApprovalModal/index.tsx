@@ -5,12 +5,22 @@ import { useForm } from "react-hook-form";
 import { attachmentUrl } from "../../api/attachmentUrl";
 import { deleteAttachment, uploadAttachment } from "../../api/BugRepository";
 import type { Bug, BugAttachment } from "../../domain/Bug";
+import {
+  BUG_COMPONENT_LABELS,
+  BUG_COMPONENTS,
+} from "../../domain/BugComponent";
+import {
+  BUG_PRIORITIES,
+  BUG_PRIORITY_LABELS,
+  type BugPriority,
+} from "../../domain/BugPriority";
 
 interface ApproveFormData {
   title: string;
   description: string;
-  priority: "low" | "medium" | "high";
+  priority: BugPriority;
   category: string;
+  component: string;
   githubRepo: string;
   comment: string;
 }
@@ -28,6 +38,7 @@ interface BugApprovalModalProps {
     priority?: string,
     category?: string,
     githubRepo?: string,
+    component?: string,
   ) => Promise<void>;
   repos: string[];
   categories: string[];
@@ -65,6 +76,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
       description: "",
       priority: "medium",
       category: "Other",
+      component: "",
       githubRepo: "",
       comment: "",
     },
@@ -77,6 +89,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
         description: bug.description || "",
         priority: bug.priority || "medium",
         category: bug.category || categories[0] || "Other",
+        component: bug.component || "",
         githubRepo: bug.githubRepo || "",
         comment: "",
       });
@@ -112,6 +125,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
         data.priority,
         data.category,
         data.githubRepo,
+        data.component,
       );
       onHide();
     } catch (err) {
@@ -241,9 +255,11 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                 <Form.Group controlId="approvePriority">
                   <Form.Label>Priority *</Form.Label>
                   <Form.Select {...register("priority", { required: true })}>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    {BUG_PRIORITIES.map((priority) => (
+                      <option key={priority} value={priority}>
+                        {BUG_PRIORITY_LABELS[priority]}
+                      </option>
+                    ))}
                   </Form.Select>
                 </Form.Group>
               </div>
@@ -255,6 +271,22 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                     {categories.map((cat) => (
                       <option key={cat} value={cat}>
                         {cat}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
+            </div>
+
+            <div className="row mb-3">
+              <div className="col-md-6">
+                <Form.Group controlId="approveComponent">
+                  <Form.Label>Component</Form.Label>
+                  <Form.Select {...register("component")}>
+                    <option value="">Not specified</option>
+                    {BUG_COMPONENTS.map((component) => (
+                      <option key={component} value={component}>
+                        {BUG_COMPONENT_LABELS[component]}
                       </option>
                     ))}
                   </Form.Select>

@@ -199,6 +199,8 @@ describe("BugApprovalModal Component", () => {
       screen.getByLabelText(/Status Change Comment/i),
       "Review note",
     );
+    await user.selectOptions(screen.getByLabelText(/Priority \*/i), "critical");
+    await user.selectOptions(screen.getByLabelText("Component"), "model");
 
     fireEvent.submit(
       screen.getByRole("button", { name: "Approve & Send to GitHub" }),
@@ -220,9 +222,10 @@ describe("BugApprovalModal Component", () => {
         "Review note",
         "Approved Title",
         "Old Description",
-        "low",
+        "critical",
         "UI",
         "repo1",
+        "model",
       );
     });
 

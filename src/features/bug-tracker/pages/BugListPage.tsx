@@ -20,10 +20,12 @@ import { BugApprovalModal } from "../components/BugApprovalModal";
 import { BugAssigneesForm } from "../components/BugAssigneesForm";
 import { BugFormModal } from "../components/BugFormModal";
 import { BugList } from "../components/BugList";
+import { BugPriorityBadge } from "../components/BugPriorityBadge";
 import { BugSearchForm } from "../components/BugSearchForm";
 import { BugStatusBadge } from "../components/BugStatusBadge";
 import { BugStatusForm } from "../components/BugStatusForm";
 import type { Bug, BugAttachment, BugStatusLog } from "../domain/Bug";
+import { componentLabel } from "../domain/BugComponent";
 import type { BugFilter } from "../domain/BugFilter";
 import { useAssignableUsers } from "../hooks/useAssignableUsers";
 import { useBugList } from "../hooks/useBugList";
@@ -85,6 +87,7 @@ const BugListPageComponent: FC = () => {
       data.category,
       data.githubRepo,
       file,
+      data.component || undefined,
     );
     if (created) {
       setShowUserCreateModal(false);
@@ -293,22 +296,9 @@ const BugListPageComponent: FC = () => {
                     {selectedBugForDetails.githubRepo || "Local"}
                   </Badge>
                   {selectedBugForDetails.priority && (
-                    <Badge
-                      bg={
-                        selectedBugForDetails.priority === "high"
-                          ? "danger"
-                          : selectedBugForDetails.priority === "medium"
-                            ? "warning"
-                            : "info"
-                      }
-                      text={
-                        selectedBugForDetails.priority === "high"
-                          ? "white"
-                          : "dark"
-                      }
-                    >
-                      {selectedBugForDetails.priority.toUpperCase()}
-                    </Badge>
+                    <BugPriorityBadge
+                      priority={selectedBugForDetails.priority}
+                    />
                   )}
                   {selectedBugForDetails.status && (
                     <BugStatusBadge status={selectedBugForDetails.status} />
@@ -334,6 +324,9 @@ const BugListPageComponent: FC = () => {
               <Row className="mb-3">
                 <Col md={6} className="mb-2 mb-md-0">
                   <strong>Category: </strong> {selectedBugForDetails.category}
+                  <br />
+                  <strong>Component: </strong>{" "}
+                  {componentLabel(selectedBugForDetails.component)}
                 </Col>
                 <Col md={6}>
                   <strong>Created At: </strong>{" "}

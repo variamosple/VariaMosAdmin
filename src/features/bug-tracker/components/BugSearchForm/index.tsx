@@ -3,7 +3,12 @@ import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { BugUserRef } from "../../domain/Bug";
+import {
+  BUG_COMPONENT_LABELS,
+  BUG_COMPONENTS,
+} from "../../domain/BugComponent";
 import type { BugFilter } from "../../domain/BugFilter";
+import { BUG_PRIORITIES, BUG_PRIORITY_LABELS } from "../../domain/BugPriority";
 import { GITHUB_BUG_STATUSES, statusLabel } from "../../domain/BugStatus";
 
 export interface BugSearchFormProps {
@@ -42,6 +47,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
       priority: "",
       search: "",
       assignee: "",
+      component: "",
     });
     onSearchReset();
   };
@@ -68,6 +74,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
       priority: undefined,
       search: undefined,
       assignee: undefined,
+      component: undefined,
     });
   }, [reset]);
 
@@ -203,15 +210,46 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
                 isInvalid={!!errors.priority}
               >
                 <option value="">All</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                {BUG_PRIORITIES.map((priority) => (
+                  <option key={priority} value={priority}>
+                    {BUG_PRIORITY_LABELS[priority]}
+                  </option>
+                ))}
               </Form.Select>
 
               <Button
                 title="Clear priority filter"
                 variant="outline-secondary"
                 onClick={() => clearField("priority")}
+                className="fw-bold"
+                disabled={isLoading}
+              >
+                <Trash />
+              </Button>
+            </InputGroup>
+          </Form.Group>
+        </Col>
+
+        <Col xs={12} sm={6} lg={3} className="mt-2">
+          <Form.Group className="w-100" controlId="component">
+            <Form.Label>Component</Form.Label>
+            <InputGroup>
+              <Form.Select
+                className="form-select"
+                aria-label="Component"
+                {...register("component")}
+              >
+                <option value="">All</option>
+                {BUG_COMPONENTS.map((component) => (
+                  <option key={component} value={component}>
+                    {BUG_COMPONENT_LABELS[component]}
+                  </option>
+                ))}
+              </Form.Select>
+              <Button
+                title="Clear component filter"
+                variant="outline-secondary"
+                onClick={() => clearField("component")}
                 className="fw-bold"
                 disabled={isLoading}
               >

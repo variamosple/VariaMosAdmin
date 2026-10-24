@@ -4,12 +4,16 @@ export interface BugUserRef {
   name: string;
 }
 
+import type { BugComponent } from "./BugComponent";
+import type { BugPriority } from "./BugPriority";
+
 export interface Bug {
   id?: string;
   title: string;
   description: string;
-  priority: "low" | "medium" | "high";
+  priority: BugPriority;
   category: string;
+  component?: BugComponent | "";
   status?: string;
   githubRepo?: string;
   gitIssueNumber?: number;
