@@ -20,6 +20,8 @@ import { BugApprovalModal } from "../components/BugApprovalModal";
 import { BugFormModal } from "../components/BugFormModal";
 import { BugList } from "../components/BugList";
 import { BugSearchForm } from "../components/BugSearchForm";
+import { BugStatusBadge } from "../components/BugStatusBadge";
+import { BugStatusForm } from "../components/BugStatusForm";
 import type { Bug, BugAttachment, BugStatusLog } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 import { useBugList } from "../hooks/useBugList";
@@ -42,6 +44,7 @@ const BugListPageComponent: FC = () => {
     handleReject,
     handleRestore,
     handleApprove,
+    handleChangeStatus,
     error,
     loadError,
     createError,
@@ -303,23 +306,7 @@ const BugListPageComponent: FC = () => {
                     </Badge>
                   )}
                   {selectedBugForDetails.status && (
-                    <Badge
-                      bg={
-                        selectedBugForDetails.status === "open"
-                          ? "success"
-                          : selectedBugForDetails.status === "closed"
-                            ? "secondary"
-                            : "light"
-                      }
-                      text={
-                        selectedBugForDetails.status === "open" ||
-                        selectedBugForDetails.status === "closed"
-                          ? "white"
-                          : "dark"
-                      }
-                    >
-                      {selectedBugForDetails.status.toUpperCase()}
-                    </Badge>
+                    <BugStatusBadge status={selectedBugForDetails.status} />
                   )}
                 </div>
               </div>
@@ -407,6 +394,32 @@ const BugListPageComponent: FC = () => {
                       )}
                     </ul>
                   </div>
+                )}
+
+              {canUpdate &&
+                selectedBugForDetails.id &&
+                selectedBugForDetails.gitIssueNumber &&
+                selectedBugForDetails.status && (
+                  <BugStatusForm
+                    key={selectedBugForDetails.status}
+                    status={selectedBugForDetails.status}
+                    onChangeStatus={async (status, comment) => {
+                      const bugId = selectedBugForDetails.id as string;
+                      const failure = await handleChangeStatus(
+                        bugId,
+                        status,
+                        comment,
+                      );
+                      if (!failure) {
+                        setSelectedBugForDetails({
+                          ...selectedBugForDetails,
+                          status,
+                        });
+                        fetchNotes(bugId);
+                      }
+                      return failure;
+                    }}
+                  />
                 )}
 
               <hr />

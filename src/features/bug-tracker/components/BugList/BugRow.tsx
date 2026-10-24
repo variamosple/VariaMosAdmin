@@ -4,6 +4,7 @@ import { Eye } from "react-bootstrap-icons";
 import { formatDate } from "@/shared/constants";
 import { attachmentUrl } from "../../api/attachmentUrl";
 import type { Bug } from "../../domain/Bug";
+import { BugStatusBadge } from "../BugStatusBadge";
 
 interface BugRowProps {
   bug: Bug;
@@ -43,22 +44,6 @@ export const BugRowComponent: FC<BugRowProps> = ({
         );
       default:
         return <Badge bg="secondary">{priority || "None"}</Badge>;
-    }
-  };
-
-  // Helper for status badges colors
-  const getStatusBadge = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case "open":
-        return <Badge bg="success">Open</Badge>;
-      case "closed":
-        return <Badge bg="secondary">Closed</Badge>;
-      default:
-        return (
-          <Badge bg="light" text="dark">
-            {status || "Unknown"}
-          </Badge>
-        );
     }
   };
 
@@ -114,7 +99,9 @@ export const BugRowComponent: FC<BugRowProps> = ({
 
       <td className="align-middle">{getPriorityBadge(bug.priority)}</td>
 
-      <td className="align-middle">{getStatusBadge(bug.status)}</td>
+      <td className="align-middle">
+        <BugStatusBadge status={bug.status} />
+      </td>
 
       <td className="align-middle small">
         <div>
