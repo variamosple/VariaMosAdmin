@@ -1,8 +1,7 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import { type FC, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useState } from "react";
 import {
   Alert,
-  Badge,
   Button,
   Card,
   Col,
@@ -15,15 +14,16 @@ import { Megaphone, People, Person, Send } from "react-bootstrap-icons";
 import { queryRoles } from "@/features/role-management/api/RoleRepository";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
-import { queryUsers } from "@/features/user-management/api/UserRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
-import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import {
   countNotificationRecipients,
   type DispatchNotificationRequest,
   dispatchNotification,
 } from "../api/NotificationsAdminRepository";
+import { UserRecipientPicker } from "../components/UserRecipientPicker";
+
+const ROLE_PAGE_SIZE = 100;
 
 const accounts = (count: number) => `${count} account${count === 1 ? "" : "s"}`;
 
@@ -34,14 +34,12 @@ const NotificationsAdminPageComponent: FC = () => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [userSearch, setUserSearch] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
-  // Loaded metadata
-  const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
-  const [loadingMetadata, setLoadingMetadata] = useState(false);
+  const [rolesTotal, setRolesTotal] = useState(0);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+  const [rolesError, setRolesError] = useState<string | null>(null);
 
   // Submission state
   const [submitting, setSubmitting] = useState(false);
@@ -55,34 +53,26 @@ const NotificationsAdminPageComponent: FC = () => {
     count: number;
   } | null>(null);
 
-  useEffect(() => {
-    const loadMetadata = async () => {
-      setLoadingMetadata(true);
-      try {
-        const [usersRes, rolesRes] = await Promise.all([
-          queryUsers(new UsersFilter(undefined, undefined, undefined, 1, 200)),
-          queryRoles(new RolesFilter(undefined, 1, 100)),
-        ]);
-
-        if (usersRes.data) {
-          // Filter out disabled/deleted users
-          setUsers(usersRes.data.filter((u) => u.isEnabled && !u.isDeleted));
-        }
-        if (rolesRes.data) {
-          setRoles(rolesRes.data);
-        }
-      } catch (error) {
-        console.error(
-          "Failed to load users or roles for notifications admin:",
-          error,
-        );
-      } finally {
-        setLoadingMetadata(false);
-      }
-    };
-
-    loadMetadata();
+  // Users are searched on the server by the picker (UX-03); roles are
+  // few, they are loaded once
+  const loadRoles = useCallback(async () => {
+    setLoadingRoles(true);
+    setRolesError(null);
+    const response = await queryRoles(
+      new RolesFilter(undefined, 1, ROLE_PAGE_SIZE),
+    );
+    if (response.errorCode) {
+      setRolesError(response.message || "The roles could not be loaded.");
+    } else {
+      setRoles(response.data ?? []);
+      setRolesTotal(response.totalCount ?? response.data?.length ?? 0);
+    }
+    setLoadingRoles(false);
   }, []);
+
+  useEffect(() => {
+    loadRoles();
+  }, [loadRoles]);
 
   const handleRoleToggle = (roleName: string) => {
     setSelectedRoles((prev) =>
@@ -92,12 +82,14 @@ const NotificationsAdminPageComponent: FC = () => {
     );
   };
 
-  const handleUserToggle = (userId: string) => {
+  const addUser = (user: User) => {
     setSelectedUsers((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId],
+      prev.some((selected) => selected.id === user.id) ? prev : [...prev, user],
     );
+  };
+
+  const removeUser = (userId: string) => {
+    setSelectedUsers((prev) => prev.filter((user) => user.id !== userId));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,7 +125,10 @@ const NotificationsAdminPageComponent: FC = () => {
       title,
       body,
       roles: audience === "role" ? selectedRoles : undefined,
-      userIds: audience === "users" ? selectedUsers : undefined,
+      userIds:
+        audience === "users"
+          ? selectedUsers.map((user) => user.id as string)
+          : undefined,
     };
     // Nothing is sent before the confirmation shows how many accounts
     // the notification reaches (UX-02)
@@ -206,289 +201,172 @@ const NotificationsAdminPageComponent: FC = () => {
                 VariaMos platform.
               </p>
 
-              {loadingMetadata ? (
-                <div className="text-center py-5">
-                  <Spinner animation="border" variant="primary" />
-                  <p className="mt-2 text-muted">
-                    Loading target audience data...
-                  </p>
-                </div>
-              ) : (
-                <Form onSubmit={handleSubmit} noValidate>
-                  <Form.Group className="mb-4">
-                    <Form.Label className="fw-semibold">
-                      Audience Selection
-                    </Form.Label>
-                    <div className="d-flex gap-3 flex-wrap">
-                      <Form.Check
-                        type="radio"
-                        id="audience-broadcast"
-                        label={
-                          <span className="d-flex align-items-center gap-1">
-                            <Megaphone size={16} /> Broadcast (All Users)
-                          </span>
-                        }
-                        name="audience"
-                        checked={audience === "broadcast"}
-                        onChange={() => setAudience("broadcast")}
-                        className="border rounded p-2 px-3 bg-light cursor-pointer"
-                      />
-                      <Form.Check
-                        type="radio"
-                        id="audience-role"
-                        label={
-                          <span className="d-flex align-items-center gap-1">
-                            <People size={16} /> By Role
-                          </span>
-                        }
-                        name="audience"
-                        checked={audience === "role"}
-                        onChange={() => setAudience("role")}
-                        className="border rounded p-2 px-3 bg-light cursor-pointer"
-                      />
-                      <Form.Check
-                        type="radio"
-                        id="audience-users"
-                        label={
-                          <span className="d-flex align-items-center gap-1">
-                            <Person size={16} /> Specific Users
-                          </span>
-                        }
-                        name="audience"
-                        checked={audience === "users"}
-                        onChange={() => setAudience("users")}
-                        className="border rounded p-2 px-3 bg-light cursor-pointer"
-                      />
-                    </div>
-                  </Form.Group>
-
-                  {/* Target Audience Selectors */}
-                  {audience === "role" && (
-                    <Card className="mb-4 bg-light border-light">
-                      <Card.Body>
-                        <h6 className="fw-bold mb-2">Select Roles</h6>
-                        <Row xs={1} sm={2} className="g-2">
-                          {roles.map((role) => (
-                            <Col key={role.id}>
-                              <Form.Check
-                                type="checkbox"
-                                id={`role-${role.id}`}
-                                label={role.name}
-                                checked={selectedRoles.includes(role.name)}
-                                onChange={() => handleRoleToggle(role.name)}
-                              />
-                            </Col>
-                          ))}
-                        </Row>
-                      </Card.Body>
-                    </Card>
-                  )}
-
-                  {audience === "users" && (
-                    <Card className="mb-4 bg-light border-light">
-                      <Card.Body>
-                        <h6 className="fw-bold mb-2">Select Target Users</h6>
-
-                        {/* Selected User Badges */}
-                        {selectedUsers.length > 0 && (
-                          <div className="d-flex flex-wrap gap-2 mb-3">
-                            {selectedUsers.map((userId) => {
-                              const user = users.find((u) => u.id === userId);
-                              return (
-                                <Badge
-                                  key={userId}
-                                  bg="primary"
-                                  className="d-flex align-items-center gap-2 p-2"
-                                  style={{ borderRadius: "20px" }}
-                                >
-                                  <span>
-                                    {user
-                                      ? `${user.name} (${user.email})`
-                                      : userId}
-                                  </span>
-                                  <Button
-                                    variant="link"
-                                    className="p-0 text-white border-0 d-flex align-items-center"
-                                    onClick={() => handleUserToggle(userId)}
-                                    style={{ lineHeight: 1, boxShadow: "none" }}
-                                  >
-                                    &times;
-                                  </Button>
-                                </Badge>
-                              );
-                            })}
-                          </div>
-                        )}
-
-                        {/* Search input with dynamic dropdown list */}
-                        <div className="position-relative">
-                          <Form.Control
-                            type="text"
-                            placeholder="Search user by name or email..."
-                            value={userSearch}
-                            onChange={(e) => {
-                              setUserSearch(e.target.value);
-                              setShowDropdown(true);
-                            }}
-                            onFocus={() => setShowDropdown(true)}
-                          />
-
-                          {showDropdown && (
-                            <div
-                              className="position-absolute w-100 bg-white border rounded shadow-lg mt-1"
-                              style={{
-                                zIndex: 1000,
-                                maxHeight: "220px",
-                                overflowY: "auto",
-                              }}
-                            >
-                              {users
-                                .filter((user) => {
-                                  if (
-                                    selectedUsers.includes(user.id as string)
-                                  ) {
-                                    return false;
-                                  }
-                                  const searchTrim = userSearch
-                                    .trim()
-                                    .toLowerCase();
-                                  if (!searchTrim) {
-                                    return true;
-                                  }
-                                  const nameMatch = user.name
-                                    ?.toLowerCase()
-                                    .includes(searchTrim);
-                                  const emailMatch = user.email
-                                    ?.toLowerCase()
-                                    .includes(searchTrim);
-                                  const userMatch = user.user
-                                    ?.toLowerCase()
-                                    .includes(searchTrim);
-                                  return Boolean(
-                                    nameMatch || emailMatch || userMatch,
-                                  );
-                                })
-                                .map((user) => (
-                                  <button
-                                    key={user.id}
-                                    type="button"
-                                    className="p-2 border-bottom text-dark w-100 text-start bg-transparent border-0 d-block"
-                                    style={{ cursor: "pointer" }}
-                                    onMouseDown={(e) => {
-                                      e.preventDefault();
-                                      handleUserToggle(user.id as string);
-                                      setUserSearch("");
-                                      setShowDropdown(false);
-                                    }}
-                                    onMouseEnter={(e) =>
-                                      (e.currentTarget.style.backgroundColor =
-                                        "#f8f9fa")
-                                    }
-                                    onMouseLeave={(e) =>
-                                      (e.currentTarget.style.backgroundColor =
-                                        "transparent")
-                                    }
-                                  >
-                                    <strong>
-                                      {user.name || user.user || "User"}
-                                    </strong>{" "}
-                                    <span className="text-muted">
-                                      ({user.email || user.user || user.id})
-                                    </span>
-                                  </button>
-                                ))}
-                              {users.filter((user) => {
-                                if (selectedUsers.includes(user.id as string)) {
-                                  return false;
-                                }
-                                const searchTrim = userSearch
-                                  .trim()
-                                  .toLowerCase();
-                                if (!searchTrim) {
-                                  return true;
-                                }
-                                const nameMatch = user.name
-                                  ?.toLowerCase()
-                                  .includes(searchTrim);
-                                const emailMatch = user.email
-                                  ?.toLowerCase()
-                                  .includes(searchTrim);
-                                const userMatch = user.user
-                                  ?.toLowerCase()
-                                  .includes(searchTrim);
-                                return Boolean(
-                                  nameMatch || emailMatch || userMatch,
-                                );
-                              }).length === 0 && (
-                                <div className="p-2 text-muted text-center">
-                                  No matching users found
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  )}
-
-                  <Form.Group className="mb-3" controlId="notification-title">
-                    <Form.Label className="fw-semibold">
-                      Notification Title
-                    </Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="e.g., Scheduled Maintenance Alert"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
+              <Form onSubmit={handleSubmit} noValidate>
+                <Form.Group className="mb-4">
+                  <Form.Label className="fw-semibold">
+                    Audience Selection
+                  </Form.Label>
+                  <div className="d-flex gap-3 flex-wrap">
+                    <Form.Check
+                      type="radio"
+                      id="audience-broadcast"
+                      label={
+                        <span className="d-flex align-items-center gap-1">
+                          <Megaphone size={16} /> Broadcast (All Users)
+                        </span>
+                      }
+                      name="audience"
+                      checked={audience === "broadcast"}
+                      onChange={() => setAudience("broadcast")}
+                      className="border rounded p-2 px-3 bg-light cursor-pointer"
                     />
-                  </Form.Group>
-
-                  <Form.Group className="mb-4" controlId="notification-body">
-                    <Form.Label className="fw-semibold">
-                      Message Body
-                    </Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={4}
-                      placeholder="Enter the notification message here..."
-                      value={body}
-                      onChange={(e) => setBody(e.target.value)}
-                      required
+                    <Form.Check
+                      type="radio"
+                      id="audience-role"
+                      label={
+                        <span className="d-flex align-items-center gap-1">
+                          <People size={16} /> By Role
+                        </span>
+                      }
+                      name="audience"
+                      checked={audience === "role"}
+                      onChange={() => setAudience("role")}
+                      className="border rounded p-2 px-3 bg-light cursor-pointer"
                     />
-                  </Form.Group>
-
-                  {/* Next to the button, where the eye is after a click (UX-21) */}
-                  {feedback && (
-                    <Alert
-                      variant={feedback.type}
-                      dismissible
-                      onClose={() => setFeedback(null)}
-                    >
-                      {feedback.message}
-                    </Alert>
-                  )}
-
-                  <div className="d-grid justify-content-end">
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      disabled={submitting}
-                      className="px-4 py-2 fw-semibold d-flex align-items-center gap-2"
-                    >
-                      {submitting ? (
-                        <>
-                          <Spinner size="sm" animation="border" /> Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Send size={16} /> Dispatch Notification
-                        </>
-                      )}
-                    </Button>
+                    <Form.Check
+                      type="radio"
+                      id="audience-users"
+                      label={
+                        <span className="d-flex align-items-center gap-1">
+                          <Person size={16} /> Specific Users
+                        </span>
+                      }
+                      name="audience"
+                      checked={audience === "users"}
+                      onChange={() => setAudience("users")}
+                      className="border rounded p-2 px-3 bg-light cursor-pointer"
+                    />
                   </div>
-                </Form>
-              )}
+                </Form.Group>
+
+                {/* Target Audience Selectors */}
+                {audience === "role" && (
+                  <Card className="mb-4 bg-light border-light">
+                    <Card.Body>
+                      <h6 className="fw-bold mb-2">Select Roles</h6>
+                      {loadingRoles && (
+                        <div className="text-muted d-flex align-items-center gap-2">
+                          <Spinner animation="border" size="sm" /> Loading
+                          roles...
+                        </div>
+                      )}
+                      {rolesError && (
+                        <Alert
+                          variant="danger"
+                          className="py-2 d-flex align-items-center gap-2"
+                        >
+                          <span>{rolesError}</span>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            className="ms-auto"
+                            onClick={loadRoles}
+                          >
+                            Retry
+                          </Button>
+                        </Alert>
+                      )}
+                      {rolesTotal > roles.length && (
+                        <p className="small text-muted">
+                          Only the first {roles.length} of {rolesTotal} roles
+                          are listed.
+                        </p>
+                      )}
+                      <Row xs={1} sm={2} className="g-2">
+                        {roles.map((role) => (
+                          <Col key={role.id}>
+                            <Form.Check
+                              type="checkbox"
+                              id={`role-${role.id}`}
+                              label={role.name}
+                              checked={selectedRoles.includes(role.name)}
+                              onChange={() => handleRoleToggle(role.name)}
+                            />
+                          </Col>
+                        ))}
+                      </Row>
+                    </Card.Body>
+                  </Card>
+                )}
+
+                {audience === "users" && (
+                  <Card className="mb-4 bg-light border-light">
+                    <Card.Body>
+                      <h6 className="fw-bold mb-2">Select Target Users</h6>
+                      <UserRecipientPicker
+                        selected={selectedUsers}
+                        onAdd={addUser}
+                        onRemove={removeUser}
+                      />
+                    </Card.Body>
+                  </Card>
+                )}
+
+                <Form.Group className="mb-3" controlId="notification-title">
+                  <Form.Label className="fw-semibold">
+                    Notification Title
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="e.g., Scheduled Maintenance Alert"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-4" controlId="notification-body">
+                  <Form.Label className="fw-semibold">Message Body</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={4}
+                    placeholder="Enter the notification message here..."
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    required
+                  />
+                </Form.Group>
+
+                {/* Next to the button, where the eye is after a click (UX-21) */}
+                {feedback && (
+                  <Alert
+                    variant={feedback.type}
+                    dismissible
+                    onClose={() => setFeedback(null)}
+                  >
+                    {feedback.message}
+                  </Alert>
+                )}
+
+                <div className="d-grid justify-content-end">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={submitting}
+                    className="px-4 py-2 fw-semibold d-flex align-items-center gap-2"
+                  >
+                    {submitting ? (
+                      <>
+                        <Spinner size="sm" animation="border" /> Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={16} /> Dispatch Notification
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Form>
             </Card.Body>
           </Card>
         </Col>
