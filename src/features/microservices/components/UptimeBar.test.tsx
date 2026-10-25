@@ -35,4 +35,18 @@ describe("UptimeBar", () => {
       "rgb(220, 53, 69)",
     ]);
   });
+
+  it("shows a degraded slot in orange, even without a successful check", () => {
+    const { container } = render(
+      <UptimeBar
+        history={[slot(1, "DEGRADED", 0), slot(2, "DEGRADED", 50)]}
+        uptimePercentage={25}
+      />,
+    );
+
+    const colors = [...container.querySelectorAll(".uptime-bar-slot")].map(
+      (bar) => (bar as HTMLElement).style.backgroundColor,
+    );
+    expect(colors).toEqual(["rgb(255, 193, 7)", "rgb(255, 193, 7)"]);
+  });
 });
