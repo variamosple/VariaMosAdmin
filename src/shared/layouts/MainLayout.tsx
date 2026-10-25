@@ -12,7 +12,7 @@ export const MainLayout: FC<{ children?: ReactNode }> = ({ children }) => {
     <>
       <MenuContextProvider requestMenu={requestMenuConfig}>
         <Header
-          logoUrl={"./images/VariaMosLogo.png"}
+          logoUrl={"./images/VariaMosLogo.webp"}
           logoAlt="VariaMos logo"
           signInUrl={AppConfig.LOGIN_URL}
           adminApiUrl={AppConfig.ADMIN_API_URL}

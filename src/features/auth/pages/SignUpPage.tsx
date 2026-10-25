@@ -28,7 +28,9 @@ export const SignUpPage: FC = () => {
       data-bs-theme="dark"
     >
       <img
-        src="./images/VariaMosLogo.png"
+        src="./images/VariaMosLogo.webp"
+        width={1200}
+        height={245}
         alt="Variamos logo"
         className="img-fluid"
       />
