@@ -111,42 +111,83 @@ describe("NotificationsAdminPage Component Tests", () => {
     expect(adminCheck).toBeChecked();
   });
 
-  it("renders search input, filters users, selects tags, and removes tags", async () => {
+  it("sends to the users chosen with the server search", async () => {
+    vi.mocked(countNotificationRecipients).mockResolvedValue(counted(1));
+    vi.mocked(dispatchNotification).mockResolvedValue(
+      new ResponseModel<void>("dispatchNotification"),
+    );
     render(<NotificationsAdminPage />);
 
-    const userRadio = await screen.findByLabelText(/Specific Users/i);
-    await userEvent.click(userRadio);
-
-    // Search input should appear
-    const searchInput = await screen.findByPlaceholderText(
-      "Search user by name or email...",
+    await userEvent.click(await screen.findByLabelText(/Specific Users/i));
+    await userEvent.type(screen.getByRole("combobox"), "Alice");
+    await userEvent.click(
+      await screen.findByRole("option", { name: /Alice Smith/ }),
     );
-    expect(searchInput).toBeInTheDocument();
 
-    // Type query to filter
-    await userEvent.type(searchInput, "Alice");
-
-    // Alice should show up in dropdown
-    const aliceItem = await screen.findByText("Alice Smith");
-    expect(aliceItem).toBeInTheDocument();
-
-    // Click item to select
-    await userEvent.click(aliceItem);
-
-    // Alice should appear as a badge tag and search input should be cleared
     expect(
       screen.getByText("Alice Smith (alice@example.com)"),
     ).toBeInTheDocument();
-    expect(searchInput).toHaveValue("");
+    expect(screen.getByRole("combobox")).toHaveValue("");
 
-    // Click 'x' button inside the badge tag to remove her
-    const removeBtn = screen.getByRole("button", { name: "×" });
-    await userEvent.click(removeBtn);
+    await fillAndSubmit();
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Send to 1 account" }),
+    );
 
-    // Tag should be gone
+    await waitFor(() => {
+      expect(dispatchNotification).toHaveBeenCalledWith(
+        expect.objectContaining({ audience: "users", userIds: ["user-1"] }),
+      );
+    });
+  });
+
+  it("removes a chosen user", async () => {
+    render(<NotificationsAdminPage />);
+
+    await userEvent.click(await screen.findByLabelText(/Specific Users/i));
+    await userEvent.click(screen.getByRole("combobox"));
+    await userEvent.click(
+      await screen.findByRole("option", { name: /Alice Smith/ }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remove Alice Smith" }),
+    );
+
     expect(
       screen.queryByText("Alice Smith (alice@example.com)"),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows a failed roles load and loads them again on Retry", async () => {
+    vi.mocked(queryRoles).mockResolvedValueOnce(
+      new ResponseModel<Role[]>("queryRoles").withError(
+        500,
+        "The roles could not be read.",
+      ),
+    );
+    render(<NotificationsAdminPage />);
+
+    await userEvent.click(await screen.findByLabelText(/By Role/i));
+    expect(
+      await screen.findByText("The roles could not be read."),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    expect(await screen.findByLabelText("Administrator")).toBeInTheDocument();
+  });
+
+  it("says when only part of the roles is listed", async () => {
+    const rolesResponse = new ResponseModel<Role[]>("queryRoles");
+    rolesResponse.data = mockRoles;
+    rolesResponse.totalCount = 120;
+    vi.mocked(queryRoles).mockResolvedValue(rolesResponse);
+    render(<NotificationsAdminPage />);
+
+    await userEvent.click(await screen.findByLabelText(/By Role/i));
+
+    expect(
+      await screen.findByText("Only the first 2 of 120 roles are listed."),
+    ).toBeInTheDocument();
   });
 
   it("submits the form successfully for broadcast audience", async () => {
