@@ -1,6 +1,6 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import type { FC } from "react";
-import { Button, Form, Modal, Spinner } from "react-bootstrap";
+import { type FC, useState } from "react";
+import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { usePasswordPolicy } from "@/features/auth/hooks/usePasswordPolicy";
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
@@ -28,12 +28,17 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
     reset,
   } = useForm<PasswordUpdate>();
   const passwordPolicy = usePasswordPolicy();
+  // A refused update is told in the open modal, the input kept (UX-05)
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const onSubmit: SubmitHandler<PasswordUpdate> = (data) => {
     if (!isLoading) {
+      setServerError(null);
       onUpdatePasswordSubmit(data).then((response) => {
         if (!response.errorCode) {
           reset();
+        } else {
+          setServerError(response.message || "The password was not updated.");
         }
       });
     }
@@ -48,6 +53,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
   const onCloseModal = () => {
     onClose();
     reset();
+    setServerError(null);
   };
 
   return (
@@ -61,6 +67,11 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">
+          {serverError && (
+            <Alert variant="danger" className="mb-0">
+              {serverError}
+            </Alert>
+          )}
           <Form.Group className="w-100" controlId="newPassword">
             <Form.Label className="form-label align-self-start m-0">
               Current password

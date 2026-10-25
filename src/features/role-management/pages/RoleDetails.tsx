@@ -70,7 +70,13 @@ const RoleDetailsPageComponent: FC = () => {
         .then((response) => {
           removeToast(toastId);
 
-          if (!response.errorCode) {
+          if (response.errorCode) {
+            pushToast({
+              title: "Permission assignment",
+              message: response.message || "Failed to assign permission",
+              variant: "danger",
+            });
+          } else {
             if (rolePermissionsFilter) {
               loadRolePermissions(rolePermissionsFilter);
             }

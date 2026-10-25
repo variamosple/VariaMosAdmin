@@ -556,6 +556,51 @@ describe("BugListPage Component", () => {
     });
   });
 
+  it("shows a refused comment in the details modal and keeps the text", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get("*/bugs/local", () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: "local-1",
+              title: "Local Bug",
+              description: "Desc",
+              priority: "medium",
+              category: "frontend",
+              status: "pending",
+            },
+          ],
+        }),
+      ),
+      http.get("*/bugs/local-1/notes", () => HttpResponse.json({ data: [] })),
+      http.post("*/bugs/local-1/notes", () =>
+        HttpResponse.json(
+          { errorCode: "INVALID_INPUT", message: "The comment is too long" },
+          { status: 400 },
+        ),
+      ),
+    );
+
+    render(<BugListPage />);
+    await user.click(await screen.findByRole("tab", { name: /local inbox/i }));
+    await user.click(
+      (await screen.findAllByRole("button", { name: /details/i }))[0],
+    );
+
+    const dialog = await screen.findByRole("dialog");
+    const textarea = within(dialog).getByPlaceholderText("Write a comment...");
+    await user.type(textarea, "New user note");
+    await user.click(
+      within(dialog).getByRole("button", { name: /add comment/i }),
+    );
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "The comment is too long",
+    );
+    expect(textarea).toHaveValue("New user note");
+  });
+
   it("renders closed discussion notice if status is not pending", async () => {
     const user = userEvent.setup();
     render(<BugListPage />);

@@ -1,6 +1,6 @@
 import { type ResponseModel, useQuery } from "@variamosple/variamos-components";
-import { type FC, useEffect } from "react";
-import { Button, Form, Modal, Spinner } from "react-bootstrap";
+import { type FC, useEffect, useState } from "react";
+import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import { queryCountries } from "@/shared/api/CountriesRepository";
@@ -41,12 +41,19 @@ export const PersonalInformationUpdateForModal: FC<
     formState: { errors },
     reset,
   } = useForm<PersonalInformationUpdate>();
+  // A refused update is told in the open modal, the input kept (UX-05)
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const onSubmit: SubmitHandler<PersonalInformationUpdate> = (data) => {
     if (!isLoading) {
+      setServerError(null);
       onUpdatePersonalInformationSubmit(data).then((response) => {
         if (!response.errorCode) {
           reset();
+        } else {
+          setServerError(
+            response.message || "The information was not updated.",
+          );
         }
       });
     }
@@ -55,6 +62,7 @@ export const PersonalInformationUpdateForModal: FC<
   const onCloseModal = () => {
     onClose();
     reset();
+    setServerError(null);
   };
 
   useEffect(() => {
@@ -76,10 +84,15 @@ export const PersonalInformationUpdateForModal: FC<
       onHide={onCloseModal}
     >
       <Modal.Header closeButton={!isLoading}>
-        <Modal.Title>PersonalInformation update</Modal.Title>
+        <Modal.Title>Personal information update</Modal.Title>
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">
+          {serverError && (
+            <Alert variant="danger" className="mb-0">
+              {serverError}
+            </Alert>
+          )}
           <Form.Group className="w-100" controlId="countryCode">
             <Form.Label className="form-label align-self-start m-0">
               Country

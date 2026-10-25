@@ -5,6 +5,7 @@ import { PersonalInformationUpdateForModal } from "@/features/user-management/co
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import type { User } from "@/features/user-management/domain/Entity/User";
+import { useToast } from "@/shared/context/ToastContext";
 import {
   getMyAccount,
   updatePersonalInformation,
@@ -21,6 +22,7 @@ const MyAccountPageComponent: FC = () => {
 
   const [showInformationUpdate, setShowInformationUpdate] = useState(false);
   const [isUpdatingInformation, setIsUpdatingInformation] = useState(false);
+  const { pushToast } = useToast();
 
   const personalInformation: PersonalInformationUpdate = useMemo(
     () => ({ countryCode: user?.countryCode }),
@@ -46,6 +48,11 @@ const MyAccountPageComponent: FC = () => {
       .then((response) => {
         if (!response.errorCode) {
           setShowPasswordUpdate(false);
+          pushToast({
+            title: "Password updated",
+            message: "Your password has been changed.",
+            variant: "success",
+          });
         }
 
         return response;
@@ -63,6 +70,11 @@ const MyAccountPageComponent: FC = () => {
       .then((response) => {
         if (!response.errorCode) {
           setShowInformationUpdate(false);
+          pushToast({
+            title: "Information updated",
+            message: "Your information has been saved.",
+            variant: "success",
+          });
           queryUser();
         }
 

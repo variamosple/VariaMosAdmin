@@ -52,10 +52,10 @@ describe("SignUpPage Page Component", () => {
     expect(screen.getByText("Sign in")).toBeInTheDocument();
   });
 
-  it("handles successful sign up and displays success message", async () => {
+  it("answers a sign up with a text that also fits a taken address", async () => {
     mockSignUp.mockResolvedValueOnce({
       errorCode: null,
-      message: "Registration successful",
+      message: "You have successfully signed up!",
     });
     render(
       <MemoryRouter>
@@ -69,7 +69,14 @@ describe("SignUpPage Page Component", () => {
     await waitFor(() => {
       expect(mockSignUp).toHaveBeenCalledWith({ email: "test@example.com" });
     });
-    expect(screen.getByText("Registration successful")).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(
+      "If this email address was not registered yet, your account is ready.",
+    );
+    expect(alert).not.toHaveTextContent("successfully signed up");
+    expect(
+      screen.getByRole("link", { name: "Reset your password" }),
+    ).toHaveAttribute("href", "/forgot-password");
   });
 
   it("handles failed sign up and displays error message", async () => {

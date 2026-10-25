@@ -206,16 +206,6 @@ const NotificationsAdminPageComponent: FC = () => {
                 VariaMos platform.
               </p>
 
-              {feedback && (
-                <Alert
-                  variant={feedback.type}
-                  dismissible
-                  onClose={() => setFeedback(null)}
-                >
-                  {feedback.message}
-                </Alert>
-              )}
-
               {loadingMetadata ? (
                 <div className="text-center py-5">
                   <Spinner animation="border" variant="primary" />
@@ -467,6 +457,17 @@ const NotificationsAdminPageComponent: FC = () => {
                       required
                     />
                   </Form.Group>
+
+                  {/* Next to the button, where the eye is after a click (UX-21) */}
+                  {feedback && (
+                    <Alert
+                      variant={feedback.type}
+                      dismissible
+                      onClose={() => setFeedback(null)}
+                    >
+                      {feedback.message}
+                    </Alert>
+                  )}
 
                   <div className="d-grid justify-content-end">
                     <Button
