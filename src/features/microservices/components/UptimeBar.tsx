@@ -28,7 +28,7 @@ export const UptimeBar: FC<UptimeBarProps> = ({
       }));
 
   const getSlotColor = (slot: UptimeHistorySlot): string => {
-    if ((slot.status as string) === "NO_DATA") return "#e9ecef"; // Gray / No data recorded
+    if (slot.status === "NO_DATA") return "#e9ecef"; // Gray / No check during the slot
     if (slot.status === "DOWN" || slot.uptimePercentage < 80) return "#dc3545"; // Red
     if (slot.status === "DEGRADED" || slot.uptimePercentage < 98)
       return "#ffc107"; // Yellow/Orange
@@ -115,7 +115,9 @@ export const UptimeBar: FC<UptimeBarProps> = ({
                 <div>
                   Status: <span className="fw-bold">{slot.status}</span>
                 </div>
-                <div>Uptime: {slot.uptimePercentage}%</div>
+                {slot.status !== "NO_DATA" && (
+                  <div>Uptime: {slot.uptimePercentage}%</div>
+                )}
                 {slot.responseTimeMs > 0 && (
                   <div>Latency: {slot.responseTimeMs}ms</div>
                 )}
