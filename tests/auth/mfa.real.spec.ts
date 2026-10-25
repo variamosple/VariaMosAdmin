@@ -183,6 +183,11 @@ test.describe("Two-factor authentication - Real E2E", () => {
     await page.getByLabel(/Don't ask for a code/).check();
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(HOME);
+    // The loaded session sends the page home (its redirect): going to My
+    // account before that would be undone
+    await expect(
+      page.getByText(/Welcome to the VariaMos admin module/),
+    ).toBeVisible();
 
     // Forgotten from My account: the code is asked again
     await page.goto("http://localhost:3000/variamos_admin/#/my-account");
