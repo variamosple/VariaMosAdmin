@@ -29,15 +29,6 @@ test.describe("Two-factor authentication - Real E2E", () => {
     await page.locator('button[type="submit"]').click();
   };
 
-  // The right code reloads the page once the hash is #/ (pageLoader): the
-  // URL is home before the reload, and a navigation made in between is
-  // undone by it. Waits for the reloaded page before going on.
-  const submitCode = async (page: Page) => {
-    const reloaded = page.waitForEvent("load");
-    await page.keyboard.press("Enter");
-    await reloaded;
-  };
-
   test("turns the factor on, then asks for the code at sign-in", async ({
     page,
   }) => {
@@ -80,7 +71,7 @@ test.describe("Two-factor authentication - Real E2E", () => {
     // The next step: the one used to turn the factor on is spent
     // The right code reloads the page: submit without waiting on the button
     await page.getByLabel("Authentication code").fill(totp(secret, 1));
-    await submitCode(page);
+    await page.keyboard.press("Enter");
     await expect(page).toHaveURL(HOME);
     await expect(
       page.getByText(/Welcome to the VariaMos admin module/),
@@ -91,7 +82,7 @@ test.describe("Two-factor authentication - Real E2E", () => {
     // A recovery code works once, then turns the factor off
     await signIn(page);
     await page.getByLabel("Authentication code").fill(recoveryCode);
-    await submitCode(page);
+    await page.keyboard.press("Enter");
     await expect(page).toHaveURL(HOME);
     await expect(
       page.getByText(/Welcome to the VariaMos admin module/),
@@ -174,7 +165,7 @@ test.describe("Two-factor authentication - Real E2E", () => {
     await expect(remember).not.toBeChecked();
     await remember.check();
     await page.getByLabel("Authentication code").fill(totp(secret, 1));
-    await submitCode(page);
+    await page.keyboard.press("Enter");
     await expect(page).toHaveURL(HOME);
 
     // Same browser: the password is enough
@@ -190,8 +181,13 @@ test.describe("Two-factor authentication - Real E2E", () => {
     // Two steps ahead is out of the window: a recovery code instead
     await page.getByLabel("Authentication code").fill(recoveryCode);
     await page.getByLabel(/Don't ask for a code/).check();
-    await submitCode(page);
+    await page.keyboard.press("Enter");
     await expect(page).toHaveURL(HOME);
+    // The loaded session sends the page home (its redirect): going to My
+    // account before that would be undone
+    await expect(
+      page.getByText(/Welcome to the VariaMos admin module/),
+    ).toBeVisible();
 
     // Forgotten from My account: the code is asked again
     await page.goto("http://localhost:3000/variamos_admin/#/my-account");
