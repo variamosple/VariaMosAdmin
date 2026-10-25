@@ -1,4 +1,3 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 import {
   createProject,
@@ -9,6 +8,7 @@ import {
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePagedList } from "@/shared/hooks/usePagedList";
 
 export const useProjectList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -28,22 +28,15 @@ export const useProjectList = () => {
     isLoading,
     totalPages,
     onPageChange,
-  } = usePaginatedQuery<ProjectsFilter, Project>({
+    listState,
+  } = usePagedList<ProjectsFilter, Project>({
     queryFunction: queryProjects,
     initialFilter: new ProjectsFilter(),
   });
 
   useEffect(() => {
-    loadData(new ProjectsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Project query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+    void loadData(new ProjectsFilter());
+  }, [loadData]);
 
   const onProjectEdit = (project: Project) => {
     setToEditProject(project);
@@ -138,37 +131,22 @@ export const useProjectList = () => {
   };
 
   const onSearchReset = () => {
-    loadData(new ProjectsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Project query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new ProjectsFilter());
   };
 
   const onSearchSubmit = (search?: ProjectsFilter) => {
-    loadData(
+    void loadData(
       new ProjectsFilter(
         search?.name,
         search?.isTemplate,
         search?.isDeleted,
         search?.includeDeleted,
       ),
-    ).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Project query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    );
   };
 
   return {
+    listState,
     showEdit,
     setShowEdit,
     showCreate,

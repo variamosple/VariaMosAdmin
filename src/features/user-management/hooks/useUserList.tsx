@@ -1,4 +1,3 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 import {
   deleteUser,
@@ -9,6 +8,7 @@ import {
 import type { User } from "@/features/user-management/domain/Entity/User";
 import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePagedList } from "@/shared/hooks/usePagedList";
 
 export const useUserList = () => {
   const [showResetLink, setShowResetLink] = useState(false);
@@ -26,22 +26,15 @@ export const useUserList = () => {
     totalPages,
     isLoading,
     onPageChange,
-  } = usePaginatedQuery<UsersFilter, User>({
+    listState,
+  } = usePagedList<UsersFilter, User>({
     queryFunction: queryUsers,
     initialFilter: new UsersFilter(),
   });
 
   useEffect(() => {
-    loadData(new UsersFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "User query error",
-          message: response.message || "Failed to query users",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+    void loadData(new UsersFilter());
+  }, [loadData]);
 
   const onUserResetLink = (user: User) => {
     setSelectedUser(user);
@@ -167,30 +160,15 @@ export const useUserList = () => {
   };
 
   const onSearchReset = () => {
-    loadData(new UsersFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "User query error",
-          message: response.message || "Failed to query users",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new UsersFilter());
   };
 
   const onSearchSubmit = (search?: string) => {
-    loadData(new UsersFilter(undefined, undefined, search)).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "User query error",
-          message: response.message || "Failed to query users",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new UsersFilter(undefined, undefined, search));
   };
 
   return {
+    listState,
     currentPage,
     onPageChange,
     showResetLink,

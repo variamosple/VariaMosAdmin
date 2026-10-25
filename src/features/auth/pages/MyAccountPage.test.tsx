@@ -281,4 +281,24 @@ describe("MyAccountPage Component", () => {
     await user.click(screen.getByText("Close Info Modal"));
     expect(screen.queryByTestId("info-update-form")).not.toBeInTheDocument();
   });
+
+  it("shows a failed read with Retry instead of empty fields (UX-24)", async () => {
+    let calls = 0;
+    server.use(
+      http.get(apiTarget("/auth/my-account"), () => {
+        calls++;
+        return calls === 1
+          ? HttpResponse.json({ errorCode: "SYSTEM_ERROR" }, { status: 500 })
+          : HttpResponse.json({ data: mockUser });
+      }),
+    );
+    render(<MyAccountPage />);
+
+    const retry = await screen.findByRole("button", { name: "Retry" });
+    expect(screen.queryByText("Edit information")).not.toBeInTheDocument();
+
+    await userEvent.click(retry);
+
+    expect(await screen.findByText("John Doe")).toBeInTheDocument();
+  });
 });

@@ -4,16 +4,20 @@ import { ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, Search, TrashFill } from "react-bootstrap-icons";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { IconButton } from "@/shared/components/IconButton";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 
 export interface RoleListParameters extends PaginationControlsProps {
   items: Role[];
+  state?: ListState;
   onRoleEdit: (role: Role) => void;
   onRoleDelete: (role: Role) => void;
 }
 
 export const RoleList: FC<RoleListParameters> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -29,7 +33,7 @@ export const RoleList: FC<RoleListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover>
         <thead>
           <tr>
             <th>ID</th>
@@ -73,6 +77,14 @@ export const RoleList: FC<RoleListParameters> = ({
               </td>
             </tr>
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={3}
+              items="roles"
+            />
+          )}
         </tbody>
       </Table>
 

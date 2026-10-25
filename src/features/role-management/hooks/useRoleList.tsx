@@ -1,4 +1,3 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 import {
   createRole,
@@ -9,6 +8,7 @@ import {
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePagedList } from "@/shared/hooks/usePagedList";
 
 export const useRoleList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -29,22 +29,15 @@ export const useRoleList = () => {
     totalPages,
     isLoading,
     onPageChange,
-  } = usePaginatedQuery<RolesFilter, Role>({
+    listState,
+  } = usePagedList<RolesFilter, Role>({
     queryFunction: queryRoles,
     initialFilter: new RolesFilter(),
   });
 
   useEffect(() => {
-    loadData(new RolesFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Role query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+    void loadData(new RolesFilter());
+  }, [loadData]);
 
   const onRoleCreate = (role: Role) => {
     setIsCreating(true);
@@ -147,30 +140,15 @@ export const useRoleList = () => {
   };
 
   const onSearchReset = () => {
-    loadData(new RolesFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Role query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new RolesFilter());
   };
 
   const onSearchSubmit = (search?: string) => {
-    loadData(new RolesFilter(search)).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Role query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new RolesFilter(search));
   };
 
   return {
+    listState,
     showCreate,
     setShowCreate,
     showEdit,

@@ -37,6 +37,18 @@ export const PROJECTS_CLIENT = axios.create({
 
 PROJECTS_CLIENT.interceptors.request.use(authInterceptor);
 
+// Pages a signed-out visitor may stay on: a 401 there sends nowhere
+const PUBLIC_PATHS = new Set([
+  "/login",
+  "/forgot-password",
+  "/reset-password",
+  "/sign-up",
+]);
+
+// The path of the hash route, without its query: "#/login?x=1" gives "/login"
+const currentRoutePath = () =>
+  window.location.hash.replace(/^#/, "").split("?")[0];
+
 export const setupAxiosInterceptors = (
   axiosInstance: AxiosInstance,
   navigate: NavigateFunction,
@@ -46,18 +58,14 @@ export const setupAxiosInterceptors = (
       return response;
     },
     (error) => {
-      if (error?.response?.status === 401) {
-        const currentHash = window.location.hash || "";
-        const isPublicRoute =
-          currentHash.includes("/login") ||
-          currentHash.includes("/forgot-password") ||
-          currentHash.includes("/reset-password") ||
-          currentHash.includes("/sign-up");
-
-        if (!isPublicRoute) {
-          // A code, never the server text: the login page shows its own
-          navigate("/login?reason=session-expired");
-        }
+      if (
+        error?.response?.status === 401 &&
+        !PUBLIC_PATHS.has(currentRoutePath())
+      ) {
+        // A code, never the server text: the login page shows its own. The
+        // current page is given back after sign-in (UX-27).
+        const redirectTo = encodeURIComponent(window.location.href);
+        navigate(`/login?reason=session-expired&redirectTo=${redirectTo}`);
       }
 
       return Promise.reject(error);

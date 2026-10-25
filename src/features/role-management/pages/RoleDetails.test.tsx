@@ -294,4 +294,47 @@ describe("RoleDetailsPage Component", () => {
       }),
     );
   });
+
+  it("says the role does not exist instead of a bare title (UX-24)", async () => {
+    // The API answers a missing role with a success without data
+    server.use(
+      http.get(apiTarget("/v1/roles/:roleId"), () =>
+        HttpResponse.json({ errorCode: null, data: null }),
+      ),
+    );
+    render(<RoleDetailsPage />);
+
+    expect(
+      await screen.findByText("This role does not exist, or it was deleted."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      /^Role$/,
+    );
+    expect(
+      screen.queryByTestId("role-permission-form"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers Retry when the role could not be read", async () => {
+    let calls = 0;
+    server.use(
+      http.get(apiTarget("/v1/roles/:roleId"), () => {
+        calls++;
+        return calls === 1
+          ? HttpResponse.json({ errorCode: "SYSTEM_ERROR" }, { status: 500 })
+          : HttpResponse.json({
+              errorCode: null,
+              data: { id: 123, name: "Admin" },
+            });
+      }),
+    );
+    render(<RoleDetailsPage />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Retry" }));
+
+    expect(
+      await screen.findByRole("heading", { name: "Admin Role" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("role-permission-form")).toBeInTheDocument();
+  });
 });

@@ -1,5 +1,5 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useCallback, useEffect, useState } from "react";
+import { usePagedList } from "@/shared/hooks/usePagedList";
 import {
   queryMicroServices,
   restartMicroservice,
@@ -34,7 +34,8 @@ export const useMicroServiceList = (initialRefreshInterval: number = 0) => {
     loadData,
     totalPages,
     onPageChange,
-  } = usePaginatedQuery<MicroServiceFilter, MicroService>({
+    listState,
+  } = usePagedList<MicroServiceFilter, MicroService>({
     queryFunction: queryMicroServices,
     initialFilter,
   });
@@ -122,6 +123,7 @@ export const useMicroServiceList = (initialRefreshInterval: number = 0) => {
   };
 
   return {
+    listState,
     showStart,
     setShowStart,
     showRestart,

@@ -109,24 +109,17 @@ describe("useRoleList Hook", () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  it("should load data on mount and handle query error toast", async () => {
+  it("leaves a load error to the table, without a toast (UX-23)", async () => {
     mockLoadData.mockResolvedValueOnce({
       errorCode: 500,
       message: "Query failed",
     });
-
     renderHook(() => useRoleList());
 
-    expect(mockLoadData).toHaveBeenCalled();
     await waitFor(() => {
-      expect(mockPushToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Role query error",
-          message: "Query failed",
-          variant: "danger",
-        }),
-      );
+      expect(mockLoadData).toHaveBeenCalled();
     });
+    expect(mockPushToast).not.toHaveBeenCalled();
   });
 
   it("should handle role creation successfully", async () => {

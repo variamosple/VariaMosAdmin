@@ -33,6 +33,7 @@ const UserListPageComponent: FC = () => {
     onSearchSubmit,
     currentPage,
     onPageChange,
+    listState,
   } = useUserList();
 
   return (
@@ -49,6 +50,7 @@ const UserListPageComponent: FC = () => {
 
       <UserList
         items={users}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
