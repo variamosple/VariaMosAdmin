@@ -38,7 +38,8 @@ test.describe("Monitoring - Real E2E Flows", () => {
     await page.goto("http://localhost:3000/variamos_admin/");
 
     page.on("response", async (response) => {
-      if (response.url().includes("/microservices") || response.url().includes("/health")) {
+      // The API only: the page's own file is named microservices-*.js (T-30)
+      if (response.url().includes("/v1/micro-services") || response.url().includes("/health")) {
         console.log(`[API] ${response.url()} - ${response.status()}`);
         try {
           const body = await response.text();
