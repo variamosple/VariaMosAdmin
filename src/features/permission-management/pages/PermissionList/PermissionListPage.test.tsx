@@ -209,7 +209,7 @@ describe("PermissionListPage Integration", () => {
     expect(screen.queryByText("WRITE_PRIVILEGES")).not.toBeInTheDocument();
   });
 
-  it("shows error toast when API fails to load permissions", async () => {
+  it("shows a failed load of the permissions in the table", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/permissions", () => {
@@ -221,10 +221,15 @@ describe("PermissionListPage Integration", () => {
     );
 
     renderWithProviders(<PermissionListPage />);
+    // In the table, with Retry, and not repeated in a toast (UX-23)
+    const table = await screen.findByRole("table");
     expect(
-      await screen.findByText("Permission query error"),
+      await within(table).findByText(SYSTEM_ERROR_MESSAGE),
     ).toBeInTheDocument();
-    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
+    expect(
+      within(table).getByRole("button", { name: "Retry" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(SYSTEM_ERROR_MESSAGE)).toHaveLength(1);
     consoleSpy.mockRestore();
   });
 });

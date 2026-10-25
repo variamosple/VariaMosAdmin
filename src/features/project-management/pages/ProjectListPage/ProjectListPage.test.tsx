@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import type React from "react";
@@ -203,7 +203,7 @@ describe("ProjectListPage Integration", () => {
     expect(screen.queryByText("Project Two")).not.toBeInTheDocument();
   });
 
-  it("shows error toast when API fails to load projects", async () => {
+  it("shows a failed load of the projects in the table", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/projects", () => {
@@ -221,8 +221,15 @@ describe("ProjectListPage Integration", () => {
     );
 
     renderWithProviders(<ProjectListPage />);
-    expect(await screen.findByText("Project query error")).toBeInTheDocument();
-    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
+    // In the table, with Retry, and not repeated in a toast (UX-23)
+    const table = await screen.findByRole("table");
+    expect(
+      await within(table).findByText(SYSTEM_ERROR_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("button", { name: "Retry" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(SYSTEM_ERROR_MESSAGE)).toHaveLength(1);
     consoleSpy.mockRestore();
   });
 });

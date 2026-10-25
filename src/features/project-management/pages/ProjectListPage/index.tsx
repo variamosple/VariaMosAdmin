@@ -33,6 +33,7 @@ const ProjectListPageComponent: FC = () => {
     showDelete,
     setShowDelete,
     performDeleteProject,
+    listState,
   } = useProjectList();
   return (
     <Container fluid="sm" className="my-2">
@@ -75,6 +76,7 @@ const ProjectListPageComponent: FC = () => {
 
       <ProjectList
         items={projects}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}

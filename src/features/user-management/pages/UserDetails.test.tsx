@@ -333,4 +333,48 @@ describe("UserDetailsPage Component", () => {
     );
     expect(mockOnUserRolesPageChange).toHaveBeenCalledWith(1);
   });
+
+  it("says the user does not exist instead of an empty page (UX-24)", async () => {
+    server.use(
+      http.get(apiTarget("/v1/users/:userId"), () =>
+        HttpResponse.json(
+          { errorCode: "ENTITY_NOT_FOUND", message: "User not found" },
+          { status: 404 },
+        ),
+      ),
+    );
+    render(<UserDetailsPage />);
+
+    expect(
+      await screen.findByText("This user does not exist, or it was deleted."),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("user-role-form")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Retry" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers Retry when the user could not be read", async () => {
+    let calls = 0;
+    server.use(
+      http.get(apiTarget("/v1/users/:userId"), () => {
+        calls++;
+        return calls === 1
+          ? HttpResponse.json({ errorCode: "SYSTEM_ERROR" }, { status: 500 })
+          : HttpResponse.json({
+              data: { id: "user-123", name: "John Doe", email: "john@doe.com" },
+            });
+      }),
+    );
+    render(<UserDetailsPage />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Retry" }));
+
+    expect(await screen.findByTestId("user-details")).toHaveTextContent(
+      "User: John Doe",
+    );
+    expect(
+      screen.queryByRole("button", { name: "Retry" }),
+    ).not.toBeInTheDocument();
+  });
 });

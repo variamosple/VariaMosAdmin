@@ -1,12 +1,15 @@
 import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Table } from "react-bootstrap";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 import type { Language } from "../../domain/Entity/Language";
 import { LanguageRowComponent } from "./LanguageRow";
 
 export interface LanguageListProps extends PaginationControlsProps {
   items: Language[];
+  state?: ListState;
   onLanguageEdit: (language: Language) => void;
   onLanguageDelete: (language: Language) => void;
   onLanguageActivate: (language: Language) => void;
@@ -15,6 +18,7 @@ export interface LanguageListProps extends PaginationControlsProps {
 
 export const LanguageList: FC<LanguageListProps> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -31,7 +35,7 @@ export const LanguageList: FC<LanguageListProps> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover responsive>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
             <th>Name</th>
@@ -61,6 +65,14 @@ export const LanguageList: FC<LanguageListProps> = ({
               onLanguageDeactivate={onLanguageDeactivate}
             />
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={7}
+              items="languages"
+            />
+          )}
         </tbody>
       </Table>
 

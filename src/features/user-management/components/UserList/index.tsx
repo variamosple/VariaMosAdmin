@@ -2,11 +2,14 @@ import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Table } from "react-bootstrap";
 import type { User } from "@/features/user-management/domain/Entity/User";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 import { UserRowComponent } from "./UserRow";
 
 export interface UserListParameters extends PaginationControlsProps {
   items: User[];
+  state?: ListState;
   onUserResetLink: (user: User) => void;
   onUserDisable: (user: User) => void;
   onUserEnable: (user: User) => void;
@@ -15,6 +18,7 @@ export interface UserListParameters extends PaginationControlsProps {
 
 export const UserList: FC<UserListParameters> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -31,7 +35,7 @@ export const UserList: FC<UserListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover>
         <thead>
           <tr>
             <th>user</th>
@@ -61,6 +65,14 @@ export const UserList: FC<UserListParameters> = ({
               onUserEnable={onUserEnable}
             />
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={7}
+              items="users"
+            />
+          )}
         </tbody>
       </Table>
 

@@ -1,8 +1,4 @@
-import {
-  usePaginatedQuery,
-  useRouter,
-  withPageVisit,
-} from "@variamosple/variamos-components";
+import { useRouter, withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useCallback, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
@@ -18,7 +14,13 @@ import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
 import { RolePermissionFilter } from "@/features/role-management/domain/Entity/RolePermissionFilter";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import {
+  LoadProblem,
+  type LoadProblemKind,
+  loadProblemOf,
+} from "@/shared/components/LoadProblem";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePagedList } from "@/shared/hooks/usePagedList";
 import { RolePermissionForm } from "../components/RolePermissionForm";
 import { RolePermissionList } from "../components/RolePermissionList";
 
@@ -27,6 +29,7 @@ const RoleDetailsPageComponent: FC = () => {
   const { navigate } = useRouter();
   const { roleId: roleIdParam } = useParams();
   const [role, setRole] = useState<Role>();
+  const [problem, setProblem] = useState<LoadProblemKind | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
@@ -39,7 +42,8 @@ const RoleDetailsPageComponent: FC = () => {
     totalPages: rolePermissionTotalPages,
     filter: rolePermissionsFilter,
     onPageChange: onRolePermissionsPageChange,
-  } = usePaginatedQuery<RolePermissionFilter, Permission>({
+    listState: rolePermissionsState,
+  } = usePagedList<RolePermissionFilter, Permission>({
     queryFunction: queryRolePermissions,
     initialFilter: new RolePermissionFilter(),
   });
@@ -48,7 +52,8 @@ const RoleDetailsPageComponent: FC = () => {
     setIsLoading(true);
     queryRoleById(roleId)
       .then((response) => {
-        setRole(response.data);
+        setProblem(loadProblemOf(response));
+        setRole(response.data ?? undefined);
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -166,7 +171,8 @@ const RoleDetailsPageComponent: FC = () => {
   return (
     <Container fluid="sm" className="my-2">
       <div className="d-flex justify-content-between align-items-end">
-        <h1 className="mb-0">{role?.name} Role</h1>
+        {/* Never a bare "Role" title while the role is missing (UX-24) */}
+        <h1 className="mb-0">{role ? `${role.name} Role` : "Role"}</h1>
 
         <div>
           <Button onClick={() => navigate("/roles")}>
@@ -177,18 +183,31 @@ const RoleDetailsPageComponent: FC = () => {
 
       <hr />
 
-      <RolePermissionForm
-        isLoading={isCreating}
-        onRolePermissionSubmit={onRolePermissionCreate}
-      />
+      {problem && roleIdParam && (
+        <LoadProblem
+          problem={problem}
+          item="role"
+          onRetry={() => queryRole(Number.parseInt(roleIdParam, 10))}
+        />
+      )}
 
-      <RolePermissionList
-        items={rolePermissions}
-        totalPages={rolePermissionTotalPages}
-        currentPage={currentRolePermissionsPage}
-        onPageChange={onRolePermissionsPageChange}
-        onPermissionDelete={onRolePermissionDelete}
-      />
+      {!!role && (
+        <>
+          <RolePermissionForm
+            isLoading={isCreating}
+            onRolePermissionSubmit={onRolePermissionCreate}
+          />
+
+          <RolePermissionList
+            items={rolePermissions}
+            state={rolePermissionsState}
+            totalPages={rolePermissionTotalPages}
+            currentPage={currentRolePermissionsPage}
+            onPageChange={onRolePermissionsPageChange}
+            onPermissionDelete={onRolePermissionDelete}
+          />
+        </>
+      )}
 
       <ConfirmationModal
         show={showDelete}

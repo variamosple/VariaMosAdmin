@@ -36,6 +36,7 @@ const LanguageListPageComponent: FC = () => {
     onLanguageActivateClick,
     onLanguageDeactivateClick,
     performDeleteLanguage,
+    listState,
   } = useLanguageList();
 
   return (
@@ -61,6 +62,7 @@ const LanguageListPageComponent: FC = () => {
 
       <LanguageList
         items={languages}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}

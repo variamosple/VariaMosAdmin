@@ -14,6 +14,7 @@ import {
   ResetPasswordPage,
   SignUpPage,
 } from "@/features/auth";
+import { NotFound } from "@/shared/components/NotFound";
 import { SecurityWrapper } from "@/shared/components/SecurityWrapper";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { MainLayout } from "@/shared/layouts/MainLayout";
@@ -398,12 +399,17 @@ export const ROUTES: RouteObject[] = [
       </MainLayout>
     ),
   },
+  // Former address of the application, kept for old links and bookmarks
   {
     path: "/variamos_admin",
     element: <Navigate to="/" replace />,
   },
   {
     path: "*",
-    element: <Navigate to="/" replace />,
+    element: (
+      <MainLayout>
+        <NotFound />
+      </MainLayout>
+    ),
   },
 ];

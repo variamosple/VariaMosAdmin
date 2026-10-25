@@ -1,4 +1,3 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 import {
   createPermission,
@@ -9,6 +8,7 @@ import {
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePagedList } from "@/shared/hooks/usePagedList";
 
 export const usePermissionList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -28,22 +28,15 @@ export const usePermissionList = () => {
     isLoading,
     totalPages,
     onPageChange,
-  } = usePaginatedQuery<PermissionsFilter, Permission>({
+    listState,
+  } = usePagedList<PermissionsFilter, Permission>({
     queryFunction: queryPermissions,
     initialFilter: new PermissionsFilter(),
   });
 
   useEffect(() => {
-    loadData(new PermissionsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+    void loadData(new PermissionsFilter());
+  }, [loadData]);
 
   const onPermissionCreate = (permission: Permission) => {
     setIsCreating(true);
@@ -139,30 +132,15 @@ export const usePermissionList = () => {
   };
 
   const onSearchReset = () => {
-    loadData(new PermissionsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new PermissionsFilter());
   };
 
   const onSearchSubmit = (search?: string) => {
-    loadData(new PermissionsFilter(search)).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new PermissionsFilter(search));
   };
 
   return {
+    listState,
     showCreate,
     setShowCreate,
     showEdit,

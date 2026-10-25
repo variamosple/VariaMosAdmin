@@ -4,16 +4,20 @@ import { ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, TrashFill } from "react-bootstrap-icons";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { IconButton } from "@/shared/components/IconButton";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 
 export interface PermissionListParameters extends PaginationControlsProps {
   items: Permission[];
+  state?: ListState;
   onPermissionEdit: (permission: Permission) => void;
   onPermissionDelete: (permission: Permission) => void;
 }
 
 export const PermissionList: FC<PermissionListParameters> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -28,7 +32,7 @@ export const PermissionList: FC<PermissionListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover>
         <thead>
           <tr>
             <th>ID</th>
@@ -65,6 +69,14 @@ export const PermissionList: FC<PermissionListParameters> = ({
               </td>
             </tr>
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={3}
+              items="permissions"
+            />
+          )}
         </tbody>
       </Table>
 

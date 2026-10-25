@@ -40,6 +40,7 @@ const MicroServiceListPageComponent: FC = () => {
     setRefreshInterval,
     refreshList,
     isRefreshing,
+    listState,
   } = useMicroServiceList();
 
   return (
@@ -100,6 +101,7 @@ const MicroServiceListPageComponent: FC = () => {
       {/* Microservice Cards List */}
       <MicroServiceList
         items={microServices}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}

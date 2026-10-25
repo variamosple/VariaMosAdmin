@@ -202,7 +202,7 @@ describe("RoleListPage", () => {
     expect(screen.queryByText("User")).not.toBeInTheDocument();
   });
 
-  it("shows error toast when API fails to load roles", async () => {
+  it("shows a failed load of the roles in the table", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/roles", () => {
@@ -214,8 +214,15 @@ describe("RoleListPage", () => {
     );
 
     renderWithProviders(<RoleListPage />);
-    expect(await screen.findByText("Role query error")).toBeInTheDocument();
-    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
+    // In the table, with Retry, and not repeated in a toast (UX-23)
+    const table = await screen.findByRole("table");
+    expect(
+      await within(table).findByText(SYSTEM_ERROR_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("button", { name: "Retry" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(SYSTEM_ERROR_MESSAGE)).toHaveLength(1);
     consoleSpy.mockRestore();
   });
 });

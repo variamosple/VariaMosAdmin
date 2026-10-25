@@ -37,6 +37,7 @@ const ModelListPageComponent: FC = () => {
     onModelToggleVisibility,
     projects,
     languages,
+    listState,
   } = useModelList();
   return (
     <Container fluid="sm" className="my-2">
@@ -83,6 +84,7 @@ const ModelListPageComponent: FC = () => {
 
       <ModelList
         items={models}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}

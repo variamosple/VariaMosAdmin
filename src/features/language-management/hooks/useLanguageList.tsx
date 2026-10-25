@@ -1,6 +1,6 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePagedList } from "@/shared/hooks/usePagedList";
 import { queryLanguages, updateLanguage } from "../api/LanguageRepository";
 import { type Language, LanguageStatus } from "../domain/Entity/Language";
 import { LanguagesFilter } from "../domain/Entity/LanguageFilter";
@@ -24,22 +24,15 @@ export const useLanguageList = () => {
     isLoading,
     totalPages,
     onPageChange,
-  } = usePaginatedQuery<LanguagesFilter, Language>({
+    listState,
+  } = usePagedList<LanguagesFilter, Language>({
     queryFunction: queryLanguages,
     initialFilter: new LanguagesFilter(),
   });
 
   useEffect(() => {
-    loadData(new LanguagesFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Language query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+    void loadData(new LanguagesFilter());
+  }, [loadData]);
 
   const onLanguageEdit = (language: Language) => {
     setToEditLanguage(language);
@@ -124,32 +117,15 @@ export const useLanguageList = () => {
   };
 
   const onSearchReset = () => {
-    loadData(new LanguagesFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Language query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new LanguagesFilter());
   };
 
   const onSearchSubmit = (search?: LanguagesFilter) => {
-    loadData(new LanguagesFilter(search?.name, search?.status)).then(
-      (response) => {
-        if (response.errorCode) {
-          pushToast({
-            title: "Language query error",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-      },
-    );
+    void loadData(new LanguagesFilter(search?.name, search?.status));
   };
 
   return {
+    listState,
     showEdit,
     setShowEdit,
     showDelete,

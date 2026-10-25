@@ -1,4 +1,3 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { useEffect, useState } from "react";
 import { queryLanguages } from "@/features/language-management/api/LanguageRepository";
 import { LanguagesFilter } from "@/features/language-management/domain/Entity/LanguageFilter";
@@ -13,6 +12,7 @@ import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFil
 import { queryProjects } from "@/features/project-management/api/ProjectRepository";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePagedList } from "@/shared/hooks/usePagedList";
 
 export const useModelList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -36,22 +36,15 @@ export const useModelList = () => {
     isLoading,
     totalPages,
     onPageChange,
-  } = usePaginatedQuery<ModelsFilter, Model>({
+    listState,
+  } = usePagedList<ModelsFilter, Model>({
     queryFunction: queryModels,
     initialFilter: new ModelsFilter(),
   });
 
   useEffect(() => {
-    loadData(new ModelsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Model query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+    void loadData(new ModelsFilter());
+  }, [loadData]);
 
   useEffect(() => {
     queryProjects(new ProjectsFilter()).then((res) => {
@@ -163,19 +156,11 @@ export const useModelList = () => {
   };
 
   const onSearchReset = () => {
-    loadData(new ModelsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Model query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new ModelsFilter());
   };
 
   const onSearchSubmit = (search?: ModelsFilter) => {
-    loadData(
+    void loadData(
       new ModelsFilter(
         search?.name,
         search?.modelLevel,
@@ -183,15 +168,7 @@ export const useModelList = () => {
         search?.includeDeleted,
         search?.isPublic,
       ),
-    ).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Model query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    );
   };
 
   const performToggleModelLevel = (model: Model) => {
@@ -240,6 +217,7 @@ export const useModelList = () => {
   };
 
   return {
+    listState,
     showEdit,
     setShowEdit,
     showCreate,

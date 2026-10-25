@@ -151,7 +151,7 @@ describe("useProjectList Hook", () => {
     expect(result.current.isEditing).toBe(false);
   });
 
-  it("should handle query error toast on loadData", async () => {
+  it("leaves a load error to the table, without a toast (UX-23)", async () => {
     mockLoadData.mockResolvedValueOnce({
       errorCode: 500,
       message: "Query failed",
@@ -159,13 +159,8 @@ describe("useProjectList Hook", () => {
     renderHook(() => useProjectList());
 
     await waitFor(() => {
-      expect(mockPushToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Project query error",
-          message: "Query failed",
-          variant: "danger",
-        }),
-      );
+      expect(mockLoadData).toHaveBeenCalled();
     });
+    expect(mockPushToast).not.toHaveBeenCalled();
   });
 });

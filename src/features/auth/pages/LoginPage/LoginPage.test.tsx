@@ -188,6 +188,38 @@ describe("LoginPage Page Component", () => {
     });
   });
 
+  it("does not keep a script address as the page to go back to", async () => {
+    const registered = vi.fn();
+    server.use(
+      http.post(apiTarget("/auth/redirects"), () => {
+        registered();
+        return HttpResponse.json({ errorCode: null });
+      }),
+    );
+
+    mockQueryParams.set("redirectTo", "javascript:alert(1)");
+    renderLoginPage();
+
+    expect(
+      await screen.findByRole("button", { name: "Continue as a Guest" }),
+    ).toBeInTheDocument();
+    expect(registered).not.toHaveBeenCalled();
+  });
+
+  it("goes home rather than to a script address after sign-in", async () => {
+    mockSignInAsGuest.mockResolvedValueOnce({
+      errorCode: null,
+      data: { redirect: "javascript:alert(1)" },
+    });
+    renderLoginPage();
+
+    await userEvent.click(screen.getByText("Continue as a Guest"));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(AppConfig.HOME_PAGE);
+    });
+  });
+
   describe("second factor", () => {
     const answerCode = (status: number, body: object) =>
       server.use(
@@ -235,6 +267,18 @@ describe("LoginPage Page Component", () => {
 
       await waitFor(() =>
         expect(load).toHaveBeenCalledWith("https://app.example/home"),
+      );
+    });
+
+    it("loads the home page rather than a script address", async () => {
+      const load = vi.spyOn(pageLoader, "load").mockImplementation(() => {});
+      answerCode(200, { data: { redirect: "javascript:alert(1)" } });
+      const user = await reachCodeStep();
+
+      await typeCode(user, "123456");
+
+      await waitFor(() =>
+        expect(load).toHaveBeenCalledWith(AppConfig.HOME_PAGE),
       );
     });
 

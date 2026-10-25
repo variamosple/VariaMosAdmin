@@ -32,6 +32,7 @@ const PermissionListPageComponent: FC = () => {
     onPermissionDelete,
     onSearchReset,
     onSearchSubmit,
+    listState,
   } = usePermissionList();
 
   return (
@@ -72,6 +73,7 @@ const PermissionListPageComponent: FC = () => {
 
       <PermissionList
         items={permissions}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}

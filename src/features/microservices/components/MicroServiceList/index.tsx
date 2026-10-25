@@ -1,12 +1,15 @@
 import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Table } from "react-bootstrap";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 import type { MicroService } from "../../domain/Entity/MicroService";
 import { MicroServiceRowComponent } from "./MicroserviceRow";
 
 export interface MicroServiceListParameters extends PaginationControlsProps {
   items: MicroService[];
+  state?: ListState;
   onMicroServiceStart: (microservice: MicroService) => void;
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
@@ -15,6 +18,7 @@ export interface MicroServiceListParameters extends PaginationControlsProps {
 
 export const MicroServiceList: FC<MicroServiceListParameters> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -32,6 +36,7 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
       />
 
       <Table
+        aria-busy={state?.isLoading}
         striped
         bordered
         hover
@@ -65,6 +70,14 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
               onMicroServiceConfigure={onMicroServiceConfigure}
             />
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={7}
+              items="microservices"
+            />
+          )}
         </tbody>
       </Table>
 
