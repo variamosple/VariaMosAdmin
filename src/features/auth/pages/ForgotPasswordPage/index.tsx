@@ -50,7 +50,7 @@ export const ForgotPasswordPage: FC = () => {
           <Alert variant="success" className="w-100 small mb-3">
             {message}
           </Alert>
-          <Link to="/login" className="text-decoration-none text-primary-small">
+          <Link to="/login" className="text-decoration-none">
             Back to Sign In
           </Link>
         </div>
@@ -58,7 +58,7 @@ export const ForgotPasswordPage: FC = () => {
         <>
           <div className="w-100 text-center">
             <h4 className="text-light mb-2">Forgot Password</h4>
-            <p className="text-secondary small">
+            <p className="text-body-secondary small">
               Enter your email address to receive a temporary reset link.
             </p>
           </div>
@@ -73,10 +73,7 @@ export const ForgotPasswordPage: FC = () => {
           />
 
           <div className="mt-2">
-            <Link
-              to="/login"
-              className="text-decoration-none text-primary-small"
-            >
+            <Link to="/login" className="text-decoration-none">
               Back to Sign In
             </Link>
           </div>

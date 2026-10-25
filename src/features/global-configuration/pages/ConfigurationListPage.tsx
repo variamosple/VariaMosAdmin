@@ -21,6 +21,7 @@ import {
   ShieldFillExclamation,
   ShieldLockFill,
 } from "react-bootstrap-icons";
+import { IconButton } from "@/shared/components/IconButton";
 import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
 import type { Configuration } from "../domain/Entity/Configuration";
 import { useConfigurationList } from "../hooks/useConfigurationList";
@@ -149,7 +150,7 @@ const ConfigurationListPageComponent: FC = () => {
                         <div className="mt-2 d-flex gap-2">
                           <Badge
                             bg="light"
-                            className="text-secondary border text-uppercase"
+                            className="text-dark border text-uppercase"
                           >
                             {config.type}
                           </Badge>
@@ -248,24 +249,25 @@ const ConfigurationListPageComponent: FC = () => {
                               <Tooltip>This setting is read-only</Tooltip>
                             }
                           >
-                            <Button
+                            <IconButton
                               size="sm"
                               variant="outline-secondary"
                               disabled
-                            >
-                              <ShieldFillExclamation className="text-muted" />
-                            </Button>
+                              label="This setting is read-only"
+                              icon={
+                                <ShieldFillExclamation className="text-muted" />
+                              }
+                            />
                           </OverlayTrigger>
                         ) : (
-                          <Button
+                          <IconButton
                             size="sm"
                             variant="primary"
                             disabled={isUpdating}
                             onClick={() => onConfigEdit(config)}
-                            title="Edit setting"
-                          >
-                            <PencilFill />
-                          </Button>
+                            label="Edit setting"
+                            icon={<PencilFill />}
+                          />
                         )}
                       </td>
                     </tr>

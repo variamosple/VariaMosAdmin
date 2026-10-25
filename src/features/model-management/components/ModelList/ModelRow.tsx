@@ -12,6 +12,7 @@ import {
 import type { Model } from "@/features/model-management/domain/Entity/Model";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
+import { IconButton } from "@/shared/components/IconButton";
 import { formatBoolean } from "@/shared/constants";
 
 export interface ModelRowProps {
@@ -118,50 +119,45 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
 
         <td>
           <ButtonGroup size="sm">
-            <Button
+            <IconButton
               variant="primary"
               onClick={() => onModelEdit(model)}
-              title="Edit model"
-            >
-              <PencilFill />
-            </Button>
+              label="Edit model"
+              icon={<PencilFill />}
+            />
 
-            <Button
+            <IconButton
               variant="danger"
               onClick={() => onModelDelete(model)}
-              title="Delete model"
-            >
-              <TrashFill />
-            </Button>
+              label="Delete model"
+              icon={<TrashFill />}
+            />
 
             {isActive && (
               <>
-                <Button
+                <IconButton
                   variant="warning"
                   onClick={() => setShowLevelConfirm(true)}
-                  title="Toggle model level (Domain/Application)"
-                >
-                  <ArrowRepeat />
-                </Button>
+                  label="Toggle model level (Domain/Application)"
+                  icon={<ArrowRepeat />}
+                />
 
-                <Button
+                <IconButton
                   variant="secondary"
                   onClick={() => setShowVisibilityConfirm(true)}
-                  title="Toggle model visibility (Public/Private)"
-                >
-                  <LockFill />
-                </Button>
+                  label="Toggle model visibility (Public/Private)"
+                  icon={<LockFill />}
+                />
               </>
             )}
 
-            <Button
+            <IconButton
               size="sm"
               variant="info"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide model details"
-            >
-              {!show ? <PlusCircle /> : <DashCircle />}
-            </Button>
+              label="Show/Hide model details"
+              icon={!show ? <PlusCircle /> : <DashCircle />}
+            />
           </ButtonGroup>
         </td>
       </tr>

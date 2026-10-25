@@ -9,7 +9,7 @@ import { UptimeBar } from "../UptimeBar";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
 import { type FC, useEffect, useState } from "react";
-import { Badge, Button, ButtonGroup, Spinner } from "react-bootstrap";
+import { Badge, ButtonGroup, Spinner } from "react-bootstrap";
 import {
   ArrowClockwise,
   DashCircle,
@@ -18,6 +18,7 @@ import {
   Sliders,
   StopFill,
 } from "react-bootstrap-icons";
+import { IconButton } from "@/shared/components/IconButton";
 
 export interface MicroServiceRowProps {
   microService: MicroService;
@@ -195,51 +196,46 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         <td className="text-center">
           <ButtonGroup size="sm">
             {!isRunning && (
-              <Button
+              <IconButton
                 variant="success"
                 onClick={() => onMicroServiceStart(microService)}
-                title="Start Service"
-              >
-                <PlayFill />
-              </Button>
+                label="Start Service"
+                icon={<PlayFill />}
+              />
             )}
 
             {isRunning && (
               <>
-                <Button
+                <IconButton
                   variant="warning"
                   onClick={() => onMicroServiceRestart(microService)}
-                  title="Restart Service"
-                >
-                  <ArrowClockwise />
-                </Button>
+                  label="Restart Service"
+                  icon={<ArrowClockwise />}
+                />
 
-                <Button
+                <IconButton
                   variant="danger"
                   onClick={() => onMicroServiceStop(microService)}
-                  title="Stop Service"
-                >
-                  <StopFill />
-                </Button>
+                  label="Stop Service"
+                  icon={<StopFill />}
+                />
               </>
             )}
 
-            <Button
+            <IconButton
               variant="outline-secondary"
               onClick={() => onMicroServiceConfigure?.(microService)}
-              title="Configure service parameters"
-            >
-              <Sliders size={14} />
-            </Button>
+              label="Configure service parameters"
+              icon={<Sliders size={14} />}
+            />
 
-            <Button
+            <IconButton
               variant="outline-secondary"
               size="sm"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide logs"
-            >
-              {!show ? <Search size={14} /> : <DashCircle size={14} />}
-            </Button>
+              label="Show/Hide logs"
+              icon={!show ? <Search size={14} /> : <DashCircle size={14} />}
+            />
           </ButtonGroup>
         </td>
       </tr>

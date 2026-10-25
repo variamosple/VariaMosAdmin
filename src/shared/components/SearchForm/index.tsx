@@ -1,7 +1,8 @@
 import { type FC, useCallback, useEffect, useRef } from "react";
-import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
+import { Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import { IconButton } from "@/shared/components/IconButton";
 
 export interface SearchFormProps {
   onSubmit: (search?: string) => void;
@@ -75,15 +76,14 @@ export const SearchForm: FC<SearchFormProps> = ({
                 {...register("search")}
                 isInvalid={!!errors.search}
               />
-              <Button
-                title="Clear results"
+              <IconButton
+                label="Clear results"
                 variant="outline-secondary"
                 onClick={onReset}
                 className="fw-bold"
                 disabled={isLoading}
-              >
-                <Trash />
-              </Button>
+                icon={<Trash />}
+              />
             </InputGroup>
 
             <Form.Control.Feedback type="invalid">

@@ -98,7 +98,9 @@ export const ResetPasswordPage: FC = () => {
       {isVerifyingToken ? (
         <div className="text-center my-3">
           <Spinner animation="border" variant="light" size="sm" />
-          <p className="text-secondary small mt-2">Checking link validity...</p>
+          <p className="text-body-secondary small mt-2">
+            Checking link validity...
+          </p>
         </div>
       ) : !isTokenValid ? (
         <div className="w-100 text-center">
@@ -106,10 +108,7 @@ export const ResetPasswordPage: FC = () => {
             This password reset link is invalid, has expired, or has already
             been used.
           </Alert>
-          <Link
-            to="/forgot-password"
-            className="text-decoration-none text-primary-small"
-          >
+          <Link to="/forgot-password" className="text-decoration-none">
             Request a new link
           </Link>
         </div>
@@ -118,14 +117,14 @@ export const ResetPasswordPage: FC = () => {
           <Alert variant="success" className="w-100 small mb-3">
             {message}
           </Alert>
-          <Link to="/login" className="text-decoration-none text-primary-small">
+          <Link to="/login" className="text-decoration-none">
             Back to Sign In
           </Link>
         </div>
       ) : (
         <>
           <div className="w-100 text-center">
-            <p className="text-secondary small">
+            <p className="text-body-secondary small">
               Enter your new password to reset your account credentials.
             </p>
           </div>

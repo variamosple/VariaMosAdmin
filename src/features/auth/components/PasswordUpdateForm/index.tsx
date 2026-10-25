@@ -72,7 +72,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
               {serverError}
             </Alert>
           )}
-          <Form.Group className="w-100" controlId="newPassword">
+          <Form.Group className="w-100" controlId="currentPassword">
             <Form.Label className="form-label align-self-start m-0">
               Current password
             </Form.Label>
@@ -90,7 +90,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
             </Form.Control.Feedback>
           </Form.Group>
 
-          <Form.Group className="w-100" controlId="currentPassword">
+          <Form.Group className="w-100" controlId="newPassword">
             <Form.Label className="form-label align-self-start m-0">
               New password
             </Form.Label>

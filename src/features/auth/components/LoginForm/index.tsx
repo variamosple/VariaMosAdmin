@@ -65,7 +65,7 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
       <div className="d-flex justify-content-start w-100 mb-3">
         <Link
           to="/forgot-password"
-          className="text-decoration-none text-decoration-underline-hover text-primary-small"
+          className="text-decoration-none text-decoration-underline-hover"
         >
           Forgot Password?
         </Link>

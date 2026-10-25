@@ -1,8 +1,9 @@
 import { Paginator, useRouter } from "@variamosple/variamos-components";
 import type { FC } from "react";
-import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, Search, TrashFill } from "react-bootstrap-icons";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
+import { IconButton } from "@/shared/components/IconButton";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 
 export interface RoleListParameters extends PaginationControlsProps {
@@ -48,29 +49,26 @@ export const RoleList: FC<RoleListParameters> = ({
 
               <td>
                 <ButtonGroup size="sm">
-                  <Button
+                  <IconButton
                     variant="secondary"
                     onClick={() => navigate(`/roles/${role.id}`)}
-                    title="See role details"
-                  >
-                    <Search />
-                  </Button>
+                    label="See role details"
+                    icon={<Search />}
+                  />
 
-                  <Button
+                  <IconButton
                     variant="primary"
                     onClick={() => onRoleEdit(role)}
-                    title="Edit role"
-                  >
-                    <PencilFill />
-                  </Button>
+                    label="Edit role"
+                    icon={<PencilFill />}
+                  />
 
-                  <Button
+                  <IconButton
                     variant="danger"
                     onClick={() => onRoleDelete(role)}
-                    title="Delete role"
-                  >
-                    <TrashFill />
-                  </Button>
+                    label="Delete role"
+                    icon={<TrashFill />}
+                  />
                 </ButtonGroup>
               </td>
             </tr>
