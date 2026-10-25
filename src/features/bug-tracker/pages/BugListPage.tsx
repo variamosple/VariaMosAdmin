@@ -266,6 +266,7 @@ const BugListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={!!bugToReject}
+        title="Reject bug"
         message={`Move "${bugToReject?.title ?? "this bug"}" to the Trash Bin? It can be restored for 7 days, then it is deleted.`}
         confirmLabel="Reject bug"
         confirmButtonVariant="danger"

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import type React from "react";
@@ -171,18 +171,16 @@ describe("RoleListPage", () => {
     await user.click(deleteButtons[1]);
 
     // Delete confirmation modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to delete the role?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Delete role" });
 
-    // Click Accept to confirm delete
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Delete role" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to delete the role?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 

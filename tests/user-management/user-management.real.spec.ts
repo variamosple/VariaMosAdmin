@@ -29,7 +29,7 @@ test.describe("User Management - Real E2E Flows", () => {
 
     const disablePromise = page.waitForResponse("**/v1/users/*/disable");
     await row.locator('button[title="Disable user"]').click();
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("dialog", { name: "Disable user" }).getByRole("button", { name: "Disable user" }).click();
     await disablePromise;
 
     await expect(row.locator("td").nth(3)).toHaveText("disabled");
@@ -39,7 +39,7 @@ test.describe("User Management - Real E2E Flows", () => {
 
     const enablePromise = page.waitForResponse("**/v1/users/*/enable");
     await row.locator('button[title="Enable user"]').click();
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("dialog", { name: "Enable user" }).getByRole("button", { name: "Enable user" }).click();
     await enablePromise;
 
     await expect(row.locator("td").nth(3)).toHaveText("active");

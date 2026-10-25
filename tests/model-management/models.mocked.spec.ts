@@ -146,7 +146,7 @@ test.describe("Model Management - Mocked Flows", () => {
     
     // Toggle Level
     await row.locator('button[title="Toggle model level (Domain/Application)"]').click();
-    await expect(page.locator(".modal-body")).toContainText("Are you sure you want to change this model level to Application Model?");
+    await expect(page.locator(".modal-body")).toContainText('Change the level of the model "First Model" to Application Model?');
     
     await page.route("**/v1/admin/models/1", async (route) => {
       await route.fulfill({
@@ -155,11 +155,11 @@ test.describe("Model Management - Mocked Flows", () => {
         body: JSON.stringify({ data: { ...mockModels[0], modelLevel: "application" } })
       });
     });
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("button", { name: "Change level" }).click();
 
     // Toggle Visibility
     await row.locator('button[title="Toggle model visibility (Public/Private)"]').click();
-    await expect(page.locator(".modal-body")).toContainText("Are you sure you want to change this model visibility to Private?");
+    await expect(page.locator(".modal-body")).toContainText('Make the model "First Model" private?');
     
     await page.route("**/v1/admin/models/1", async (route) => {
       await route.fulfill({
@@ -168,7 +168,7 @@ test.describe("Model Management - Mocked Flows", () => {
         body: JSON.stringify({ data: { ...mockModels[0], isPublic: false } })
       });
     });
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("button", { name: "Make private" }).click();
   });
 
   test("should support searchable language dropdown when creating a model", async ({ page }) => {

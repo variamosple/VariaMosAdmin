@@ -4,39 +4,36 @@ import "@testing-library/jest-dom/vitest";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
 import { ModelRowComponent } from "./ModelRow";
 
-// Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-vi.mock(
-  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
-  async () => {
-    return {
-      __esModule: true,
-      default: ({
-        show,
-        message,
-        onConfirm,
-        onCancel,
-      }: {
-        show: boolean;
-        message: string;
-        onConfirm: () => void;
-        onCancel: () => void;
-      }) => {
-        if (!show) return null;
-        return (
-          <div data-testid="confirm-modal">
-            <span>{message}</span>
-            <button type="button" onClick={onConfirm}>
-              Confirm Delete
-            </button>
-            <button type="button" onClick={onCancel}>
-              Cancel Delete
-            </button>
-          </div>
-        );
-      },
-    };
-  },
-);
+// Mock the shared ConfirmationModal
+vi.mock("@/shared/components/ConfirmationModal", async () => {
+  return {
+    __esModule: true,
+    default: ({
+      show,
+      message,
+      onConfirm,
+      onCancel,
+    }: {
+      show: boolean;
+      message: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => {
+      if (!show) return null;
+      return (
+        <div data-testid="confirm-modal">
+          <span>{message}</span>
+          <button type="button" onClick={onConfirm}>
+            Confirm Delete
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel Delete
+          </button>
+        </div>
+      );
+    },
+  };
+});
 
 describe("ModelRowComponent", () => {
   const mockOnModelEdit = vi.fn();
@@ -147,7 +144,7 @@ describe("ModelRowComponent", () => {
     // Test Level Toggle
     await user.click(levelBtn);
     expect(
-      screen.getByText(/Are you sure you want to change this model level/i),
+      screen.getByText(/Change the level of the model/i),
     ).toBeInTheDocument();
 
     // Confirm Level Toggle
@@ -158,9 +155,7 @@ describe("ModelRowComponent", () => {
     // Test Visibility Toggle
     await user.click(visibilityBtn);
     expect(
-      screen.getByText(
-        /Are you sure you want to change this model visibility/i,
-      ),
+      screen.getByText(/Make the model .* (private|public)\?/i),
     ).toBeInTheDocument();
 
     // Confirm Visibility Toggle

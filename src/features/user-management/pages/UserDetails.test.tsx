@@ -313,7 +313,7 @@ describe("UserDetailsPage Component", () => {
 
     expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
     expect(
-      screen.getByText("Are you sure you want to remove the user role?"),
+      screen.getByText(/^Remove the role "Administrator" from /),
     ).toBeInTheDocument();
 
     const confirmBtn = screen.getByRole("button", { name: /confirm action/i });

@@ -186,7 +186,9 @@ const RoleDetailsPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to remove the role permission?"
+        title="Remove permission"
+        message={`Remove the permission "${toDeletePermission?.name ?? ""}" from the role "${role?.name ?? ""}"?`}
+        confirmLabel="Remove permission"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeletePermission) {

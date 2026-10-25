@@ -18,7 +18,14 @@ import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilte
 import { queryUsers } from "@/features/user-management/api/UserRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
-import { dispatchNotification } from "../api/NotificationsAdminRepository";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import {
+  countNotificationRecipients,
+  type DispatchNotificationRequest,
+  dispatchNotification,
+} from "../api/NotificationsAdminRepository";
+
+const accounts = (count: number) => `${count} account${count === 1 ? "" : "s"}`;
 
 const NotificationsAdminPageComponent: FC = () => {
   const [audience, setAudience] = useState<"broadcast" | "role" | "users">(
@@ -41,6 +48,11 @@ const NotificationsAdminPageComponent: FC = () => {
   const [feedback, setFeedback] = useState<{
     type: "success" | "danger";
     message: string;
+  } | null>(null);
+  // The dispatch waiting for its confirmation, with the number it reaches
+  const [pending, setPending] = useState<{
+    request: DispatchNotificationRequest;
+    count: number;
   } | null>(null);
 
   useEffect(() => {
@@ -116,15 +128,40 @@ const NotificationsAdminPageComponent: FC = () => {
       return;
     }
 
+    const request: DispatchNotificationRequest = {
+      audience,
+      title,
+      body,
+      roles: audience === "role" ? selectedRoles : undefined,
+      userIds: audience === "users" ? selectedUsers : undefined,
+    };
+    // Nothing is sent before the confirmation shows how many accounts
+    // the notification reaches (UX-02)
+    setSubmitting(true);
+    const counted = await countNotificationRecipients(request);
+    setSubmitting(false);
+    if (counted.errorCode || !counted.data) {
+      setFeedback({
+        type: "danger",
+        message: counted.message || "Failed to count the recipients.",
+      });
+      return;
+    }
+    if (counted.data.count === 0) {
+      setFeedback({
+        type: "danger",
+        message: "No active account matches this audience.",
+      });
+      return;
+    }
+    setPending({ request, count: counted.data.count });
+  };
+
+  const send = async (request: DispatchNotificationRequest) => {
+    setPending(null);
     setSubmitting(true);
     try {
-      const response = await dispatchNotification({
-        audience,
-        title,
-        body,
-        roles: audience === "role" ? selectedRoles : undefined,
-        userIds: audience === "users" ? selectedUsers : undefined,
-      });
+      const response = await dispatchNotification(request);
 
       // Success has no error code; older servers answered errorCode 0
       if (!response.errorCode) {
@@ -455,6 +492,18 @@ const NotificationsAdminPageComponent: FC = () => {
           </Card>
         </Col>
       </Row>
+      <ConfirmationModal
+        show={pending !== null}
+        title="Send notification"
+        message={
+          pending
+            ? `Send "${pending.request.title}" to ${accounts(pending.count)}? A sent notification cannot be recalled.`
+            : ""
+        }
+        confirmLabel={pending ? `Send to ${accounts(pending.count)}` : "Send"}
+        onConfirm={() => pending && send(pending.request)}
+        onCancel={() => setPending(null)}
+      />
     </Container>
   );
 };

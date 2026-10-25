@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import type React from "react";
@@ -236,18 +236,16 @@ describe("UserListPage Integration", () => {
     const disableButtons = screen.getAllByTitle("Disable user");
     await user.click(disableButtons[0]);
 
-    expect(
-      screen.getByText("Are you sure you want to disable the user?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Disable user" });
 
-    // Confirm (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Disable user" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to disable the user?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
@@ -260,18 +258,16 @@ describe("UserListPage Integration", () => {
     const enableButtons = screen.getAllByTitle("Enable user");
     await user.click(enableButtons[0]);
 
-    expect(
-      screen.getByText("Are you sure you want to enable the user?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Enable user" });
 
-    // Confirm (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Enable user" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to enable the user?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
@@ -284,18 +280,16 @@ describe("UserListPage Integration", () => {
     const deleteButtons = screen.getAllByTitle("Delete user");
     await user.click(deleteButtons[0]);
 
-    expect(
-      screen.getByText("Are you sure you want to delete the user?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Delete user" });
 
-    // Confirm (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Delete user" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to delete the user?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 

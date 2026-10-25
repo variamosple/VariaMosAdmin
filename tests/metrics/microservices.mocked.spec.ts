@@ -233,15 +233,15 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
     });
     await updatedAdminRow.locator('button[title="Stop Service"]').click();
     await expect(
-      page.getByText("Are you sure you want to stop Administration Service?"),
+      page.getByText("Stop Administration Service?"),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("button", { name: "Stop microservice" }).click();
 
     // 8. Test Start Container Confirmation Flow
     await langRow.locator('button[title="Start Service"]').click();
     await expect(
-      page.getByText("Are you sure you want to start Languages Service?"),
+      page.getByText("Start Languages Service?"),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("button", { name: "Start microservice" }).click();
   });
 });

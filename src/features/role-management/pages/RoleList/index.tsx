@@ -81,7 +81,9 @@ const RoleListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the role?"
+        title="Delete role"
+        message={`Delete the role "${toDeleteRole?.name ?? ""}"?`}
+        confirmLabel="Delete role"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteRole) {

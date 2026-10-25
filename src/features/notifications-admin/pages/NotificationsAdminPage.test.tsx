@@ -6,7 +6,10 @@ import { queryRoles } from "@/features/role-management/api/RoleRepository";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { queryUsers } from "@/features/user-management/api/UserRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
-import { dispatchNotification } from "../api/NotificationsAdminRepository";
+import {
+  countNotificationRecipients,
+  dispatchNotification,
+} from "../api/NotificationsAdminRepository";
 import { NotificationsAdminPage } from "./NotificationsAdminPage";
 
 // Mock API repositories
@@ -19,8 +22,14 @@ vi.mock("@/features/role-management/api/RoleRepository", () => ({
 }));
 
 vi.mock("../api/NotificationsAdminRepository", () => ({
+  countNotificationRecipients: vi.fn(),
   dispatchNotification: vi.fn(),
 }));
+
+const counted = (count: number) =>
+  ({ data: { count } }) as Awaited<
+    ReturnType<typeof countNotificationRecipients>
+  >;
 
 describe("NotificationsAdminPage Component Tests", () => {
   const mockUsers: User[] = [
@@ -59,7 +68,20 @@ describe("NotificationsAdminPage Component Tests", () => {
     const rolesResponse = new ResponseModel<Role[]>("success");
     rolesResponse.data = mockRoles;
     vi.mocked(queryRoles).mockResolvedValue(rolesResponse);
+    vi.mocked(countNotificationRecipients).mockResolvedValue(counted(2));
   });
+
+  const fillAndSubmit = async () => {
+    await userEvent.type(
+      await screen.findByLabelText("Notification Title"),
+      "Maintenance",
+    );
+    await userEvent.type(
+      screen.getByLabelText("Message Body"),
+      "Platform offline tonight.",
+    );
+    await userEvent.click(screen.getByRole("button", { name: /Dispatch/i }));
+  };
 
   it("renders the page title and default audience options", async () => {
     render(<NotificationsAdminPage />);
@@ -140,6 +162,9 @@ describe("NotificationsAdminPage Component Tests", () => {
 
     const submitBtn = screen.getByRole("button", { name: /Dispatch/i });
     await userEvent.click(submitBtn);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Send to 2 accounts" }),
+    );
 
     await waitFor(() => {
       expect(dispatchNotification).toHaveBeenCalledWith({
@@ -172,6 +197,9 @@ describe("NotificationsAdminPage Component Tests", () => {
       "Platform offline tonight.",
     );
     await userEvent.click(screen.getByRole("button", { name: /Dispatch/i }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Send to 2 accounts" }),
+    );
 
     expect(
       await screen.findByText(
@@ -181,5 +209,54 @@ describe("NotificationsAdminPage Component Tests", () => {
     expect(
       screen.queryByText("Notifications dispatched successfully!"),
     ).not.toBeInTheDocument();
+  });
+
+  describe("confirmation before sending (UX-02)", () => {
+    it("names the notification and the number of accounts, and sends nothing on cancel", async () => {
+      render(<NotificationsAdminPage />);
+      await fillAndSubmit();
+
+      const dialog = await screen.findByRole("dialog", {
+        name: "Send notification",
+      });
+      expect(dialog).toHaveTextContent(
+        'Send "Maintenance" to 2 accounts? A sent notification cannot be recalled.',
+      );
+      expect(countNotificationRecipients).toHaveBeenCalledWith(
+        expect.objectContaining({ audience: "broadcast" }),
+      );
+
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      );
+      expect(dispatchNotification).not.toHaveBeenCalled();
+    });
+
+    it("sends nothing when the recipients cannot be counted", async () => {
+      vi.mocked(countNotificationRecipients).mockResolvedValue({
+        errorCode: 500,
+        message: "Counting failed.",
+      } as Awaited<ReturnType<typeof countNotificationRecipients>>);
+      render(<NotificationsAdminPage />);
+      await fillAndSubmit();
+
+      expect(await screen.findByText("Counting failed.")).toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(dispatchNotification).not.toHaveBeenCalled();
+    });
+
+    it("sends nothing to an audience without any active account", async () => {
+      vi.mocked(countNotificationRecipients).mockResolvedValue(counted(0));
+      render(<NotificationsAdminPage />);
+      await fillAndSubmit();
+
+      expect(
+        await screen.findByText("No active account matches this audience."),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(dispatchNotification).not.toHaveBeenCalled();
+    });
   });
 });

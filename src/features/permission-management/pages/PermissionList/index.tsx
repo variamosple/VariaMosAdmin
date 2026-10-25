@@ -81,7 +81,9 @@ const PermissionListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the permission?"
+        title="Delete permission"
+        message={`Delete the permission "${toDeletePermission?.name ?? ""}"?`}
+        confirmLabel="Delete permission"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeletePermission) {

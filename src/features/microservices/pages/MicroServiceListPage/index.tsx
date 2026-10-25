@@ -125,7 +125,9 @@ const MicroServiceListPageComponent: FC = () => {
       {/* Confirmation Modals */}
       <ConfirmationModal
         show={showStart}
-        message={`Are you sure you want to start ${toStartMicroService?.displayName || toStartMicroService?.serviceName || "this microservice"}?`}
+        title="Start microservice"
+        message={`Start ${toStartMicroService?.displayName || toStartMicroService?.serviceName || "this microservice"}?`}
+        confirmLabel="Start microservice"
         onConfirm={() => {
           if (toStartMicroService) {
             performMicroSerViceStart(toStartMicroService);
@@ -140,7 +142,9 @@ const MicroServiceListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showRestart}
-        message={`Are you sure you want to restart ${toRestartMicroService?.displayName || toRestartMicroService?.serviceName || "this microservice"}?`}
+        title="Restart microservice"
+        message={`Restart ${toRestartMicroService?.displayName || toRestartMicroService?.serviceName || "this microservice"}?`}
+        confirmLabel="Restart microservice"
         confirmButtonVariant="warning"
         onConfirm={() => {
           if (toRestartMicroService) {
@@ -156,7 +160,9 @@ const MicroServiceListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showStop}
-        message={`Are you sure you want to stop ${toStopMicroService?.displayName || toStopMicroService?.serviceName || "this microservice"}?`}
+        title="Stop microservice"
+        message={`Stop ${toStopMicroService?.displayName || toStopMicroService?.serviceName || "this microservice"}?`}
+        confirmLabel="Stop microservice"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toStopMicroService) {

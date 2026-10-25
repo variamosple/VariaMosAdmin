@@ -1,11 +1,11 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import type { FC } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
 import { ModelFormModal } from "@/features/model-management/components/ModelFormModal";
 import { ModelList } from "@/features/model-management/components/ModelList";
 import { ModelSearchForm } from "@/features/model-management/components/ModelSearchForm";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { useModelList } from "../../hooks/useModelList";
 
 const ModelListPageComponent: FC = () => {
@@ -94,7 +94,9 @@ const ModelListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the model?"
+        title="Delete model"
+        message={`Delete the model "${toDeleteModel?.name ?? ""}"?`}
+        confirmLabel="Delete model"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteModel) {

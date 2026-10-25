@@ -1,11 +1,11 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import type { FC } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
 import { ProjectFormModal } from "@/features/project-management/components/ProjectFormModal";
 import { ProjectList } from "@/features/project-management/components/ProjectList";
 import { ProjectSearchForm } from "@/features/project-management/components/ProjectsSearchForm";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { useProjectList } from "../../hooks/useProjectsList";
 
 const ProjectListPageComponent: FC = () => {
@@ -84,7 +84,9 @@ const ProjectListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the project?"
+        title="Delete project"
+        message={`Delete the project "${toDeleteProject?.name ?? ""}"?`}
+        confirmLabel="Delete project"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteProject) {

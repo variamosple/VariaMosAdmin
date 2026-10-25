@@ -1,4 +1,3 @@
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import { type FC, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
 import {
@@ -11,6 +10,7 @@ import {
   TrashFill,
 } from "react-bootstrap-icons";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
 import { formatBoolean } from "@/shared/constants";
 
@@ -189,7 +189,9 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
 
       <ConfirmationModal
         show={showLevelConfirm}
-        message={`Are you sure you want to change this model level to ${model.modelLevel === "application" ? "Domain Model" : "Application Model"}?`}
+        title="Change model level"
+        message={`Change the level of the model "${model.name}" to ${model.modelLevel === "application" ? "Domain Model" : "Application Model"}?`}
+        confirmLabel="Change level"
         confirmButtonVariant="warning"
         onConfirm={() => {
           onModelToggleLevel(model);
@@ -200,7 +202,9 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
 
       <ConfirmationModal
         show={showVisibilityConfirm}
-        message={`Are you sure you want to change this model visibility to ${model.isPublic ? "Private" : "Public"}?`}
+        title="Change model visibility"
+        message={`Make the model "${model.name}" ${model.isPublic ? "private" : "public"}?`}
+        confirmLabel={model.isPublic ? "Make private" : "Make public"}
         confirmButtonVariant="secondary"
         onConfirm={() => {
           onModelToggleVisibility(model);
