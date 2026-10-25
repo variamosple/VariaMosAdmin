@@ -137,15 +137,17 @@ export const useBugList = () => {
     setIsLoadingNotes(false);
   }, []);
 
-  const handleAddNote = async (bugId: string, body: string) => {
-    setError(null);
+  // Resolves to the error message, shown in the details modal (UX-09)
+  const handleAddNote = async (
+    bugId: string,
+    body: string,
+  ): Promise<string | null> => {
     const response = await addBugNote(bugId, body);
     if (response.errorCode) {
-      setError(response.message || "Failed to add bug note");
-      return false;
+      return response.message || "Failed to add the comment";
     }
     await fetchNotes(bugId);
-    return true;
+    return null;
   };
 
   // 5. Function to submit the creation of a bug

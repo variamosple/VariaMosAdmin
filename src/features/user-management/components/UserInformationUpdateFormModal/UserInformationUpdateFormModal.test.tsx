@@ -72,7 +72,7 @@ describe("PersonalInformationUpdateForModal Component", () => {
     );
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("PersonalInformation update")).toBeInTheDocument();
+    expect(screen.getByText("Personal information update")).toBeInTheDocument();
     expect(mockLoadData).toHaveBeenCalledWith(null);
   });
 
@@ -131,6 +131,37 @@ describe("PersonalInformationUpdateForModal Component", () => {
         expect.objectContaining({ countryCode: "CO" }),
       );
     });
+  });
+
+  it("shows a refused update in the modal and keeps the choice", async () => {
+    mockOnSubmit.mockResolvedValue({
+      errorCode: 400,
+      message: "Unknown country code",
+    });
+
+    render(
+      <PersonalInformationUpdateForModal
+        onUpdatePersonalInformationSubmit={mockOnSubmit}
+        showModal={true}
+        onClose={mockOnClose}
+        isLoading={false}
+        defaultValue={{ countryCode: "US" }}
+      />,
+    );
+
+    const user = userEvent.setup();
+    const select = screen.getByRole("combobox", {
+      name: /select your country/i,
+    });
+    await user.selectOptions(select, "CO");
+    await user.click(
+      screen.getByRole("button", { name: /update information/i }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unknown country code",
+    );
+    expect(select).toHaveValue("CO");
   });
 
   it("calls onClose when cancel button is clicked", async () => {

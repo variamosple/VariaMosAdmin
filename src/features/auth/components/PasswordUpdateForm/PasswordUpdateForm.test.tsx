@@ -156,6 +156,40 @@ describe("PasswordUpdateForm Component", () => {
     ).toBe("");
   });
 
+  it("shows a refused update in the modal and keeps the input", async () => {
+    mockOnUpdatePasswordSubmit.mockResolvedValueOnce(
+      new ResponseModel(undefined, 400, "Current password is incorrect"),
+    );
+
+    render(
+      <PasswordUpdateForm
+        onUpdatePasswordSubmit={mockOnUpdatePasswordSubmit}
+        showModal={true}
+        onClose={mockOnClose}
+        isLoading={false}
+      />,
+    );
+
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText(/current password/i), "oldPassword");
+    await user.type(screen.getByLabelText(/new password/i), "NewPassword123!");
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      "NewPassword123!",
+    );
+    await user.click(screen.getByRole("button", { name: "Update Password" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Current password is incorrect",
+    );
+    expect(
+      (screen.getByLabelText(/current password/i) as HTMLInputElement).value,
+    ).toBe("oldPassword");
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("calls onClose and resets form when Cancel button is clicked", async () => {
     render(
       <PasswordUpdateForm

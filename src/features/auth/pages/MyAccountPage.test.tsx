@@ -6,6 +6,11 @@ import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { MyAccountPage } from "./MyAccountPage";
 
+const pushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", () => ({
+  useToast: () => ({ pushToast, removeToast: vi.fn() }),
+}));
+
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
@@ -105,6 +110,7 @@ describe("MyAccountPage Component", () => {
   };
 
   beforeEach(() => {
+    pushToast.mockClear();
     server.use(
       http.get(apiTarget("/auth/my-account"), () => {
         return HttpResponse.json({ data: mockUser });
@@ -179,6 +185,36 @@ describe("MyAccountPage Component", () => {
     expect(
       screen.queryByTestId("password-update-form"),
     ).not.toBeInTheDocument();
+    expect(pushToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Password updated",
+        variant: "success",
+      }),
+    );
+  });
+
+  it("keeps the password modal open, without a toast, when the update is refused", async () => {
+    server.use(
+      http.put(apiTarget("/auth/password-update"), () =>
+        HttpResponse.json(
+          { errorCode: 400, message: "Current password is incorrect" },
+          { status: 400 },
+        ),
+      ),
+    );
+
+    render(<MyAccountPage />);
+    await screen.findByText("My account");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /update/i }));
+    await user.click(screen.getByText("Submit Password Update"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Loading: No")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("password-update-form")).toBeInTheDocument();
+    expect(pushToast).not.toHaveBeenCalled();
   });
 
   it("handles personal information update submission successfully", async () => {
@@ -216,6 +252,12 @@ describe("MyAccountPage Component", () => {
       expect(updatePersonalInformationPayload).toEqual({ countryCode: "FR" });
     });
     expect(screen.queryByTestId("info-update-form")).not.toBeInTheDocument();
+    expect(pushToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Information updated",
+        variant: "success",
+      }),
+    );
     await waitFor(() => {
       expect(getMyAccountCalledCount).toBe(2); // Initial query + query after update
     });

@@ -73,9 +73,11 @@ const BugListPageComponent: FC = () => {
     useState<Bug | null>(null);
   const [newNoteBody, setNewNoteBody] = useState("");
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
+  const [noteError, setNoteError] = useState<string | null>(null);
 
   const handleViewDetails = (bug: Bug) => {
     setSelectedBugForDetails(bug);
+    setNoteError(null);
     if (bug?.id) {
       fetchNotes(bug.id);
     }
@@ -161,8 +163,11 @@ const BugListPageComponent: FC = () => {
     e.preventDefault();
     if (!newNoteBody.trim() || !selectedBugForDetails?.id) return;
     setIsSubmittingNote(true);
-    const success = await handleAddNote(selectedBugForDetails.id, newNoteBody);
-    if (success) {
+    setNoteError(null);
+    const failure = await handleAddNote(selectedBugForDetails.id, newNoteBody);
+    if (failure) {
+      setNoteError(failure);
+    } else {
       setNewNoteBody("");
     }
     setIsSubmittingNote(false);
@@ -645,6 +650,11 @@ const BugListPageComponent: FC = () => {
                         disabled={isSubmittingNote}
                       />
                     </Form.Group>
+                    {noteError && (
+                      <Alert variant="danger" className="py-2 small">
+                        {noteError}
+                      </Alert>
+                    )}
                     <div className="text-end">
                       <Button
                         type="submit"

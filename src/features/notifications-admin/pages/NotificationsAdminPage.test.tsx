@@ -201,11 +201,14 @@ describe("NotificationsAdminPage Component Tests", () => {
       await screen.findByRole("button", { name: "Send to 2 accounts" }),
     );
 
-    expect(
-      await screen.findByText(
-        "An unexpected error occurred. Please try again later.",
-      ),
-    ).toBeInTheDocument();
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "An unexpected error occurred. Please try again later.",
+    );
+    // Shown right above the button just clicked (UX-21)
+    expect(alert.nextElementSibling).toContainElement(
+      screen.getByRole("button", { name: /Dispatch/i }),
+    );
     expect(
       screen.queryByText("Notifications dispatched successfully!"),
     ).not.toBeInTheDocument();

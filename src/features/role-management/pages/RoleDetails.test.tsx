@@ -230,6 +230,34 @@ describe("RoleDetailsPage Component", () => {
     );
   });
 
+  it("shows the refusal of a permission assignment in a danger toast", async () => {
+    server.use(
+      http.post(apiTarget("/v1/roles/:roleId/permissions"), () =>
+        HttpResponse.json(
+          { errorCode: 409, message: "The role already has this permission" },
+          { status: 409 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+
+    render(<RoleDetailsPage />);
+    expect(await screen.findByText("Admin Role")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Add permission/i }));
+
+    await waitFor(() => {
+      expect(mockPushToast).toHaveBeenCalledWith({
+        title: "Permission assignment",
+        message: "The role already has this permission",
+        variant: "danger",
+      });
+    });
+    expect(mockPushToast).not.toHaveBeenCalledWith(
+      expect.objectContaining({ variant: "success" }),
+    );
+  });
+
   it("opens deletion modal and deletes a permission on confirmation", async () => {
     const user = userEvent.setup();
 
