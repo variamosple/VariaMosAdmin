@@ -10,6 +10,7 @@ import {
   TrashFill,
 } from "react-bootstrap-icons";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
+import { IconButton } from "@/shared/components/IconButton";
 import { formatDate, formatDateTime } from "@/shared/constants";
 import { type Language, LanguageStatus } from "../../domain/Entity/Language";
 
@@ -106,52 +107,47 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
 
         <td>
           <ButtonGroup size="sm">
-            <Button
+            <IconButton
               variant="primary"
               onClick={() => onLanguageEdit(language)}
-              title="Edit language"
-            >
-              <PencilFill />
-            </Button>
+              label="Edit language"
+              icon={<PencilFill />}
+            />
 
             {isActive && (
-              <Button
+              <IconButton
                 variant="warning"
                 onClick={() => onLanguageDeactivate(language)}
-                title="Deactivate language"
-              >
-                <StopFill />
-              </Button>
+                label="Deactivate language"
+                icon={<StopFill />}
+              />
             )}
 
             {isDisabledOrPending && (
-              <Button
+              <IconButton
                 variant="success"
                 onClick={() => onLanguageActivate(language)}
-                title="Activate language"
-              >
-                <PlayFill />
-              </Button>
+                label="Activate language"
+                icon={<PlayFill />}
+              />
             )}
 
             {!isActive && !isDeleted && (
-              <Button
+              <IconButton
                 variant="danger"
                 onClick={() => onLanguageDelete(language)}
-                title="Delete language"
-              >
-                <TrashFill />
-              </Button>
+                label="Delete language"
+                icon={<TrashFill />}
+              />
             )}
 
-            <Button
+            <IconButton
               size="sm"
               variant="info"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide language details"
-            >
-              {!show ? <PlusCircle /> : <DashCircle />}
-            </Button>
+              label="Show/Hide language details"
+              icon={!show ? <PlusCircle /> : <DashCircle />}
+            />
           </ButtonGroup>
         </td>
       </tr>

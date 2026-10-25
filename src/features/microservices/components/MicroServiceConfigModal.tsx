@@ -256,7 +256,9 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                           {config.isReadOnly ? (
                             <Badge bg="dark">Read-only</Badge>
                           ) : (
-                            <Badge bg="info">Editable</Badge>
+                            <Badge bg="info" text="dark">
+                              Editable
+                            </Badge>
                           )}
                         </td>
                         <td className="text-end">

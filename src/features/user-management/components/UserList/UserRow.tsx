@@ -1,6 +1,6 @@
 import { useQuery, useRouter } from "@variamosple/variamos-components";
 import { type FC, useEffect, useState } from "react";
-import { Accordion, Button, ButtonGroup, Spinner } from "react-bootstrap";
+import { Accordion, ButtonGroup, Spinner } from "react-bootstrap";
 import {
   Ban,
   CheckCircle,
@@ -14,6 +14,7 @@ import type { RoleDetails } from "@/features/role-management/domain/Entity/Role"
 import { queryUserRolesDetails } from "@/features/user-management/api/UserRoleRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import { UserRoleFilter } from "@/features/user-management/domain/Entity/UserRoleFilter";
+import { IconButton } from "@/shared/components/IconButton";
 import { formatDateTime } from "@/shared/constants";
 
 export interface UserRowProps {
@@ -78,62 +79,56 @@ export const UserRowComponent: FC<UserRowProps> = ({
 
         <td className="text-center">
           <ButtonGroup size="sm">
-            <Button
+            <IconButton
               variant="primary"
               onClick={() => navigate(`/users/${user.id}`)}
-              title="See user details"
-            >
-              <Search />
-            </Button>
+              label="See user details"
+              icon={<Search />}
+            />
 
             {user.isEnabled && !user.isDeleted && (
-              <Button
+              <IconButton
                 variant="secondary"
                 onClick={() => onUserResetLink(user)}
-                title="Generate password reset link"
-              >
-                <Key />
-              </Button>
+                label="Generate password reset link"
+                icon={<Key />}
+              />
             )}
 
             {user.isEnabled && !user.isDeleted && (
-              <Button
+              <IconButton
                 variant="warning"
                 onClick={() => onUserDisable(user)}
-                title="Disable user"
-              >
-                <Ban />
-              </Button>
+                label="Disable user"
+                icon={<Ban />}
+              />
             )}
 
             {!user.isEnabled && !user.isDeleted && (
-              <Button
+              <IconButton
                 variant="success"
                 onClick={() => onUserEnable(user)}
-                title="Enable user"
-              >
-                <CheckCircle />
-              </Button>
+                label="Enable user"
+                icon={<CheckCircle />}
+              />
             )}
 
             {!user.isDeleted && (
-              <Button
+              <IconButton
                 variant="danger"
                 onClick={() => onUserDelete(user)}
-                title="Delete user"
-              >
-                <TrashFill />
-              </Button>
+                label="Delete user"
+                icon={<TrashFill />}
+              />
             )}
 
-            <Button
+            <IconButton
               size="sm"
               variant="info"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide permissions"
-            >
-              {!show ? <PlusCircle /> : <DashCircle />}
-            </Button>
+              label="Show/Hide permissions"
+              icon={!show ? <PlusCircle /> : <DashCircle />}
+            />
           </ButtonGroup>
         </td>
       </tr>

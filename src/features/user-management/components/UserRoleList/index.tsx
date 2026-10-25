@@ -1,8 +1,9 @@
 import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
-import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { ButtonGroup, Table } from "react-bootstrap";
 import { TrashFill } from "react-bootstrap-icons";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
+import { IconButton } from "@/shared/components/IconButton";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 
 export interface UserRoleListParameters extends PaginationControlsProps {
@@ -45,13 +46,12 @@ export const UserRoleList: FC<UserRoleListParameters> = ({
 
               <td>
                 <ButtonGroup size="sm">
-                  <Button
+                  <IconButton
                     variant="danger"
                     onClick={() => onRoleDelete(role)}
-                    title="Delete user role"
-                  >
-                    <TrashFill />
-                  </Button>
+                    label="Delete user role"
+                    icon={<TrashFill />}
+                  />
                 </ButtonGroup>
               </td>
             </tr>

@@ -16,6 +16,7 @@ import {
 } from "react-bootstrap-icons";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
+import { IconButton } from "@/shared/components/IconButton";
 import { formatBoolean, formatDate } from "@/shared/constants";
 
 export interface ProjectRowProps {
@@ -84,30 +85,27 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
 
         <td>
           <ButtonGroup size="sm">
-            <Button
+            <IconButton
               variant="primary"
               onClick={() => onProjectEdit(project)}
-              title="Edit project"
-            >
-              <PencilFill />
-            </Button>
+              label="Edit project"
+              icon={<PencilFill />}
+            />
 
-            <Button
+            <IconButton
               variant="danger"
               onClick={() => onProjectDelete(project)}
-              title="Delete project"
-            >
-              <TrashFill />
-            </Button>
+              label="Delete project"
+              icon={<TrashFill />}
+            />
 
-            <Button
+            <IconButton
               size="sm"
               variant="info"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide project details"
-            >
-              {!show ? <PlusCircle /> : <DashCircle />}
-            </Button>
+              label="Show/Hide project details"
+              icon={!show ? <PlusCircle /> : <DashCircle />}
+            />
           </ButtonGroup>
         </td>
       </tr>

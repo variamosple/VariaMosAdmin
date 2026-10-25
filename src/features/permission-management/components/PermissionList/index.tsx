@@ -1,8 +1,9 @@
 import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
-import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, TrashFill } from "react-bootstrap-icons";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import { IconButton } from "@/shared/components/IconButton";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 
 export interface PermissionListParameters extends PaginationControlsProps {
@@ -47,21 +48,19 @@ export const PermissionList: FC<PermissionListParameters> = ({
 
               <td>
                 <ButtonGroup size="sm">
-                  <Button
+                  <IconButton
                     variant="primary"
                     onClick={() => onPermissionEdit(permission)}
-                    title="Edit permission"
-                  >
-                    <PencilFill />
-                  </Button>
+                    label="Edit permission"
+                    icon={<PencilFill />}
+                  />
 
-                  <Button
+                  <IconButton
                     variant="danger"
                     onClick={() => onPermissionDelete(permission)}
-                    title="Delete permission"
-                  >
-                    <TrashFill />
-                  </Button>
+                    label="Delete permission"
+                    icon={<TrashFill />}
+                  />
                 </ButtonGroup>
               </td>
             </tr>

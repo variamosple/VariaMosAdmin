@@ -3,6 +3,7 @@ import { Button, Form, InputGroup, Modal, Spinner } from "react-bootstrap";
 import { Clipboard, ClipboardCheck } from "react-bootstrap-icons";
 import { generateRecoveryLink } from "@/features/user-management/api/UserRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
+import { IconButton } from "@/shared/components/IconButton";
 import { useToast } from "@/shared/context/ToastContext";
 
 interface RecoveryLinkModalProps {
@@ -101,12 +102,12 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
                 value={recoveryUrl}
                 className="bg-light text-dark border-secondary small font-monospace"
               />
-              <Button
+              <IconButton
                 variant={copied ? "success" : "outline-primary"}
                 onClick={handleCopyToClipboard}
-              >
-                {copied ? <ClipboardCheck /> : <Clipboard />}
-              </Button>
+                label={copied ? "Link copied" : "Copy link"}
+                icon={copied ? <ClipboardCheck /> : <Clipboard />}
+              />
             </InputGroup>
             {copied && (
               <p className="text-success small mt-1">Copied to clipboard!</p>

@@ -1,8 +1,9 @@
 import { type FC, useCallback, useEffect, useRef } from "react";
-import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
+import { Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
+import { IconButton } from "@/shared/components/IconButton";
 
 export interface ProjectSearchFormProps {
   onSubmit: (search?: ProjectsFilter) => void;
@@ -140,15 +141,14 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
                 <option value="true">Deleted</option>
                 <option value="all">All</option>
               </Form.Select>
-              <Button
-                title="Clear results"
+              <IconButton
+                label="Clear results"
                 variant="outline-secondary"
                 onClick={onReset}
                 className="fw-bold"
                 disabled={isLoading}
-              >
-                <Trash />
-              </Button>
+                icon={<Trash />}
+              />
             </InputGroup>
           </Form.Group>
         </Col>
