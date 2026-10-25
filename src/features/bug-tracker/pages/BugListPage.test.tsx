@@ -82,6 +82,45 @@ describe("BugListPage Component", () => {
     consoleSpy.mockRestore();
   });
 
+  it("pages through the bugs only when there is more than one page", async () => {
+    const user = userEvent.setup();
+    const pagesAsked: (string | null)[] = [];
+    server.use(
+      http.get("*/bugs", ({ request }) => {
+        const pageNumber = new URL(request.url).searchParams.get("pageNumber");
+        pagesAsked.push(pageNumber);
+        return HttpResponse.json({
+          data: [
+            { id: `bug-${pageNumber}`, title: `Bug of page ${pageNumber}` },
+          ],
+          totalCount: 21,
+        });
+      }),
+      http.get("*/bugs/local", () =>
+        HttpResponse.json({ data: [], totalCount: 0 }),
+      ),
+    );
+
+    render(<BugListPage />);
+    expect(await screen.findAllByText("Bug of page 1")).not.toHaveLength(0);
+    // Above and below the list of the active tab
+    const activeTab = document.querySelector(".tab-pane.active") as HTMLElement;
+    const paginators = within(activeTab).getAllByRole("button", {
+      name: "Page 1 of 2",
+    });
+    expect(paginators).toHaveLength(2);
+
+    await user.click(paginators[0] as HTMLElement);
+
+    expect(await screen.findAllByText("Bug of page 2")).not.toHaveLength(0);
+    expect(pagesAsked.at(-1)).toBe("2");
+
+    await user.click(screen.getByRole("tab", { name: /local inbox/i }));
+    await waitFor(() =>
+      expect(screen.queryByText(/^Page \d of/)).not.toBeInTheDocument(),
+    );
+  });
+
   it("hides the actions the operator has no permission for", async () => {
     const user = userEvent.setup();
     givePermissions(["bugs::query"]);

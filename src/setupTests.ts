@@ -7,7 +7,7 @@ import { TextDecoder, TextEncoder } from "node:util";
 
 import "@testing-library/jest-dom/vitest";
 
-import type { ReactNode } from "react";
+import { createElement, type ReactNode } from "react";
 import { vi } from "vitest";
 import { server } from "./shared/tests/mocks/server";
 
@@ -162,6 +162,20 @@ vi.mock("@variamosple/variamos-components", () => {
     NotAuthorized: () => null,
     ProtectedRoute: ({ children }: { children: ReactNode }) => children,
     PagedModel: class PagedModel {},
+    // One button to the next page: enough to drive a paged list in a test
+    Paginator: (props: {
+      currentPage: number;
+      totalPages: number;
+      onPageChange: (page: number) => void;
+    }) =>
+      createElement(
+        "button",
+        {
+          type: "button",
+          onClick: () => props.onPageChange(props.currentPage + 1),
+        },
+        `Page ${props.currentPage} of ${props.totalPages}`,
+      ),
     ResponseModel,
     useRouter: vi.fn(),
     useSession: vi.fn(),

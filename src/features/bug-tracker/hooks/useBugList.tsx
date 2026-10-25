@@ -18,6 +18,8 @@ import type { Bug, BugStatusLog, BugUserRef, RawBugNote } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 import type { BugPriority } from "../domain/BugPriority";
 
+export const BUG_PAGE_SIZE = 20;
+
 export const useBugList = () => {
   // 1. States for data
   const [bugs, setBugs] = useState<Bug[]>([]);
@@ -34,6 +36,9 @@ export const useBugList = () => {
   const [activeTab, setActiveTab] = useState<"github" | "local" | "trash">(
     "github",
   );
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / BUG_PAGE_SIZE));
 
   // Bug Notes States
   const [notes, setNotes] = useState<BugStatusLog[]>([]);
@@ -80,22 +85,30 @@ export const useBugList = () => {
     setIsLoading(true);
     setLoadError(null);
 
+    const page = { pageNumber, pageSize: BUG_PAGE_SIZE };
     let response: ResponseModel<Bug[]>;
     if (activeTab === "github") {
-      response = await queryBugs(filter);
+      response = await queryBugs({ ...filter, ...page });
     } else {
       const status = activeTab === "local" ? "pending" : "rejected";
-      response = await queryLocalBugs({ ...filter, status });
+      response = await queryLocalBugs({ ...filter, ...page, status });
     }
 
     if (response.errorCode) {
       setBugs([]);
       setLoadError(response.message || "Failed to load bugs");
     } else {
-      setBugs(response.data || []);
+      const data = response.data || [];
+      // A server without paging sends every bug and no count
+      const count = response.totalCount ?? data.length;
+      setBugs(data);
+      setTotalCount(count);
+      // The last bugs of the page were moved away: show the new last page
+      const lastPage = Math.max(1, Math.ceil(count / BUG_PAGE_SIZE));
+      if (pageNumber > lastPage) setPageNumber(lastPage);
     }
     setIsLoading(false);
-  }, [filter, activeTab]);
+  }, [filter, activeTab, pageNumber]);
 
   // Trigger loading
   useEffect(() => {
@@ -276,13 +289,23 @@ export const useBugList = () => {
     createError,
     clearCreateError: () => setCreateError(null),
     filter,
-    setFilter,
+    // Another filter or tab starts again from the first page
+    setFilter: (next: BugFilter) => {
+      setFilter(next);
+      setPageNumber(1);
+    },
     showCreate,
     setShowCreate,
     isSubmitting,
     isSyncing,
     activeTab,
-    setActiveTab,
+    setActiveTab: (tab: "github" | "local" | "trash") => {
+      setActiveTab(tab);
+      setPageNumber(1);
+    },
+    currentPage: pageNumber,
+    totalPages,
+    onPageChange: setPageNumber,
     handleCreateBug,
     handleSyncBugs,
     handleReject,

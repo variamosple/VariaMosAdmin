@@ -1,4 +1,4 @@
-import { withPageVisit } from "@variamosple/variamos-components";
+import { Paginator, withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useState } from "react";
 import {
   Alert,
@@ -45,6 +45,9 @@ const BugListPageComponent: FC = () => {
     handleSyncBugs,
     activeTab,
     setActiveTab,
+    currentPage,
+    totalPages,
+    onPageChange,
     handleReject,
     handleRestore,
     handleApprove,
@@ -125,20 +128,32 @@ const BugListPageComponent: FC = () => {
         </Alert>
       );
     }
-    return (
-      <BugList
-        items={bugs}
-        onViewDetails={handleViewDetails}
-        activeTab={activeTab}
-        onReject={
-          canUpdate
-            ? (id: string) =>
-                setBugToReject(bugs.find((bug) => bug.id === id) ?? null)
-            : undefined
-        }
-        onRestore={canUpdate ? handleRestore : undefined}
-        onApprove={canUpdate ? setBugToApprove : undefined}
+    // One page is shown without a paginator
+    const paginator = totalPages > 1 && (
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
       />
+    );
+    return (
+      <>
+        {paginator}
+        <BugList
+          items={bugs}
+          onViewDetails={handleViewDetails}
+          activeTab={activeTab}
+          onReject={
+            canUpdate
+              ? (id: string) =>
+                  setBugToReject(bugs.find((bug) => bug.id === id) ?? null)
+              : undefined
+          }
+          onRestore={canUpdate ? handleRestore : undefined}
+          onApprove={canUpdate ? setBugToApprove : undefined}
+        />
+        {paginator}
+      </>
     );
   };
 
