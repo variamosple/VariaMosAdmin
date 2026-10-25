@@ -77,39 +77,36 @@ vi.mock("@variamosple/variamos-components", async () => {
   };
 });
 
-// Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-vi.mock(
-  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
-  async () => {
-    return {
-      __esModule: true,
-      default: ({
-        show,
-        message,
-        onConfirm,
-        onCancel,
-      }: {
-        show: boolean;
-        message: string;
-        onConfirm: () => void;
-        onCancel: () => void;
-      }) => {
-        if (!show) return null;
-        return (
-          <div data-testid="confirm-modal">
-            <span>{message}</span>
-            <button type="button" onClick={onConfirm}>
-              Confirm
-            </button>
-            <button type="button" onClick={onCancel}>
-              Cancel
-            </button>
-          </div>
-        );
-      },
-    };
-  },
-);
+// Mock the shared ConfirmationModal
+vi.mock("@/shared/components/ConfirmationModal", async () => {
+  return {
+    __esModule: true,
+    default: ({
+      show,
+      message,
+      onConfirm,
+      onCancel,
+    }: {
+      show: boolean;
+      message: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => {
+      if (!show) return null;
+      return (
+        <div data-testid="confirm-modal">
+          <span>{message}</span>
+          <button type="button" onClick={onConfirm}>
+            Confirm
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      );
+    },
+  };
+});
 
 describe("LanguageListPage", () => {
   beforeEach(() => {
@@ -174,7 +171,7 @@ describe("LanguageListPage", () => {
     // Delete confirmation modal should be visible
     expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
     expect(
-      screen.getByText("Are you sure you want to delete the language?"),
+      screen.getByText('Delete the language "Spanish"?'),
     ).toBeInTheDocument();
 
     // Click confirm delete
@@ -200,9 +197,7 @@ describe("LanguageListPage", () => {
     // Confirmation modal should be visible
     expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Are you sure you want to activate the language 'Spanish'?",
-      ),
+      screen.getByText('Activate the language "Spanish"?'),
     ).toBeInTheDocument();
 
     // Click confirm
@@ -230,9 +225,7 @@ describe("LanguageListPage", () => {
     // Confirmation modal should be visible
     expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Are you sure you want to deactivate the language 'English'?",
-      ),
+      screen.getByText('Deactivate the language "English"?'),
     ).toBeInTheDocument();
 
     // Click confirm

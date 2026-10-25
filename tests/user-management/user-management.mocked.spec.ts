@@ -89,7 +89,7 @@ test.describe("User Management - Mocked Flows", () => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true }) });
     });
     await johnRow.locator('button[title="Disable user"]').click();
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("dialog", { name: "Disable user" }).getByRole("button", { name: "Disable user" }).click();
 
     // Enable jane
     await page.route("**/v1/users/u2/enable", async (route) => {
@@ -97,6 +97,6 @@ test.describe("User Management - Mocked Flows", () => {
     });
     const janeRow = page.locator("tr", { hasText: "jane_smith" });
     await janeRow.locator('button[title="Enable user"]').click();
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("dialog", { name: "Enable user" }).getByRole("button", { name: "Enable user" }).click();
   });
 });

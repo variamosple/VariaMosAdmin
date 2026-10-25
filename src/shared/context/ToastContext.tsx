@@ -71,7 +71,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             bg={variant}
             onClose={() => removeToast(id)}
             delay={delay}
-            autohide
+            // An error stays until it is closed: read at one's own pace (UX-22)
+            autohide={variant !== "danger"}
           >
             <Toast.Header>
               <strong className="me-auto">{title}</strong>

@@ -99,8 +99,22 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
       });
     });
 
-    // Dispatch
+    await page.route("**/v1/admin/notifications/recipients/count", async (route) => {
+      const postData = JSON.parse(route.request().postData() || "{}");
+      expect(postData.userIds).toEqual(["user-1"]);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: { count: 1 } }),
+      });
+    });
+
+    // Dispatch, after the confirmation that counts the accounts
     await page.click('button[type="submit"]');
+    await page
+      .getByRole("dialog", { name: "Send notification" })
+      .getByRole("button", { name: "Send to 1 account" })
+      .click();
 
     // Success alert should show up
     await expect(page.locator(".alert-success")).toContainText("Notifications dispatched successfully!");

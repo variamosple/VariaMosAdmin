@@ -178,20 +178,16 @@ describe("MicroServiceListPage Integration", () => {
     await user.click(startButton);
 
     // Modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to start Service B?"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Start Service B?")).toBeInTheDocument();
 
-    // Confirm action (Button label in ConfirmationModal is Accept)
+    // Confirm with the action button
     const confirmButton = screen.getByRole("button", {
-      name: /accept|confirm|yes/i,
+      name: "Start microservice",
     });
     await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to start Service B?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Start Service B?")).not.toBeInTheDocument();
     });
   });
 
@@ -205,20 +201,16 @@ describe("MicroServiceListPage Integration", () => {
     await user.click(restartButton);
 
     // Modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to restart Service A?"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Restart Service A?")).toBeInTheDocument();
 
     // Confirm action
     const confirmButton = screen.getByRole("button", {
-      name: /accept|confirm|yes/i,
+      name: "Restart microservice",
     });
     await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to restart Service A?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Restart Service A?")).not.toBeInTheDocument();
     });
   });
 
@@ -232,20 +224,16 @@ describe("MicroServiceListPage Integration", () => {
     await user.click(stopButton);
 
     // Modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to stop Service A?"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Stop Service A?")).toBeInTheDocument();
 
     // Confirm action
     const confirmButton = screen.getByRole("button", {
-      name: /accept|confirm|yes/i,
+      name: "Stop microservice",
     });
     await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to stop Service A?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Stop Service A?")).not.toBeInTheDocument();
     });
   });
 });

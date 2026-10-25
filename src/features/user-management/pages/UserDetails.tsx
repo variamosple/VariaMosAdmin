@@ -205,7 +205,9 @@ const UserDetailsPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to remove the user role?"
+        title="Remove role"
+        message={`Remove the role "${toDeleteRole?.name ?? ""}" from "${user?.name ?? ""}"?`}
+        confirmLabel="Remove role"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteRole) {

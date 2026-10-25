@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import type React from "react";
@@ -178,18 +178,16 @@ describe("PermissionListPage Integration", () => {
     await user.click(deleteButtons[1]);
 
     // Confirmation modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to delete the permission?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Delete permission" });
 
-    // Click Accept to confirm
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Delete permission" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to delete the permission?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 

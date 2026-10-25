@@ -242,11 +242,15 @@ describe("RoleDetailsPage Component", () => {
 
     // Confirmation modal should be visible
     expect(
-      screen.getByText("Are you sure you want to remove the role permission?"),
-    ).toBeInTheDocument();
+      screen.getByRole("dialog", { name: "Remove permission" }),
+    ).toHaveTextContent(
+      'Remove the permission "READ_PRIVILEGES" from the role "Admin"?',
+    );
 
-    // Click Confirm on ConfirmationModal
-    const confirmButton = screen.getByRole("button", { name: /Accept/i });
+    // Confirm with the action button
+    const confirmButton = screen.getByRole("button", {
+      name: "Remove permission",
+    });
     await user.click(confirmButton);
 
     await waitFor(() => {

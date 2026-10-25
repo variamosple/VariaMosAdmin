@@ -22,3 +22,17 @@ export const dispatchNotification = (
       ),
     );
 };
+
+/** How many active accounts a dispatch would reach; nothing is sent. */
+export const countNotificationRecipients = (
+  request: Pick<DispatchNotificationRequest, "audience" | "roles" | "userIds">,
+): Promise<ResponseModel<{ count: number }>> => {
+  return ADMIN_CLIENT.post("/v1/admin/notifications/recipients/count", request)
+    .then((response) => response.data)
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        "Error when trying to count the recipients, please try again later.",
+      ),
+    );
+};

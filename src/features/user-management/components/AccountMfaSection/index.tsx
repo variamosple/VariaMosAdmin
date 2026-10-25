@@ -113,6 +113,7 @@ export const AccountMfaSection: FC<AccountMfaSectionProps> = ({ userId }) => {
 
       <ConfirmationModal
         show={showConfirm}
+        title="Turn off two-factor authentication"
         message="Turn off two-factor authentication for this user? The user will be told by e-mail."
         confirmLabel="Turn off"
         confirmButtonVariant="danger"

@@ -66,7 +66,9 @@ const UserListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDisable}
-        message="Are you sure you want to disable the user?"
+        title="Disable user"
+        message={`Disable the account of "${selectedUser?.name ?? ""}"? The user can no longer sign in.`}
+        confirmLabel="Disable user"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (selectedUser) {
@@ -82,7 +84,9 @@ const UserListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showEnable}
-        message="Are you sure you want to enable the user?"
+        title="Enable user"
+        message={`Enable the account of "${selectedUser?.name ?? ""}"?`}
+        confirmLabel="Enable user"
         onConfirm={() => {
           if (selectedUser) {
             performEnableUser(selectedUser);
@@ -97,7 +101,9 @@ const UserListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the user?"
+        title="Delete user"
+        message={`Delete the account of "${selectedUser?.name ?? ""}"?`}
+        confirmLabel="Delete user"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (selectedUser) {

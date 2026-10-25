@@ -47,10 +47,11 @@ test.describe("Project Management - Real E2E Flows", () => {
     const updatedRow = page.locator("tr", { hasText: `Test Custom Project-${suffix} Edited` });
     await updatedRow.locator('button[title="Delete project"]').click();
 
-    const confirmModal = page.locator(".modal", { hasText: "Are you sure you want to delete the project?" });
+    const confirmModal = page.getByRole("dialog", { name: "Delete project" });
+    await expect(confirmModal).toContainText(`Delete the project "Test Custom Project-${suffix} Edited"?`);
     
     const deletePromise = page.waitForResponse("**/v1/admin/projects/*");
-    await confirmModal.getByRole("button", { name: "Accept" }).click();
+    await confirmModal.getByRole("button", { name: "Delete project" }).click();
     await deletePromise;
 
     await expect(page.locator("tr", { hasText: `Test Custom Project-${suffix} Edited` })).not.toBeVisible();

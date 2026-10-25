@@ -74,39 +74,36 @@ vi.mock("@variamosple/variamos-components", async () => {
   };
 });
 
-// Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-vi.mock(
-  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
-  async () => {
-    return {
-      __esModule: true,
-      default: ({
-        show,
-        message,
-        onConfirm,
-        onCancel,
-      }: {
-        show: boolean;
-        message: string;
-        onConfirm: () => void;
-        onCancel: () => void;
-      }) => {
-        if (!show) return null;
-        return (
-          <div data-testid="delete-confirm-modal">
-            <span>{message}</span>
-            <button type="button" onClick={onConfirm}>
-              Confirm Delete
-            </button>
-            <button type="button" onClick={onCancel}>
-              Cancel Delete
-            </button>
-          </div>
-        );
-      },
-    };
-  },
-);
+// Mock the shared ConfirmationModal
+vi.mock("@/shared/components/ConfirmationModal", async () => {
+  return {
+    __esModule: true,
+    default: ({
+      show,
+      message,
+      onConfirm,
+      onCancel,
+    }: {
+      show: boolean;
+      message: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => {
+      if (!show) return null;
+      return (
+        <div data-testid="delete-confirm-modal">
+          <span>{message}</span>
+          <button type="button" onClick={onConfirm}>
+            Confirm Delete
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel Delete
+          </button>
+        </div>
+      );
+    },
+  };
+});
 
 describe("ModelListPage Integration", () => {
   beforeEach(() => {
