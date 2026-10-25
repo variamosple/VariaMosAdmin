@@ -150,7 +150,11 @@ describe("useBugList Hook", () => {
 
     expect(queryBugReposCalled).toBe(1);
     expect(queryCategoriesCalled).toBe(1);
-    expect(queryBugsParams[0]).toEqual(result.current.filter);
+    expect(queryBugsParams[0]).toEqual({
+      ...result.current.filter,
+      pageNumber: "1",
+      pageSize: "20",
+    });
   });
 
   it("should handle error during bug fetching gracefully", async () => {
@@ -244,6 +248,78 @@ describe("useBugList Hook", () => {
       status: "open",
       priority: "high",
       search: "Bug One",
+      pageNumber: "1",
+      pageSize: "20",
+    });
+  });
+
+  describe("pages", () => {
+    // 45 GitHub bugs: three pages of 20
+    const serveGithubBugs = (totalCount?: number) =>
+      server.use(
+        http.get(apiTarget("/bugs"), ({ request }) => {
+          const url = new URL(request.url);
+          queryBugsParams.push(Object.fromEntries(url.searchParams.entries()));
+          return HttpResponse.json({ data: mockBugsList, totalCount });
+        }),
+      );
+    const lastPageAsked = () => queryBugsParams.at(-1)?.pageNumber;
+
+    it("asks for the page chosen and counts the pages", async () => {
+      serveGithubBugs(45);
+      const { result } = renderHook(() => useBugList());
+      await waitFor(() => expect(result.current.totalPages).toBe(3));
+
+      await act(async () => result.current.onPageChange(3));
+
+      await waitFor(() => expect(lastPageAsked()).toBe("3"));
+      expect(result.current.currentPage).toBe(3);
+    });
+
+    it("starts again from the first page with another filter or tab", async () => {
+      serveGithubBugs(45);
+      const { result } = renderHook(() => useBugList());
+      await waitFor(() => expect(result.current.totalPages).toBe(3));
+
+      await act(async () => result.current.onPageChange(2));
+      await act(async () => result.current.setFilter({ priority: "high" }));
+      await waitFor(() =>
+        expect(queryBugsParams.at(-1)).toMatchObject({
+          priority: "high",
+          pageNumber: "1",
+        }),
+      );
+
+      await act(async () => result.current.onPageChange(2));
+      await act(async () => result.current.setActiveTab("local"));
+      await waitFor(() =>
+        expect(queryLocalBugsParams.at(-1)?.pageNumber).toBe("1"),
+      );
+    });
+
+    it("goes back to the last page when its bugs are gone", async () => {
+      serveGithubBugs(45);
+      const { result } = renderHook(() => useBugList());
+      await waitFor(() => expect(result.current.totalPages).toBe(3));
+      await act(async () => result.current.onPageChange(3));
+      await waitFor(() => expect(lastPageAsked()).toBe("3"));
+
+      // The last five bugs were closed elsewhere
+      serveGithubBugs(40);
+      await act(async () => result.current.refreshBugs());
+
+      await waitFor(() => expect(result.current.currentPage).toBe(2));
+      await waitFor(() => expect(lastPageAsked()).toBe("2"));
+    });
+
+    it("shows one page when the server sends no count", async () => {
+      serveGithubBugs();
+      const { result } = renderHook(() => useBugList());
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.bugs).toEqual(mockBugsList);
+      expect(result.current.totalPages).toBe(1);
     });
   });
 
