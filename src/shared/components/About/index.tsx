@@ -7,8 +7,10 @@ export const About: FC = () => {
     <section className="p-2 p-md-5">
       <article>
         <img
-          className="col-12 col-lg-10 col-xl-6"
-          src="images/VariaMosLogo.png"
+          className="col-12 col-lg-10 col-xl-6 h-auto"
+          src="images/VariaMosLogo.webp"
+          width={1200}
+          height={245}
           alt="VariaMos logo"
         />
 
@@ -20,7 +22,8 @@ export const About: FC = () => {
         </p>
       </article>
 
-      <Tabs defaultActiveKey="how-it-works" className="mb-3">
+      {/* A tab and its screenshots load when opened (T-30) */}
+      <Tabs defaultActiveKey="how-it-works" className="mb-3" mountOnEnter>
         <Tab eventKey="how-it-works" title="How it works">
           <h2 className="text-primary-color-contrast play-regular fs-4">
             How it works
@@ -102,8 +105,11 @@ export const About: FC = () => {
 
           <figure className="text-center">
             <img
-              className="col-12 col-lg-8 col-xl-8"
+              className="col-12 col-lg-8 col-xl-8 h-auto"
               src="images/variamos_1.0_deployment.png"
+              width={1600}
+              height={450}
+              loading="lazy"
               alt="Deployment diagram of VariaMos 1.0."
             />
             <figcaption>
@@ -175,8 +181,11 @@ export const About: FC = () => {
 
           <figure className="text-center">
             <img
-              className="col-12 col-xl-5"
+              className="col-12 col-xl-5 h-auto"
               src="images/variamos_1.0_integration_process_example.png"
+              width={381}
+              height={526}
+              loading="lazy"
               alt="Integration process example of two
               variability models in VariaMos 1.0."
             />
@@ -193,8 +202,11 @@ export const About: FC = () => {
 
           <figure className="text-center">
             <img
-              className="col-12 col-xl-10"
+              className="col-12 col-xl-10 h-auto"
               src="images/variamos_1.0_PLM_transformations_gui.png"
+              width={1105}
+              height={548}
+              loading="lazy"
               alt="Graphical user interface for PLM
               transformations to GNU Prolog and integration in a GNU Prolog
               file."
@@ -231,8 +243,11 @@ export const About: FC = () => {
 
           <figure className="text-center">
             <img
-              className="col-12 col-xl-10"
+              className="col-12 col-xl-10 h-auto"
               src="images/variamos_1.0_verification_gui.png"
+              width={1103}
+              height={604}
+              loading="lazy"
               alt="Verification GUI of VariaMos"
             />
             <figcaption>
@@ -402,8 +417,11 @@ fd_labeling(L).`}
 
               <figure className="text-center">
                 <img
-                  className="col-12 col-lg-12 col-xl-8 col-2xl-6"
+                  className="col-12 col-lg-12 col-xl-8 col-2xl-6 h-auto"
                   src="images/variamos_1.0_requirements_specification.png"
+                  width={519}
+                  height={633}
+                  loading="lazy"
                   alt="Requirements specification in order to create a filter"
                 />
 
@@ -442,8 +460,11 @@ fd_labeling(L).`}
 
               <figure className="text-center">
                 <img
-                  className="col-12 col-lg-12 col-xl-8 col-2xl-6"
+                  className="col-12 col-lg-12 col-xl-8 col-2xl-6 h-auto"
                   src="images/variamos_1.0_analysis_functions.png"
+                  width={520}
+                  height={634}
+                  loading="lazy"
                   alt="Some analysis functions implemented in VariaMos"
                 />
 

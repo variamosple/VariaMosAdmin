@@ -3,23 +3,12 @@ FROM node:24-alpine AS build
 # Set the working directory in the container
 WORKDIR /app
 
-# update packages
-RUN apk update
+# Dependencies first: a change of the source code reuses this layer (T-30)
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# # create root application folder
-# WORKDIR /variamos
-
-# copy configs to /variamos folder
-COPY package*.json ./
-COPY tsconfig.json ./
-
-# copy source code to /variamos/src folder
-COPY ./ . 
-COPY .env ./ 
-
-# install dependencies
-RUN npm install
-# compile
+# Source code, with the .env file written by the deployment workflow
+COPY ./ .
 RUN npm run build
 
 

@@ -3,8 +3,9 @@ import {
   NotAuthorized,
   ProtectedRoute,
 } from "@variamosple/variamos-components";
+import { type ComponentType, lazy, Suspense } from "react";
+import { Spinner } from "react-bootstrap";
 import { Navigate, Outlet, type RouteObject } from "react-router-dom";
-import { JournalPage } from "@/features/activity-journal";
 import {
   ForgotPasswordPage,
   LoginPage,
@@ -13,22 +14,87 @@ import {
   ResetPasswordPage,
   SignUpPage,
 } from "@/features/auth";
-import { BugListPage } from "@/features/bug-tracker";
-import { ConfigurationListPage } from "@/features/global-configuration";
-import { HomePage } from "@/features/home";
-import { LanguageListPage } from "@/features/language-management";
-import { MetricsPage } from "@/features/metrics-dashboard";
-import { MicroServiceListPage } from "@/features/microservices";
-import { ModelListPage } from "@/features/model-management";
-import { NotificationsAdminPage } from "@/features/notifications-admin";
-import { PermissionListPage } from "@/features/permission-management";
-import { ProjectListPage } from "@/features/project-management";
-import { RoleDetailsPage, RoleListPage } from "@/features/role-management";
-import { UserDetailsPage, UserListPage } from "@/features/user-management";
 import { SecurityWrapper } from "@/shared/components/SecurityWrapper";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { MainLayout } from "@/shared/layouts/MainLayout";
 import { SignInLayout } from "@/shared/layouts/SignInLayout";
+
+// Each page behind the sign-in loads on its first visit, in its own file, so
+// the sign-in page does not download them all (T-30). The sign-in pages stay
+// in the first file: the application already imports their feature.
+const lazyPage = <M,>(
+  load: () => Promise<M>,
+  pick: (module: M) => ComponentType,
+) => lazy(() => load().then((module) => ({ default: pick(module) })));
+
+const JournalPage = lazyPage(
+  () => import("@/features/activity-journal"),
+  (m) => m.JournalPage,
+);
+const BugListPage = lazyPage(
+  () => import("@/features/bug-tracker"),
+  (m) => m.BugListPage,
+);
+const ConfigurationListPage = lazyPage(
+  () => import("@/features/global-configuration"),
+  (m) => m.ConfigurationListPage,
+);
+const HomePage = lazyPage(
+  () => import("@/features/home"),
+  (m) => m.HomePage,
+);
+const LanguageListPage = lazyPage(
+  () => import("@/features/language-management"),
+  (m) => m.LanguageListPage,
+);
+const MetricsPage = lazyPage(
+  () => import("@/features/metrics-dashboard"),
+  (m) => m.MetricsPage,
+);
+const MicroServiceListPage = lazyPage(
+  () => import("@/features/microservices"),
+  (m) => m.MicroServiceListPage,
+);
+const ModelListPage = lazyPage(
+  () => import("@/features/model-management"),
+  (m) => m.ModelListPage,
+);
+const NotificationsAdminPage = lazyPage(
+  () => import("@/features/notifications-admin"),
+  (m) => m.NotificationsAdminPage,
+);
+const PermissionListPage = lazyPage(
+  () => import("@/features/permission-management"),
+  (m) => m.PermissionListPage,
+);
+const ProjectListPage = lazyPage(
+  () => import("@/features/project-management"),
+  (m) => m.ProjectListPage,
+);
+const RoleListPage = lazyPage(
+  () => import("@/features/role-management"),
+  (m) => m.RoleListPage,
+);
+const RoleDetailsPage = lazyPage(
+  () => import("@/features/role-management"),
+  (m) => m.RoleDetailsPage,
+);
+const UserListPage = lazyPage(
+  () => import("@/features/user-management"),
+  (m) => m.UserListPage,
+);
+const UserDetailsPage = lazyPage(
+  () => import("@/features/user-management"),
+  (m) => m.UserDetailsPage,
+);
+
+const PageLoading = () => (
+  <div className="d-flex justify-content-center py-5">
+    <Spinner animation="border" variant="primary" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </Spinner>
+  </div>
+);
 
 const NOT_AUTHORIZED_PATH = "/403";
 
@@ -40,7 +106,9 @@ export const ROUTES: RouteObject[] = [
         <AuthWrapper redirectPath={AppConfig.LOGIN_URL}>
           <MainLayout>
             <MfaInvitationBanner />
-            <Outlet />
+            <Suspense fallback={<PageLoading />}>
+              <Outlet />
+            </Suspense>
           </MainLayout>
         </AuthWrapper>
       </SecurityWrapper>

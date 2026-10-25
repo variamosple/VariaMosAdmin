@@ -6,6 +6,9 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import "./shared/types/global.d.ts";
 import reportWebVitals from "./reportWebVitals";
+import { reloadOnStaleFiles } from "./shared/infrastructure/StaleFilesReload";
+
+reloadOnStaleFiles();
 
 const App = lazy(() => import("./app/App"));
 
