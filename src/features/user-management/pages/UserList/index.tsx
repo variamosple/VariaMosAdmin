@@ -9,6 +9,8 @@ import { useUserList } from "../../hooks/useUserList";
 
 const UserListPageComponent: FC = () => {
   const {
+    restoredFilter,
+    restoreKey,
     showResetLink,
     setShowResetLink,
     showEnable,
@@ -42,6 +44,9 @@ const UserListPageComponent: FC = () => {
       <hr />
 
       <SearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultSearch={restoredFilter?.search}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}

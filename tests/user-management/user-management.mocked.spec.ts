@@ -63,6 +63,34 @@ test.describe("User Management - Mocked Flows", () => {
     await expect(page.locator("td", { hasText: "jane_smith" })).not.toBeVisible();
   });
 
+  test("keeps the search in the address, through a reload and Back (UX-26)", async ({ page }) => {
+    await page.route("**/v1/users?*search=john*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: [mockUsers[0]], totalCount: 1 })
+      });
+    });
+
+    await page.locator('input[id="search"]').fill("john");
+    await expect(page).toHaveURL(/#\/users\?search=john$/);
+    await expect(page.locator("td", { hasText: "jane_smith" })).not.toBeVisible();
+
+    await page.reload();
+    await expect(page.locator('input[id="search"]')).toHaveValue("john");
+    await expect(page.locator("td", { hasText: "john_doe" })).toBeVisible();
+    await expect(page.locator("td", { hasText: "jane_smith" })).not.toBeVisible();
+
+    // A user's page, then Back: the list comes back with its search
+    await page.route("**/v1/users/u1", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: mockUsers[0] }) });
+    });
+    await page.goto("http://localhost:3000/#/users/u1");
+    await page.goBack();
+    await expect(page).toHaveURL(/#\/users\?search=john$/);
+    await expect(page.locator('input[id="search"]')).toHaveValue("john");
+  });
+
   test("should inspect user details, layout fields, and toggle active/disabled states", async ({ page }) => {
     await page.route("**/v1/users/u1", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: mockUsers[0] }) });

@@ -39,6 +39,8 @@ const BugListPageComponent: FC = () => {
     isLoading,
     isSubmitting,
     isSyncing,
+    filter,
+    restoreKey,
     setFilter,
     handleCreateBug,
     refreshBugs,
@@ -221,6 +223,9 @@ const BugListPageComponent: FC = () => {
       )}
 
       <BugSearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultFilter={filter}
         onSubmit={(search?: BugFilter) => setFilter(search || {})}
         onSearchReset={() => setFilter({})}
         isLoading={isLoading}

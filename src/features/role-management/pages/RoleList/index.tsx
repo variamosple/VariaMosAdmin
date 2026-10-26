@@ -9,6 +9,8 @@ import { useRoleList } from "../../hooks/useRoleList";
 
 const RoleListPageComponent: FC = () => {
   const {
+    restoredFilter,
+    restoreKey,
     showCreate,
     setShowCreate,
     showEdit,
@@ -65,6 +67,9 @@ const RoleListPageComponent: FC = () => {
       />
 
       <SearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultSearch={restoredFilter?.name}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}

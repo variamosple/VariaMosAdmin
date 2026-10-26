@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createPermission,
   deletePermission,
@@ -8,7 +8,16 @@ import {
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
 import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const permissionsFromParams = (params: URLSearchParams) =>
+  new PermissionsFilter(readParam(params, "name"), readPage(params));
 
 export const usePermissionList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -25,6 +34,7 @@ export const usePermissionList = () => {
     data: permissions,
     currentPage,
     loadData,
+    filter,
     isLoading,
     totalPages,
     onPageChange,
@@ -34,9 +44,10 @@ export const usePermissionList = () => {
     initialFilter: new PermissionsFilter(),
   });
 
-  useEffect(() => {
-    void loadData(new PermissionsFilter());
-  }, [loadData]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    permissionsFromParams,
+  );
 
   const onPermissionCreate = (permission: Permission) => {
     setIsCreating(true);
@@ -140,6 +151,8 @@ export const usePermissionList = () => {
   };
 
   return {
+    restoredFilter,
+    restoreKey,
     listState,
     showCreate,
     setShowCreate,

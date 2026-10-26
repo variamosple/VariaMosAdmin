@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type React from "react";
+import { MemoryRouter } from "react-router-dom";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { ModelListPage } from "./index";
 
@@ -111,7 +112,11 @@ describe("ModelListPage Integration", () => {
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
+    return render(
+      <MemoryRouter>
+        <ToastProvider>{ui}</ToastProvider>
+      </MemoryRouter>,
+    );
   };
 
   it("renders page components correctly", async () => {

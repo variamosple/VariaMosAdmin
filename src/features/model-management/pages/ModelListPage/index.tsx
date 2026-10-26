@@ -10,6 +10,8 @@ import { useModelList } from "../../hooks/useModelList";
 
 const ModelListPageComponent: FC = () => {
   const {
+    restoredFilter,
+    restoreKey,
     models,
     totalPages,
     currentPage,
@@ -77,6 +79,9 @@ const ModelListPageComponent: FC = () => {
       />
 
       <ModelSearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultFilter={restoredFilter ?? undefined}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}

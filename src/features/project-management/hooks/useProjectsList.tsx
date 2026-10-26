@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createProject,
   deleteProject,
@@ -8,7 +8,23 @@ import {
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  readBooleanParam,
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
 import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const projectsFromParams = (params: URLSearchParams) =>
+  new ProjectsFilter(
+    readParam(params, "name"),
+    readBooleanParam(params, "isTemplate"),
+    readBooleanParam(params, "isDeleted"),
+    readBooleanParam(params, "includeDeleted"),
+    readPage(params),
+  );
 
 export const useProjectList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -25,6 +41,7 @@ export const useProjectList = () => {
     data: projects,
     currentPage,
     loadData,
+    filter,
     isLoading,
     totalPages,
     onPageChange,
@@ -34,9 +51,10 @@ export const useProjectList = () => {
     initialFilter: new ProjectsFilter(),
   });
 
-  useEffect(() => {
-    void loadData(new ProjectsFilter());
-  }, [loadData]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    projectsFromParams,
+  );
 
   const onProjectEdit = (project: Project) => {
     setToEditProject(project);
@@ -146,6 +164,8 @@ export const useProjectList = () => {
   };
 
   return {
+    restoredFilter,
+    restoreKey,
     listState,
     showEdit,
     setShowEdit,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createRole,
   deleteRole,
@@ -8,7 +8,16 @@ import {
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
 import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const rolesFromParams = (params: URLSearchParams) =>
+  new RolesFilter(readParam(params, "name"), readPage(params));
 
 export const useRoleList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -26,6 +35,7 @@ export const useRoleList = () => {
     data: roles,
     currentPage,
     loadData,
+    filter,
     totalPages,
     isLoading,
     onPageChange,
@@ -35,9 +45,10 @@ export const useRoleList = () => {
     initialFilter: new RolesFilter(),
   });
 
-  useEffect(() => {
-    void loadData(new RolesFilter());
-  }, [loadData]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    rolesFromParams,
+  );
 
   const onRoleCreate = (role: Role) => {
     setIsCreating(true);
@@ -148,6 +159,8 @@ export const useRoleList = () => {
   };
 
   return {
+    restoredFilter,
+    restoreKey,
     listState,
     showCreate,
     setShowCreate,

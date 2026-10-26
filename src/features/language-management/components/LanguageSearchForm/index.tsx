@@ -10,11 +10,14 @@ export interface LanguageSearchFormProps {
   onSubmit: (search?: LanguagesFilter) => void;
   isLoading: boolean;
   onSearchReset: () => void;
+  // The search restored from the address (UX-26)
+  defaultFilter?: LanguagesFilter;
 }
 export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
   onSubmit,
   isLoading,
   onSearchReset,
+  defaultFilter,
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
@@ -23,7 +26,12 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
     reset,
     formState: { errors, isDirty },
     watch,
-  } = useForm<LanguagesFilter>();
+  } = useForm<LanguagesFilter>({
+    defaultValues: {
+      name: defaultFilter?.name ?? "",
+      status: defaultFilter?.status ?? "",
+    },
+  });
 
   const _values = watch();
 

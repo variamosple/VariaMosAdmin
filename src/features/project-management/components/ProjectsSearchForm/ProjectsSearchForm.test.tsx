@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { ProjectSearchForm } from "./index";
 
 // Mock the variamos-components library which is imported by ProjectsFilter
@@ -126,4 +127,26 @@ describe("ProjectSearchForm Component", () => {
     expect(mockOnSearchReset).toHaveBeenCalledTimes(1);
     expect(nameInput.value).toBe("");
   });
+
+  it.each([
+    [new ProjectsFilter("demo", true, true, true), "true", "true"],
+    [new ProjectsFilter(undefined, false, undefined, true), "false", "all"],
+    [new ProjectsFilter(), "all", "false"],
+  ])(
+    "starts from the search of the address (UX-26)",
+    (filter, access, status) => {
+      render(
+        <ProjectSearchForm
+          onSubmit={mockOnSubmit}
+          isLoading={false}
+          onSearchReset={mockOnSearchReset}
+          defaultFilter={filter}
+        />,
+      );
+
+      expect(screen.getByLabelText("Access level")).toHaveValue(access);
+      expect(screen.getByLabelText("Status")).toHaveValue(status);
+      expect(mockOnSubmit).not.toHaveBeenCalled();
+    },
+  );
 });

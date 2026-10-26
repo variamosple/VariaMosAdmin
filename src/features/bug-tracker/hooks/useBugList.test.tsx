@@ -1,5 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
+import type { ReactNode } from "react";
+import { MemoryRouter } from "react-router-dom";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
@@ -136,7 +138,9 @@ describe("useBugList Hook", () => {
   });
 
   it("should initialize with default states and fetch repos, categories, and bugs on mount", async () => {
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -171,7 +175,9 @@ describe("useBugList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -206,7 +212,9 @@ describe("useBugList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -228,7 +236,9 @@ describe("useBugList Hook", () => {
   });
 
   it("should filter bugs when setFilter is called", async () => {
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -267,7 +277,9 @@ describe("useBugList Hook", () => {
 
     it("asks for the page chosen and counts the pages", async () => {
       serveGithubBugs(45);
-      const { result } = renderHook(() => useBugList());
+      const { result } = renderHook(() => useBugList(), {
+        wrapper: MemoryRouter,
+      });
       await waitFor(() => expect(result.current.totalPages).toBe(3));
 
       await act(async () => result.current.onPageChange(3));
@@ -278,7 +290,9 @@ describe("useBugList Hook", () => {
 
     it("starts again from the first page with another filter or tab", async () => {
       serveGithubBugs(45);
-      const { result } = renderHook(() => useBugList());
+      const { result } = renderHook(() => useBugList(), {
+        wrapper: MemoryRouter,
+      });
       await waitFor(() => expect(result.current.totalPages).toBe(3));
 
       await act(async () => result.current.onPageChange(2));
@@ -299,7 +313,9 @@ describe("useBugList Hook", () => {
 
     it("goes back to the last page when its bugs are gone", async () => {
       serveGithubBugs(45);
-      const { result } = renderHook(() => useBugList());
+      const { result } = renderHook(() => useBugList(), {
+        wrapper: MemoryRouter,
+      });
       await waitFor(() => expect(result.current.totalPages).toBe(3));
       await act(async () => result.current.onPageChange(3));
       await waitFor(() => expect(lastPageAsked()).toBe("3"));
@@ -314,7 +330,9 @@ describe("useBugList Hook", () => {
 
     it("shows one page when the server sends no count", async () => {
       serveGithubBugs();
-      const { result } = renderHook(() => useBugList());
+      const { result } = renderHook(() => useBugList(), {
+        wrapper: MemoryRouter,
+      });
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -324,7 +342,9 @@ describe("useBugList Hook", () => {
   });
 
   it("should call createBug and refresh lists upon success", async () => {
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -349,7 +369,9 @@ describe("useBugList Hook", () => {
   });
 
   it("should call rejectLocalBug and refresh lists", async () => {
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -366,7 +388,9 @@ describe("useBugList Hook", () => {
   });
 
   it("should call restoreLocalBug and refresh lists", async () => {
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -383,7 +407,9 @@ describe("useBugList Hook", () => {
   });
 
   it("should call updateBugStatus during handleApprove and refresh lists", async () => {
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -404,7 +430,9 @@ describe("useBugList Hook", () => {
   });
 
   it("should call syncBugs and refresh bugs", async () => {
-    const { result } = renderHook(() => useBugList());
+    const { result } = renderHook(() => useBugList(), {
+      wrapper: MemoryRouter,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -418,5 +446,87 @@ describe("useBugList Hook", () => {
 
     expect(syncBugsCalled).toBe(1);
     expect(queryBugsParams).toHaveLength(1);
+  });
+
+  describe("address of the list (UX-26)", () => {
+    const at =
+      (entry: string) =>
+      ({ children }: { children: ReactNode }) => (
+        <MemoryRouter initialEntries={[entry]}>{children}</MemoryRouter>
+      );
+
+    // Enough bugs for page 3: no move back to the last page
+    const answerManyBugs = () =>
+      server.use(
+        http.get(apiTarget("/bugs"), ({ request }) => {
+          queryBugsParams.push(
+            Object.fromEntries(new URL(request.url).searchParams.entries()),
+          );
+          return HttpResponse.json({ data: mockBugsList, totalCount: 60 });
+        }),
+        http.get(apiTarget("/bugs/local"), ({ request }) => {
+          queryLocalBugsParams.push(
+            Object.fromEntries(new URL(request.url).searchParams.entries()),
+          );
+          return HttpResponse.json({ data: mockBugsList, totalCount: 60 });
+        }),
+      );
+
+    it("loads the bugs once when the page opens", async () => {
+      renderHook(() => useBugList(), { wrapper: MemoryRouter });
+
+      await waitFor(() => expect(queryBugsParams).toHaveLength(1));
+      // A second load would come after the first one
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(queryBugsParams).toHaveLength(1);
+    });
+
+    it("opens the tab, the filters and the page written in the address", async () => {
+      answerManyBugs();
+      const { result } = renderHook(() => useBugList(), {
+        wrapper: at("/bugs?tab=local&search=crash&priority=high&page=2"),
+      });
+
+      await waitFor(() => expect(queryLocalBugsParams).toHaveLength(1));
+      expect(queryLocalBugsParams[0]).toMatchObject({
+        search: "crash",
+        priority: "high",
+        pageNumber: "2",
+        status: "pending",
+      });
+      expect(queryBugsParams).toHaveLength(0);
+      expect(result.current.activeTab).toBe("local");
+      expect(result.current.currentPage).toBe(2);
+      expect(result.current.filter).toEqual({
+        search: "crash",
+        priority: "high",
+      });
+    });
+
+    it("ignores an unknown tab", async () => {
+      const { result } = renderHook(() => useBugList(), {
+        wrapper: at("/bugs?tab=secret"),
+      });
+
+      await waitFor(() => expect(queryBugsParams).toHaveLength(1));
+      expect(result.current.activeTab).toBe("github");
+    });
+
+    it("keeps the filters across tabs and starts the new tab on page 1", async () => {
+      answerManyBugs();
+      const { result } = renderHook(() => useBugList(), {
+        wrapper: at("/bugs?search=crash&page=3"),
+      });
+      await waitFor(() => expect(queryBugsParams).toHaveLength(1));
+
+      act(() => result.current.setActiveTab("trash"));
+
+      await waitFor(() => expect(queryLocalBugsParams).toHaveLength(1));
+      expect(queryLocalBugsParams[0]).toMatchObject({
+        search: "crash",
+        pageNumber: "1",
+        status: "rejected",
+      });
+    });
   });
 });

@@ -3,6 +3,7 @@ import {
   type ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
+import { MemoryRouter } from "react-router-dom";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import * as ProjectRepository from "../api/ProjectRepository";
 import { useProjectList } from "./useProjectsList";
@@ -78,7 +79,9 @@ describe("useProjectList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useProjectList());
+    const { result } = renderHook(() => useProjectList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.projects).toEqual([
       { id: 1, name: "Project One", template: false },
@@ -88,7 +91,9 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle performEditProject successfully", async () => {
-    const { result } = renderHook(() => useProjectList());
+    const { result } = renderHook(() => useProjectList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditProject({
@@ -108,7 +113,9 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle performDeleteProject successfully", async () => {
-    const { result } = renderHook(() => useProjectList());
+    const { result } = renderHook(() => useProjectList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteProject({
@@ -128,7 +135,9 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle performEditProject failure", async () => {
-    const { result } = renderHook(() => useProjectList());
+    const { result } = renderHook(() => useProjectList(), {
+      wrapper: MemoryRouter,
+    });
     updateProjectSpy.mockResolvedValueOnce({
       errorCode: 500,
       message: "Edit failed",
@@ -156,7 +165,7 @@ describe("useProjectList Hook", () => {
       errorCode: 500,
       message: "Query failed",
     });
-    renderHook(() => useProjectList());
+    renderHook(() => useProjectList(), { wrapper: MemoryRouter });
 
     await waitFor(() => {
       expect(mockLoadData).toHaveBeenCalled();

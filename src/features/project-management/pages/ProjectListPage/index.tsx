@@ -10,6 +10,8 @@ import { useProjectList } from "../../hooks/useProjectsList";
 
 const ProjectListPageComponent: FC = () => {
   const {
+    restoredFilter,
+    restoreKey,
     projects,
     totalPages,
     currentPage,
@@ -69,6 +71,9 @@ const ProjectListPageComponent: FC = () => {
       />
 
       <ProjectSearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultFilter={restoredFilter ?? undefined}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}

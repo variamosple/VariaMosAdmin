@@ -9,7 +9,18 @@ export interface ProjectSearchFormProps {
   onSubmit: (search?: ProjectsFilter) => void;
   isLoading: boolean;
   onSearchReset: () => void;
+  // The search restored from the address (UX-26)
+  defaultFilter?: ProjectsFilter;
 }
+// A yes, no or any choice of the form, from a filter value
+const choiceOf = (value?: boolean) =>
+  value === undefined ? "all" : String(value);
+
+// The "deleted" choice: only deleted, deleted or not, or not deleted
+const deletedChoiceOf = (isDeleted?: boolean, includeDeleted?: boolean) => {
+  if (isDeleted === true) return "true";
+  return includeDeleted ? "all" : "false";
+};
 
 interface ProjectSearchFormFields {
   name?: string;
@@ -21,6 +32,7 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
   onSubmit,
   isLoading,
   onSearchReset,
+  defaultFilter,
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
@@ -31,9 +43,12 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
     watch,
   } = useForm<ProjectSearchFormFields>({
     defaultValues: {
-      name: "",
-      isTemplate: "all",
-      isDeleted: "false",
+      name: defaultFilter?.name ?? "",
+      isTemplate: choiceOf(defaultFilter?.isTemplate),
+      isDeleted: deletedChoiceOf(
+        defaultFilter?.isDeleted,
+        defaultFilter?.includeDeleted,
+      ),
     },
   });
 

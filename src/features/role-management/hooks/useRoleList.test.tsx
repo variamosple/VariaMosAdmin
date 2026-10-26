@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router-dom";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
@@ -102,7 +103,9 @@ describe("useRoleList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.roles).toEqual([{ id: 1, name: "Admin" }]);
     expect(result.current.currentPage).toBe(1);
@@ -114,7 +117,7 @@ describe("useRoleList Hook", () => {
       errorCode: 500,
       message: "Query failed",
     });
-    renderHook(() => useRoleList());
+    renderHook(() => useRoleList(), { wrapper: MemoryRouter });
 
     await waitFor(() => {
       expect(mockLoadData).toHaveBeenCalled();
@@ -123,7 +126,9 @@ describe("useRoleList Hook", () => {
   });
 
   it("should handle role creation successfully", async () => {
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.onRoleCreate({ name: "New Role" });
@@ -143,7 +148,9 @@ describe("useRoleList Hook", () => {
 
   it("should handle performEditRole successfully", async () => {
     mockPushToast.mockReturnValue("toast-123");
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditRole({ id: 1, name: "Admin Edit" });
@@ -156,7 +163,9 @@ describe("useRoleList Hook", () => {
   });
 
   it("should handle performDeleteRole successfully", async () => {
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteRole({ id: 1, name: "Admin" });
@@ -178,7 +187,9 @@ describe("useRoleList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditRole({ id: 1, name: "Admin Edit" });

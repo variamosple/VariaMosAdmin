@@ -3,6 +3,7 @@ import {
   type ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
+import { MemoryRouter } from "react-router-dom";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
 import * as ModelRepository from "../api/ModelRepository";
 import { useModelList } from "./useModelList";
@@ -78,7 +79,9 @@ describe("useModelList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useModelList());
+    const { result } = renderHook(() => useModelList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.models).toEqual([
       { id: "1", projectId: "p1", name: "Model One" },
@@ -88,7 +91,9 @@ describe("useModelList Hook", () => {
   });
 
   it("should handle performEditModel successfully", async () => {
-    const { result } = renderHook(() => useModelList());
+    const { result } = renderHook(() => useModelList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditModel({
@@ -110,7 +115,9 @@ describe("useModelList Hook", () => {
   });
 
   it("should handle performDeleteModel successfully", async () => {
-    const { result } = renderHook(() => useModelList());
+    const { result } = renderHook(() => useModelList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteModel({
@@ -131,7 +138,9 @@ describe("useModelList Hook", () => {
   });
 
   it("should handle performEditModel failure", async () => {
-    const { result } = renderHook(() => useModelList());
+    const { result } = renderHook(() => useModelList(), {
+      wrapper: MemoryRouter,
+    });
     updateModelSpy.mockResolvedValueOnce({
       errorCode: 500,
       message: "Edit failed",
@@ -160,7 +169,7 @@ describe("useModelList Hook", () => {
       errorCode: 500,
       message: "Query failed",
     });
-    renderHook(() => useModelList());
+    renderHook(() => useModelList(), { wrapper: MemoryRouter });
 
     await waitFor(() => {
       expect(mockLoadData).toHaveBeenCalled();
