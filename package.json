@@ -16,7 +16,7 @@
     "stryker": "stryker run",
     "prepare": "husky",
     "check-arch": "dependency-cruiser --config .dependency-cruiser.js src/",
-    "lint": "biome check src/",
+    "lint": "biome check --error-on-warnings src/",
     "lint:errors": "biome check --diagnostic-level=error src/",
     "lint:fix": "biome check --write --unsafe src/",
     "typecheck": "tsc --noEmit",
