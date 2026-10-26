@@ -198,7 +198,7 @@ const LanguageDetails: FC<LanguageDetailsProps> = ({
 
         <Col xs={6}>
           {(language.owners || [])
-            .map((owner) => `${owner.name} (${owner.email})`)
+            .map((owner) => `${owner.name} (${owner.email || "no email"})`)
             .join(", ") || "No owners registered"}
         </Col>
 

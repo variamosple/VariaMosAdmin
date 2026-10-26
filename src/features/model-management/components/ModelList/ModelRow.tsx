@@ -281,7 +281,10 @@ const ModelDetails: FC<ModelDetailsProps> = ({ model, onContactClick }) => {
 
         <Col xs={6}>
           {(model.owners || [])
-            .map((owner) => `${owner.name || "N/A"} (${owner.email})`)
+            .map(
+              (owner) =>
+                `${owner.name || "N/A"} (${owner.email || "no email"})`,
+            )
             .join(", ") || "No owners registered"}
         </Col>
 

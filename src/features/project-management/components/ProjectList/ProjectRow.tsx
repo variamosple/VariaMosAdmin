@@ -155,7 +155,10 @@ const ProjectDetails: FC<ProjectDetailsProps> = ({
         </Col>
         <Col xs={6}>
           {(project.owners || [])
-            .map((owner) => `${owner.name || "N/A"} (${owner.email})`)
+            .map(
+              (owner) =>
+                `${owner.name || "N/A"} (${owner.email || "no email"})`,
+            )
             .join(", ") || "No owners registered"}
         </Col>
         <Col xs={4} className="text-end">
