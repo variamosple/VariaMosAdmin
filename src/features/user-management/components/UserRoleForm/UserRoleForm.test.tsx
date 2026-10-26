@@ -117,6 +117,8 @@ describe("UserRoleForm Component", () => {
     );
 
     const select = await screen.findByTestId("infinite-select");
+    // The roles load after the first render: wait for them before choosing one
+    await screen.findByRole("option", { name: "Admin" });
     const user = userEvent.setup();
     await user.selectOptions(select, "1");
 
