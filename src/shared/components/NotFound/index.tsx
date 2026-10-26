@@ -1,12 +1,14 @@
 import type { FC } from "react";
 import { Container } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 
 /**
  * Shown for an address that matches no page, instead of a silent jump to
  * the home page (UX-25). A missing right has its own page, /403.
  */
 export const NotFound: FC = () => {
+  usePageTitle("Page not found");
   const { pathname } = useLocation();
 
   return (

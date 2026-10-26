@@ -14,8 +14,8 @@ import type { RoleDetails } from "@/features/role-management/domain/Entity/Role"
 import { queryUserRolesDetails } from "@/features/user-management/api/UserRoleRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import { UserRoleFilter } from "@/features/user-management/domain/Entity/UserRoleFilter";
+import { DateTime } from "@/shared/components/DateTime";
 import { IconButton } from "@/shared/components/IconButton";
-import { formatDateTime } from "@/shared/constants";
 
 export interface UserRowProps {
   user: User;
@@ -71,10 +71,12 @@ export const UserRowComponent: FC<UserRowProps> = ({
           {user.isDeleted ? "deleted" : user.isEnabled ? "active" : "disabled"}
         </td>
 
-        <td>{formatDateTime(new Date(user.createdAt))}</td>
+        <td>
+          <DateTime value={user.createdAt} />
+        </td>
 
         <td>
-          {user.lastLogin ? formatDateTime(new Date(user.lastLogin)) : "N/A"}
+          <DateTime value={user.lastLogin} />
         </td>
 
         <td className="text-center">

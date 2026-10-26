@@ -3,11 +3,13 @@ import type { FC } from "react";
 import { Container } from "react-bootstrap";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { SearchForm } from "@/shared/components/SearchForm";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { UserList } from "../../components/UserList";
 import { RecoveryLinkModal } from "../../components/UserList/RecoveryLinkModal";
 import { useUserList } from "../../hooks/useUserList";
 
 const UserListPageComponent: FC = () => {
+  usePageTitle("Users");
   const {
     restoredFilter,
     restoreKey,

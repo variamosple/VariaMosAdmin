@@ -11,6 +11,7 @@ import {
   Tabs,
 } from "react-bootstrap";
 import { Check, PencilSquare, PlusLg } from "react-bootstrap-icons";
+import { DateTime } from "@/shared/components/DateTime";
 import {
   getMicroServiceAuditLogs,
   getMicroServiceConfigurations,
@@ -164,13 +165,13 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                 onClick={() => setShowAddForm(!showAddForm)}
               >
                 <PlusLg size={14} className="me-1" />
-                {showAddForm ? "Cancel" : "Add Parameter"}
+                {showAddForm ? "Cancel" : "Add parameter"}
               </Button>
             </div>
 
             {showAddForm && (
               <div className="bg-light p-3 rounded mb-3 border">
-                <h6 className="fw-bold mb-2">Add New Configuration Key</h6>
+                <h6 className="fw-bold mb-2">Add new configuration key</h6>
                 <div className="row g-2">
                   <div className="col-md-5">
                     <Form.Control
@@ -209,7 +210,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
             ) : configs.length === 0 ? (
               <div className="text-muted text-center my-4">
                 No custom configuration parameters found for this service. Click{" "}
-                <strong>Add Parameter</strong> above to configure environment
+                <strong>Add parameter</strong> above to configure environment
                 overrides.
               </div>
             ) : (
@@ -322,7 +323,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                   {auditLogs.map((log, idx) => (
                     <tr key={log.id || idx}>
                       <td className="small text-muted">
-                        {new Date(log.createdAt).toLocaleString()}
+                        <DateTime value={log.createdAt} />
                       </td>
                       <td>
                         <Badge

@@ -4,6 +4,7 @@ import { Alert, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import { loginMessageOf } from "@/shared/api/errorMessages";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { pageLoader } from "@/shared/infrastructure/PageLoader";
 import { registerRedirect } from "../../api/AuthRepository";
@@ -14,6 +15,7 @@ import { MfaCodeForm } from "../../components/MfaCodeForm";
 import { safeRedirectOf } from "../../domain/Redirect";
 
 export const LoginPage: FC = () => {
+  usePageTitle("Sign in");
   const { queryParams, navigate } = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isMfaStep, setIsMfaStep] = useState(false);

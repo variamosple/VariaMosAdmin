@@ -111,7 +111,7 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
       expect(screen.getByText("MAX_CONNECTIONS")).toBeInTheDocument();
     });
 
-    const addBtn = screen.getByRole("button", { name: /Add Parameter/i });
+    const addBtn = screen.getByRole("button", { name: /Add parameter/i });
     await user.click(addBtn);
 
     const keyInput = screen.getByPlaceholderText(/KEY_NAME/i);

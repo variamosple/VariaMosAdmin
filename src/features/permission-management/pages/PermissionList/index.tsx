@@ -5,9 +5,11 @@ import { PermissionFormModal } from "@/features/permission-management/components
 import { PermissionList } from "@/features/permission-management/components/PermissionList";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { SearchForm } from "@/shared/components/SearchForm";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { usePermissionList } from "../../hooks/usePermissionList";
 
 const PermissionListPageComponent: FC = () => {
+  usePageTitle("Permissions");
   const {
     restoredFilter,
     restoreKey,
@@ -43,13 +45,13 @@ const PermissionListPageComponent: FC = () => {
         <h1 className="mb-0">Permissions list</h1>
 
         <div>
-          <Button onClick={() => setShowCreate(true)}>Create Permission</Button>
+          <Button onClick={() => setShowCreate(true)}>Create permission</Button>
         </div>
       </div>
       <hr />
 
       <PermissionFormModal
-        modalTitle="Create a Permission"
+        modalTitle="New permission"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onPermissionSubmit={onPermissionCreate}

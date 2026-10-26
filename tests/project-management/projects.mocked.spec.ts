@@ -80,7 +80,8 @@ test.describe("Project Management - Mocked Flows", () => {
 
     const row2 = page.locator("tr", { hasText: "Spanish Mobile Project" });
     await expect(row2).toContainText("Private");
-    await expect(row2.locator("td").nth(4)).toBeEmpty();
+    // A missing date reads N/A, as in the other tables (UX-31)
+    await expect(row2.locator("td").nth(4)).toHaveText("N/A");
 
     await row1.locator('button[title="Show/Hide project details"]').click();
     await page.getByRole("button", { name: "Product Line: Core PL - Type: software - Domain: education" }).click();

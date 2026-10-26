@@ -4,10 +4,12 @@ import { Button, Container } from "react-bootstrap";
 import { RoleFormModal } from "@/features/role-management/components/RoleFormModal";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { SearchForm } from "@/shared/components/SearchForm";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { RoleList } from "../../components/RoleList";
 import { useRoleList } from "../../hooks/useRoleList";
 
 const RoleListPageComponent: FC = () => {
+  usePageTitle("Roles");
   const {
     restoredFilter,
     restoreKey,
@@ -43,13 +45,13 @@ const RoleListPageComponent: FC = () => {
         <h1 className="mb-0">Roles list</h1>
 
         <div>
-          <Button onClick={() => setShowCreate(true)}>Create Role</Button>
+          <Button onClick={() => setShowCreate(true)}>Create role</Button>
         </div>
       </div>
       <hr />
 
       <RoleFormModal
-        modalTitle="Create a Role"
+        modalTitle="New role"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onRoleSubmit={onRoleCreate}

@@ -32,7 +32,7 @@ describe("BugListPage Component", () => {
     expect(screen.getAllByText("Bug Two")).not.toHaveLength(0);
     expect(screen.getByText("Sync GitHub")).toBeInTheDocument();
     expect(screen.getByText("Report a Bug")).toBeInTheDocument();
-    expect(screen.getByText("Create GitHub Issue")).toBeInTheDocument();
+    expect(screen.getByText("Create GitHub issue")).toBeInTheDocument();
   });
 
   it("shows loader spinner initially", async () => {
@@ -514,7 +514,7 @@ describe("BugListPage Component", () => {
     post.mockRestore();
   });
 
-  it("opens Admin Report Modal when clicking Create GitHub Issue and submits it", async () => {
+  it("opens Admin Report Modal when clicking Create GitHub issue and submits it", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>

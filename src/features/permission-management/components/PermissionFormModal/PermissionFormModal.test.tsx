@@ -28,7 +28,7 @@ describe("PermissionFormModal Component", () => {
   const mockOnClose = vi.fn();
 
   const defaultProps = {
-    modalTitle: "Create Permission",
+    modalTitle: "Create permission",
     showModal: true,
     onClose: mockOnClose,
     onPermissionSubmit: mockOnPermissionSubmit,
@@ -43,7 +43,7 @@ describe("PermissionFormModal Component", () => {
     render(<PermissionFormModal {...defaultProps} />);
 
     expect(
-      screen.getByText("Create Permission", { selector: ".modal-title" }),
+      screen.getByText("Create permission", { selector: ".modal-title" }),
     ).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Permission name")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();

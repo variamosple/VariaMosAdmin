@@ -23,7 +23,7 @@ export const PermissionFormModal: FC<PermissionFormModalProps> = ({
   defaultValue,
   onPermissionSubmit,
   isLoading,
-  submitText = "Create Permission",
+  submitText = "Create permission",
 }) => {
   const {
     register,

@@ -16,8 +16,9 @@ import {
 } from "react-bootstrap-icons";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
+import { DateTime } from "@/shared/components/DateTime";
 import { IconButton } from "@/shared/components/IconButton";
-import { formatBoolean, formatDate } from "@/shared/constants";
+import { formatBoolean } from "@/shared/constants";
 
 export interface ProjectRowProps {
   project: Project;
@@ -77,7 +78,9 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
           {project.source}
         </td>
 
-        <td>{project.date && formatDate(project.date)}</td>
+        <td>
+          <DateTime value={project.date} dateOnly />
+        </td>
 
         <td>{formatBoolean(project.template, "Public", "Private")}</td>
 

@@ -74,7 +74,7 @@ export const useUserList = () => {
 
     pushToast({
       title: "User disable",
-      message: "Disabling users...",
+      message: "Disabling user...",
     });
 
     return disableUser(user.id).then((response) => {
@@ -115,7 +115,7 @@ export const useUserList = () => {
 
     pushToast({
       title: "User enable",
-      message: "Enabling users...",
+      message: "Enabling user...",
     });
 
     return enableUser(user.id).then((response) => {

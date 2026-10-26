@@ -102,7 +102,7 @@ describe("RoleListPage", () => {
       screen.getByRole("heading", { name: "Roles list" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Create Role" }),
+      screen.getByRole("button", { name: "Create role" }),
     ).toBeInTheDocument();
 
     // Wait for the real API calls to complete via MSW
@@ -116,22 +116,26 @@ describe("RoleListPage", () => {
 
     expect(await screen.findByText("Admin")).toBeInTheDocument();
 
-    const createBtn = screen.getByRole("button", { name: "Create Role" });
+    const createBtn = screen.getByRole("button", { name: "Create role" });
     await user.click(createBtn);
 
     // Modal should be visible
-    expect(screen.getByText("Create a Role")).toBeInTheDocument();
+    expect(screen.getByText("New role")).toBeInTheDocument();
 
     // Fill form
     const input = screen.getByPlaceholderText("Role name");
     await user.type(input, "NewRole");
 
-    // Click submit
-    await user.click(screen.getByRole("button", { name: "Create role" }));
+    // Click submit, in the dialog: the page button has the same name
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Create role",
+      }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(screen.queryByText("Create a Role")).not.toBeInTheDocument();
+      expect(screen.queryByText("New role")).not.toBeInTheDocument();
     });
   });
 

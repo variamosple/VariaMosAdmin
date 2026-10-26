@@ -47,7 +47,7 @@ describe("ForgotPasswordPage Component", () => {
       screen.getByRole("heading", { name: /forgot password/i }),
     ).toBeInTheDocument();
     expect(screen.getByTestId("mock-forgot-form")).toBeInTheDocument();
-    expect(screen.getByText("Back to Sign In")).toBeInTheDocument();
+    expect(screen.getByText("Back to sign in")).toBeInTheDocument();
   });
 
   it("handles successful password reset request and shows success screen", async () => {

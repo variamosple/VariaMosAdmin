@@ -363,7 +363,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
                 >
-                  <Upload size={14} aria-hidden="true" /> Add Attachment
+                  <Upload size={14} aria-hidden="true" /> Add attachment
                 </Button>
                 <input
                   type="file"

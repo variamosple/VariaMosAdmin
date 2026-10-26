@@ -6,9 +6,11 @@ import { ModelFormModal } from "@/features/model-management/components/ModelForm
 import { ModelList } from "@/features/model-management/components/ModelList";
 import { ModelSearchForm } from "@/features/model-management/components/ModelSearchForm";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useModelList } from "../../hooks/useModelList";
 
 const ModelListPageComponent: FC = () => {
+  usePageTitle("Models");
   const {
     restoredFilter,
     restoreKey,
@@ -49,7 +51,7 @@ const ModelListPageComponent: FC = () => {
         </Col>
         <Col className="text-end">
           <Button variant="primary" onClick={() => setShowCreate(true)}>
-            <Plus className="me-1" /> Create Model
+            <Plus className="me-1" /> Create model
           </Button>
         </Col>
       </Row>
@@ -68,7 +70,7 @@ const ModelListPageComponent: FC = () => {
       />
 
       <ModelFormModal
-        modalTitle="Create a Model"
+        modalTitle="New model"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onModelSubmit={performCreateModel}

@@ -2,6 +2,7 @@ import { type FC, useEffect, useState } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ErrorCodes, isErrorCode } from "@/shared/api/errorCodes";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import {
   resetPassword,
   verifyPasswordResetToken,
@@ -9,6 +10,7 @@ import {
 import { ResetPasswordForm } from "../../components/ResetPasswordForm";
 
 export const ResetPasswordPage: FC = () => {
+  usePageTitle("Reset password");
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +120,7 @@ export const ResetPasswordPage: FC = () => {
             {message}
           </Alert>
           <Link to="/login" className="text-decoration-none">
-            Back to Sign In
+            Back to sign in
           </Link>
         </div>
       ) : (

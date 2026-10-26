@@ -234,7 +234,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
             {isSubmitting
               ? "Creating..."
               : mode === "admin"
-                ? "Create Public GitHub Issue"
+                ? "Create public GitHub issue"
                 : "Report Bug"}
           </Button>
         </Modal.Footer>

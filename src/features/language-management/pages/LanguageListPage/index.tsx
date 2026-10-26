@@ -2,12 +2,14 @@ import { withPageVisit } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Container } from "react-bootstrap";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { LanguageFormModal } from "../../components/LanguageFormModal";
 import { LanguageList } from "../../components/LanguageList";
 import { LanguageSearchForm } from "../../components/LanguageSearchForm";
 import { useLanguageList } from "../../hooks/useLanguageList";
 
 const LanguageListPageComponent: FC = () => {
+  usePageTitle("Languages");
   const {
     restoredFilter,
     restoreKey,

@@ -91,6 +91,16 @@ test.describe("User Management - Mocked Flows", () => {
     await expect(page.locator('input[id="search"]')).toHaveValue("john");
   });
 
+  test("names the browser tab after the screen and the user (UX-35)", async ({ page }) => {
+    await expect(page).toHaveTitle("Users — VariaMos");
+
+    await page.route("**/v1/users/u1", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: mockUsers[0] }) });
+    });
+    await page.goto("http://localhost:3000/#/users/u1");
+    await expect(page).toHaveTitle(`User ${mockUsers[0].name} — VariaMos`);
+  });
+
   test("should inspect user details, layout fields, and toggle active/disabled states", async ({ page }) => {
     await page.route("**/v1/users/u1", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: mockUsers[0] }) });
@@ -109,7 +119,7 @@ test.describe("User Management - Mocked Flows", () => {
     await expect(page.getByText("User Id:").locator("..")).toContainText("u1");
     await expect(page.getByText("Name:").locator("..")).toContainText("John Doe");
 
-    await page.getByRole("button", { name: "Back To User List" }).click();
+    await page.getByRole("button", { name: "Back to user list" }).click();
     await expect(page).toHaveURL(/.*\/users/);
 
     // Disable john
