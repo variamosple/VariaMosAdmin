@@ -9,6 +9,8 @@ export interface SearchFormProps {
   isLoading: boolean;
   onSearchReset: () => void;
   placeholder?: string;
+  // The search restored from the address (UX-26)
+  defaultSearch?: string;
 }
 
 interface SearchFormFields {
@@ -20,6 +22,7 @@ export const SearchForm: FC<SearchFormProps> = ({
   onSearchReset,
   isLoading,
   placeholder = "Search",
+  defaultSearch = "",
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
@@ -28,7 +31,9 @@ export const SearchForm: FC<SearchFormProps> = ({
     reset,
     formState: { errors, isDirty },
     watch,
-  } = useForm<SearchFormFields>();
+  } = useForm<SearchFormFields>({
+    defaultValues: { search: defaultSearch },
+  });
 
   const _values = watch();
 

@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import type React from "react";
+import { MemoryRouter } from "react-router-dom";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
 import { MicroServiceListPage } from "./index";
@@ -154,7 +155,11 @@ describe("MicroServiceListPage Integration", () => {
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
+    return render(
+      <MemoryRouter>
+        <ToastProvider>{ui}</ToastProvider>
+      </MemoryRouter>,
+    );
   };
 
   it("renders page header and list of microservices correctly", async () => {

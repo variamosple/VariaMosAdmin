@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router-dom";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
@@ -68,7 +69,9 @@ describe("usePermissionList Hook", () => {
   });
 
   it("should initialize with expected values from query hook", () => {
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.permissions).toEqual([{ id: 1, name: "read:users" }]);
     expect(result.current.currentPage).toBe(1);
@@ -85,7 +88,9 @@ describe("usePermissionList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.onPermissionCreate({ name: "write:roles" });
@@ -108,7 +113,9 @@ describe("usePermissionList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.onPermissionCreate({ name: "write:roles" });
@@ -137,7 +144,9 @@ describe("usePermissionList Hook", () => {
       ),
     );
 
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditPermission({
@@ -163,7 +172,9 @@ describe("usePermissionList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeletePermission({

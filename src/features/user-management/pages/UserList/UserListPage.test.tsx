@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import type React from "react";
+import { MemoryRouter } from "react-router-dom";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
 import { UserListPage } from "./index";
@@ -178,9 +179,30 @@ describe("UserListPage Integration", () => {
     );
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
+  const renderWithProviders = (ui: React.ReactElement, entry = "/users") => {
+    return render(
+      <MemoryRouter initialEntries={[entry]}>
+        <ToastProvider>{ui}</ToastProvider>
+      </MemoryRouter>,
+    );
   };
+
+  it("searches what the address says, and shows it in the field (UX-26)", async () => {
+    const searches: (string | null)[] = [];
+    server.use(
+      http.get("*/v1/users", ({ request }) => {
+        searches.push(new URL(request.url).searchParams.get("search"));
+        return HttpResponse.json({ data: [] });
+      }),
+    );
+
+    renderWithProviders(<UserListPage />, "/users?search=jane");
+
+    await waitFor(() => expect(searches).toEqual(["jane"]));
+    expect(
+      screen.getByPlaceholderText("Search by user name or email"),
+    ).toHaveValue("jane");
+  });
 
   it("renders page components correctly", async () => {
     renderWithProviders(<UserListPage />);

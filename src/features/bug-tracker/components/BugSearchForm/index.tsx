@@ -20,6 +20,8 @@ export interface BugSearchFormProps {
   activeTab: "github" | "local" | "trash";
   // Offered as the "Assigned to" filter; empty without bugs::update
   assignees?: BugUserRef[];
+  // The filters restored from the address (UX-26)
+  defaultFilter?: BugFilter;
 }
 export const BugSearchForm: FC<BugSearchFormProps> = ({
   onSubmit,
@@ -28,6 +30,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
   repos,
   activeTab,
   assignees = [],
+  defaultFilter = {},
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
@@ -37,7 +40,16 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
     formState: { errors, isDirty },
     watch,
     setValue,
-  } = useForm<BugFilter>();
+  } = useForm<BugFilter>({
+    defaultValues: {
+      repo: defaultFilter.repo ?? "",
+      status: defaultFilter.status ?? "",
+      priority: defaultFilter.priority ?? "",
+      search: defaultFilter.search ?? "",
+      assignee: defaultFilter.assignee ?? "",
+      component: defaultFilter.component ?? "",
+    },
+  });
 
   const _values = watch();
 
@@ -66,18 +78,6 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
     // Submit the form immediately to refresh results
     handleSubmit(submit)();
   };
-
-  // Reset form inputs when user switches between tabs
-  useEffect(() => {
-    reset({
-      repo: undefined,
-      status: undefined,
-      priority: undefined,
-      search: undefined,
-      assignee: undefined,
-      component: undefined,
-    });
-  }, [reset]);
 
   useEffect(() => {
     if (!isDirty) return;

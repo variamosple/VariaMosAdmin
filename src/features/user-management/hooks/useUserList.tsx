@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   deleteUser,
   disableUser,
@@ -8,7 +8,21 @@ import {
 import type { User } from "@/features/user-management/domain/Entity/User";
 import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
 import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const usersFromParams = (params: URLSearchParams) =>
+  new UsersFilter(
+    undefined,
+    undefined,
+    readParam(params, "search"),
+    readPage(params),
+  );
 
 export const useUserList = () => {
   const [showResetLink, setShowResetLink] = useState(false);
@@ -23,6 +37,7 @@ export const useUserList = () => {
     data: users,
     currentPage,
     loadData,
+    filter,
     totalPages,
     isLoading,
     onPageChange,
@@ -32,9 +47,10 @@ export const useUserList = () => {
     initialFilter: new UsersFilter(),
   });
 
-  useEffect(() => {
-    void loadData(new UsersFilter());
-  }, [loadData]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    usersFromParams,
+  );
 
   const onUserResetLink = (user: User) => {
     setSelectedUser(user);
@@ -168,6 +184,8 @@ export const useUserList = () => {
   };
 
   return {
+    restoredFilter,
+    restoreKey,
     listState,
     currentPage,
     onPageChange,

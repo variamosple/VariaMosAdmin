@@ -3,6 +3,7 @@ import {
   ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
+import { MemoryRouter } from "react-router-dom";
 import * as MicroServiceRepository from "../api/MicroServiceRepository";
 import { useMicroServiceList } from "./useMicroServiceList";
 
@@ -88,7 +89,9 @@ describe("useMicroServiceList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useMicroServiceList());
+    const { result } = renderHook(() => useMicroServiceList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.microServices).toHaveLength(1);
     expect(result.current.microServices[0].serviceName).toBe("service-1");
@@ -96,7 +99,9 @@ describe("useMicroServiceList Hook", () => {
   });
 
   it("should handle startMicroservice successfully", async () => {
-    const { result } = renderHook(() => useMicroServiceList());
+    const { result } = renderHook(() => useMicroServiceList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performMicroSerViceStart({
@@ -118,7 +123,9 @@ describe("useMicroServiceList Hook", () => {
   });
 
   it("should handle restartMicroservice successfully", async () => {
-    const { result } = renderHook(() => useMicroServiceList());
+    const { result } = renderHook(() => useMicroServiceList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performMicroSerViceRestart({
@@ -140,7 +147,9 @@ describe("useMicroServiceList Hook", () => {
   });
 
   it("should handle stopMicroservice successfully", async () => {
-    const { result } = renderHook(() => useMicroServiceList());
+    const { result } = renderHook(() => useMicroServiceList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performMicroSerViceStop({
@@ -166,7 +175,9 @@ describe("useMicroServiceList Hook", () => {
       .spyOn(MicroServiceRepository, "triggerMicroServicesCheck")
       .mockResolvedValue(new ResponseModel<void>("success"));
 
-    const { result } = renderHook(() => useMicroServiceList());
+    const { result } = renderHook(() => useMicroServiceList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.refreshList(true);

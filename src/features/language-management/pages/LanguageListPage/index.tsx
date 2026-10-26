@@ -9,6 +9,8 @@ import { useLanguageList } from "../../hooks/useLanguageList";
 
 const LanguageListPageComponent: FC = () => {
   const {
+    restoredFilter,
+    restoreKey,
     languages,
     totalPages,
     currentPage,
@@ -55,6 +57,9 @@ const LanguageListPageComponent: FC = () => {
       />
 
       <LanguageSearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultFilter={restoredFilter ?? undefined}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}

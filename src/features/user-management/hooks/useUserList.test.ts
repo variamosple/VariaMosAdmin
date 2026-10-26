@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router-dom";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
@@ -109,7 +110,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should initialize with expected values and load user list on mount", () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.users).toEqual([dummyUser]);
     expect(result.current.currentPage).toBe(1);
@@ -119,7 +122,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle onUserResetLink", () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     act(() => {
       result.current.onUserResetLink(dummyUser);
@@ -130,7 +135,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDisableUser successfully", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDisableUser(dummyUser);
@@ -153,7 +160,9 @@ describe("useUserList Hook", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
     disableUserError = true;
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDisableUser(dummyUser);
@@ -171,7 +180,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performEnableUser successfully", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEnableUser(dummyUser);
@@ -190,7 +201,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDeleteUser successfully", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteUser(dummyUser);
@@ -209,7 +222,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should trigger loadData on search submit", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       result.current.onSearchSubmit("john");
@@ -221,7 +236,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should trigger loadData on search reset", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       result.current.onSearchReset();

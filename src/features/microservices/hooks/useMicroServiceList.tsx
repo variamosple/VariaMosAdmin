@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { readPage, useListQueryState } from "@/shared/hooks/useListQueryState";
 import { usePagedList } from "@/shared/hooks/usePagedList";
 import {
   queryMicroServices,
@@ -9,6 +10,10 @@ import {
 } from "../api/MicroServiceRepository";
 import type { MicroService } from "../domain/Entity/MicroService";
 import { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
+
+// The page shown by the address (UX-26)
+const microServicesFromParams = (params: URLSearchParams) =>
+  new MicroServiceFilter(undefined, readPage(params));
 
 export const useMicroServiceList = (initialRefreshInterval: number = 0) => {
   const [showStart, setShowStart] = useState(false);
@@ -32,6 +37,7 @@ export const useMicroServiceList = (initialRefreshInterval: number = 0) => {
     data: microServices,
     currentPage,
     loadData,
+    filter,
     totalPages,
     onPageChange,
     listState,
@@ -47,21 +53,22 @@ export const useMicroServiceList = (initialRefreshInterval: number = 0) => {
         ? triggerMicroServicesCheck().catch(() => {})
         : Promise.resolve();
 
-      return preAction
-        .then(() => loadData(initialFilter))
-        .then(() => {
-          setLastRefreshedAt(new Date());
-        })
-        .finally(() => {
-          setIsRefreshing(false);
-        });
+      return (
+        preAction
+          // The page on screen, which the address may have chosen
+          .then(() => loadData(filter ?? initialFilter))
+          .then(() => {
+            setLastRefreshedAt(new Date());
+          })
+          .finally(() => {
+            setIsRefreshing(false);
+          })
+      );
     },
-    [loadData, initialFilter],
+    [loadData, filter, initialFilter],
   );
 
-  useEffect(() => {
-    loadData(initialFilter);
-  }, [loadData, initialFilter]);
+  useListQueryState({ filter, currentPage, loadData }, microServicesFromParams);
 
   // Periodic Auto-refresh
   useEffect(() => {

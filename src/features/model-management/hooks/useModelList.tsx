@@ -12,7 +12,24 @@ import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFil
 import { queryProjects } from "@/features/project-management/api/ProjectRepository";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  readBooleanParam,
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
 import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const modelsFromParams = (params: URLSearchParams) =>
+  new ModelsFilter(
+    readParam(params, "name"),
+    readParam(params, "modelLevel"),
+    readBooleanParam(params, "isDeleted"),
+    readBooleanParam(params, "includeDeleted"),
+    readBooleanParam(params, "isPublic"),
+    readPage(params),
+  );
 
 export const useModelList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -33,6 +50,7 @@ export const useModelList = () => {
     data: models,
     currentPage,
     loadData,
+    filter,
     isLoading,
     totalPages,
     onPageChange,
@@ -42,9 +60,10 @@ export const useModelList = () => {
     initialFilter: new ModelsFilter(),
   });
 
-  useEffect(() => {
-    void loadData(new ModelsFilter());
-  }, [loadData]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    modelsFromParams,
+  );
 
   useEffect(() => {
     queryProjects(new ProjectsFilter()).then((res) => {
@@ -217,6 +236,8 @@ export const useModelList = () => {
   };
 
   return {
+    restoredFilter,
+    restoreKey,
     listState,
     showEdit,
     setShowEdit,

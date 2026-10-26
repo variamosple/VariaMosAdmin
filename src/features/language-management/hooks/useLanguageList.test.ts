@@ -3,6 +3,7 @@ import {
   ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
+import { MemoryRouter } from "react-router-dom";
 import * as LanguageRepository from "../api/LanguageRepository";
 import type { Language } from "../domain/Entity/Language";
 import { useLanguageList } from "./useLanguageList";
@@ -78,7 +79,9 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useLanguageList());
+    const { result } = renderHook(() => useLanguageList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.languages).toEqual([
       { id: 1, name: "Language One", stateAccept: "ACTIVE" },
@@ -88,7 +91,9 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle performEditLanguage successfully", async () => {
-    const { result } = renderHook(() => useLanguageList());
+    const { result } = renderHook(() => useLanguageList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditLanguage({
@@ -110,7 +115,9 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle performDeleteLanguage successfully", async () => {
-    const { result } = renderHook(() => useLanguageList());
+    const { result } = renderHook(() => useLanguageList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteLanguage({
@@ -135,7 +142,9 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle performEditLanguage failure", async () => {
-    const { result } = renderHook(() => useLanguageList());
+    const { result } = renderHook(() => useLanguageList(), {
+      wrapper: MemoryRouter,
+    });
     updateLanguageSpy.mockResolvedValueOnce(
       new ResponseModel<Language>("error").withError(500, "Edit failed"),
     );
@@ -163,7 +172,7 @@ describe("useLanguageList Hook", () => {
       errorCode: 500,
       message: "Query failed",
     });
-    renderHook(() => useLanguageList());
+    renderHook(() => useLanguageList(), { wrapper: MemoryRouter });
 
     await waitFor(() => {
       expect(mockLoadData).toHaveBeenCalled();

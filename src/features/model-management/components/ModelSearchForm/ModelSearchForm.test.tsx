@@ -1,3 +1,4 @@
+import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
 import "@testing-library/jest-dom/vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -129,5 +130,20 @@ describe("ModelSearchForm Component", () => {
         expect.objectContaining({ name: "AB" }),
       );
     });
+  });
+
+  it("starts from the search of the address (UX-26)", () => {
+    render(
+      <ModelSearchForm
+        onSubmit={vi.fn()}
+        isLoading={false}
+        onSearchReset={vi.fn()}
+        defaultFilter={new ModelsFilter("m", "domain", undefined, true, false)}
+      />,
+    );
+
+    expect(screen.getByLabelText("Level")).toHaveValue("domain");
+    expect(screen.getByLabelText("Access level")).toHaveValue("false");
+    expect(screen.getByLabelText("Status")).toHaveValue("all");
   });
 });

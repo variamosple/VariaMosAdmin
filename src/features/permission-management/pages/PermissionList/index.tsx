@@ -9,6 +9,8 @@ import { usePermissionList } from "../../hooks/usePermissionList";
 
 const PermissionListPageComponent: FC = () => {
   const {
+    restoredFilter,
+    restoreKey,
     showCreate,
     setShowCreate,
     showEdit,
@@ -65,6 +67,9 @@ const PermissionListPageComponent: FC = () => {
       />
 
       <SearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultSearch={restoredFilter?.name}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}
