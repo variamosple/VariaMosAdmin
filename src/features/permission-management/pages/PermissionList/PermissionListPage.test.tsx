@@ -126,7 +126,7 @@ describe("PermissionListPage Integration", () => {
     await user.click(createBtn);
 
     // Modal should be visible
-    expect(screen.getByText("Create a Permission")).toBeInTheDocument();
+    expect(screen.getByText("New permission")).toBeInTheDocument();
 
     // Fill form
     const input = screen.getByPlaceholderText("Permission name");
@@ -134,13 +134,13 @@ describe("PermissionListPage Integration", () => {
 
     // Click submit
     const submitBtns = screen.getAllByRole("button", {
-      name: "Create Permission",
+      name: "Create permission",
     });
     await user.click(submitBtns[submitBtns.length - 1]);
 
     // Verify modal closes
     await waitFor(() => {
-      expect(screen.queryByText("Create a Permission")).not.toBeInTheDocument();
+      expect(screen.queryByText("New permission")).not.toBeInTheDocument();
     });
   });
 

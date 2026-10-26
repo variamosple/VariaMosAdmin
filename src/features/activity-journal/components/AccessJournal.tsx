@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Col, Form, Row, Table } from "react-bootstrap";
 import { useForm } from "react-hook-form";
-import { formatDateTime } from "@/shared/constants";
+import { DateTime } from "@/shared/components/DateTime";
 import { queryAccessLogs } from "../api/JournalRepository";
 import { ACCESS_EVENTS, AccessFilter } from "../domain/JournalEntry";
 import { useJournal } from "../hooks/useJournal";
@@ -103,7 +103,9 @@ export const AccessJournal: FC = () => {
           <tbody>
             {journal.entries.map((entry) => (
               <tr key={entry.id}>
-                <td>{formatDateTime(entry.occurredAt)}</td>
+                <td>
+                  <DateTime value={entry.occurredAt} />
+                </td>
                 <td>{entry.event}</td>
                 <td>
                   <OutcomeBadge outcome={entry.outcome} />

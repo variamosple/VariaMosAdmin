@@ -21,6 +21,7 @@ import {
 } from "@/shared/components/LoadProblem";
 import { useToast } from "@/shared/context/ToastContext";
 import { usePagedList } from "@/shared/hooks/usePagedList";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { RolePermissionForm } from "../components/RolePermissionForm";
 import { RolePermissionList } from "../components/RolePermissionList";
 
@@ -29,6 +30,7 @@ const RoleDetailsPageComponent: FC = () => {
   const { navigate } = useRouter();
   const { roleId: roleIdParam } = useParams();
   const [role, setRole] = useState<Role>();
+  usePageTitle(role ? `Role ${role.name}` : "Role");
   const [problem, setProblem] = useState<LoadProblemKind | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -109,8 +111,8 @@ const RoleDetailsPageComponent: FC = () => {
 
   const performDeleteRolePermission = (permission: Permission) => {
     const toastId = pushToast({
-      title: "Permission deletion",
-      message: "Deleting permission...",
+      title: "Permission removal",
+      message: "Removing permission...",
       variant: "info",
     });
 
@@ -122,14 +124,14 @@ const RoleDetailsPageComponent: FC = () => {
 
         if (response.errorCode) {
           pushToast({
-            title: "Permission deletion",
+            title: "Permission removal",
             message: response.message ?? "An error occurred",
             variant: "danger",
           });
         } else {
           pushToast({
-            title: "Permission delete",
-            message: "Permission deleted successfully",
+            title: "Permission removal",
+            message: "Permission removed successfully",
             variant: "success",
           });
           onRolePermissionsPageChange(currentRolePermissionsPage);
@@ -176,7 +178,7 @@ const RoleDetailsPageComponent: FC = () => {
 
         <div>
           <Button onClick={() => navigate("/roles")}>
-            <ArrowLeft /> Back To Role List
+            <ArrowLeft /> Back to role list
           </Button>
         </div>
       </div>

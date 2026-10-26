@@ -199,7 +199,7 @@ describe("RoleDetailsPage Component", () => {
     expect(await screen.findByText("Admin Role")).toBeInTheDocument();
 
     const backButton = screen.getByRole("button", {
-      name: /Back To Role List/i,
+      name: /Back to role list/i,
     });
     await user.click(backButton);
 
@@ -289,7 +289,7 @@ describe("RoleDetailsPage Component", () => {
     );
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Permission delete",
+        title: "Permission removal",
         variant: "success",
       }),
     );

@@ -248,7 +248,7 @@ describe("BugApprovalModal Component", () => {
 
     const file = new File(["foo"], "att2.png", { type: "image/png" });
     const fileInput = screen.getByLabelText(
-      /Add Attachment/i,
+      /Add attachment/i,
     ) as HTMLInputElement;
 
     // Trigger upload
@@ -310,9 +310,9 @@ describe("BugApprovalModal Component", () => {
       />,
     );
 
-    const input = screen.getByLabelText(/Add Attachment/i) as HTMLInputElement;
+    const input = screen.getByLabelText(/Add attachment/i) as HTMLInputElement;
     const pickerSpy = vi.spyOn(input, "click");
-    screen.getByRole("button", { name: /Add Attachment/i }).focus();
+    screen.getByRole("button", { name: /Add attachment/i }).focus();
 
     const user = userEvent.setup();
     await user.keyboard("{Enter}");
@@ -347,7 +347,7 @@ describe("BugApprovalModal Component", () => {
 
     const file = new File(["foo"], "att2.png", { type: "image/png" });
     const fileInput = screen.getByLabelText(
-      /Add Attachment/i,
+      /Add attachment/i,
     ) as HTMLInputElement;
 
     const user = userEvent.setup();

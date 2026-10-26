@@ -3,10 +3,12 @@ import { type FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { GoogleLogin } from "../components/GoogleLogin";
 import { SignUpForm } from "../components/SignUpForm";
 
 export const SignUpPage: FC = () => {
+  usePageTitle("Sign up");
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [signedUp, setSignedUp] = useState(false);
   const { signUp } = useSession();

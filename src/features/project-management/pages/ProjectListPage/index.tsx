@@ -6,9 +6,11 @@ import { ProjectFormModal } from "@/features/project-management/components/Proje
 import { ProjectList } from "@/features/project-management/components/ProjectList";
 import { ProjectSearchForm } from "@/features/project-management/components/ProjectsSearchForm";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useProjectList } from "../../hooks/useProjectsList";
 
 const ProjectListPageComponent: FC = () => {
+  usePageTitle("Projects");
   const {
     restoredFilter,
     restoreKey,
@@ -45,7 +47,7 @@ const ProjectListPageComponent: FC = () => {
         </Col>
         <Col className="text-end">
           <Button variant="primary" onClick={() => setShowCreate(true)}>
-            <Plus className="me-1" /> Create Project
+            <Plus className="me-1" /> Create project
           </Button>
         </Col>
       </Row>
@@ -62,7 +64,7 @@ const ProjectListPageComponent: FC = () => {
       />
 
       <ProjectFormModal
-        modalTitle="Create a Project"
+        modalTitle="New project"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onProjectSubmit={performCreateProject}

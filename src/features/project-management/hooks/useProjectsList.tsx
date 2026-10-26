@@ -120,7 +120,7 @@ export const useProjectList = () => {
   const performDeleteProject = (project: Project) => {
     pushToast({
       title: "Project delete",
-      message: "Deleting role...",
+      message: "Deleting project...",
     });
 
     if (project.id !== undefined) {

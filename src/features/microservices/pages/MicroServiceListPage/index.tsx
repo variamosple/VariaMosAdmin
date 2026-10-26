@@ -3,12 +3,14 @@ import { type FC, useState } from "react";
 import { Button, Col, Container, Form, Row, Spinner } from "react-bootstrap";
 import { ArrowClockwise } from "react-bootstrap-icons";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { MicroServiceConfigModal } from "../../components/MicroServiceConfigModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
 import type { MicroService } from "../../domain/Entity/MicroService";
 import { useMicroServiceList } from "../../hooks/useMicroServiceList";
 
 const MicroServiceListPageComponent: FC = () => {
+  usePageTitle("Microservices");
   const [selectedConfigService, setSelectedConfigService] = useState<
     MicroService | undefined
   >(undefined);

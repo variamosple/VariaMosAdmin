@@ -15,6 +15,8 @@ import {
 } from "react-bootstrap";
 import { ArrowRepeat, Github, Plus } from "react-bootstrap-icons";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { DateTime } from "@/shared/components/DateTime";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { attachmentUrl } from "../api/attachmentUrl";
 import { BugApprovalModal } from "../components/BugApprovalModal";
 import { BugAssigneesForm } from "../components/BugAssigneesForm";
@@ -32,6 +34,7 @@ import { useBugList } from "../hooks/useBugList";
 import { useBugPermissions } from "../hooks/useBugPermissions";
 
 const BugListPageComponent: FC = () => {
+  usePageTitle("Bugs");
   const {
     bugs,
     repos,
@@ -209,7 +212,7 @@ const BugListPageComponent: FC = () => {
               className="d-inline-flex align-items-center text-white"
               disabled={isSyncing}
             >
-              <Github size={16} className="me-1" /> Create GitHub Issue
+              <Github size={16} className="me-1" /> Create GitHub issue
             </Button>
           )}
         </Col>
@@ -356,9 +359,7 @@ const BugListPageComponent: FC = () => {
                 </Col>
                 <Col md={6}>
                   <strong>Created At: </strong>{" "}
-                  {selectedBugForDetails.createdAt
-                    ? new Date(selectedBugForDetails.createdAt).toLocaleString()
-                    : "N/A"}
+                  <DateTime value={selectedBugForDetails.createdAt} />
                 </Col>
               </Row>
 
@@ -411,7 +412,7 @@ const BugListPageComponent: FC = () => {
                 selectedBugForDetails.attachments.length > 0 && (
                   <div className="mb-3">
                     <strong>Attachments:</strong>
-                    <ul className="mt-1 mb-0 pl-3">
+                    <ul className="mt-1 mb-0 ps-3">
                       {selectedBugForDetails.attachments.map(
                         (attachment: BugAttachment) => (
                           <li key={attachment.id} className="my-1">
@@ -516,7 +517,7 @@ const BugListPageComponent: FC = () => {
                           >
                             <div className="d-flex align-items-center mb-1 border-bottom pb-1">
                               <span
-                                className="badge bg-secondary-subtle text-secondary small-text font-monospace"
+                                className="badge bg-secondary-subtle text-secondary small font-monospace"
                                 style={{
                                   fontSize: "0.65rem",
                                   padding: "0.2rem 0.4rem",
@@ -525,10 +526,10 @@ const BugListPageComponent: FC = () => {
                                 SYSTEM AUDIT
                               </span>
                               <span
-                                className="text-muted small-text ms-auto"
+                                className="text-muted small ms-auto"
                                 style={{ fontSize: "0.7rem" }}
                               >
-                                {new Date(note.changedAt).toLocaleString()}
+                                <DateTime value={note.changedAt} />
                               </span>
                             </div>
                             <div
@@ -620,7 +621,7 @@ const BugListPageComponent: FC = () => {
                           className="border rounded p-2 bg-light"
                         >
                           <div
-                            className="text-dark small-text"
+                            className="text-dark small"
                             style={{ whiteSpace: "pre-wrap" }}
                           >
                             {note.comment}
@@ -630,7 +631,7 @@ const BugListPageComponent: FC = () => {
                             style={{ fontSize: "0.75rem" }}
                           >
                             {note.changedBy?.name || "Anonymous"} at{" "}
-                            {new Date(note.changedAt).toLocaleString()}
+                            <DateTime value={note.changedAt} />
                           </div>
                         </div>
                       );
@@ -667,7 +668,7 @@ const BugListPageComponent: FC = () => {
                         size="sm"
                         disabled={isSubmittingNote}
                       >
-                        {isSubmittingNote ? "Adding..." : "Add Comment"}
+                        {isSubmittingNote ? "Adding..." : "Add comment"}
                       </Button>
                     </div>
                   </Form>

@@ -95,7 +95,7 @@ test.describe("Admin - Password Reset Flow", () => {
     await expect(
       page.getByText("Your password has been reset successfully !"),
     ).toBeVisible();
-    await page.getByText("Back to Sign In").click();
+    await page.getByText("Back to sign in").click();
     await expect(page).toHaveURL(/.*\/login/);
 
     await page.locator('input[name="email"]').fill(targetUserEmail);

@@ -126,6 +126,10 @@ describe("useProjectList Hook", () => {
 
     expect(deleteProjectSpy).toHaveBeenCalledWith("1");
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
+    // The progress toast names the project, not a role (UX-37)
+    expect(mockPushToast).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Deleting project..." }),
+    );
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Project delete",

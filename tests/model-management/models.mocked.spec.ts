@@ -172,8 +172,8 @@ test.describe("Model Management - Mocked Flows", () => {
   });
 
   test("should support searchable language dropdown when creating a model", async ({ page }) => {
-    await page.getByRole("button", { name: "Create Model" }).click();
-    await expect(page.locator(".modal-title")).toHaveText("Create a Model");
+    await page.getByRole("button", { name: "Create model" }).click();
+    await expect(page.locator(".modal-title")).toHaveText("New model");
 
     // Open language dropdown
     await page.getByRole("button", { name: "Select a language..." }).click();

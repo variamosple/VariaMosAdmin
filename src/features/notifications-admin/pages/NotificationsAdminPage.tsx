@@ -16,6 +16,7 @@ import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import {
   countNotificationRecipients,
   type DispatchNotificationRequest,
@@ -28,6 +29,7 @@ const ROLE_PAGE_SIZE = 100;
 const accounts = (count: number) => `${count} account${count === 1 ? "" : "s"}`;
 
 const NotificationsAdminPageComponent: FC = () => {
+  usePageTitle("Notifications");
   const [audience, setAudience] = useState<"broadcast" | "role" | "users">(
     "broadcast",
   );
@@ -218,7 +220,7 @@ const NotificationsAdminPageComponent: FC = () => {
                       name="audience"
                       checked={audience === "broadcast"}
                       onChange={() => setAudience("broadcast")}
-                      className="border rounded p-2 px-3 bg-light cursor-pointer"
+                      className="border rounded p-2 px-3 bg-light"
                     />
                     <Form.Check
                       type="radio"
@@ -231,7 +233,7 @@ const NotificationsAdminPageComponent: FC = () => {
                       name="audience"
                       checked={audience === "role"}
                       onChange={() => setAudience("role")}
-                      className="border rounded p-2 px-3 bg-light cursor-pointer"
+                      className="border rounded p-2 px-3 bg-light"
                     />
                     <Form.Check
                       type="radio"
@@ -244,7 +246,7 @@ const NotificationsAdminPageComponent: FC = () => {
                       name="audience"
                       checked={audience === "users"}
                       onChange={() => setAudience("users")}
-                      className="border rounded p-2 px-3 bg-light cursor-pointer"
+                      className="border rounded p-2 px-3 bg-light"
                     />
                   </div>
                 </Form.Group>

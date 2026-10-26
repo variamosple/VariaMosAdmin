@@ -10,8 +10,8 @@ import {
   TrashFill,
 } from "react-bootstrap-icons";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
+import { DateTime } from "@/shared/components/DateTime";
 import { IconButton } from "@/shared/components/IconButton";
-import { formatDate, formatDateTime } from "@/shared/constants";
 import { type Language, LanguageStatus } from "../../domain/Entity/Language";
 
 export interface LanguageRowProps {
@@ -94,15 +94,11 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
         <td>{owner?.name}</td>
 
         <td>
-          {language.createdAt
-            ? formatDate(new Date(language.createdAt))
-            : "N/A"}
+          <DateTime value={language.createdAt} dateOnly />
         </td>
 
         <td>
-          {language.updatedAt
-            ? formatDateTime(new Date(language.updatedAt))
-            : "N/A"}
+          <DateTime value={language.updatedAt} />
         </td>
 
         <td>

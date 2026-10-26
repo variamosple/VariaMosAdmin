@@ -11,6 +11,7 @@ import {
   loadProblemOf,
 } from "@/shared/components/LoadProblem";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import {
   getMyAccount,
   updatePersonalInformation,
@@ -20,6 +21,7 @@ import { PasswordUpdateForm } from "../components/PasswordUpdateForm";
 import { TwoFactorCard } from "../components/TwoFactorCard";
 
 const MyAccountPageComponent: FC = () => {
+  usePageTitle("My account");
   const [user, setUser] = useState<User>();
   const [problem, setProblem] = useState<LoadProblemKind | null>(null);
   const [isLoading, setIsLoading] = useState(false);

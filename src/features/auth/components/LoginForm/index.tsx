@@ -67,7 +67,7 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
           to="/forgot-password"
           className="text-decoration-none text-decoration-underline-hover"
         >
-          Forgot Password?
+          Forgot password?
         </Link>
       </div>
 

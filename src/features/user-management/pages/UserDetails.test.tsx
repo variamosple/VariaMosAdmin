@@ -259,6 +259,8 @@ describe("UserDetailsPage Component", () => {
     expect(screen.getByTestId("role-row-role-1")).toHaveTextContent(
       "Administrator",
     );
+    // The browser tab names the user once it is read (UX-35)
+    expect(document.title).toBe("User John Doe — VariaMos");
   });
 
   it("handles back to user list click", async () => {
@@ -283,8 +285,12 @@ describe("UserDetailsPage Component", () => {
     const assignBtn = screen.getByRole("button", { name: /assign role/i });
     await user.click(assignBtn);
 
+    // An assignment is announced as such, not as a deletion (UX-37)
     expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Role assignment" }),
+      expect.objectContaining({
+        title: "Role assignment",
+        message: "Assigning role...",
+      }),
     );
     await waitFor(() => {
       expect(createUserRoleCalled).toBe(1);
@@ -320,7 +326,7 @@ describe("UserDetailsPage Component", () => {
     await user.click(confirmBtn);
 
     expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Role delete" }),
+      expect.objectContaining({ title: "Role removal" }),
     );
     await waitFor(() => {
       expect(deleteUserRoleCalled).toBe(1);
@@ -329,7 +335,7 @@ describe("UserDetailsPage Component", () => {
       expect.objectContaining({ userId: "user-123", roleId: "role-1" }),
     );
     expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Role delete", variant: "success" }),
+      expect.objectContaining({ title: "Role removal", variant: "success" }),
     );
     expect(mockOnUserRolesPageChange).toHaveBeenCalledWith(1);
   });

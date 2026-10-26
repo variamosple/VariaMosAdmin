@@ -23,6 +23,7 @@ import {
 } from "@/shared/components/LoadProblem";
 import { useToast } from "@/shared/context/ToastContext";
 import { usePagedList } from "@/shared/hooks/usePagedList";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { UserRoleForm } from "../components/UserRoleForm";
 import { UserRoleList } from "../components/UserRoleList";
 
@@ -31,6 +32,7 @@ const UserDetailsPageComponent: FC = () => {
   const { navigate } = useRouter();
   const { userId: userIdParam } = useParams();
   const [user, setUser] = useState<User>();
+  usePageTitle(user ? `User ${user.name}` : "User");
   const [problem, setProblem] = useState<LoadProblemKind | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -73,7 +75,7 @@ const UserDetailsPageComponent: FC = () => {
     setIsCreating(true);
     const toastId = pushToast({
       title: "Role assignment",
-      message: "Deleting role...",
+      message: "Assigning role...",
     });
 
     createUserRole({
@@ -112,7 +114,7 @@ const UserDetailsPageComponent: FC = () => {
   const performDeleteUserRole = (role: Role) => {
     if (!userIdParam || !role.id) {
       pushToast({
-        title: "Role delete",
+        title: "Role removal",
         message: "User ID or Role ID is missing",
         variant: "danger",
       });
@@ -120,8 +122,8 @@ const UserDetailsPageComponent: FC = () => {
     }
 
     const toastId = pushToast({
-      title: "Role delete",
-      message: "Deleting role...",
+      title: "Role removal",
+      message: "Removing role...",
     });
 
     deleteUserRole(new UserRole(userIdParam, role.id)).then((response) => {
@@ -129,14 +131,14 @@ const UserDetailsPageComponent: FC = () => {
 
       if (response.errorCode) {
         pushToast({
-          title: "Role delete",
+          title: "Role removal",
           message: response.message || "Failed to delete role",
           variant: "danger",
         });
       } else {
         pushToast({
-          title: "Role delete",
-          message: "Role deleted successfully",
+          title: "Role removal",
+          message: "Role removed successfully",
           variant: "success",
         });
       }
@@ -179,7 +181,7 @@ const UserDetailsPageComponent: FC = () => {
 
         <div>
           <Button onClick={() => navigate("/users")}>
-            <ArrowLeft /> Back To User List
+            <ArrowLeft /> Back to user list
           </Button>
         </div>
       </div>

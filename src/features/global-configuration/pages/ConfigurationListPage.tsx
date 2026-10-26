@@ -22,11 +22,13 @@ import {
   ShieldLockFill,
 } from "react-bootstrap-icons";
 import { IconButton } from "@/shared/components/IconButton";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
 import type { Configuration } from "../domain/Entity/Configuration";
 import { useConfigurationList } from "../hooks/useConfigurationList";
 
 const ConfigurationListPageComponent: FC = () => {
+  usePageTitle("Global configurations");
   const {
     configurations,
     isLoading,
