@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Alert, Button, Form, Modal } from "react-bootstrap";
 
 export interface Owner {
   id?: string | number;
@@ -26,13 +26,15 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
   const [subjectKey, setSubjectKey] = useState("GENERAL_INQUIRY");
   const [customBody, setCustomBody] = useState("");
 
+  const hasEmail = (owner: Owner) =>
+    typeof owner.email === "string" && owner.email.trim() !== "";
   const emailList = owners
+    .filter(hasEmail)
     .map((owner) => owner.email)
-    .filter(
-      (email): email is string =>
-        typeof email === "string" && email.trim() !== "",
-    )
     .join(",");
+  const ownersWithoutEmail = owners
+    .filter((owner) => !hasEmail(owner))
+    .map((owner) => owner.name || "Unnamed owner");
 
   const subjects: Record<string, string> = {
     GENERAL_INQUIRY: `Inquiry regarding ${entityType}: ${entityName}`,
@@ -78,6 +80,18 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
             />
           </Form.Group>
         </Form>
+        {!emailList ? (
+          <Alert variant="warning" className="mb-0">
+            No email address is registered for the owners of {entityName}.
+          </Alert>
+        ) : (
+          ownersWithoutEmail.length > 0 && (
+            <Alert variant="info" className="mb-0">
+              Not reached, no email address registered:{" "}
+              {ownersWithoutEmail.join(", ")}.
+            </Alert>
+          )
+        )}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onClose}>
@@ -86,6 +100,7 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
         <a
           className={`btn btn-primary ${!emailList ? "disabled" : ""}`}
           href={emailList ? mailtoHref : undefined}
+          aria-disabled={!emailList}
           onClick={onClose}
           title="Send Email"
         >

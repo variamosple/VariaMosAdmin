@@ -74,6 +74,29 @@ describe("ContactOwnerModal - Behavior & Anti-Fragile Tests", () => {
     const sendEmailLink = screen.getByText("Send Email");
     expect(sendEmailLink).toHaveClass("disabled");
     expect(sendEmailLink).not.toHaveAttribute("href");
+    expect(
+      screen.getByText(
+        "No email address is registered for the owners of GhostModule.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("names the owners the email will not reach", () => {
+    render(
+      <ContactOwnerModal
+        show={true}
+        onClose={vi.fn()}
+        owners={[...defaultOwners, { id: 3, name: "Carol Ghost" }]}
+        entityName="FeatureIDE"
+        entityType="Language"
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: /Send Email/i })).toHaveAttribute(
+      "href",
+      expect.stringContaining("mailto:alice@variamos.org,bob@variamos.org?"),
+    );
+    expect(screen.getByText(/Not reached/)).toHaveTextContent("Carol Ghost");
   });
 
   it("calls onClose when Cancel button is clicked", async () => {
