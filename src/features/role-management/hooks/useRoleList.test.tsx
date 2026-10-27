@@ -87,12 +87,13 @@ describe("useRoleList Hook", () => {
       http.post(apiTarget("/v1/roles"), async ({ request }) => {
         createRoleCalled++;
         createRolePayload = (await request.json()) as Partial<Role>;
-        return HttpResponse.json({ errorCode: null });
+        // The server answers the role it created
+        return HttpResponse.json({ data: { id: 30, ...createRolePayload } });
       }),
       http.put(apiTarget("/v1/roles/:roleId"), async ({ request }) => {
         updateRoleCalled++;
         updateRolePayload = (await request.json()) as Role;
-        return HttpResponse.json({ errorCode: null });
+        return HttpResponse.json({ data: updateRolePayload });
       }),
       http.delete(apiTarget("/v1/roles/:roleId"), ({ params }) => {
         deleteRoleCalled++;

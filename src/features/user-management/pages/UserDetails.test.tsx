@@ -222,7 +222,9 @@ describe("UserDetailsPage Component", () => {
       http.post(apiTarget("/v1/users/:userId/roles"), async ({ request }) => {
         createUserRoleCalled++;
         createUserRolePayload = (await request.json()) as UserRole;
-        return HttpResponse.json({ errorCode: null });
+        return HttpResponse.json({
+          data: { userId: "user-123", roleId: 1 },
+        });
       }),
       http.delete(
         apiTarget("/v1/users/:userId/roles/:roleId"),
