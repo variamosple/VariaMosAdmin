@@ -153,7 +153,7 @@ describe("RoleDetailsPage Component", () => {
             permissionId: number;
             roleId: number;
           };
-          return HttpResponse.json({ errorCode: null });
+          return HttpResponse.json({ data: createRolePermissionPayload });
         },
       ),
       http.delete(

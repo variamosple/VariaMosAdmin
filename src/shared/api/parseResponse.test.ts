@@ -66,6 +66,32 @@ describe("parseResponse (EV-97 lot 6c)", () => {
     expect(response.message).toBe("Invalid audience type.");
   });
 
+  it("reads a null errorCode as no error, as the shared model does", () => {
+    const response = parseResponse(
+      countSchema,
+      { errorCode: null, data: { count: 1 } },
+      FAILURE,
+    );
+
+    expect(response.data).toEqual({ count: 1 });
+  });
+
+  it("checks the data even when errorCode is null", () => {
+    const response = parseResponse(
+      countSchema,
+      { errorCode: null, data: { count: "1" } },
+      FAILURE,
+    );
+
+    expect(response.errorCode).toBe(500);
+  });
+
+  it("accepts a null data where none is expected", () => {
+    expect(
+      parseResponse(noData, { data: null }, FAILURE).errorCode,
+    ).toBeFalsy();
+  });
+
   it("accepts a response without data where none is expected", () => {
     const response = parseResponse(
       noData,

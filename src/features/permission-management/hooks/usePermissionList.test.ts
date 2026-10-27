@@ -84,7 +84,8 @@ describe("usePermissionList Hook", () => {
     server.use(
       http.post(apiTarget("/v1/permissions"), async ({ request }) => {
         createPayload = (await request.json()) as Partial<Permission>;
-        return HttpResponse.json({ errorCode: null });
+        // The server answers the permission it created
+        return HttpResponse.json({ data: { id: 30, ...createPayload } });
       }),
     );
 
@@ -139,7 +140,7 @@ describe("usePermissionList Hook", () => {
         async ({ request, params }) => {
           editPermissionId = params.id as string;
           editPayload = (await request.json()) as Permission;
-          return HttpResponse.json({ errorCode: null });
+          return HttpResponse.json({ data: editPayload });
         },
       ),
     );

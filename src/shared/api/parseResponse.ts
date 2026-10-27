@@ -5,14 +5,18 @@ import * as z from "zod/mini";
 // know are kept, so a new field on the server breaks nothing
 const envelopeFields = {
   transactionId: z.optional(z.string()),
-  errorCode: z.optional(z.union([z.number(), z.string()])),
+  // null is "no error" in the shared ResponseModel
+  errorCode: z.optional(z.nullable(z.union([z.number(), z.string()]))),
   message: z.optional(z.string()),
   totalCount: z.optional(z.number()),
 };
 const errorEnvelope = z.looseObject(envelopeFields);
 
 /** The data of a response that carries none, such as an update. */
-export const noData = z.optional(z.undefined());
+export const noData = z.pipe(
+  z.optional(z.nullable(z.undefined())),
+  z.transform(() => undefined),
+);
 
 const invalid = <T>(
   error: z.core.$ZodError,
@@ -41,7 +45,7 @@ export const parseResponse = <T>(
 ): ResponseModel<T> => {
   const envelope = errorEnvelope.safeParse(body);
   if (!envelope.success) return invalid(envelope.error, failureMessage);
-  if (envelope.data.errorCode !== undefined) {
+  if (envelope.data.errorCode != null) {
     return Object.assign(new ResponseModel<T>(), envelope.data);
   }
 
