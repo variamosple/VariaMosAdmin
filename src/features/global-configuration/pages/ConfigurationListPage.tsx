@@ -385,4 +385,3 @@ export const ConfigurationListPage = withPageVisit(
   ConfigurationListPageComponent,
   "AdminConfigurationList",
 );
-export default ConfigurationListPage;

@@ -2,7 +2,7 @@ import type { FC } from "react";
 import { useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 
-export interface Owner {
+interface Owner {
   id?: string | number;
   name?: string;
   email?: string;
