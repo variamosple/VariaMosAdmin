@@ -14,3 +14,9 @@ export const isoDate = z.pipe(
   z.iso.datetime({ offset: true }),
   z.transform((value) => new Date(value)),
 );
+
+/** Text the server may send as null or leave out; read as absent. */
+export const optionalText = z.pipe(
+  z.optional(z.nullable(z.string())),
+  z.transform((value) => value ?? undefined),
+);

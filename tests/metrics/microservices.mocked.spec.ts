@@ -123,15 +123,8 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({
-          data: [
-            {
-              serviceName: "variamos_ms_admin",
-              status: "UP",
-              responseTimeMs: 25,
-            },
-          ],
-        }),
+        // The server answers no data: the results come with the next list
+        body: JSON.stringify({ transactionId: "triggerHealthChecks" }),
       });
     });
 

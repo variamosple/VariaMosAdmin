@@ -59,7 +59,8 @@ export interface MicroServiceConfigItem {
   serviceName: string;
   key: string;
   value: string;
-  type: "string" | "number" | "boolean" | "json";
+  // Free text: the global configurations also have "array" and "object"
+  type: string;
   isSecret: boolean;
   isReadOnly: boolean;
   description?: string;
