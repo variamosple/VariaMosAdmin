@@ -108,7 +108,12 @@ describe("BugListPage Component", () => {
         pagesAsked.push(pageNumber);
         return HttpResponse.json({
           data: [
-            { id: `bug-${pageNumber}`, title: `Bug of page ${pageNumber}` },
+            {
+              id: `bug-${pageNumber}`,
+              title: `Bug of page ${pageNumber}`,
+              description: "Desc",
+              priority: "low",
+            },
           ],
           totalCount: 21,
         });
@@ -271,7 +276,13 @@ describe("BugListPage Component", () => {
         HttpResponse.json({
           data:
             sent.length > 0
-              ? [{ id: 1, body: "[Audit] Assigned to: Ben (was: nobody)." }]
+              ? [
+                  {
+                    id: 1,
+                    body: "[Audit] Assigned to: Ben (was: nobody).",
+                    createdAt: "2026-10-27T10:00:00.000Z",
+                  },
+                ]
               : [],
         }),
       ),
@@ -574,13 +585,13 @@ describe("BugListPage Component", () => {
         return HttpResponse.json({
           data: [
             {
-              id: "note-1",
+              id: 1,
               body: "Simple comment",
               createdAt: "2026-07-17T13:00:00Z",
               author: { name: "Alice" },
             },
             {
-              id: "note-2",
+              id: 2,
               body: "[Audit] Status changed: open -> closed",
               createdAt: "2026-07-17T14:00:00Z",
             },
