@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Notifications Admin - Mocked E2E Flows", () => {
   const mockUsers = [
-    { id: "user-1", name: "Alice Smith", email: "alice@example.com", isEnabled: true, isDeleted: false },
-    { id: "user-2", name: "Bob Jones", email: "bob@example.com", isEnabled: true, isDeleted: false },
+    { id: "user-1", user: "alice", name: "Alice Smith", email: "alice@example.com", isEnabled: true, isDeleted: false, createdAt: "2026-07-20T22:00:00.000Z" },
+    { id: "user-2", user: "bob", name: "Bob Jones", email: "bob@example.com", isEnabled: true, isDeleted: false, createdAt: "2026-07-20T22:00:00.000Z" },
   ];
 
   const mockRoles = [
