@@ -84,7 +84,8 @@ export const readBooleanParam = (params: URLSearchParams, name: string) => {
 
 export const readPage = (params: URLSearchParams) => {
   const page = Number.parseInt(params.get("page") ?? "", 10);
-  return page > 1 ? page : 1;
+  // A missing or invalid page (NaN) is the first page
+  return Number.isNaN(page) ? 1 : Math.max(page, 1);
 };
 
 interface PagedListState<Filter extends PagedModel> {
