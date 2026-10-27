@@ -244,7 +244,7 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
 
   test("should display Local Inbox bugs, access attachments, and perform Approve/Reject actions", async ({ page }) => {
     const mockLocalBugs = [
-      { id: "local-1", title: "Local UI Crash", priority: "medium", status: "pending", category: "Editor", description: "Crash log", reporterEmail: "reporter@test.com", attachments: [{ filePath: "/uploads/screenshot.png" }] }
+      { id: "local-1", title: "Local UI Crash", priority: "medium", status: "pending", category: "Editor", description: "Crash log", reporterEmail: "reporter@test.com", attachments: [{ id: 1, filePath: "/uploads/screenshot.png", fileType: "image/png", bugId: "local-1", createdAt: "2026-10-27T10:00:00.000Z" }] }
     ];
 
     await page.route("**/bugs/local*", async (route) => {

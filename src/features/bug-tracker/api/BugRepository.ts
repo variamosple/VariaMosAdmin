@@ -1,4 +1,5 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
+import { noData, parseResponse } from "@/shared/api/parseResponse";
 import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type {
@@ -10,16 +11,19 @@ import type {
 } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 import type { BugPriority } from "../domain/BugPriority";
+import {
+  attachmentSchema,
+  bugsSchema,
+  notesSchema,
+  textsSchema,
+  userRefsSchema,
+} from "./bugSchemas";
 
 export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
+  const failure = "Error when trying to query bugs, please try again later.";
   return ADMIN_CLIENT.get("/bugs", { params: filter })
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to query bugs, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(bugsSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const createBug = (
@@ -126,74 +130,56 @@ export const addBugNote = (
 export const queryAssignableUsers = (): Promise<
   ResponseModel<BugUserRef[]>
 > => {
+  const failure =
+    "Error when trying to query assignable administrators, please try again later.";
   return ADMIN_CLIENT.get("/bugs/assignable-users")
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to query assignable administrators, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(userRefsSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const setBugAssignees = (
   bugId: string,
   userIds: string[],
 ): Promise<ResponseModel<BugUserRef[]>> => {
+  const failure =
+    "Error when trying to assign the bug, please try again later.";
   return ADMIN_CLIENT.put(`/bugs/${bugId}/assignees`, { userIds })
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to assign the bug, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(userRefsSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const queryBugRepos = (): Promise<ResponseModel<string[]>> => {
+  const failure =
+    "Error when trying to query bug repositories, please try again later.";
   return ADMIN_CLIENT.get("/bugs/repos")
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to query bug repositories, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(textsSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const queryCategories = (): Promise<ResponseModel<string[]>> => {
+  const failure =
+    "Error when trying to query bug categories, please try again later.";
   return ADMIN_CLIENT.get("/bugs/categories")
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to query bug categories, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(textsSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const syncBugs = (): Promise<ResponseModel<void>> => {
+  const failure =
+    "Error when trying to synchronize bugs, please try again later.";
   return ADMIN_CLIENT.post("/bugs/sync")
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to synchronize bugs, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(noData, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const queryLocalBugs = (
   filter: BugFilter,
 ): Promise<ResponseModel<Bug[]>> => {
+  const failure =
+    "Error when trying to query local bugs, please try again later.";
   return ADMIN_CLIENT.get("/bugs/local", { params: filter })
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to query local bugs, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(bugsSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const rejectLocalBug = (id: string): Promise<ResponseModel<Bug>> => {
@@ -224,38 +210,29 @@ export const uploadAttachment = (
 ): Promise<ResponseModel<BugAttachment>> => {
   const formData = new FormData();
   formData.append("file", file);
+  const failure =
+    "Error when trying to upload attachment, please try again later.";
   return ADMIN_CLIENT.post(`/bugs/${bugId}/attachments`, formData)
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to upload attachment, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(attachmentSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const deleteAttachment = (
   attachmentId: string,
 ): Promise<ResponseModel<void>> => {
+  const failure =
+    "Error when trying to delete attachment, please try again later.";
   return ADMIN_CLIENT.delete(`/bugs/attachments/${attachmentId}`)
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to delete attachment, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(noData, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const queryBugNotes = (
   bugId: string,
 ): Promise<ResponseModel<RawBugNote[]>> => {
+  const failure =
+    "Error when trying to query bug notes, please try again later.";
   return ADMIN_CLIENT.get(`/bugs/${bugId}/notes`)
-    .then((response) => response.data)
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to query bug notes, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(notesSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
