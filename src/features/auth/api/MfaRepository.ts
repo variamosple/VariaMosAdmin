@@ -2,58 +2,58 @@ import {
   ResponseModel,
   type singInResponse,
 } from "@variamosple/variamos-components";
-import { parseResponse } from "@/shared/api/parseResponse";
+import { noData, parseResponse } from "@/shared/api/parseResponse";
 import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { MfaEnrollment, MfaRecoveryCodes, MfaStatus } from "../domain/Mfa";
 import { signedInSchema } from "./authSchemas";
+import {
+  mfaEnrollmentSchema,
+  mfaStatusSchema,
+  recoveryCodesSchema,
+} from "./mfaSchemas";
 
 const asResponse = <T>(data: Partial<ResponseModel<T>>): ResponseModel<T> =>
   Object.assign(new ResponseModel<T>(), data);
 
-export const getMfaStatus = (): Promise<ResponseModel<MfaStatus>> =>
-  ADMIN_CLIENT.get("/auth/mfa")
-    .then((response) => asResponse<MfaStatus>(response.data))
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Could not read the two-factor authentication status.",
-      ),
-    );
+export const getMfaStatus = (): Promise<ResponseModel<MfaStatus>> => {
+  const failure = "Could not read the two-factor authentication status.";
+  return ADMIN_CLIENT.get("/auth/mfa")
+    .then((response) => parseResponse(mfaStatusSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
+};
 
 export const startMfaEnrollment = (
   password: string,
-): Promise<ResponseModel<MfaEnrollment>> =>
-  ADMIN_CLIENT.post("/auth/mfa/enrollment", { password })
-    .then((response) => asResponse<MfaEnrollment>(response.data))
-    .catch((error) =>
-      toErrorResponse(error, "Could not start the two-factor authentication."),
-    );
+): Promise<ResponseModel<MfaEnrollment>> => {
+  const failure = "Could not start the two-factor authentication.";
+  return ADMIN_CLIENT.post("/auth/mfa/enrollment", { password })
+    .then((response) =>
+      parseResponse(mfaEnrollmentSchema, response.data, failure),
+    )
+    .catch((error) => toErrorResponse(error, failure));
+};
 
 export const confirmMfaEnrollment = (
   code: string,
-): Promise<ResponseModel<MfaRecoveryCodes>> =>
-  ADMIN_CLIENT.post("/auth/mfa/enrollment/confirm", { code })
-    .then((response) => asResponse<MfaRecoveryCodes>(response.data))
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Could not turn on the two-factor authentication.",
-      ),
-    );
+): Promise<ResponseModel<MfaRecoveryCodes>> => {
+  const failure = "Could not turn on the two-factor authentication.";
+  return ADMIN_CLIENT.post("/auth/mfa/enrollment/confirm", { code })
+    .then((response) =>
+      parseResponse(recoveryCodesSchema, response.data, failure),
+    )
+    .catch((error) => toErrorResponse(error, failure));
+};
 
 export const disableMfa = (
   password: string,
   code: string,
-): Promise<ResponseModel<void>> =>
-  ADMIN_CLIENT.post("/auth/mfa/disable", { password, code })
-    .then((response) => asResponse<void>(response.data))
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Could not turn off the two-factor authentication.",
-      ),
-    );
+): Promise<ResponseModel<void>> => {
+  const failure = "Could not turn off the two-factor authentication.";
+  return ADMIN_CLIENT.post("/auth/mfa/disable", { password, code })
+    .then((response) => parseResponse(noData, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
+};
 
 /**
  * The code after the password; opens the session when it is right. With
