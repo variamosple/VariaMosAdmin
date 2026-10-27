@@ -2,7 +2,7 @@
 // (variamos_ms_admin, Domain/Bug/Entity/BugStatus.ts): the interface only
 // offers the ones it will accept.
 
-export const BUG_STATUS_LABELS: Readonly<Record<string, string>> = {
+const BUG_STATUS_LABELS: Readonly<Record<string, string>> = {
   pending: "Open (to triage)",
   open: "Open",
   in_progress: "In Progress",

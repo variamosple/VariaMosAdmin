@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export const APP_TITLE = "VariaMos";
+const APP_TITLE = "VariaMos";
 
 /**
  * Names the browser tab, the history entry and the page announced by a

@@ -57,21 +57,6 @@ export const stopMicroservice = (
     );
 };
 
-export const getMicroServiceHistory = (
-  serviceName: string,
-  days: number = 30,
-): Promise<
-  ResponseModel<
-    import("../domain/Entity/MicroService").MicroServiceUptimeSummary
-  >
-> => {
-  return ADMIN_CLIENT.get(`/v1/micro-services/${serviceName}/history`, {
-    params: { days },
-  })
-    .then((response) => response.data)
-    .catch((error) => toErrorResponse(error, "Unexpected error"));
-};
-
 export const getMicroServiceConfigurations = (
   serviceName: string,
 ): Promise<

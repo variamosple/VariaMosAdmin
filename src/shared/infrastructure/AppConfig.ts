@@ -1,5 +1,4 @@
 export const AppConfig = {
-  VERSION: "1.24.10.29.01",
   ADMIN_API_URL: import.meta.env.VITE_ADMIN_API_URL || "",
   ADMIN_WS_URL: import.meta.env.VITE_ADMIN_WS_URL || "",
   LANGUAGES_API_URL: import.meta.env.VITE_LANGUAGES_API_URL || "",

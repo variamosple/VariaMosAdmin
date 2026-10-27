@@ -13,7 +13,7 @@ import type { User } from "@/features/user-management/domain/Entity/User";
 import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
 import useListenOutsideClicks from "@/shared/hooks/useListenOutsideClicks";
 
-export const RECIPIENT_PAGE_SIZE = 20;
+const RECIPIENT_PAGE_SIZE = 20;
 const SEARCH_DELAY_MS = 300;
 
 const label = (user: User) => user.name || user.user || "User";
