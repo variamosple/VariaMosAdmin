@@ -2,9 +2,11 @@ import {
   ResponseModel,
   type singInResponse,
 } from "@variamosple/variamos-components";
+import { parseResponse } from "@/shared/api/parseResponse";
 import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { MfaEnrollment, MfaRecoveryCodes, MfaStatus } from "../domain/Mfa";
+import { signedInSchema } from "./authSchemas";
 
 const asResponse = <T>(data: Partial<ResponseModel<T>>): ResponseModel<T> =>
   Object.assign(new ResponseModel<T>(), data);
@@ -62,7 +64,9 @@ export const requestSignInMfa = (
   rememberDevice = false,
 ): Promise<ResponseModel<singInResponse>> =>
   ADMIN_CLIENT.post("/auth/sign-in/mfa", { code, rememberDevice })
-    .then((response) => asResponse<singInResponse>(response.data))
+    .then((response) =>
+      parseResponse(signedInSchema, response.data, "Could not check the code."),
+    )
     .catch((error) => toErrorResponse(error, "Could not check the code."));
 
 /** Asks the code again on every browser where it was skipped. */
