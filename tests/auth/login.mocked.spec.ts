@@ -87,16 +87,12 @@ test.describe("Auth - Login Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
+        // The answer of variamos_ms_admin: the session itself is read
+        // from session-info right after
         body: JSON.stringify({
           data: {
-            user: {
-              id: "1",
-              user: "admin_test",
-              name: "Admin Test",
-              email: "admin@variamos-test.com",
-              roles: ["Admin"],
-            },
-            authToken: "mock-auth-token-1234"
+            id: "1",
+            redirect: "http://localhost:3000/#/"
           }
         })
       });

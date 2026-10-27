@@ -208,7 +208,15 @@ describe("UserDetailsPage Component", () => {
           });
         }
         return HttpResponse.json({
-          data: { id: "user-123", name: "John Doe", email: "john@doe.com" },
+          data: {
+            id: "user-123",
+            user: "john",
+            name: "John Doe",
+            email: "john@doe.com",
+            isEnabled: true,
+            isDeleted: false,
+            createdAt: "2026-07-20T22:00:00.000Z",
+          },
         });
       }),
       http.post(apiTarget("/v1/users/:userId/roles"), async ({ request }) => {
@@ -239,7 +247,15 @@ describe("UserDetailsPage Component", () => {
     await act(async () => {
       resolveUserPromise(
         HttpResponse.json({
-          data: { id: "user-123", name: "John Doe", email: "john@doe.com" },
+          data: {
+            id: "user-123",
+            user: "john",
+            name: "John Doe",
+            email: "john@doe.com",
+            isEnabled: true,
+            isDeleted: false,
+            createdAt: "2026-07-20T22:00:00.000Z",
+          },
         }),
       );
     });
@@ -259,8 +275,11 @@ describe("UserDetailsPage Component", () => {
     expect(screen.getByTestId("role-row-role-1")).toHaveTextContent(
       "Administrator",
     );
-    // The browser tab names the user once it is read (UX-35)
-    expect(document.title).toBe("User John Doe — VariaMos");
+    // The browser tab names the user once it is read (UX-35); the title is
+    // set by an effect, which runs after the text is on screen
+    await waitFor(() => {
+      expect(document.title).toBe("User John Doe — VariaMos");
+    });
   });
 
   it("handles back to user list click", async () => {
@@ -368,7 +387,15 @@ describe("UserDetailsPage Component", () => {
         return calls === 1
           ? HttpResponse.json({ errorCode: "SYSTEM_ERROR" }, { status: 500 })
           : HttpResponse.json({
-              data: { id: "user-123", name: "John Doe", email: "john@doe.com" },
+              data: {
+                id: "user-123",
+                user: "john",
+                name: "John Doe",
+                email: "john@doe.com",
+                isEnabled: true,
+                isDeleted: false,
+                createdAt: "2026-07-20T22:00:00.000Z",
+              },
             });
       }),
     );

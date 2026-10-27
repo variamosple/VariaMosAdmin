@@ -107,6 +107,9 @@ describe("MyAccountPage Component", () => {
     email: "john@example.com",
     countryCode: "US",
     countryName: "United States",
+    isEnabled: true,
+    isDeleted: false,
+    createdAt: "2026-07-20T22:00:00.000Z",
   };
 
   beforeEach(() => {
