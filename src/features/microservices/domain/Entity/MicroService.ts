@@ -1,11 +1,11 @@
 // NO_DATA: no check was ever recorded for the service (EV-106)
 export type HealthStatus = "UP" | "DEGRADED" | "DOWN" | "NO_DATA";
 
-export interface Labels {
+interface Labels {
   [label: string]: string;
 }
 
-export interface ContainerInstanceInfo {
+interface ContainerInstanceInfo {
   id: string;
   name: string;
   state: string;
@@ -14,20 +14,20 @@ export interface ContainerInstanceInfo {
   labels: Labels;
 }
 
-export type JsonPrimitive = string | number | boolean | null;
-export type JsonValue =
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue =
   | JsonPrimitive
   | JsonPrimitive[]
   | Record<string, JsonPrimitive>;
 
-export interface HealthCheckDetail {
+interface HealthCheckDetail {
   status: HealthStatus;
   latencyMs?: number;
   message?: string;
   details?: Record<string, JsonValue>;
 }
 
-export interface MicroServiceHealthInfo {
+interface MicroServiceHealthInfo {
   status: HealthStatus;
   serviceName: string;
   version?: string;
@@ -45,7 +45,7 @@ export interface UptimeHistorySlot {
   uptimePercentage: number;
 }
 
-export interface MicroServiceUptimeSummary {
+interface MicroServiceUptimeSummary {
   serviceName: string;
   currentStatus: HealthStatus;
   uptime24hPercentage: number;

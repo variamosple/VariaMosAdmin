@@ -19,7 +19,7 @@ import type { Bug, BugStatusLog, BugUserRef, RawBugNote } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 import type { BugPriority } from "../domain/BugPriority";
 
-export const BUG_PAGE_SIZE = 20;
+const BUG_PAGE_SIZE = 20;
 
 export type BugTab = "github" | "local" | "trash";
 const BUG_TABS: readonly string[] = ["github", "local", "trash"];
