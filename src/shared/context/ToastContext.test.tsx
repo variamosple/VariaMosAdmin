@@ -30,6 +30,31 @@ const _BadComponent = () => {
   return <div>Bad</div>;
 };
 
+// Pushes a success or an error toast (UX-22)
+const Pusher = () => {
+  const { pushToast } = useToast();
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          pushToast({ title: "Saved", message: "Done", variant: "success" })
+        }
+      >
+        Success
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          pushToast({ title: "Failed", message: "Oops", variant: "danger" })
+        }
+      >
+        Error
+      </button>
+    </>
+  );
+};
+
 describe("ToastContext & useToast", () => {
   it("throws error when used outside ToastProvider", () => {
     // Suppress console.error for clean output during expected throw
@@ -93,30 +118,6 @@ describe("ToastContext & useToast", () => {
   });
 
   describe("hiding (UX-22)", () => {
-    const Pusher = () => {
-      const { pushToast } = useToast();
-      return (
-        <>
-          <button
-            type="button"
-            onClick={() =>
-              pushToast({ title: "Saved", message: "Done", variant: "success" })
-            }
-          >
-            Success
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              pushToast({ title: "Failed", message: "Oops", variant: "danger" })
-            }
-          >
-            Error
-          </button>
-        </>
-      );
-    };
-
     afterEach(() => {
       vi.useRealTimers();
     });

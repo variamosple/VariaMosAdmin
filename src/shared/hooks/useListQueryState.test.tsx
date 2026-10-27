@@ -159,6 +159,7 @@ describe("paramsOf and the readers", () => {
   it("reads back what it wrote, and ignores what it cannot read", () => {
     const params = new URLSearchParams("archived=maybe&page=-4&name=");
     expect(fromParams(params)).toEqual(new NameFilter(undefined, undefined, 1));
+    expect(readPage(new URLSearchParams("page=abc"))).toBe(1);
     expect(fromParams(paramsOf(new NameFilter("jane", true, 3)))).toEqual(
       new NameFilter("jane", true, 3),
     );
