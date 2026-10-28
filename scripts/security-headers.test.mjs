@@ -47,19 +47,20 @@ describe("security headers", () => {
     ]);
   });
 
-  it("reports the policy without blocking, and sends the other headers", () => {
+  it("enforces the policy, and sends the other headers", () => {
     const headers = securityHeaders({
       VITE_ADMIN_API_URL: "https://api.example.com",
     });
 
     expect(headers).toContain(
-      'add_header Content-Security-Policy-Report-Only "default-src',
+      'add_header Content-Security-Policy "default-src',
     );
     expect(headers).toContain("https://api.example.com https://accounts");
     expect(headers).toContain(
       'add_header X-Content-Type-Options "nosniff" always;',
     );
     expect(headers).toContain('add_header X-Frame-Options "DENY" always;');
-    expect(headers).not.toMatch(/^add_header Content-Security-Policy "/m);
+    // A report-only header would let a violation through
+    expect(headers).not.toContain("Report-Only");
   });
 });
