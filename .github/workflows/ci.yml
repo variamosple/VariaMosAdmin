@@ -103,6 +103,46 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+  # The mocked e2e in Microsoft Edge (T-31). Edge is installed on the GitHub
+  # runner but not in the Playwright image, so the tests run on the runner.
+  # Not required for now: it shares the Chromium engine, already tested.
+  e2e-edge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Show the Edge version
+        run: |
+          /opt/microsoft/msedge/msedge --version
+
+      - name: Run Mocked E2E Tests (Edge)
+        run: |
+          npm run playwright:run:mocked
+        env:
+          PLAYWRIGHT_EDGE: 1
+
+      - name: Upload Playwright Report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-edge-report
+          path: playwright-report/
+          retention-days: 7
+
   # The required check: it passes only when the checks and the mocked e2e
   # both pass (a skipped required check would count as passed)
   build-and-test:
