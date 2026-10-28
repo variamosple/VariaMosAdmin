@@ -63,12 +63,12 @@ export function contentSecurityPolicy(env) {
 }
 
 /**
- * The policy is only reported for now: a violation shows in the browser
- * console without blocking, until the list is confirmed in production.
+ * The policy blocks what it does not list. It was only reported first, and
+ * the production console showed no violation (2026-10-28).
  */
 export function securityHeaders(env) {
   return [
-    `add_header Content-Security-Policy-Report-Only "${contentSecurityPolicy(env)}" always;`,
+    `add_header Content-Security-Policy "${contentSecurityPolicy(env)}" always;`,
     'add_header X-Content-Type-Options "nosniff" always;',
     'add_header X-Frame-Options "DENY" always;',
     'add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;',
