@@ -374,6 +374,72 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     await waitFor(() => {
       expect(screen.getByText("MAX_CONNECTIONS")).toBeInTheDocument();
     });
+    expect(
+      await screen.findByText(
+        "The parameter MAX_CONNECTIONS could not be saved.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the edit open with the typed value when the API refuses it", async () => {
+    const user = userEvent.setup();
+    vi.mocked(
+      MicroServiceRepository.updateMicroServiceConfiguration,
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceConfigItem>().withError(
+        400,
+        "Value for key 'MAX_CONNECTIONS' must be a number.",
+      ),
+    );
+    render(
+      <MicroServiceConfigModal
+        show={true}
+        serviceName="ms_admin"
+        displayName="Administration Service"
+        onHide={vi.fn()}
+      />,
+    );
+    await screen.findByText("MAX_CONNECTIONS");
+
+    await user.click(screen.getAllByTitle("Edit parameter")[0]);
+    const input = screen.getByDisplayValue("100");
+    await user.clear(input);
+    await user.type(input, "many");
+    await user.click(
+      screen.getByRole("button", { name: /Save MAX_CONNECTIONS/i }),
+    );
+
+    expect(await screen.findByText(/must be a number/)).toBeInTheDocument();
+    expect(screen.getByDisplayValue("many")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Save MAX_CONNECTIONS/i }),
+    ).toBeEnabled();
+  });
+
+  it("says why a new parameter could not be added, and keeps the form", async () => {
+    const user = userEvent.setup();
+    vi.mocked(
+      MicroServiceRepository.updateMicroServiceConfiguration,
+    ).mockResolvedValue(
+      new ResponseModel<MicroServiceConfigItem>().withError(403, "Forbidden"),
+    );
+    render(
+      <MicroServiceConfigModal
+        show={true}
+        serviceName="ms_admin"
+        displayName="Administration Service"
+        onHide={vi.fn()}
+      />,
+    );
+    await screen.findByText("MAX_CONNECTIONS");
+
+    await user.click(screen.getByRole("button", { name: /Add parameter/i }));
+    await user.type(screen.getByPlaceholderText(/KEY_NAME/i), "LOG_LEVEL");
+    await user.type(screen.getByPlaceholderText(/Value/i), "debug");
+    await user.click(screen.getByRole("button", { name: /Save/i }));
+
+    expect(await screen.findByText("Forbidden")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/KEY_NAME/i)).toHaveValue("LOG_LEVEL");
   });
 
   it("displays empty state placeholder when no configurations exist", async () => {

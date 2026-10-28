@@ -75,8 +75,10 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
     setEditValue(config.isSecret ? "" : config.value);
   };
 
+  // On a failure the edit stays open with what was typed, and says why (UX-07)
   const handleSaveConfig = async (key: string) => {
     setIsSaving(true);
+    setSaveError(null);
     try {
       const res = await updateMicroServiceConfiguration(
         serviceName,
@@ -88,6 +90,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
         setConfigs((prev) =>
           prev.map((c) => (c.key === key ? updatedData : c)),
         );
+        setEditingKey(null);
         // Refresh audit logs
         const auditRes = await getMicroServiceAuditLogs(serviceName);
         if (auditRes.data) setAuditLogs(auditRes.data);
@@ -96,15 +99,16 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
       }
     } catch (error) {
       console.error("Error saving microservice configuration:", error);
+      setSaveError(`The parameter ${key} could not be saved.`);
     } finally {
       setIsSaving(false);
-      setEditingKey(null);
     }
   };
 
   const handleAddNewParam = async () => {
     if (!newKey.trim()) return;
     setIsAdding(true);
+    setSaveError(null);
     try {
       const res = await updateMicroServiceConfiguration(
         serviceName,
@@ -122,9 +126,14 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
         setShowAddForm(false);
         const auditRes = await getMicroServiceAuditLogs(serviceName);
         if (auditRes.data) setAuditLogs(auditRes.data);
+      } else {
+        setSaveError(
+          res.message ?? `The parameter ${newKey.trim()} could not be added.`,
+        );
       }
     } catch (error) {
       console.error("Error creating microservice configuration:", error);
+      setSaveError(`The parameter ${newKey.trim()} could not be added.`);
     } finally {
       setIsAdding(false);
     }
