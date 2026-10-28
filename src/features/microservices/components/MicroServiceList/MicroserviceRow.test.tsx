@@ -172,3 +172,30 @@ describe("MicroServiceRowComponent action follow-up (EV-86 lot 3)", () => {
     expect(screen.getByTitle("Restart Service")).toBeEnabled();
   });
 });
+
+describe("MicroServiceRowComponent latency", () => {
+  it("shows the latency of a degraded service, which explains its status", () => {
+    render(
+      <table>
+        <tbody>
+          <MicroServiceRowComponent
+            microService={{
+              ...mockMicroservice,
+              health: {
+                status: "DEGRADED",
+                serviceName: "test-micro",
+                responseTimeMs: 2400,
+              },
+            }}
+            onMicroServiceStart={vi.fn()}
+            onMicroServiceRestart={vi.fn()}
+            onMicroServiceStop={vi.fn()}
+          />
+        </tbody>
+      </table>,
+    );
+
+    expect(screen.getByText("DEGRADED")).toBeInTheDocument();
+    expect(screen.getByText("2400 ms")).toBeInTheDocument();
+  });
+});

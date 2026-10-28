@@ -183,7 +183,9 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         </td>
 
         <td>
-          {isUp && microService.health?.responseTimeMs !== undefined
+          {/* A slow answer is what makes a service DEGRADED: show it */}
+          {(isUp || status === "DEGRADED") &&
+          microService.health?.responseTimeMs !== undefined
             ? `${microService.health.responseTimeMs} ms`
             : "—"}
         </td>
