@@ -103,6 +103,9 @@ export const ACTIVITY_ACTIONS = [
   "permission.update",
   "permission.delete",
   "configuration.update",
+  "micro-service.start",
+  "micro-service.stop",
+  "micro-service.restart",
   "notification.dispatch",
 ];
 
@@ -111,6 +114,7 @@ export const ENTITY_TYPES = [
   "role",
   "permission",
   "configuration",
+  "micro-service",
   "notification",
 ];
 
