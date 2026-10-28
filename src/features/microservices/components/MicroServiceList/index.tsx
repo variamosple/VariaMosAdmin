@@ -4,6 +4,7 @@ import { Table } from "react-bootstrap";
 import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
 import type { ListState } from "@/shared/hooks/usePagedList";
+import { type FollowUp, serviceKeyOf } from "../../domain/actionFollowUp";
 import type { MicroService } from "../../domain/Entity/MicroService";
 import { MicroServiceRowComponent } from "./MicroserviceRow";
 
@@ -14,6 +15,8 @@ export interface MicroServiceListParameters extends PaginationControlsProps {
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
   onMicroServiceConfigure?: (microservice: MicroService) => void;
+  // Actions under way, by service key
+  followUps?: Record<string, FollowUp>;
 }
 
 export const MicroServiceList: FC<MicroServiceListParameters> = ({
@@ -26,6 +29,7 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
   onMicroServiceRestart,
   onMicroServiceStop,
   onMicroServiceConfigure,
+  followUps,
 }) => {
   return (
     <>
@@ -68,6 +72,7 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
               onMicroServiceRestart={onMicroServiceRestart}
               onMicroServiceStop={onMicroServiceStop}
               onMicroServiceConfigure={onMicroServiceConfigure}
+              followUp={followUps?.[serviceKeyOf(microService)]}
             />
           ))}
           {state && (

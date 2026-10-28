@@ -1,6 +1,14 @@
 import { withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useState } from "react";
-import { Button, Col, Container, Form, Row, Spinner } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Col,
+  Container,
+  Form,
+  Row,
+  Spinner,
+} from "react-bootstrap";
 import { ArrowClockwise } from "react-bootstrap-icons";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
@@ -43,7 +51,13 @@ const MicroServiceListPageComponent: FC = () => {
     refreshList,
     isRefreshing,
     listState,
+    lastRefreshedAt,
+    followUps,
   } = useMicroServiceList();
+
+  // A failed reload leaves the last statuses on screen: say they are old
+  // instead of letting them pass for current ones (EV-86 lot 2)
+  const isConnectionLost = !!listState.error && microServices.length > 0;
 
   return (
     <Container fluid="sm" className="my-2">
@@ -54,6 +68,9 @@ const MicroServiceListPageComponent: FC = () => {
         </Col>
 
         <Col xs="auto" className="d-flex align-items-center gap-2">
+          <small className="text-muted">
+            Updated {lastRefreshedAt.toLocaleTimeString()}
+          </small>
           <Form.Select
             size="sm"
             style={{ width: "160px" }}
@@ -100,10 +117,29 @@ const MicroServiceListPageComponent: FC = () => {
 
       <hr />
 
+      {isConnectionLost && (
+        <Alert variant="warning" className="d-flex align-items-center gap-2">
+          <span>
+            Connection to the administration service lost: the statuses below
+            date from {lastRefreshedAt.toLocaleTimeString()}. ({listState.error}
+            )
+          </span>
+          <Button
+            size="sm"
+            variant="outline-dark"
+            className="ms-auto"
+            onClick={() => refreshList(true)}
+          >
+            Retry
+          </Button>
+        </Alert>
+      )}
+
       {/* Microservice Cards List */}
       <MicroServiceList
         items={microServices}
-        state={listState}
+        state={isConnectionLost ? { ...listState, error: null } : listState}
+        followUps={followUps}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}

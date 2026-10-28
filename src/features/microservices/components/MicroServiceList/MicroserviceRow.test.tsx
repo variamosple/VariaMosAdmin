@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as MicroServiceRepository from "../../api/MicroServiceRepository";
+import type { FollowUp } from "../../domain/actionFollowUp";
 import type { MicroService } from "../../domain/Entity/MicroService";
 import { MicroServiceRowComponent } from "./MicroserviceRow";
 
@@ -136,5 +137,38 @@ describe("MicroServiceRowComponent WebSocket Logging", () => {
     // Close logs
     await user.click(logButton);
     expect(mockWebSocket.close).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("MicroServiceRowComponent action follow-up (EV-86 lot 3)", () => {
+  const renderRow = (followUp?: FollowUp) =>
+    render(
+      <table>
+        <tbody>
+          <MicroServiceRowComponent
+            microService={mockMicroservice}
+            onMicroServiceStart={vi.fn()}
+            onMicroServiceRestart={vi.fn()}
+            onMicroServiceStop={vi.fn()}
+            followUp={followUp}
+          />
+        </tbody>
+      </table>,
+    );
+
+  it("shows a restart under way instead of the last status, and blocks the actions", () => {
+    renderRow({ step: "restarting", since: Date.now() });
+
+    expect(screen.getByText("RESTARTING")).toBeInTheDocument();
+    expect(screen.queryByText("UP")).not.toBeInTheDocument();
+    expect(screen.getByTitle("Restart Service")).toBeDisabled();
+    expect(screen.getByTitle("Stop Service")).toBeDisabled();
+  });
+
+  it("shows a service not back, and lets the operator act again", () => {
+    renderRow({ step: "failed", since: Date.now() });
+
+    expect(screen.getByText("NOT BACK")).toBeInTheDocument();
+    expect(screen.getByTitle("Restart Service")).toBeEnabled();
   });
 });

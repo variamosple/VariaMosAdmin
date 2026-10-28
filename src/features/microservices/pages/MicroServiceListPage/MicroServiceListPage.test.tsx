@@ -241,4 +241,49 @@ describe("MicroServiceListPage Integration", () => {
       expect(screen.queryByText("Stop Service A?")).not.toBeInTheDocument();
     });
   });
+
+  it("keeps the last statuses and says the connection is lost when a reload fails", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<MicroServiceListPage />);
+    expect(await screen.findByText("Service A")).toBeInTheDocument();
+
+    server.use(
+      http.post("*/v1/micro-services/check", () =>
+        HttpResponse.json({ data: null }),
+      ),
+      http.get("*/v1/micro-services", () =>
+        HttpResponse.json(
+          { errorCode: 500, message: "Service unavailable." },
+          { status: 500 },
+        ),
+      ),
+    );
+    await user.click(screen.getByRole("button", { name: /Refresh/ }));
+
+    expect(
+      await screen.findByText(/Connection to the administration service lost/),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Service A")).toBeInTheDocument();
+  });
+
+  it("says why an action failed", async () => {
+    server.use(
+      http.put("*/v1/micro-services/:microserviceId/stop", () =>
+        HttpResponse.json(
+          { errorCode: 500, message: "Failed to stop microservice container" },
+          { status: 500 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<MicroServiceListPage />);
+    expect(await screen.findByText("Service A")).toBeInTheDocument();
+
+    await user.click(screen.getByTitle("Stop Service"));
+    await user.click(screen.getByRole("button", { name: "Stop microservice" }));
+
+    expect(
+      await screen.findByText("Service A could not be stopped"),
+    ).toBeInTheDocument();
+  });
 });
