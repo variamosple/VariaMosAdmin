@@ -129,6 +129,12 @@ jobs:
         run: |
           /opt/microsoft/msedge/msedge --version
 
+      # Videos of failed tests need the ffmpeg build of Playwright, which
+      # the image has and the runner has not
+      - name: Install the Playwright ffmpeg
+        run: |
+          npx playwright install ffmpeg
+
       - name: Run Mocked E2E Tests (Edge)
         run: |
           npm run playwright:run:mocked
