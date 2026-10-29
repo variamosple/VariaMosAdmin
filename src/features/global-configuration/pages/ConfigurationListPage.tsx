@@ -21,6 +21,7 @@ import {
   ShieldFillExclamation,
   ShieldLockFill,
 } from "react-bootstrap-icons";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { IconButton } from "@/shared/components/IconButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
@@ -35,10 +36,22 @@ const ConfigurationListPageComponent: FC = () => {
     isUpdating,
     isDirty,
     modifiedKeys,
+    sensitiveModifiedKeys,
+    saveFailures,
     setLocalValue,
     discardChanges,
     saveChanges,
   } = useConfigurationList();
+  const [confirming, setConfirming] = useState<"discard" | "sensitive">();
+
+  // A change to a sensitive setting is confirmed by name before it is sent
+  const onSave = () => {
+    if (sensitiveModifiedKeys.length > 0) {
+      setConfirming("sensitive");
+    } else {
+      void saveChanges();
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<string>("general");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -132,6 +145,7 @@ const ConfigurationListPageComponent: FC = () => {
                   const isSecret = config.isSecret;
                   const isBoolean = config.type === "boolean";
                   const isModified = modifiedKeys.includes(config.key);
+                  const saveFailure = saveFailures[config.key];
 
                   return (
                     <tr key={config.key}>
@@ -144,6 +158,11 @@ const ConfigurationListPageComponent: FC = () => {
                             </Badge>
                           )}
                         </div>
+                        {saveFailure && isModified && (
+                          <div className="text-danger small mt-1" role="alert">
+                            Not saved: {saveFailure}
+                          </div>
+                        )}
                         {config.description && (
                           <div className="text-muted small mt-1">
                             {config.description}
@@ -161,14 +180,14 @@ const ConfigurationListPageComponent: FC = () => {
                               placement="top"
                               overlay={
                                 <Tooltip>
-                                  Modifying this setting requires Multi-Factor
-                                  Authentication
+                                  Sensitive setting: saving a change to it asks
+                                  for a confirmation.
                                 </Tooltip>
                               }
                             >
                               <Badge bg="warning" className="text-dark">
                                 <ShieldLockFill className="me-1" />
-                                MFA PROTECTED
+                                SENSITIVE
                               </Badge>
                             </OverlayTrigger>
                           )}
@@ -312,7 +331,7 @@ const ConfigurationListPageComponent: FC = () => {
               variant="outline-secondary"
               size="sm"
               disabled={isUpdating}
-              onClick={discardChanges}
+              onClick={() => setConfirming("discard")}
             >
               Discard
             </Button>
@@ -320,7 +339,7 @@ const ConfigurationListPageComponent: FC = () => {
               variant="primary"
               size="sm"
               disabled={isUpdating}
-              onClick={saveChanges}
+              onClick={onSave}
             >
               {isUpdating ? (
                 <Spinner
@@ -335,6 +354,32 @@ const ConfigurationListPageComponent: FC = () => {
           </div>
         </Alert>
       )}
+
+      <ConfirmationModal
+        show={confirming === "discard"}
+        title="Discard changes"
+        message={`Discard ${modifiedKeys.length} unsaved change(s)? The settings go back to their saved values.`}
+        confirmLabel="Discard changes"
+        confirmButtonVariant="danger"
+        onConfirm={() => {
+          discardChanges();
+          setConfirming(undefined);
+        }}
+        onCancel={() => setConfirming(undefined)}
+      />
+
+      <ConfirmationModal
+        show={confirming === "sensitive"}
+        title="Save sensitive settings"
+        message={`This save changes sensitive settings: ${sensitiveModifiedKeys.join(", ")}. Save ${modifiedKeys.length} change(s)?`}
+        confirmLabel="Save changes"
+        confirmButtonVariant="warning"
+        onConfirm={() => {
+          setConfirming(undefined);
+          void saveChanges();
+        }}
+        onCancel={() => setConfirming(undefined)}
+      />
 
       <ConfigurationFormModal
         showModal={showEdit}
