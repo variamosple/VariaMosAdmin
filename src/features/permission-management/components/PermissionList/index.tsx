@@ -72,7 +72,7 @@ export const PermissionList: FC<PermissionListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table aria-busy={state?.isLoading} striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
             <SortableHeader field="id" label="ID" sort={sort} onSort={onSort} />

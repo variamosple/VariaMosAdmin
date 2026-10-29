@@ -33,7 +33,7 @@ export const RoleList: FC<RoleListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table aria-busy={state?.isLoading} striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
             <th>ID</th>

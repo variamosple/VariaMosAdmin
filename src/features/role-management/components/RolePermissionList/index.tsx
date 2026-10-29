@@ -30,7 +30,7 @@ export const RolePermissionList: FC<PermissionListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table aria-busy={state?.isLoading} striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
             <th>ID</th>

@@ -35,10 +35,10 @@ export const UserList: FC<UserListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table aria-busy={state?.isLoading} striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
-            <th>user</th>
+            <th>User</th>
 
             <th>Name</th>
 
