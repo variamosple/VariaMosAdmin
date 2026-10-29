@@ -160,4 +160,66 @@ describe("ModelFormModal Component", () => {
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(screen.queryByText("Edit Model")).not.toBeInTheDocument();
   });
+
+  describe("project and language search on the server (EV-96)", () => {
+    const renderCreateForm = (
+      props: Partial<Parameters<typeof ModelFormModal>[0]> = {},
+    ) =>
+      render(
+        <ModelFormModal
+          modalTitle="New model"
+          showModal={true}
+          onClose={mockOnClose}
+          onModelSubmit={mockOnSubmit}
+          isLoading={false}
+          projects={[{ id: "p-1", name: "Alpha" }]}
+          languages={[{ id: 1, name: "Feature model" }]}
+          {...props}
+        />,
+      );
+
+    it("asks the server for the projects whose name is typed", async () => {
+      const onProjectSearch = vi.fn();
+      const user = userEvent.setup();
+      renderCreateForm({ onProjectSearch });
+
+      await user.click(screen.getByText("Select a project..."));
+      await user.type(screen.getByPlaceholderText("Type to search..."), "Zeta");
+
+      await waitFor(() => expect(onProjectSearch).toHaveBeenCalledWith("Zeta"));
+      expect(onProjectSearch).toHaveBeenCalledTimes(1);
+    });
+
+    it("asks nothing when the form opens", async () => {
+      const onProjectSearch = vi.fn();
+      const onLanguageSearch = vi.fn();
+      renderCreateForm({ onProjectSearch, onLanguageSearch });
+
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      expect(onProjectSearch).not.toHaveBeenCalled();
+      expect(onLanguageSearch).not.toHaveBeenCalled();
+    });
+
+    it("keeps the name of the picked project when a later search leaves it out", async () => {
+      const user = userEvent.setup();
+      const { rerender } = renderCreateForm();
+
+      await user.click(screen.getByText("Select a project..."));
+      await user.click(screen.getByText("Alpha"));
+      rerender(
+        <ModelFormModal
+          modalTitle="New model"
+          showModal={true}
+          onClose={mockOnClose}
+          onModelSubmit={mockOnSubmit}
+          isLoading={false}
+          projects={[{ id: "p-2", name: "Beta" }]}
+          languages={[]}
+        />,
+      );
+
+      expect(screen.getByRole("button", { name: "Alpha" })).toBeInTheDocument();
+    });
+  });
 });
