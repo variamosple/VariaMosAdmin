@@ -19,7 +19,7 @@
     "lint": "biome check --error-on-warnings src/",
     "lint:errors": "biome check --diagnostic-level=error src/",
     "lint:fix": "biome check --write --unsafe src/",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
     "find-deadcode": "knip",
     "check-updates": "taze",
     "playwright:run:mocked": "bash ./scripts/run-mocked-playwright.sh",
