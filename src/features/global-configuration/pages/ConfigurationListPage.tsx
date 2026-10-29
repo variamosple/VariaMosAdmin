@@ -28,6 +28,11 @@ import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
 import type { Configuration } from "../domain/Entity/Configuration";
 import { useConfigurationList } from "../hooks/useConfigurationList";
 
+const lockedLabel = (config: Configuration) =>
+  config.isReadOnly
+    ? "This setting is read-only"
+    : "This setting is locked until a second-factor check is available";
+
 const ConfigurationListPageComponent: FC = () => {
   usePageTitle("Global configurations");
   const {
@@ -36,22 +41,12 @@ const ConfigurationListPageComponent: FC = () => {
     isUpdating,
     isDirty,
     modifiedKeys,
-    sensitiveModifiedKeys,
     saveFailures,
     setLocalValue,
     discardChanges,
     saveChanges,
   } = useConfigurationList();
-  const [confirming, setConfirming] = useState<"discard" | "sensitive">();
-
-  // A change to a sensitive setting is confirmed by name before it is sent
-  const onSave = () => {
-    if (sensitiveModifiedKeys.length > 0) {
-      setConfirming("sensitive");
-    } else {
-      void saveChanges();
-    }
-  };
+  const [confirming, setConfirming] = useState<"discard">();
 
   const [activeTab, setActiveTab] = useState<string>("general");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -146,6 +141,9 @@ const ConfigurationListPageComponent: FC = () => {
                   const isBoolean = config.type === "boolean";
                   const isModified = modifiedKeys.includes(config.key);
                   const saveFailure = saveFailures[config.key];
+                  // The server refuses a change to a key that requires MFA
+                  // until it can check a second factor (T-10)
+                  const isLocked = config.isReadOnly || config.requiresMfa;
 
                   return (
                     <tr key={config.key}>
@@ -180,14 +178,14 @@ const ConfigurationListPageComponent: FC = () => {
                               placement="top"
                               overlay={
                                 <Tooltip>
-                                  Sensitive setting: saving a change to it asks
-                                  for a confirmation.
+                                  Changing this setting needs a second-factor
+                                  check, which is not available yet.
                                 </Tooltip>
                               }
                             >
                               <Badge bg="warning" className="text-dark">
                                 <ShieldLockFill className="me-1" />
-                                SENSITIVE
+                                LOCKED
                               </Badge>
                             </OverlayTrigger>
                           )}
@@ -218,7 +216,7 @@ const ConfigurationListPageComponent: FC = () => {
                               type="switch"
                               id={`toggle-${config.key}`}
                               checked={Boolean(config.value)}
-                              disabled={config.isReadOnly || isUpdating}
+                              disabled={isLocked || isUpdating}
                               onChange={(e) =>
                                 setLocalValue(config.key, e.target.checked)
                               }
@@ -263,18 +261,16 @@ const ConfigurationListPageComponent: FC = () => {
                         </div>
                       </td>
                       <td className="text-center">
-                        {config.isReadOnly ? (
+                        {isLocked ? (
                           <OverlayTrigger
                             placement="top"
-                            overlay={
-                              <Tooltip>This setting is read-only</Tooltip>
-                            }
+                            overlay={<Tooltip>{lockedLabel(config)}</Tooltip>}
                           >
                             <IconButton
                               size="sm"
                               variant="outline-secondary"
                               disabled
-                              label="This setting is read-only"
+                              label={lockedLabel(config)}
                               icon={
                                 <ShieldFillExclamation className="text-muted" />
                               }
@@ -339,7 +335,7 @@ const ConfigurationListPageComponent: FC = () => {
               variant="primary"
               size="sm"
               disabled={isUpdating}
-              onClick={onSave}
+              onClick={() => void saveChanges()}
             >
               {isUpdating ? (
                 <Spinner
@@ -364,19 +360,6 @@ const ConfigurationListPageComponent: FC = () => {
         onConfirm={() => {
           discardChanges();
           setConfirming(undefined);
-        }}
-        onCancel={() => setConfirming(undefined)}
-      />
-
-      <ConfirmationModal
-        show={confirming === "sensitive"}
-        title="Save sensitive settings"
-        message={`This save changes sensitive settings: ${sensitiveModifiedKeys.join(", ")}. Save ${modifiedKeys.length} change(s)?`}
-        confirmLabel="Save changes"
-        confirmButtonVariant="warning"
-        onConfirm={() => {
-          setConfirming(undefined);
-          void saveChanges();
         }}
         onCancel={() => setConfirming(undefined)}
       />

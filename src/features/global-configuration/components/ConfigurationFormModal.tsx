@@ -138,9 +138,9 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
           )}
 
           {config.requiresMfa && (
-            <Alert variant="info" className="py-2 small mb-0">
-              ℹ️ Modifying this configuration requires Multi-Factor
-              Authentication upon saving.
+            <Alert variant="warning" className="py-2 small mb-0">
+              Changing this setting needs a second-factor check, which is not
+              available yet: the server refuses the change.
             </Alert>
           )}
 
