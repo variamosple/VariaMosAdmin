@@ -61,9 +61,9 @@ test.describe("Role & Permission Management - Mocked Flows", () => {
 
     test("should validate create role dialog input and handle errors", async ({ page }) => {
       await page.getByRole("button", { name: "Create role" }).click();
-      await expect(page.locator(".modal-title")).toHaveText("New role");
+      await expect(page.getByRole("dialog", { name: "New role" })).toBeVisible();
 
-      await page.locator('.modal-footer button[type="submit"]').click();
+      await page.getByRole("dialog").getByRole("button", { name: "Create role" }).click();
       await expect(page.getByText("Role name is required")).toBeVisible();
 
       await page.route("**/v1/roles", async (route) => {
@@ -74,13 +74,13 @@ test.describe("Role & Permission Management - Mocked Flows", () => {
         });
       });
 
-      await page.locator('input[id="name"]').fill("Administrator");
-      await page.locator('.modal-footer button[type="submit"]').click();
+      await page.getByRole("dialog").getByLabel("Role name").fill("Administrator");
+      await page.getByRole("dialog").getByRole("button", { name: "Create role" }).click();
 
-      await expect(page.locator(".modal-title")).toBeVisible();
+      await expect(page.getByRole("dialog")).toBeVisible();
 
       await page.getByRole("button", { name: "Cancel" }).click();
-      await expect(page.locator(".modal-title")).not.toBeVisible();
+      await expect(page.getByRole("dialog")).toBeHidden();
     });
   });
 });

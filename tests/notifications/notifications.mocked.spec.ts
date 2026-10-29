@@ -48,7 +48,7 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
 
     // Test form validation: submit without title/body
     await page.click('button[type="submit"]');
-    await expect(page.locator(".alert-danger")).toContainText("Please provide both title and message body.");
+    await expect(page.getByRole("alert")).toContainText("Please provide both title and message body.");
 
     // Fill title & body
     await page.fill('input[placeholder="e.g., Scheduled Maintenance Alert"]', "Service Maintenance");
@@ -101,6 +101,6 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
       .click();
 
     // Success alert should show up
-    await expect(page.locator(".alert-success")).toContainText("Notifications dispatched successfully!");
+    await expect(page.getByRole("alert")).toContainText("Notifications dispatched successfully!");
   });
 });

@@ -81,12 +81,12 @@ test.describe("Language Management - Mocked Flows", () => {
     const englishRow = page.locator("tr", { hasText: "English" });
     await englishRow.locator('button[title="Edit language"]').click();
 
-    await expect(page.locator(".modal-title")).toHaveText("Edit a Language");
-    const nameInput = page.locator('.modal input[placeholder="Language name"]');
+    await expect(page.getByRole("dialog", { name: "Edit a Language" })).toBeVisible();
+    const nameInput = page.getByRole("dialog").getByLabel("Name");
     await expect(nameInput).toHaveValue("English");
 
     await nameInput.clear();
-    await page.locator(".modal-footer").getByRole("button", { name: "Edit language" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Edit language" }).click();
     await expect(page.getByText("Language name is required")).toBeVisible();
 
     await nameInput.fill("English Edited");
@@ -99,7 +99,7 @@ test.describe("Language Management - Mocked Flows", () => {
       });
     });
 
-    await page.locator(".modal-footer").getByRole("button", { name: "Edit language" }).click();
-    await expect(page.locator(".modal-title")).not.toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: "Edit language" }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
   });
 });

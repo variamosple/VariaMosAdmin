@@ -94,20 +94,24 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     });
   });
 
+  // Rows of the shown tab; the header row holds no cell
+  const bugRows = (page: Page) =>
+    page.getByRole("tabpanel").getByRole("row").filter({ has: page.getByRole("cell") });
+
   const loginAndGoToBugs = async (page: Page) => {
     await page.addInitScript(() => {
       window.localStorage.setItem("authToken", "fake-jwt-token");
     });
     await page.goto("http://localhost:3000");
 
-    const emailLocator = page.locator("#email");
+    const emailLocator = page.getByLabel("Email");
     if (await emailLocator.isVisible()) {
       await emailLocator.fill(adminEmail);
-      await page.locator("#password").fill(adminPassword);
-      await page.locator('button[type="submit"]').click();
+      await page.getByLabel("Password").fill(adminPassword);
+      await page.getByRole("button", { name: "Sign in", exact: true }).click();
     }
 
-    const modal = page.locator(".modal");
+    const modal = page.getByRole("dialog");
     if (await modal.isVisible()) {
       await modal.getByRole("button", { name: "Cancel" }).click();
     }
@@ -129,16 +133,16 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     });
     await page.goto("http://localhost:3000");
 
-    const emailLocator = page.locator("#email");
+    const emailLocator = page.getByLabel("Email");
     if (await emailLocator.isVisible()) {
       await emailLocator.fill(adminEmail);
-      await page.locator("#password").fill(adminPassword);
-      await page.locator('button[type="submit"]').click();
+      await page.getByLabel("Password").fill(adminPassword);
+      await page.getByRole("button", { name: "Sign in", exact: true }).click();
     }
 
     await expect(page).toHaveURL("http://localhost:3000/");
 
-    const modal = page.locator(".modal");
+    const modal = page.getByRole("dialog");
     if (await modal.isVisible()) {
       await modal.getByRole("button", { name: "Cancel" }).click();
     }
@@ -172,9 +176,9 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
 
     await loginAndGoToBugs(page);
 
-    await expect(page.locator(".nav-tabs .nav-link.active")).toContainText("GitHub Bugs");
+    await expect(page.getByRole("tab", { selected: true })).toContainText("GitHub Bugs");
 
-    const rows = page.locator(".tab-pane.active table tbody tr");
+    const rows = bugRows(page);
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0)).toContainText("GitHub UI Crash");
     await expect(rows.nth(1)).toContainText("GitHub Performance lag");
@@ -210,20 +214,20 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
 
     await loginAndGoToBugs(page);
 
-    const rows = page.locator(".tab-pane.active table tbody tr");
+    const rows = bugRows(page);
     await expect(rows.nth(0)).toContainText("Unassigned");
     await rows.nth(0).getByRole("button", { name: "Details" }).click();
 
-    const modal = page.locator(".modal");
+    const modal = page.getByRole("dialog");
     await modal.getByLabel("Ben").check();
     await modal.getByRole("button", { name: "Save assignees" }).click();
     await expect(modal.getByText("Assigned to:").locator("..")).toContainText("Assigned to: Ben");
     expect(sentAssignees).toEqual([["admin-2"]]);
-    await modal.locator(".modal-footer").getByRole("button", { name: "Close" }).click();
+    await modal.getByRole("button", { name: "Close" }).first().click();
     await expect(rows.nth(0)).toContainText("Ben");
 
     await page.getByLabel("Assigned to").selectOption("admin-2");
-    await expect(page.locator(".tab-pane.active table tbody")).toContainText("No bugs found.");
+    await expect(page.getByRole("tabpanel")).toContainText("No bugs found.");
   });
 
   test("should display Local Inbox bugs, access attachments, and perform Approve/Reject actions", async ({ page }) => {
@@ -261,23 +265,23 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
 
     await expect(page.getByRole("button", { name: "Sync GitHub" })).not.toBeVisible();
 
-    const row = page.locator(".tab-pane.active table tbody tr").first();
+    const row = bugRows(page).first();
     await expect(row.locator("a")).toHaveAttribute("href", /.*\/uploads\/screenshot.png/);
     await expect(row.getByRole("button", { name: "Approve" })).toBeVisible();
     await expect(row.getByRole("button", { name: "Reject" })).toBeVisible();
 
     await row.getByRole("button", { name: "Approve" }).click();
-    await page.locator('.modal select[name="githubRepo"]').selectOption("VariaMos/VariaMosPLE");
-    await page.locator(".modal-footer").getByRole("button", { name: "Approve & Send to GitHub" }).click();
+    await page.getByRole("dialog").getByLabel("Target Repository (GitHub)").selectOption("VariaMos/VariaMosPLE");
+    await page.getByRole("dialog").getByRole("button", { name: "Approve & Send to GitHub" }).click();
     // Approval publishes a public issue: it waits for an explicit confirmation
-    await expect(page.locator(".modal-footer")).toContainText("visible to anyone");
-    await page.locator(".modal-footer").getByRole("button", { name: "Publish to GitHub" }).click();
-    await expect(page.locator(".modal-title")).not.toBeVisible();
+    await expect(page.getByRole("dialog")).toContainText("visible to anyone");
+    await page.getByRole("dialog").getByRole("button", { name: "Publish to GitHub" }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
 
     await row.getByRole("button", { name: "Reject" }).click();
-    await expect(page.locator(".modal-body")).toContainText("Move \"Local UI Crash\" to the Trash Bin?");
+    await expect(page.getByRole("dialog")).toContainText("Move \"Local UI Crash\" to the Trash Bin?");
     await page.getByRole("button", { name: "Reject bug" }).click();
-    await expect(page.locator(".modal-body")).not.toBeVisible();
+    await expect(page.getByRole("dialog")).toBeHidden();
   });
 
   test("should display Trash Bin bugs and perform Restore action", async ({ page }) => {
@@ -304,7 +308,7 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     await loginAndGoToBugs(page);
     await page.getByText("Trash Bin").click();
 
-    const row = page.locator(".tab-pane.active table tbody tr").first();
+    const row = bugRows(page).first();
     await expect(row.getByRole("button", { name: "Restore" })).toBeVisible();
     await expect(row.getByRole("button", { name: "Approve" })).not.toBeVisible();
 
@@ -330,24 +334,24 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     await loginAndGoToBugs(page);
 
     await page.getByRole("button", { name: "Report a Bug" }).click();
-    await expect(page.locator(".modal-title")).toHaveText("Report a New Bug");
+    await expect(page.getByRole("dialog", { name: "Report a New Bug" })).toBeVisible();
 
-    await page.locator(".modal-footer").getByRole("button", { name: "Cancel" }).click();
-    await expect(page.locator(".modal-title")).not.toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: "Cancel" }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
 
     await page.getByRole("button", { name: "Report a Bug" }).click();
-    await expect(page.locator('.modal select[name="priority"]')).not.toBeVisible();
+    await expect(page.getByRole("dialog").getByLabel("Priority")).toBeHidden();
 
-    await page.locator(".modal-footer").getByRole("button", { name: "Report Bug" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Report Bug" }).click();
     await expect(page.getByText("Title is required")).toBeVisible();
     await expect(page.getByText("Description is required")).toBeVisible();
 
-    await page.locator('.modal input[name="title"]').fill("User Bug Title");
-    await page.locator('.modal textarea[name="description"]').fill("User Bug Description");
-    await page.locator('.modal select[name="category"]').selectOption("Editor");
+    await page.getByRole("dialog").getByLabel("Title").fill("User Bug Title");
+    await page.getByRole("dialog").getByLabel("Description").fill("User Bug Description");
+    await page.getByRole("dialog").getByLabel("Category").selectOption("Editor");
 
-    await page.locator(".modal-footer").getByRole("button", { name: "Report Bug" }).click();
-    await expect(page.locator(".modal-title")).not.toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: "Report Bug" }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
   });
 
   test("should open bug report modal when clicking Report a problem in menu options", async ({ page }) => {
@@ -371,14 +375,14 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     });
     await page.goto("http://localhost:3000");
 
-    const emailLocator = page.locator("#email");
+    const emailLocator = page.getByLabel("Email");
     if (await emailLocator.isVisible()) {
       await emailLocator.fill(adminEmail);
-      await page.locator("#password").fill(adminPassword);
-      await page.locator('button[type="submit"]').click();
+      await page.getByLabel("Password").fill(adminPassword);
+      await page.getByRole("button", { name: "Sign in", exact: true }).click();
     }
 
-    const modal = page.locator(".modal");
+    const modal = page.getByRole("dialog");
     if (await modal.isVisible()) {
       await modal.getByRole("button", { name: "Cancel" }).click();
     }

@@ -106,13 +106,13 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await toggle.click();
 
     // Alert banner for unsaved changes should be visible
-    await expect(page.locator(".alert-warning")).toBeVisible();
-    await expect(page.locator(".alert-warning")).toContainText("You have unsaved changes.");
+    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(page.getByRole("alert")).toContainText("You have unsaved changes.");
 
     // Discard changes, after the confirmation
-    await page.locator(".alert-warning button", { hasText: "Discard" }).click();
+    await page.getByRole("button", { name: "Discard" }).click();
     await page.getByRole("button", { name: "Discard changes" }).click();
-    await expect(page.locator(".alert-warning")).not.toBeVisible();
+    await expect(page.getByRole("alert")).not.toBeVisible();
     await expect(toggle).toBeChecked();
   });
 
@@ -122,15 +122,15 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await siteNameRow.locator('button[title="Edit setting"]').click();
 
     // Verify modal elements
-    await expect(page.locator(".modal-title")).toHaveText("Edit Configuration");
-    const input = page.locator('.modal-body input[type="text"]');
+    await expect(page.getByRole("dialog", { name: "Edit Configuration" })).toBeVisible();
+    const input = page.getByRole("dialog").getByLabel("Value");
     await input.fill("VariaMos Custom");
 
     await page.click('button[type="submit"]');
 
     // Modal closes and sandbox alert appears
-    await expect(page.locator(".modal-title")).not.toBeVisible();
-    await expect(page.locator(".alert-warning")).toBeVisible();
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(page.getByRole("alert")).toBeVisible();
 
     // Mock successful update response
     await page.route("**/v1/configurations/general.site_name", async (route) => {
@@ -153,7 +153,7 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await page.click('button:has-text("Save Changes")');
 
     // Success toast should appear
-    await expect(page.locator(".toast")).toBeVisible();
-    await expect(page.locator(".toast")).toContainText("Successfully saved 1 configuration(s).");
+    await expect(page.getByRole("alert").filter({ hasText: "Successfully saved" })).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: "Successfully saved" })).toContainText("Successfully saved 1 configuration(s).");
   });
 });
