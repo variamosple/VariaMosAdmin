@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Metrics - Mocked E2E Flows", () => {
   const mockMetrics = [
@@ -25,24 +26,7 @@ test.describe("Metrics - Mocked E2E Flows", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
 
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["metrics::query"]
-            }
-          }
-        })
-      });
-    });
+    await mockSignedIn(page, ["metrics::query"]);
   });
 
   test("should render charts and date filters on the Metrics dashboard", async ({ page }) => {

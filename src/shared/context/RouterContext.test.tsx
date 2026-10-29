@@ -85,8 +85,6 @@ describe("RouterContext & RouterProvider", () => {
   const mockLocation = { pathname: "/current-page" };
   const mockParams = { id: "123" };
   const mockSearchParams = [new URLSearchParams("?q=test")];
-  let originalWindowOpen: typeof window.open;
-  let originalLocation: Location;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -113,23 +111,8 @@ describe("RouterContext & RouterProvider", () => {
       mockSearchParams,
     );
 
-    originalWindowOpen = window.open;
-    window.open = vi.fn();
-
-    // Mock window.location.origin
-    originalLocation = window.location;
-    // @ts-expect-error
-    delete window.location;
-    // @ts-expect-error
-    window.location = {
-      origin: "http://localhost:3000",
-    } as Location;
-  });
-
-  afterEach(() => {
-    window.open = originalWindowOpen;
-    // @ts-expect-error
-    window.location = originalLocation;
+    vi.stubGlobal("open", vi.fn());
+    vi.stubGlobal("location", { origin: "http://localhost:3000" });
   });
 
   it("provides RouterContext values to consumer components", () => {

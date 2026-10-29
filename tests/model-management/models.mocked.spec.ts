@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Model Management - Mocked Flows", () => {
   const mockModels = [
@@ -35,24 +36,7 @@ test.describe("Model Management - Mocked Flows", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
 
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["admin::models::query", "admin::models::create", "admin::models::update"]
-            }
-          }
-        })
-      });
-    });
+    await mockSignedIn(page, ["admin::models::query", "admin::models::create", "admin::models::update"]);
 
     await page.route("**/v1/admin/models*", async (route) => {
       await route.fulfill({
@@ -119,12 +103,12 @@ test.describe("Model Management - Mocked Flows", () => {
     const row = page.locator("tr", { hasText: "First Model" });
     await row.locator('button[title="Edit model"]').click();
 
-    await expect(page.locator(".modal-title")).toHaveText("Edit a Model");
-    const input = page.locator('.modal input[placeholder="Model name"]');
+    await expect(page.getByRole("dialog", { name: "Edit a Model" })).toBeVisible();
+    const input = page.getByRole("dialog").getByLabel("Name");
     await expect(input).toHaveValue("First Model");
 
     await input.clear();
-    await page.locator(".modal-footer").getByRole("button", { name: "Edit model" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Edit model" }).click();
     await expect(page.getByText("Model name is required")).toBeVisible();
 
     await input.fill("First Model Edited");
@@ -137,8 +121,8 @@ test.describe("Model Management - Mocked Flows", () => {
       });
     });
 
-    await page.locator(".modal-footer").getByRole("button", { name: "Edit model" }).click();
-    await expect(page.locator(".modal-title")).not.toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: "Edit model" }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
   });
 
   test("should perform quick toggles for level and visibility", async ({ page }) => {
@@ -146,7 +130,7 @@ test.describe("Model Management - Mocked Flows", () => {
     
     // Toggle Level
     await row.locator('button[title="Toggle model level (Domain/Application)"]').click();
-    await expect(page.locator(".modal-body")).toContainText('Change the level of the model "First Model" to Application Model?');
+    await expect(page.getByRole("dialog")).toContainText('Change the level of the model "First Model" to Application Model?');
     
     await page.route("**/v1/admin/models/1", async (route) => {
       await route.fulfill({
@@ -159,7 +143,7 @@ test.describe("Model Management - Mocked Flows", () => {
 
     // Toggle Visibility
     await row.locator('button[title="Toggle model visibility (Public/Private)"]').click();
-    await expect(page.locator(".modal-body")).toContainText('Make the model "First Model" private?');
+    await expect(page.getByRole("dialog")).toContainText('Make the model "First Model" private?');
     
     await page.route("**/v1/admin/models/1", async (route) => {
       await route.fulfill({
@@ -173,13 +157,13 @@ test.describe("Model Management - Mocked Flows", () => {
 
   test("should support searchable language dropdown when creating a model", async ({ page }) => {
     await page.getByRole("button", { name: "Create model" }).click();
-    await expect(page.locator(".modal-title")).toHaveText("New model");
+    await expect(page.getByRole("dialog", { name: "New model" })).toBeVisible();
 
     // Open language dropdown
     await page.getByRole("button", { name: "Select a language..." }).click();
     
     // Search for Python
-    const searchInput = page.locator('.modal input[placeholder="Type to search..."]');
+    const searchInput = page.getByRole("dialog").getByPlaceholder("Type to search...");
     await searchInput.fill("Py");
     
     // Check Java is hidden, Python is shown

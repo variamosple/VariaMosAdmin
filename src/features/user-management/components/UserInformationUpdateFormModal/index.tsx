@@ -1,5 +1,5 @@
 import { type ResponseModel, useQuery } from "@variamosple/variamos-components";
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useId, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
@@ -77,14 +77,17 @@ export const PersonalInformationUpdateForModal: FC<
     }
   }, [showModal, defaultValue, reset]);
 
+  const titleId = useId();
+
   return (
     <Modal
+      aria-labelledby={titleId}
       show={showModal}
       backdrop={isLoading ? "static" : true}
       onHide={onCloseModal}
     >
       <Modal.Header closeButton={!isLoading}>
-        <Modal.Title>Personal information update</Modal.Title>
+        <Modal.Title id={titleId}>Personal information update</Modal.Title>
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">

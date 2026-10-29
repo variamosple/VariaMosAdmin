@@ -1,14 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { json, mockSignedIn, mockSignedOut } from "../helpers/session";
 
 // WCAG 2.1 A and AA rules, checked by axe-core on the main screens (EV-96)
 const WCAG_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
-
-const json = (data: unknown, status = 200) => ({
-  status,
-  contentType: "application/json",
-  body: JSON.stringify(data),
-});
 
 const violations = async (page: Page) => {
   // Measured on a settled page: during the session check the guest button is
@@ -36,9 +31,7 @@ const violations = async (page: Page) => {
 test.describe("Accessibility - signed out screens", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    await page.route("**/auth/session-info", (route) =>
-      route.fulfill(json({ errorCode: 401, message: "No session" }, 401)),
-    );
+    await mockSignedOut(page);
   });
 
   for (const [name, path, heading] of [
@@ -60,24 +53,8 @@ test.describe("Accessibility - signed out screens", () => {
 });
 
 test.describe("Accessibility - signed in screens", () => {
-  const signIn = async (page: Page, permissions: string[]) => {
-    await page.route("**/auth/session-info", (route) =>
-      route.fulfill(
-        json({
-          data: {
-            user: {
-              id: "admin-1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions,
-            },
-          },
-        }),
-      ),
-    );
-  };
+  const signIn = (page: Page, permissions: string[]) =>
+    mockSignedIn(page, permissions, { id: "admin-1" });
 
   test("the users list has no WCAG A or AA violation", async ({ page }) => {
     await signIn(page, ["users::query", "users::update", "users::delete"]);

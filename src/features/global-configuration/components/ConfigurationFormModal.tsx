@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useId, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import type {
   Configuration,
@@ -18,6 +18,7 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
   config,
   onConfigSubmit,
 }) => {
+  const titleId = useId();
   const [inputValue, setInputValue] = useState<string>("");
   const [boolValue, setBoolValue] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -94,9 +95,9 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
   if (!config) return null;
 
   return (
-    <Modal show={showModal} onHide={onClose}>
+    <Modal aria-labelledby={titleId} show={showModal} onHide={onClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Edit Configuration</Modal.Title>
+        <Modal.Title id={titleId}>Edit Configuration</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleSubmit}>

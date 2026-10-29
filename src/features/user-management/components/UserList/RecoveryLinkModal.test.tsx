@@ -62,15 +62,8 @@ describe("RecoveryLinkModal Component", () => {
     delayRecoveryQuery = false;
     isRecoveryError = false;
 
-    // Mock navigator.clipboard using Object.defineProperty
-    const mockClipboard = {
-      writeText: vi.fn().mockImplementation(() => Promise.resolve()),
-    };
-    Object.defineProperty(navigator, "clipboard", {
-      value: mockClipboard,
-      configurable: true,
-      writable: true,
-    });
+    // No clipboard of our own: userEvent.setup() puts its stub on navigator
+    // and removes it after each test
 
     server.use(
       http.post(apiTarget("/v1/users/:userId/recovery-link"), () => {

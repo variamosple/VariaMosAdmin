@@ -1,5 +1,5 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useState } from "react";
+import { type FC, useId, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { usePasswordPolicy } from "@/features/auth/hooks/usePasswordPolicy";
@@ -56,14 +56,17 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
     setServerError(null);
   };
 
+  const titleId = useId();
+
   return (
     <Modal
+      aria-labelledby={titleId}
       show={showModal}
       backdrop={isLoading ? "static" : true}
       onHide={onCloseModal}
     >
       <Modal.Header closeButton={!isLoading}>
-        <Modal.Title>Password update</Modal.Title>
+        <Modal.Title id={titleId}>Password update</Modal.Title>
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">

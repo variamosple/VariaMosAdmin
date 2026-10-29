@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Microservices - Complete Mocked E2E Workflow", () => {
   const mockMicroservices = [
@@ -42,24 +43,7 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
     await context.clearCookies();
 
     // Mock session info
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["micro-services::query", "micro-services::manage"],
-            },
-          },
-        }),
-      });
-    });
+    await mockSignedIn(page, ["micro-services::query", "micro-services::manage"]);
   });
 
   test("should load dashboard, display metrics/uptime, trigger refresh, configure params, and manage container lifecycle", async ({

@@ -1,4 +1,11 @@
-import { type ChangeEvent, type FC, useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type FC,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import type { Bug } from "../../domain/Bug";
@@ -71,8 +78,11 @@ export const BugFormModal: FC<BugFormModalProps> = ({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const titleId = useId();
+
   return (
     <Modal
+      aria-labelledby={titleId}
       show={show}
       onHide={onHide}
       backdrop="static"
@@ -80,7 +90,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title>
+        <Modal.Title id={titleId}>
           {mode === "admin" ? "Report a GitHub Bug" : "Report a New Bug"}
         </Modal.Title>
       </Modal.Header>

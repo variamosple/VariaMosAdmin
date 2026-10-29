@@ -1,15 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
+import { json, mockSignedIn, mockSignedOut } from "../helpers/session";
 
 // MA-NF-10: the main screens are usable at 375, 768 and 1440 px without
 // horizontal scrolling of the page (EV-95). A table may scroll inside its own
 // frame: every column and action stays reachable.
 const WIDTHS = [375, 768, 1440];
-
-const json = (data: unknown, status = 200) => ({
-  status,
-  contentType: "application/json",
-  body: JSON.stringify(data),
-});
 
 const PERMISSIONS = [
   "users::query",
@@ -57,22 +52,7 @@ const MENU = {
 };
 
 const signIn = async (page: Page) => {
-  await page.route("**/auth/session-info", (route) =>
-    route.fulfill(
-      json({
-        data: {
-          user: {
-            id: "admin-1",
-            user: "admin",
-            name: "Admin User",
-            email: "admin@example.com",
-            roles: ["Admin"],
-            permissions: PERMISSIONS,
-          },
-        },
-      }),
-    ),
-  );
+  await mockSignedIn(page, PERMISSIONS, { id: "admin-1" });
   await page.route("**/v1/configurations/menu", (route) =>
     route.fulfill(json({ data: MENU })),
   );
@@ -159,9 +139,7 @@ for (const width of WIDTHS) {
     test.use({ viewport: { width, height: 800 } });
 
     test("the sign in screen fits the window", async ({ page }) => {
-      await page.route("**/auth/session-info", (route) =>
-        route.fulfill(json({ errorCode: 401, message: "No session" }, 401)),
-      );
+      await mockSignedOut(page);
       await page.goto("/#/login");
       await expect(
         page.getByRole("button", { name: /sign in/i }).first(),

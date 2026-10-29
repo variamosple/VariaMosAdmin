@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Language Management - Mocked Flows", () => {
   const mockLanguages = [
@@ -25,24 +26,7 @@ test.describe("Language Management - Mocked Flows", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
 
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["admin::languages::query"]
-            }
-          }
-        })
-      });
-    });
+    await mockSignedIn(page, ["admin::languages::query"]);
 
     await page.route("**/v1/admin/languages*", async (route) => {
       await route.fulfill({
@@ -97,12 +81,12 @@ test.describe("Language Management - Mocked Flows", () => {
     const englishRow = page.locator("tr", { hasText: "English" });
     await englishRow.locator('button[title="Edit language"]').click();
 
-    await expect(page.locator(".modal-title")).toHaveText("Edit a Language");
-    const nameInput = page.locator('.modal input[placeholder="Language name"]');
+    await expect(page.getByRole("dialog", { name: "Edit a Language" })).toBeVisible();
+    const nameInput = page.getByRole("dialog").getByLabel("Name");
     await expect(nameInput).toHaveValue("English");
 
     await nameInput.clear();
-    await page.locator(".modal-footer").getByRole("button", { name: "Edit language" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Edit language" }).click();
     await expect(page.getByText("Language name is required")).toBeVisible();
 
     await nameInput.fill("English Edited");
@@ -115,7 +99,7 @@ test.describe("Language Management - Mocked Flows", () => {
       });
     });
 
-    await page.locator(".modal-footer").getByRole("button", { name: "Edit language" }).click();
-    await expect(page.locator(".modal-title")).not.toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: "Edit language" }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
   });
 });

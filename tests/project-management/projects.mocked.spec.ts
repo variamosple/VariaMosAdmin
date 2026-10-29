@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Project Management - Mocked Flows", () => {
   const mockProjects = [
@@ -38,24 +39,7 @@ test.describe("Project Management - Mocked Flows", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
 
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["admin::projects::query"]
-            }
-          }
-        })
-      });
-    });
+    await mockSignedIn(page, ["admin::projects::query"]);
 
     await page.route("**/v1/admin/projects*", async (route) => {
       await route.fulfill({
@@ -107,12 +91,12 @@ test.describe("Project Management - Mocked Flows", () => {
     const row = page.locator("tr", { hasText: "English Web Project" });
     await row.locator('button[title="Edit project"]').click();
 
-    await expect(page.locator(".modal-title")).toHaveText("Edit a Project");
-    const nameInput = page.locator('.modal input[placeholder="Project name"]');
+    await expect(page.getByRole("dialog", { name: "Edit a Project" })).toBeVisible();
+    const nameInput = page.getByRole("dialog").getByLabel("Name");
     await expect(nameInput).toHaveValue("English Web Project");
 
     await nameInput.clear();
-    await page.locator(".modal button").getByText("Edit project", { exact: true }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Edit project", exact: true }).click();
     await expect(page.getByText("Project name is required")).toBeVisible();
 
     await nameInput.fill("English Web Project Updated");
@@ -125,7 +109,7 @@ test.describe("Project Management - Mocked Flows", () => {
       });
     });
 
-    await page.locator(".modal button").getByText("Edit project", { exact: true }).click();
-    await expect(page.locator(".modal-title")).not.toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: "Edit project", exact: true }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
   });
 });
