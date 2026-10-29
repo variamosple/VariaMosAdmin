@@ -1,20 +1,12 @@
 import { test, expect } from "@playwright/test";
+import { mockSignedOut } from "../helpers/session";
 
 test.describe("Auth - Comprehensive Mocked Flows", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
     
     // Default session mock (not logged in)
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 401,
-        contentType: "application/json",
-        body: JSON.stringify({
-          errorCode: 401,
-          message: "Your session has expired, please log in again."
-        })
-      });
-    });
+    await mockSignedOut(page);
   });
 
   test.describe("Sign In", () => {

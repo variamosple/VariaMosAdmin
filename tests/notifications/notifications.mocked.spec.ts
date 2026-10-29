@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Notifications Admin - Mocked E2E Flows", () => {
   const mockUsers = [
@@ -15,24 +16,7 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
     await context.clearCookies();
 
     // Mock session info
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin-1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["admin::notifications::dispatch"],
-            },
-          },
-        }),
-      });
-    });
+    await mockSignedIn(page, ["admin::notifications::dispatch"], { id: "admin-1" });
 
     // Mock query users
     await page.route("**/v1/users*", async (route) => {

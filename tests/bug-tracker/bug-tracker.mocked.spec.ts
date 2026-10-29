@@ -1,4 +1,5 @@
 import { type Page, test, expect } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Admin - Bug Tracker E2E Flows", () => {
   const adminEmail = "admin@variamos-test.com";
@@ -28,24 +29,7 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
       });
     });
 
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "1",
-              user: "admin_test",
-              name: "Admin Test",
-              email: "admin@variamos-test.com",
-              roles: ["Admin"],
-              permissions: ["bugs::query", "bugs::update", "bugs::sync", "users::query", "admin::languages::query", "admin::projects::query", "admin::models::query"]
-            }
-          }
-        })
-      });
-    });
+    await mockSignedIn(page, ["bugs::query", "bugs::update", "bugs::sync", "users::query", "admin::languages::query", "admin::projects::query", "admin::models::query"], { id: "1", user: "admin_test", name: "Admin Test", email: "admin@variamos-test.com" });
 
     await page.route("**/v1/configurations/menu", async (route) => {
       await route.fulfill({

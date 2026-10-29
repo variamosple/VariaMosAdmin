@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Global Configurations - Mocked E2E Flows", () => {
   const mockConfigurations = [
@@ -34,24 +35,7 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await context.clearCookies();
 
     // Mock Session Info with proper permissions
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["configurations::query", "configurations::update"],
-            },
-          },
-        }),
-      });
-    });
+    await mockSignedIn(page, ["configurations::query", "configurations::update"]);
 
     // Mock configurations query
     await page.route("**/v1/configurations", async (route) => {

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("User Management - Mocked Flows", () => {
   const mockUsers = [
@@ -9,24 +10,7 @@ test.describe("User Management - Mocked Flows", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
 
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["users::query", "users::update"]
-            }
-          }
-        })
-      });
-    });
+    await mockSignedIn(page, ["users::query", "users::update"]);
 
     await page.route("**/v1/users*", async (route) => {
       await route.fulfill({
