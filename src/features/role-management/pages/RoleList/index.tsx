@@ -36,6 +36,8 @@ const RoleListPageComponent: FC = () => {
     onRoleDelete,
     onSearchReset,
     onSearchSubmit,
+    sort,
+    onSort,
     listState,
   } = useRoleList();
 
@@ -84,6 +86,8 @@ const RoleListPageComponent: FC = () => {
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
+        sort={sort}
+        onSort={onSort}
         onRoleEdit={onRoleEdit}
         onRoleDelete={onRoleDelete}
       />

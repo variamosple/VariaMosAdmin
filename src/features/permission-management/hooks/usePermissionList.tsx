@@ -7,10 +7,17 @@ import {
 } from "@/features/permission-management/api/PermissionRepository";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import {
+  PERMISSION_SORT_FIELDS,
   type PermissionSortField,
   PermissionsFilter,
 } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  type ListSort,
+  nextSort,
+  readSort,
+  sortFields,
+} from "@/shared/domain/Entity/ListSort";
 import {
   readPage,
   readParam,
@@ -19,14 +26,16 @@ import {
 import { usePagedList } from "@/shared/hooks/usePagedList";
 
 // The list shown by the address (UX-26)
-const permissionsFromParams = (params: URLSearchParams) =>
-  new PermissionsFilter(
+const permissionsFromParams = (params: URLSearchParams) => {
+  const { sortBy, sortOrder } = readSort(params, PERMISSION_SORT_FIELDS);
+  return new PermissionsFilter(
     readParam(params, "name"),
     readPage(params),
     undefined,
-    readParam(params, "sortBy") === "id" ? "id" : undefined,
-    readParam(params, "sortOrder") === "desc" ? "desc" : undefined,
+    sortBy,
+    sortOrder,
   );
+};
 
 export const usePermissionList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -176,21 +185,19 @@ export const usePermissionList = () => {
     );
   };
 
-  // A click on the sorted column turns its order; on another column, it
-  // sorts by that column, ascending
-  const sort = {
+  const sort: ListSort<PermissionSortField> = {
     by: filter?.sortBy ?? "name",
     order: filter?.sortOrder ?? "asc",
-  } as const;
+  };
   const onSort = (field: PermissionSortField) => {
-    const order = sort.by === field && sort.order === "asc" ? "desc" : "asc";
+    const { sortBy, sortOrder } = sortFields(nextSort(sort, field));
     void loadData(
       new PermissionsFilter(
         filter?.name,
         undefined,
         undefined,
-        field === "name" ? undefined : field,
-        order === "asc" ? undefined : order,
+        sortBy,
+        sortOrder,
       ),
     );
   };

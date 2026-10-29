@@ -206,4 +206,47 @@ describe("useRoleList Hook", () => {
     expect(result.current.isEditing).toBe(false);
     consoleSpy.mockRestore();
   });
+
+  it("sorts by a column, turns its order on a second click, and keeps the search (EV-95)", () => {
+    const state = (filter: object) => ({
+      data: [],
+      currentPage: 1,
+      loadData: mockLoadData,
+      isLoading: false,
+      totalPages: 1,
+      onPageChange: mockOnPageChange,
+      filter: { name: "admin", pageNumber: 1, pageSize: 20, ...filter },
+    });
+    usePaginatedQueryMock.mockReturnValue(state({}));
+    const { result, rerender } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
+    expect(result.current.sort).toEqual({ by: "name", order: "asc" });
+
+    act(() => result.current.onSort("id"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        name: "admin",
+        sortBy: "id",
+        sortOrder: undefined,
+      }),
+    );
+
+    usePaginatedQueryMock.mockReturnValue(state({ sortBy: "id" }));
+    rerender();
+    act(() => result.current.onSort("id"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortBy: "id", sortOrder: "desc" }),
+    );
+
+    act(() => result.current.onSearchSubmit("other"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ name: "other", sortBy: "id" }),
+    );
+
+    act(() => result.current.onSearchReset());
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ name: undefined, sortBy: "id" }),
+    );
+  });
 });
