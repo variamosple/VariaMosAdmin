@@ -4,10 +4,11 @@ This is the admin dashboard frontend for the VariaMos project, built using React
 
 ## Technology Stack
 
-- **Framework**: React 18
-- **Language**: TypeScript
-- **UI Components**: PatternFly 6, Bootstrap 5
-- **Testing**: Jest, React Testing Library, Cypress
+- **Framework**: React 19, built with Vite
+- **Language**: TypeScript 6
+- **UI Components**: PatternFly 6, Bootstrap 5 (react-bootstrap)
+- **Testing**: Vitest, React Testing Library, msw, Playwright
+- **Quality**: Biome (lint and format), dependency-cruiser, knip, Stryker
 
 ---
 
@@ -15,7 +16,7 @@ This is the admin dashboard frontend for the VariaMos project, built using React
 
 ### Prerequisites
 
-- Node.js version 24 or greater
+- Node.js 24 (`.nvmrc`, `.mise.toml`)
 
 ### Installation
 
@@ -25,12 +26,12 @@ This is the admin dashboard frontend for the VariaMos project, built using React
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   npm ci
    ```
 
 ### Running the Application
 
-- To start the development server locally (runs on port 3000 by default):
+- To start the development server locally:
    ```bash
    npm start
    ```
@@ -41,56 +42,37 @@ This is the admin dashboard frontend for the VariaMos project, built using React
 
 ---
 
-## Testing Guide
+## Testing
 
-The testing suite consists of unit tests (Jest/React Testing Library) and End-to-End (E2E) tests (Cypress).
+The test layers, the rules for writing tests and the commands are in [README-tests.md](README-tests.md).
 
-### 1. Unit Tests
-
-Unit tests focus on component behavior and utility logic.
-- **Run Unit Tests (interactive watch mode)**:
-  ```bash
-  npm run test
-  ```
-- **Generate Coverage Report**:
-  ```bash
-  npm run jest:coverage
-  ```
-  *For a detailed overview of test coverage exclusions and philosophy, see the [Guide des Tests Unitaires & Couverture](README-tests.md).*
-
-### 2. End-to-End (E2E) Tests
-
-We use Cypress for end-to-end user workflow validation. There are two execution modes:
-
-#### A. Mocked E2E Tests (Recommended for CI & Local Development)
-Runs the test suite inside isolated Docker containers using mocked API responses.
-- **Run Mocked E2E Tests**:
-  ```bash
-  npm run cypress:run:mocked
-  ```
-
-#### B. Real E2E Tests (Integration)
-Runs the test suite against a real local PostgreSQL container and dev environment.
-- **Run Real E2E Tests**:
-  ```bash
-  npm run cypress:run:real
-  ```
+```bash
+npm test                        # unit and component tests (Vitest)
+npm run test:coverage           # with the coverage thresholds
+npm run playwright:run:mocked   # end-to-end tests, backend mocked (Docker)
+npm run playwright:run:real     # end-to-end tests, real services (Docker)
+```
 
 ---
 
 ## Code Quality & Architecture
 
-We enforce several linting and architectural boundaries:
-- **Linting & Formatting**: Ensure code adheres to styling guidelines with ESLint and Prettier:
+- **Lint and format** (Biome, warnings fail):
   ```bash
   npm run lint
   ```
-- **Type Checking**: Verify TypeScript types without emitting code:
+- **Type checking** (application, unit tests and end-to-end tests):
   ```bash
   npm run typecheck
   ```
-- **Architecture Boundaries**: Ensure Clean Architecture layers (Domain, Infrastructure, EntryPoints) remain decoupled and follow dependency rules:
+- **Architecture boundaries** (dependency-cruiser):
   ```bash
   npm run check-arch
   ```
-- **Git Hooks**: Pre-commit hooks run automatically on changed files (Prettier, ESLint, CSpell) to prevent formatting errors from entering the repository.
+- **Dead code** (knip):
+  ```bash
+  npm run find-deadcode
+  ```
+- **Git hooks** (husky):
+  - before a commit, the staged files of `src/` go through Biome and CSpell (`.lintstagedrc.json`);
+  - before a push, `typecheck`, `lint` and `test` run under the Node version of `.nvmrc`.
