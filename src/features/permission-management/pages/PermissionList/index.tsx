@@ -36,6 +36,8 @@ const PermissionListPageComponent: FC = () => {
     onPermissionDelete,
     onSearchReset,
     onSearchSubmit,
+    sort,
+    onSort,
     listState,
   } = usePermissionList();
 
@@ -75,7 +77,7 @@ const PermissionListPageComponent: FC = () => {
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}
-        placeholder="Search by permission name"
+        placeholder="Search by permission name or id"
       />
 
       <PermissionList
@@ -86,6 +88,8 @@ const PermissionListPageComponent: FC = () => {
         onPageChange={onPageChange}
         onPermissionEdit={onPermissionEdit}
         onPermissionDelete={onPermissionDelete}
+        sort={sort}
+        onSort={onSort}
       />
 
       <ConfirmationModal

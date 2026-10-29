@@ -5,6 +5,8 @@ export class RolePermissionFilter extends PagedModel {
     public roleId?: number,
     pageNumber?: number,
     pageSize?: number,
+    /** Part of the permission name, or its exact id */
+    public search?: string,
   ) {
     super(pageNumber, pageSize);
   }

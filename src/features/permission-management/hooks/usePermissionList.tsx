@@ -6,7 +6,10 @@ import {
   updatePermission,
 } from "@/features/permission-management/api/PermissionRepository";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
-import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
+import {
+  type PermissionSortField,
+  PermissionsFilter,
+} from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { useToast } from "@/shared/context/ToastContext";
 import {
   readPage,
@@ -17,7 +20,13 @@ import { usePagedList } from "@/shared/hooks/usePagedList";
 
 // The list shown by the address (UX-26)
 const permissionsFromParams = (params: URLSearchParams) =>
-  new PermissionsFilter(readParam(params, "name"), readPage(params));
+  new PermissionsFilter(
+    readParam(params, "name"),
+    readPage(params),
+    undefined,
+    readParam(params, "sortBy") === "id" ? "id" : undefined,
+    readParam(params, "sortOrder") === "desc" ? "desc" : undefined,
+  );
 
 export const usePermissionList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -142,12 +151,48 @@ export const usePermissionList = () => {
     setShowDelete(true);
   };
 
+  // The search keeps the sort, and the sort keeps the search
   const onSearchReset = () => {
-    void loadData(new PermissionsFilter());
+    void loadData(
+      new PermissionsFilter(
+        undefined,
+        undefined,
+        undefined,
+        filter?.sortBy,
+        filter?.sortOrder,
+      ),
+    );
   };
 
   const onSearchSubmit = (search?: string) => {
-    void loadData(new PermissionsFilter(search));
+    void loadData(
+      new PermissionsFilter(
+        search,
+        undefined,
+        undefined,
+        filter?.sortBy,
+        filter?.sortOrder,
+      ),
+    );
+  };
+
+  // A click on the sorted column turns its order; on another column, it
+  // sorts by that column, ascending
+  const sort = {
+    by: filter?.sortBy ?? "name",
+    order: filter?.sortOrder ?? "asc",
+  } as const;
+  const onSort = (field: PermissionSortField) => {
+    const order = sort.by === field && sort.order === "asc" ? "desc" : "asc";
+    void loadData(
+      new PermissionsFilter(
+        filter?.name,
+        undefined,
+        undefined,
+        field === "name" ? undefined : field,
+        order === "asc" ? undefined : order,
+      ),
+    );
   };
 
   return {
@@ -177,5 +222,7 @@ export const usePermissionList = () => {
     onPermissionDelete,
     onSearchReset,
     onSearchSubmit,
+    sort,
+    onSort,
   };
 };

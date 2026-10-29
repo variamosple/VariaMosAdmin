@@ -337,4 +337,28 @@ describe("RoleDetailsPage Component", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("role-permission-form")).toBeInTheDocument();
   });
+
+  it("searches the role's permissions on the server (EV-31)", async () => {
+    const user = userEvent.setup();
+    render(<RoleDetailsPage />);
+    await screen.findByText("Admin Role");
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ roleId: 123, search: undefined }),
+    );
+
+    await user.type(
+      screen.getByPlaceholderText(
+        "Search the role's permissions by name or id",
+      ),
+      "users",
+    );
+
+    await waitFor(
+      () =>
+        expect(mockLoadData).toHaveBeenLastCalledWith(
+          expect.objectContaining({ roleId: 123, search: "users" }),
+        ),
+      { timeout: 2000 },
+    );
+  });
 });
