@@ -188,7 +188,7 @@ describe("useConfigurationList Hook Tests", () => {
     );
   });
 
-  it("should halt saves on first error and refresh data from repository", async () => {
+  it("saves every key despite a refusal, and keeps the refused edit with its reason", async () => {
     const { result } = renderHook(() => useConfigurationList());
 
     await waitFor(() => {
@@ -210,15 +210,62 @@ describe("useConfigurationList Hook Tests", () => {
       await result.current.saveChanges();
     });
 
-    // Should stop at first save error, so updateConfiguration called only once
-    expect(updateConfigurationSpy).toHaveBeenCalledTimes(1);
+    // The refusal of the first key does not stop the second
+    expect(updateConfigurationSpy).toHaveBeenCalledTimes(2);
+    expect(mockPushToast).toHaveBeenCalledWith({
+      title: "1 of 2 configuration(s) not saved",
+      message:
+        "Saved: security.password.min_length. Not saved: general.site_name (Validation failed).",
+      variant: "danger",
+    });
+    // Reloaded from the server, with the refused edit still on screen
+    expect(queryConfigurationsSpy).toHaveBeenCalledTimes(2);
+    expect(result.current.saveFailures).toEqual({
+      "general.site_name": "Validation failed",
+    });
+    expect(result.current.modifiedKeys).toEqual(["general.site_name"]);
+    expect(result.current.configurations[0].value).toBe("New Site Name");
+  });
 
-    expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Configuration save error",
-        message: "Validation failed",
-        variant: "danger",
-      }),
+  it("forgets the refusals on discard", async () => {
+    const { result } = renderHook(() => useConfigurationList());
+    await waitFor(() => {
+      expect(result.current.configurations).toHaveLength(2);
+    });
+    act(() => {
+      result.current.setLocalValue("general.site_name", "New Site Name");
+    });
+    updateConfigurationSpy.mockResolvedValueOnce(
+      new ResponseModel<Configuration>("error").withError(400, "Refused"),
     );
+    await act(async () => {
+      await result.current.saveChanges();
+    });
+
+    act(() => {
+      result.current.discardChanges();
+    });
+
+    expect(result.current.saveFailures).toEqual({});
+    expect(result.current.isDirty).toBe(false);
+  });
+
+  it("lists the modified keys marked sensitive", async () => {
+    const { result } = renderHook(() => useConfigurationList());
+    await waitFor(() => {
+      expect(result.current.configurations).toHaveLength(2);
+    });
+
+    act(() => {
+      result.current.setLocalValue("general.site_name", "New Site Name");
+    });
+    expect(result.current.sensitiveModifiedKeys).toEqual([]);
+
+    act(() => {
+      result.current.setLocalValue("security.password.min_length", 16);
+    });
+    expect(result.current.sensitiveModifiedKeys).toEqual([
+      "security.password.min_length",
+    ]);
   });
 });

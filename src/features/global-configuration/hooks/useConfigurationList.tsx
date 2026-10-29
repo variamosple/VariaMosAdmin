@@ -16,26 +16,46 @@ export const useConfigurationList = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { pushToast } = useToast();
 
-  const loadData = useCallback(() => {
-    setIsLoading(true);
-    return queryConfigurations()
-      .then((response) => {
-        if (!response.errorCode && response.data) {
-          setOriginalConfigs(response.data);
-          // Deep clone configurations for local sandbox edits
-          setLocalConfigs(JSON.parse(JSON.stringify(response.data)));
-        } else {
-          pushToast({
-            title: "Configuration query error",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [pushToast]);
+  // Keys refused at the last save, with the reason: their edits stay on
+  // screen so that they can be corrected and saved again (UX-14)
+  const [saveFailures, setSaveFailures] = useState<Record<string, string>>({});
+
+  /**
+   * Loads the configurations. Edits passed in `keptEdits` stay on screen
+   * over the values just loaded.
+   */
+  const loadData = useCallback(
+    (keptEdits: Record<string, ConfigurationValue> = {}) => {
+      setIsLoading(true);
+      return queryConfigurations()
+        .then((response) => {
+          if (!response.errorCode && response.data) {
+            setOriginalConfigs(response.data);
+            // Deep clone configurations for local sandbox edits
+            const local: Configuration[] = JSON.parse(
+              JSON.stringify(response.data),
+            );
+            setLocalConfigs(
+              local.map((config) =>
+                config.key in keptEdits
+                  ? { ...config, value: keptEdits[config.key] }
+                  : config,
+              ),
+            );
+          } else {
+            pushToast({
+              title: "Configuration query error",
+              message: response.message ?? "An error occurred",
+              variant: "danger",
+            });
+          }
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    },
+    [pushToast],
+  );
 
   useEffect(() => {
     loadData();
@@ -51,6 +71,7 @@ export const useConfigurationList = () => {
   // Discard all sandbox changes
   const discardChanges = () => {
     setLocalConfigs(JSON.parse(JSON.stringify(originalConfigs)));
+    setSaveFailures({});
   };
 
   // Compute modified keys
@@ -69,14 +90,27 @@ export const useConfigurationList = () => {
 
   const isDirty = modifiedKeys.length > 0;
 
-  // Save all sandbox changes to backend
+  // Modified keys marked sensitive: the page asks for a confirmation first
+  const sensitiveModifiedKeys = useMemo(
+    () =>
+      modifiedKeys.filter(
+        (key) => localConfigs.find((c) => c.key === key)?.requiresMfa,
+      ),
+    [modifiedKeys, localConfigs],
+  );
+
+  /**
+   * Saves every modified key, one request each, and says which were saved
+   * and which were refused. A refusal does not stop the others, and the
+   * refused edits stay on screen with their reason (UX-14).
+   */
   const saveChanges = async () => {
     if (modifiedKeys.length === 0) return;
     setIsUpdating(true);
 
-    let successCount = 0;
-    let failedKey: string | null = null;
-    let failureMsg = "An error occurred during save.";
+    const saved: string[] = [];
+    const failures: Record<string, string> = {};
+    const keptEdits: Record<string, ConfigurationValue> = {};
 
     for (const key of modifiedKeys) {
       const localConfig = localConfigs.find((c) => c.key === key);
@@ -85,38 +119,41 @@ export const useConfigurationList = () => {
       try {
         const response = await updateConfiguration(key, localConfig.value);
         if (!response.errorCode) {
-          successCount++;
+          saved.push(key);
         } else {
-          failedKey = key;
-          failureMsg =
+          failures[key] =
             response.message ?? `Failed to update configuration '${key}'.`;
-          break; // Stop at first error (e.g. MFA challenge or validation error)
         }
       } catch (err) {
-        failedKey = key;
-        failureMsg = (err as Error).message;
-        break;
+        failures[key] = (err as Error).message;
       }
+      if (key in failures) keptEdits[key] = localConfig.value;
     }
 
     setIsUpdating(false);
+    setSaveFailures(failures);
 
-    if (failedKey) {
+    const refused = Object.keys(failures);
+    if (refused.length > 0) {
       pushToast({
-        title: "Configuration save error",
-        message: failureMsg,
+        title: `${refused.length} of ${saved.length + refused.length} configuration(s) not saved`,
+        message: [
+          saved.length > 0 ? `Saved: ${saved.join(", ")}.` : "",
+          `Not saved: ${refused.map((key) => `${key} (${failures[key]})`).join(", ")}.`,
+        ]
+          .filter(Boolean)
+          .join(" "),
         variant: "danger",
       });
-      // Refresh configurations to ensure local state matches database reality
-      loadData();
     } else {
       pushToast({
         title: "Configurations saved",
-        message: `Successfully saved ${successCount} configuration(s).`,
+        message: `Successfully saved ${saved.length} configuration(s).`,
         variant: "success",
       });
-      loadData();
     }
+    // What the server now holds, with the refused edits kept on top
+    await loadData(keptEdits);
   };
 
   return {
@@ -126,9 +163,11 @@ export const useConfigurationList = () => {
     isUpdating,
     isDirty,
     modifiedKeys,
+    sensitiveModifiedKeys,
+    saveFailures,
     setLocalValue,
     discardChanges,
     saveChanges,
-    refresh: loadData,
+    refresh: () => loadData(),
   };
 };

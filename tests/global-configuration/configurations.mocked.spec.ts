@@ -81,7 +81,7 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await page.click('button:has-text("Security & Passwords")');
 
     const passwordRow = page.locator("tr", { hasText: "security.password.min_length" });
-    await expect(passwordRow.locator("td").first()).toContainText("MFA PROTECTED");
+    await expect(passwordRow.locator("td").first()).toContainText("SENSITIVE");
     await expect(passwordRow.locator("td").nth(1)).toContainText("12");
   });
 
@@ -125,8 +125,9 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await expect(page.locator(".alert-warning")).toBeVisible();
     await expect(page.locator(".alert-warning")).toContainText("You have unsaved changes.");
 
-    // Discard changes
-    await page.click('button:has-text("Discard")');
+    // Discard changes, after the confirmation
+    await page.locator(".alert-warning button", { hasText: "Discard" }).click();
+    await page.getByRole("button", { name: "Discard changes" }).click();
     await expect(page.locator(".alert-warning")).not.toBeVisible();
     await expect(toggle).toBeChecked();
   });
