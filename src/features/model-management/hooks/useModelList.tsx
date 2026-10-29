@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { queryLanguages } from "@/features/language-management/api/LanguageRepository";
 import { LanguagesFilter } from "@/features/language-management/domain/Entity/LanguageFilter";
 import {
@@ -65,15 +65,21 @@ export const useModelList = () => {
     modelsFromParams,
   );
 
-  useEffect(() => {
-    queryProjects(new ProjectsFilter()).then((res) => {
+  // The projects and languages offered by the model form: the first page,
+  // then those whose name matches what is typed, searched on the server so
+  // that one beyond the first page can be chosen (EV-96)
+  const searchProjects = useCallback((name?: string) => {
+    queryProjects(new ProjectsFilter(name || undefined)).then((res) => {
       if (!res.errorCode && res.data) {
         setProjects(
           res.data.map((p) => ({ id: p.id || "", name: p.name || "" })),
         );
       }
     });
-    queryLanguages(new LanguagesFilter()).then((res) => {
+  }, []);
+
+  const searchLanguages = useCallback((name?: string) => {
+    queryLanguages(new LanguagesFilter(name || undefined)).then((res) => {
       if (!res.errorCode && res.data) {
         setLanguages(
           res.data.map((l) => ({ id: l.id || 0, name: l.name || "" })),
@@ -81,6 +87,11 @@ export const useModelList = () => {
       }
     });
   }, []);
+
+  useEffect(() => {
+    searchProjects();
+    searchLanguages();
+  }, [searchProjects, searchLanguages]);
 
   const onModelEdit = (model: Model) => {
     setToEditModel(model);
@@ -266,5 +277,7 @@ export const useModelList = () => {
     onSearchSubmit,
     projects,
     languages,
+    searchProjects,
+    searchLanguages,
   };
 };

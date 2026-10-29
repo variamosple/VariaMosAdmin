@@ -41,6 +41,8 @@ const ModelListPageComponent: FC = () => {
     onModelToggleVisibility,
     projects,
     languages,
+    searchProjects,
+    searchLanguages,
     listState,
   } = useModelList();
   return (
@@ -67,6 +69,8 @@ const ModelListPageComponent: FC = () => {
         isLoading={isEditing}
         projects={projects}
         languages={languages}
+        onProjectSearch={searchProjects}
+        onLanguageSearch={searchLanguages}
       />
 
       <ModelFormModal
@@ -78,6 +82,8 @@ const ModelListPageComponent: FC = () => {
         isLoading={isCreating}
         projects={projects}
         languages={languages}
+        onProjectSearch={searchProjects}
+        onLanguageSearch={searchLanguages}
       />
 
       <ModelSearchForm
