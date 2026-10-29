@@ -124,7 +124,7 @@ describe("RoleListPage", () => {
 
     // Fill form
     const input = screen.getByPlaceholderText("Role name");
-    await user.type(input, "NewRole");
+    await user.type(input, "New role");
 
     // Click submit, in the dialog: the page button has the same name
     await user.click(
@@ -155,7 +155,7 @@ describe("RoleListPage", () => {
     // Modify the role name
     const input = screen.getByPlaceholderText("Role name");
     await user.clear(input);
-    await user.type(input, "Admin Edited");
+    await user.type(input, "Admin edited");
 
     // Click submit inside the modal
     const editRoleButtons = screen.getAllByRole("button", {

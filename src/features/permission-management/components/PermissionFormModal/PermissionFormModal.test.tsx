@@ -59,7 +59,7 @@ describe("PermissionFormModal Component", () => {
 
     const input = screen.getByPlaceholderText("Permission name");
     const user = userEvent.setup();
-    await user.type(input, "READ_PRIVILEGE");
+    await user.type(input, "reports::read");
 
     const submitBtn = screen.getByRole("button", {
       name: /create permission/i,
@@ -68,7 +68,7 @@ describe("PermissionFormModal Component", () => {
 
     await waitFor(() => {
       expect(mockOnPermissionSubmit).toHaveBeenCalledWith({
-        name: "READ_PRIVILEGE",
+        name: "reports::read",
       });
     });
   });
@@ -123,5 +123,23 @@ describe("PermissionFormModal Component", () => {
     await user.click(cancelBtn);
 
     expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it("refuses a name outside 'resource::action', under the field (EV-32)", async () => {
+    const user = userEvent.setup();
+    render(<PermissionFormModal {...defaultProps} />);
+
+    await user.type(
+      screen.getByPlaceholderText("Permission name"),
+      "users_query",
+    );
+    await user.click(
+      screen.getByRole("button", { name: /create permission/i }),
+    );
+
+    expect(
+      await screen.findByText(/Use 'resource::action'/),
+    ).toBeInTheDocument();
+    expect(mockOnPermissionSubmit).not.toHaveBeenCalled();
   });
 });

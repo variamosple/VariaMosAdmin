@@ -84,11 +84,11 @@ describe("PermissionListPage Integration", () => {
 
     server.use(
       http.post("*/v1/permissions", () => {
-        return HttpResponse.json({ data: { id: 3, name: "NEW_PERM" } });
+        return HttpResponse.json({ data: { id: 3, name: "reports::create" } });
       }),
       http.put("*/v1/permissions/:id", () => {
         return HttpResponse.json({
-          data: { id: 1, name: "READ_PRIVILEGES_EDITED" },
+          data: { id: 1, name: "reports::read-all" },
         });
       }),
       http.delete("*/v1/permissions/:id", () => {
@@ -130,7 +130,7 @@ describe("PermissionListPage Integration", () => {
 
     // Fill form
     const input = screen.getByPlaceholderText("Permission name");
-    await user.type(input, "NEW_PERM");
+    await user.type(input, "reports::create");
 
     // Click submit
     const submitBtns = screen.getAllByRole("button", {
@@ -159,7 +159,7 @@ describe("PermissionListPage Integration", () => {
     // Modify permission name
     const input = screen.getByPlaceholderText("Permission name");
     await user.clear(input);
-    await user.type(input, "READ_PRIVILEGES_EDITED");
+    await user.type(input, "reports::read-all");
 
     // Click submit inside the modal
     const editRoleButtons = screen.getAllByRole("button", {

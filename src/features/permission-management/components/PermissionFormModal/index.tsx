@@ -2,7 +2,10 @@ import type { ResponseModel } from "@variamosple/variamos-components";
 import { type FC, useEffect } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
-import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import {
+  PERMISSION_NAME_PATTERN,
+  type Permission,
+} from "@/features/permission-management/domain/Entity/Permission";
 
 export interface PermissionFormModalProps {
   modalTitle: string;
@@ -69,7 +72,14 @@ export const PermissionFormModal: FC<PermissionFormModalProps> = ({
               type="text"
               className="form-control"
               placeholder="Permission name"
-              {...register("name", { required: "Permission name is required" })}
+              {...register("name", {
+                required: "Permission name is required",
+                pattern: {
+                  value: PERMISSION_NAME_PATTERN,
+                  message:
+                    "Use 'resource::action' or 'module::resource::action': lowercase letters, digits and hyphens (e.g. 'users::query').",
+                },
+              })}
               isInvalid={!!errors.name}
             />
             <Form.Control.Feedback type="invalid">

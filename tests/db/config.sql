@@ -427,6 +427,10 @@ COPY variamos.role_permission (role_id, permission_id) FROM stdin;
 
 SELECT pg_catalog.setval('variamos.roles_id_seq', 7, true);
 
+-- The permissions above are inserted with their ids: without this, the first
+-- permission created takes id 1 again and fails on a duplicate key (EV-32)
+SELECT pg_catalog.setval('variamos.permission_id_seq', (SELECT max(id) FROM variamos.permission), true);
+
 
 --
 -- Data for Name: configurations; Type: TABLE DATA; Schema: variamos; Owner: -

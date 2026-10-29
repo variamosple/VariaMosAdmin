@@ -193,4 +193,49 @@ describe("usePermissionList Hook", () => {
       }),
     );
   });
+
+  it("sorts by a column, turns its order on a second click, and keeps the search (EV-32)", () => {
+    usePaginatedQueryMock.mockReturnValue({
+      data: [],
+      currentPage: 1,
+      loadData: mockLoadData,
+      isLoading: false,
+      totalPages: 1,
+      onPageChange: mockOnPageChange,
+      filter: { name: "users", pageNumber: 1, pageSize: 20 },
+    });
+    const { result, rerender } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
+    expect(result.current.sort).toEqual({ by: "name", order: "asc" });
+
+    act(() => result.current.onSort("id"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        name: "users",
+        sortBy: "id",
+        sortOrder: undefined,
+      }),
+    );
+
+    usePaginatedQueryMock.mockReturnValue({
+      data: [],
+      currentPage: 1,
+      loadData: mockLoadData,
+      isLoading: false,
+      totalPages: 1,
+      onPageChange: mockOnPageChange,
+      filter: { name: "users", sortBy: "id", pageNumber: 1, pageSize: 20 },
+    });
+    rerender();
+    act(() => result.current.onSort("id"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortBy: "id", sortOrder: "desc" }),
+    );
+
+    act(() => result.current.onSearchSubmit("roles"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ name: "roles", sortBy: "id" }),
+    );
+  });
 });

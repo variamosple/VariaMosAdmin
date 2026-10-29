@@ -150,4 +150,25 @@ describe("RoleFormModal Component", () => {
     expect(screen.getByRole("button", { name: /Cancel/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: "" })).toBeDisabled(); // Spinner button doesn't have text
   });
+
+  it("refuses a name with a capital after the first word, under the field (EV-31)", async () => {
+    const user = userEvent.setup();
+    render(
+      <RoleFormModal
+        modalTitle="Create New Role"
+        showModal={true}
+        onClose={mockOnClose}
+        onRoleSubmit={mockOnRoleSubmit}
+        isLoading={false}
+      />,
+    );
+
+    await user.type(screen.getByPlaceholderText("Role name"), "Test Role");
+    await user.click(screen.getByRole("button", { name: /Create role/i }));
+
+    expect(
+      await screen.findByText(/lowercase words separated by single spaces/),
+    ).toBeInTheDocument();
+    expect(mockOnRoleSubmit).not.toHaveBeenCalled();
+  });
 });

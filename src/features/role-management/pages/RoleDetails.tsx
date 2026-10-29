@@ -19,6 +19,7 @@ import {
   type LoadProblemKind,
   loadProblemOf,
 } from "@/shared/components/LoadProblem";
+import { SearchForm } from "@/shared/components/SearchForm";
 import { useToast } from "@/shared/context/ToastContext";
 import { usePagedList } from "@/shared/hooks/usePagedList";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
@@ -148,17 +149,26 @@ const RoleDetailsPageComponent: FC = () => {
     }
   }, [roleIdParam, queryRole]);
 
-  useEffect(() => {
-    if (roleIdParam) {
-      const updated = !rolePermissionsFilter
-        ? new RolePermissionFilter(Number.parseInt(roleIdParam, 10))
-        : Object.assign(rolePermissionsFilter, {
-            roleId: Number.parseInt(roleIdParam, 10),
-          });
+  // The permissions of the role, all of them or those matching a search
+  const searchRolePermissions = useCallback(
+    (search?: string) => {
+      if (roleIdParam) {
+        void loadRolePermissions(
+          new RolePermissionFilter(
+            Number.parseInt(roleIdParam, 10),
+            undefined,
+            undefined,
+            search || undefined,
+          ),
+        );
+      }
+    },
+    [roleIdParam, loadRolePermissions],
+  );
 
-      loadRolePermissions(updated);
-    }
-  }, [roleIdParam, loadRolePermissions, rolePermissionsFilter]);
+  useEffect(() => {
+    searchRolePermissions();
+  }, [searchRolePermissions]);
 
   if (isLoading) {
     return (
@@ -198,6 +208,13 @@ const RoleDetailsPageComponent: FC = () => {
           <RolePermissionForm
             isLoading={isCreating}
             onRolePermissionSubmit={onRolePermissionCreate}
+          />
+
+          <SearchForm
+            isLoading={rolePermissionsState.isLoading}
+            onSearchReset={() => searchRolePermissions()}
+            onSubmit={searchRolePermissions}
+            placeholder="Search the role's permissions by name or id"
           />
 
           <RolePermissionList
