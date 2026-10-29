@@ -27,6 +27,10 @@ Configuration: `vitest.config.mts` (setup file `src/setupTests.ts`), `playwright
 
 `src/setupTests.ts` starts the msw server with `onUnhandledRequest: "error"`: a request without a handler fails the test, since it would otherwise reach the network. Declare the answers a test needs with `server.use(http.get(...))`; `server.resetHandlers()` runs after each test.
 
+### React warnings
+
+A React warning (an update outside `act()`, an invalid nesting, an unknown tag...) fails the test: it points to a real fault, in the component or in the test double. Wrap waits that let the component update in `act()`, and make a mock render what the real component renders (a modal in a portal, a chart in an `<svg>`). The application's own error logs stay allowed.
+
 ### The component library
 
 Components from `@variamosple/variamos-components` that need the application shell (session, page visits, router) are mocked. For new or modified tests, start from the shared factory, which keeps the **real** model classes (`ResponseModel`, `PagedModel`...) so that a test cannot drift from their shape:
@@ -55,6 +59,7 @@ vi.mock("@variamosple/variamos-components", async () =>
 - `*.real.spec.ts`: the real services and a test database (`docker-compose.test.yml`, data in `tests/db/`).
 - `tests/helpers/`: login commands, TOTP codes, database helper.
 - Prefer `page.getByRole` and `getByLabel` to CSS selectors.
+- In the CI, a test that passes only on a retry fails the run (`failOnFlakyTests`): fix its cause rather than rely on the retry.
 - The e2e files are type-checked with the rest (`tsconfig.e2e.json`, run by `npm run typecheck`).
 
 ---

@@ -15,6 +15,7 @@ import {
   readBooleanParam,
   readPage,
   readParam,
+  useListParams,
   useListQueryState,
 } from "./useListQueryState";
 
@@ -145,6 +146,34 @@ describe("useListQueryState", () => {
       expect(screen.getByText("items: a p1")).toBeInTheDocument(),
     );
     expect(screen.getByText("restored: a")).toBeInTheDocument();
+  });
+});
+
+let write: ReturnType<typeof useListParams>["write"];
+const Writer = () => {
+  write = useListParams().write;
+  return null;
+};
+
+describe("useListParams", () => {
+  it("follows the history asked by the caller, against its own rule", async () => {
+    const router = createMemoryRouter(
+      [{ path: "/list", element: <Writer /> }],
+      {
+        initialEntries: ["/list?tab=open"],
+      },
+    );
+    render(<RouterProvider router={router} />);
+
+    // A page change would add an entry: the caller replaces it
+    await act(async () =>
+      write(new URLSearchParams("tab=open&page=2"), "replace"),
+    );
+    expect(router.state.historyAction).toBe("REPLACE");
+
+    // A new search would replace the entry: the caller adds one (a tab)
+    await act(async () => write(new URLSearchParams("tab=closed"), "push"));
+    expect(router.state.historyAction).toBe("PUSH");
   });
 });
 

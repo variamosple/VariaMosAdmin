@@ -16,8 +16,12 @@ vi.mock("recharts", async () => {
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
       <div>{children}</div>
     ),
+    // An svg, like the real chart: its slices are svg elements
     PieChart: ({ children }: { children: React.ReactNode }) => (
-      <div data-testid="recharts-pie-chart">{children}</div>
+      <svg data-testid="recharts-pie-chart">
+        <title>Pie chart</title>
+        {children}
+      </svg>
     ),
     BarChart: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="recharts-bar-chart">{children}</div>

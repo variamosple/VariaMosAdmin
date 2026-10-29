@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { ModelFormModal } from "./index";
@@ -195,7 +201,8 @@ describe("ModelFormModal Component", () => {
       const onLanguageSearch = vi.fn();
       renderCreateForm({ onProjectSearch, onLanguageSearch });
 
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      // Past the search delay; inside act, since the modal keeps opening meanwhile
+      await act(() => new Promise((resolve) => setTimeout(resolve, 400)));
 
       expect(onProjectSearch).not.toHaveBeenCalled();
       expect(onLanguageSearch).not.toHaveBeenCalled();

@@ -11,6 +11,19 @@ const json = (data: unknown, status = 200) => ({
 });
 
 const violations = async (page: Page) => {
+  // Measured on a settled page: during the session check the guest button is
+  // disabled, and its colour then takes 0.15 s to turn back; axe measuring in
+  // between reports a contrast that no user sees (flaky in CI before).
+  await page.waitForLoadState("networkidle");
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          !(animation instanceof CSSTransition) ||
+          animation.playState !== "running",
+      ),
+  );
   const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
   // Readable on failure: rule, impact and the first elements concerned
   return results.violations.map((violation) => ({
