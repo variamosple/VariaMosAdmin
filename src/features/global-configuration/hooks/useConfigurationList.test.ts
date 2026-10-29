@@ -249,23 +249,4 @@ describe("useConfigurationList Hook Tests", () => {
     expect(result.current.saveFailures).toEqual({});
     expect(result.current.isDirty).toBe(false);
   });
-
-  it("lists the modified keys marked sensitive", async () => {
-    const { result } = renderHook(() => useConfigurationList());
-    await waitFor(() => {
-      expect(result.current.configurations).toHaveLength(2);
-    });
-
-    act(() => {
-      result.current.setLocalValue("general.site_name", "New Site Name");
-    });
-    expect(result.current.sensitiveModifiedKeys).toEqual([]);
-
-    act(() => {
-      result.current.setLocalValue("security.password.min_length", 16);
-    });
-    expect(result.current.sensitiveModifiedKeys).toEqual([
-      "security.password.min_length",
-    ]);
-  });
 });

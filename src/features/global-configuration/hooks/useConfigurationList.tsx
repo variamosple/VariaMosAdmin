@@ -90,15 +90,6 @@ export const useConfigurationList = () => {
 
   const isDirty = modifiedKeys.length > 0;
 
-  // Modified keys marked sensitive: the page asks for a confirmation first
-  const sensitiveModifiedKeys = useMemo(
-    () =>
-      modifiedKeys.filter(
-        (key) => localConfigs.find((c) => c.key === key)?.requiresMfa,
-      ),
-    [modifiedKeys, localConfigs],
-  );
-
   /**
    * Saves every modified key, one request each, and says which were saved
    * and which were refused. A refusal does not stop the others, and the
@@ -163,7 +154,6 @@ export const useConfigurationList = () => {
     isUpdating,
     isDirty,
     modifiedKeys,
-    sensitiveModifiedKeys,
     saveFailures,
     setLocalValue,
     discardChanges,

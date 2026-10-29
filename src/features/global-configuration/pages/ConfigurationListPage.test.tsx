@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -89,32 +89,21 @@ describe("ConfigurationListPage (UX-14)", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("names the sensitive settings before saving them", async () => {
-    const user = await renderPage();
-    await user.click(
-      screen.getByLabelText("Toggle setting general.allow_sign_up"),
-    );
+  it("locks a setting that requires a second factor", async () => {
+    await renderPage();
 
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    const dialog = screen.getByRole("dialog");
     expect(
-      within(dialog).getByText(/sensitive settings: general\.allow_sign_up/),
-    ).toBeInTheDocument();
-    expect(ConfigurationRepository.updateConfiguration).not.toHaveBeenCalled();
-
-    await user.click(
-      within(dialog).getByRole("button", { name: "Save changes" }),
-    );
-    await waitFor(() =>
-      expect(ConfigurationRepository.updateConfiguration).toHaveBeenCalledWith(
-        "general.allow_sign_up",
-        false,
-      ),
-    );
+      screen.getByLabelText("Toggle setting general.allow_sign_up"),
+    ).toBeDisabled();
+    expect(screen.getByText("LOCKED")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "This setting is locked until a second-factor check is available",
+      }),
+    ).toBeDisabled();
   });
 
-  it("saves a setting that is not sensitive without asking", async () => {
+  it("saves without a dialog", async () => {
     const user = await renderPage();
     await user.click(
       screen.getByLabelText("Toggle setting general.show_banner"),

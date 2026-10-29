@@ -81,7 +81,7 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await page.click('button:has-text("Security & Passwords")');
 
     const passwordRow = page.locator("tr", { hasText: "security.password.min_length" });
-    await expect(passwordRow.locator("td").first()).toContainText("SENSITIVE");
+    await expect(passwordRow.locator("td").first()).toContainText("LOCKED");
     await expect(passwordRow.locator("td").nth(1)).toContainText("12");
   });
 
