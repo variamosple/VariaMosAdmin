@@ -1,7 +1,6 @@
 import { pageLoader } from "./PageLoader";
 
 describe("pageLoader", () => {
-  const original = window.location;
   let location: {
     href: string;
     origin: string;
@@ -22,17 +21,7 @@ describe("pageLoader", () => {
       assign: vi.fn(),
       reload: vi.fn(),
     };
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: location,
-    });
-  });
-
-  afterEach(() => {
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: original,
-    });
+    vi.stubGlobal("location", location);
   });
 
   it("reloads when only the hash changes", () => {

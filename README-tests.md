@@ -50,6 +50,7 @@ vi.mock("@variamosple/variamos-components", async () =>
 - `src/shared/tests/factories.ts`: builders of domain objects (`createUserMock(overrides)`).
 - Mock a module with `vi.mock` at the top of the file, and read its functions with `vi.mocked(fn)` rather than a cast to `vi.Mock`.
 - Wrap a component that uses the router in `<MemoryRouter>`.
+- Replace a global (`window.open`, `location`, `IntersectionObserver`…) with `vi.stubGlobal`, and an environment variable with `vi.stubEnv`, never by assignment or `Object.defineProperty`: the configuration restores them after each test (`unstubGlobals`, `unstubEnvs`). `userEvent.setup()` already puts a clipboard on `navigator`.
 
 ---
 

@@ -24,11 +24,7 @@ describe("useIntersectionObserver hook", () => {
         thresholds = [];
       },
     );
-    Object.defineProperty(globalThis, "IntersectionObserver", {
-      value: mockObserverClass,
-      writable: true,
-      configurable: true,
-    });
+    vi.stubGlobal("IntersectionObserver", mockObserverClass);
   });
 
   it("should initialize hook and register intersection observer on node", () => {
