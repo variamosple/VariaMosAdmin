@@ -35,6 +35,8 @@ const UserListPageComponent: FC = () => {
     performDeleteUser,
     onSearchReset,
     onSearchSubmit,
+    sort,
+    onSort,
     currentPage,
     onPageChange,
     listState,
@@ -61,6 +63,8 @@ const UserListPageComponent: FC = () => {
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
+        sort={sort}
+        onSort={onSort}
         onUserResetLink={onUserResetLink}
         onUserDisable={onUserDisable}
         onUserEnable={onUserEnable}

@@ -248,4 +248,47 @@ describe("useUserList Hook", () => {
       expect.objectContaining({ search: undefined }),
     );
   });
+
+  it("sorts by a column, turns its order on a second click, and keeps the search (EV-95)", () => {
+    const state = (filter: object) => ({
+      data: [],
+      currentPage: 1,
+      loadData: mockLoadData,
+      isLoading: false,
+      totalPages: 1,
+      onPageChange: mockOnPageChange,
+      filter: { search: "doe", pageNumber: 1, pageSize: 20, ...filter },
+    });
+    usePaginatedQueryMock.mockReturnValue(state({}));
+    const { result, rerender } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
+    expect(result.current.sort).toEqual({ by: "name", order: "asc" });
+
+    act(() => result.current.onSort("lastLogin"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        search: "doe",
+        sortBy: "lastLogin",
+        sortOrder: undefined,
+      }),
+    );
+
+    usePaginatedQueryMock.mockReturnValue(state({ sortBy: "lastLogin" }));
+    rerender();
+    act(() => result.current.onSort("lastLogin"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortBy: "lastLogin", sortOrder: "desc" }),
+    );
+
+    act(() => result.current.onSearchSubmit("other"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: "other", sortBy: "lastLogin" }),
+    );
+
+    act(() => result.current.onSearchReset());
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: undefined, sortBy: "lastLogin" }),
+    );
+  });
 });

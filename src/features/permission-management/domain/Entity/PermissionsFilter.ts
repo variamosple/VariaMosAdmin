@@ -1,7 +1,8 @@
 import { PagedModel } from "@variamosple/variamos-components";
+import type { SortOrder } from "@/shared/domain/Entity/ListSort";
 
-export type PermissionSortField = "id" | "name";
-export type SortOrder = "asc" | "desc";
+export const PERMISSION_SORT_FIELDS = ["id", "name"] as const;
+export type PermissionSortField = (typeof PERMISSION_SORT_FIELDS)[number];
 
 export class PermissionsFilter extends PagedModel {
   constructor(

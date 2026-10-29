@@ -6,8 +6,18 @@ import {
   updateRole,
 } from "@/features/role-management/api/RoleRepository";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
-import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
+import {
+  ROLE_SORT_FIELDS,
+  type RoleSortField,
+  RolesFilter,
+} from "@/features/role-management/domain/Entity/RolesFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  type ListSort,
+  nextSort,
+  readSort,
+  sortFields,
+} from "@/shared/domain/Entity/ListSort";
 import {
   readPage,
   readParam,
@@ -16,8 +26,16 @@ import {
 import { usePagedList } from "@/shared/hooks/usePagedList";
 
 // The list shown by the address (UX-26)
-const rolesFromParams = (params: URLSearchParams) =>
-  new RolesFilter(readParam(params, "name"), readPage(params));
+const rolesFromParams = (params: URLSearchParams) => {
+  const { sortBy, sortOrder } = readSort(params, ROLE_SORT_FIELDS);
+  return new RolesFilter(
+    readParam(params, "name"),
+    readPage(params),
+    undefined,
+    sortBy,
+    sortOrder,
+  );
+};
 
 export const useRoleList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -150,12 +168,28 @@ export const useRoleList = () => {
     setShowDelete(true);
   };
 
+  // The search keeps the sort, and the sort keeps the search
+  const rolesFilter = (name?: string, sort?: ListSort<RoleSortField>) => {
+    const { sortBy, sortOrder } = sort
+      ? sortFields(sort)
+      : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
+    return new RolesFilter(name, undefined, undefined, sortBy, sortOrder);
+  };
+
   const onSearchReset = () => {
-    void loadData(new RolesFilter());
+    void loadData(rolesFilter());
   };
 
   const onSearchSubmit = (search?: string) => {
-    void loadData(new RolesFilter(search));
+    void loadData(rolesFilter(search));
+  };
+
+  const sort: ListSort<RoleSortField> = {
+    by: filter?.sortBy ?? "name",
+    order: filter?.sortOrder ?? "asc",
+  };
+  const onSort = (field: RoleSortField) => {
+    void loadData(rolesFilter(filter?.name, nextSort(sort, field)));
   };
 
   return {
@@ -184,6 +218,8 @@ export const useRoleList = () => {
     performDeleteRole,
     onRoleDelete,
     onSearchReset,
+    sort,
+    onSort,
     onSearchSubmit,
   };
 };

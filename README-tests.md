@@ -61,6 +61,7 @@ vi.mock("@variamosple/variamos-components", async () =>
 - Prefer `page.getByRole` and `getByLabel` to CSS selectors.
 - In the CI, a test that passes only on a retry fails the run (`failOnFlakyTests`): fix its cause rather than rely on the retry.
 - The e2e files are type-checked with the rest (`tsconfig.e2e.json`, run by `npm run typecheck`).
+- `tests/accessibility/` checks the WCAG A and AA rules with axe-core; `tests/responsive/` checks that the main screens fit 375, 768 and 1440 px without sideways scrolling. A table scrolls inside its own frame: give it the `responsive` prop.
 
 ---
 

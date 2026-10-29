@@ -120,4 +120,33 @@ describe("RoleList Component", () => {
     expect(mockOnPageChange).toHaveBeenCalledTimes(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(2);
   });
+
+  it("sorts from the ID and Name headers, and says which one is sorted (EV-95)", async () => {
+    const onSort = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <RoleList
+        items={mockRoles}
+        currentPage={1}
+        totalPages={1}
+        onPageChange={mockOnPageChange}
+        onRoleEdit={mockOnRoleEdit}
+        onRoleDelete={mockOnRoleDelete}
+        sort={{ by: "id", order: "asc" }}
+        onSort={onSort}
+      />,
+    );
+
+    expect(screen.getByRole("columnheader", { name: "ID" })).toHaveAttribute(
+      "aria-sort",
+      "ascending",
+    );
+    expect(screen.getByRole("columnheader", { name: "Name" })).toHaveAttribute(
+      "aria-sort",
+      "none",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Name" }));
+    expect(onSort).toHaveBeenCalledWith("name");
+  });
 });

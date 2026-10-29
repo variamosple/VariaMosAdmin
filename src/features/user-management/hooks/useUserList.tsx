@@ -6,8 +6,18 @@ import {
   queryUsers,
 } from "@/features/user-management/api/UserRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
-import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
+import {
+  USER_SORT_FIELDS,
+  type UserSortField,
+  UsersFilter,
+} from "@/features/user-management/domain/Entity/UsersFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  type ListSort,
+  nextSort,
+  readSort,
+  sortFields,
+} from "@/shared/domain/Entity/ListSort";
 import {
   readPage,
   readParam,
@@ -16,13 +26,18 @@ import {
 import { usePagedList } from "@/shared/hooks/usePagedList";
 
 // The list shown by the address (UX-26)
-const usersFromParams = (params: URLSearchParams) =>
-  new UsersFilter(
+const usersFromParams = (params: URLSearchParams) => {
+  const { sortBy, sortOrder } = readSort(params, USER_SORT_FIELDS);
+  return new UsersFilter(
     undefined,
     undefined,
     readParam(params, "search"),
     readPage(params),
+    undefined,
+    sortBy,
+    sortOrder,
   );
+};
 
 export const useUserList = () => {
   const [showResetLink, setShowResetLink] = useState(false);
@@ -175,12 +190,36 @@ export const useUserList = () => {
     });
   };
 
+  // The search keeps the sort, and the sort keeps the search
+  const usersFilter = (search?: string, sort?: ListSort<UserSortField>) => {
+    const { sortBy, sortOrder } = sort
+      ? sortFields(sort)
+      : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
+    return new UsersFilter(
+      undefined,
+      undefined,
+      search,
+      undefined,
+      undefined,
+      sortBy,
+      sortOrder,
+    );
+  };
+
   const onSearchReset = () => {
-    void loadData(new UsersFilter());
+    void loadData(usersFilter());
   };
 
   const onSearchSubmit = (search?: string) => {
-    void loadData(new UsersFilter(undefined, undefined, search));
+    void loadData(usersFilter(search));
+  };
+
+  const sort: ListSort<UserSortField> = {
+    by: filter?.sortBy ?? "name",
+    order: filter?.sortOrder ?? "asc",
+  };
+  const onSort = (field: UserSortField) => {
+    void loadData(usersFilter(filter?.search, nextSort(sort, field)));
   };
 
   return {
@@ -210,6 +249,8 @@ export const useUserList = () => {
     onUserDelete,
     performDeleteUser,
     onSearchReset,
+    sort,
+    onSort,
     onSearchSubmit,
   };
 };
