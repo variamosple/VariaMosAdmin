@@ -1,7 +1,7 @@
 import { withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
-import { PersonalInformationUpdateForModal } from "@/features/user-management/components/UserInformationUpdateFormModal";
+import { PersonalInformationUpdateForModal } from "@/features/auth/components/UserInformationUpdateFormModal";
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import type { User } from "@/features/user-management/domain/Entity/User";

@@ -58,7 +58,7 @@ vi.mock("../components/PasswordUpdateForm", async () => ({
 }));
 
 vi.mock(
-  "@/features/user-management/components/UserInformationUpdateFormModal",
+  "@/features/auth/components/UserInformationUpdateFormModal",
   async () => ({
     PersonalInformationUpdateForModal: ({
       showModal,
