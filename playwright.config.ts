@@ -6,6 +6,9 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  // A test that passes only on a retry fails the run: the retry gives its
+  // trace, it does not hide it (TST-FRONT-09)
+  failOnFlakyTests: !!process.env.CI,
   workers: process.env.PLAYWRIGHT_WORKERS
     ? Number(process.env.PLAYWRIGHT_WORKERS)
     : (process.env.CI ? 1 : undefined),

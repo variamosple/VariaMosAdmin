@@ -4,8 +4,10 @@ import "@testing-library/jest-dom/vitest";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
 import { ModelRowComponent } from "./ModelRow";
 
-// Mock the shared ConfirmationModal
+// Mock the shared ConfirmationModal; like the real modal, it renders outside
+// the table, in a portal
 vi.mock("@/shared/components/ConfirmationModal", async () => {
+  const { createPortal } = await import("react-dom");
   return {
     __esModule: true,
     default: ({
@@ -20,7 +22,7 @@ vi.mock("@/shared/components/ConfirmationModal", async () => {
       onCancel: () => void;
     }) => {
       if (!show) return null;
-      return (
+      return createPortal(
         <div data-testid="confirm-modal">
           <span>{message}</span>
           <button type="button" onClick={onConfirm}>
@@ -29,7 +31,8 @@ vi.mock("@/shared/components/ConfirmationModal", async () => {
           <button type="button" onClick={onCancel}>
             Cancel Delete
           </button>
-        </div>
+        </div>,
+        document.body,
       );
     },
   };

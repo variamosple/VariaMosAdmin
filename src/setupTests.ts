@@ -126,6 +126,28 @@ window.getComputedStyle = function (elt, ...args) {
 // (TST-FRONT-06). A test that expects one declares it with server.use.
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
+
+// A React warning fails the test (TST-FRONT-05): an update outside act(), an
+// invalid nesting or an unknown tag points to a real fault, in the component
+// or in the test. React logs them as format strings ("%s"); the application's
+// own error logs ("Axios error: ...") stay allowed. A test that silences
+// console.error with a spy silences these too.
+const reactWarnings: string[] = [];
+const logError = console.error;
+console.error = (...args: Parameters<typeof console.error>) => {
+  if (typeof args[0] === "string" && args[0].includes("%s")) {
+    reactWarnings.push(args[0].split("\n")[0]);
+  }
+  logError(...args);
+};
+afterEach(() => {
+  const warnings = reactWarnings.splice(0);
+  if (warnings.length > 0) {
+    throw new Error(
+      `React warned during the test:\n- ${warnings.join("\n- ")}`,
+    );
+  }
+});
 afterAll(async () => {
   server.close();
   if (getGlobalDispatcher) {
