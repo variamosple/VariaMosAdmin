@@ -1,9 +1,9 @@
 import {
-  type PagedModel,
   type ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
 import { useCallback, useEffect, useState } from "react";
+import type { PagedModel } from "@/shared/domain/Entity/PagedModel";
 
 /**
  * One page of a journal at a time, reloaded on each search. The error is

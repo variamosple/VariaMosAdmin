@@ -1,6 +1,6 @@
-import type { PagedModel } from "@variamosple/variamos-components";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import type { PagedModel } from "@/shared/domain/Entity/PagedModel";
 
 // The same parameters in any order give the same key
 const keyOf = (params: URLSearchParams) =>

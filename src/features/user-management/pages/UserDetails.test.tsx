@@ -32,14 +32,6 @@ vi.mock("@variamosple/variamos-components", async () => {
     withPageVisit: (component: ComponentType) => component,
     useRouter: vi.fn(),
     usePaginatedQuery: vi.fn(),
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(p?: number, s?: number) {
-        this.pageNumber = p;
-        this.pageSize = s;
-      }
-    },
     ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number | null;
       message?: string;

@@ -1,4 +1,4 @@
-import { PagedModel } from "@variamosple/variamos-components";
+import { PagedModel } from "@/shared/domain/Entity/PagedModel";
 
 /** Entries per page; the server accepts up to 100. */
 const JOURNAL_PAGE_SIZE = 50;

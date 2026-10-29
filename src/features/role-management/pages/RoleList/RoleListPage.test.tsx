@@ -19,7 +19,6 @@ vi.mock("@variamosple/variamos-components", async () => {
     useRouter: () => ({
       navigate: mockNavigate,
     }),
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
