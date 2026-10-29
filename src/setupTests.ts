@@ -122,7 +122,9 @@ window.getComputedStyle = function (elt, ...args) {
   return style;
 };
 
-beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
+// A request with no handler fails the test: it would reach the network
+// (TST-FRONT-06). A test that expects one declares it with server.use.
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
 afterAll(async () => {
   server.close();

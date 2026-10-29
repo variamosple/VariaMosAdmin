@@ -7,23 +7,11 @@ import * as ConfigurationRepository from "../api/ConfigurationRepository";
 import type { Configuration } from "../domain/Entity/Configuration";
 import { ConfigurationListPage } from "./ConfigurationListPage";
 
-vi.mock("@variamosple/variamos-components", async () => ({
-  withPageVisit: <T,>(component: T): T => component,
-  ResponseModel: class ResponseModel<T> {
-    errorCode?: number;
-    message?: string;
-    data?: T;
-    type: string;
-    constructor(type: string) {
-      this.type = type;
-    }
-    withError(code: number, msg: string) {
-      this.errorCode = code;
-      this.message = msg;
-      return this;
-    }
-  },
-}));
+vi.mock("@variamosple/variamos-components", async () =>
+  (
+    await import("@/shared/tests/mocks/variamosComponents")
+  ).variamosComponents(),
+);
 
 const toggle = (key: string, requiresMfa: boolean): Configuration => ({
   key,

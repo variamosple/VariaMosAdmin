@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { type Page, test, expect } from "@playwright/test";
 
 test.describe("Admin - Bug Tracker E2E Flows", () => {
   const adminEmail = "admin@variamos-test.com";
@@ -110,7 +110,7 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     });
   });
 
-  const loginAndGoToBugs = async (page) => {
+  const loginAndGoToBugs = async (page: Page) => {
     await page.addInitScript(() => {
       window.localStorage.setItem("authToken", "fake-jwt-token");
     });
