@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef, useState } from "react";
+import { type FC, useEffect, useId, useRef, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { Trash, Upload } from "react-bootstrap-icons";
 import { useForm } from "react-hook-form";
@@ -52,6 +52,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
   repos,
   categories,
 }) => {
+  const titleId = useId();
   const [attachments, setAttachments] = useState<BugAttachment[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -177,6 +178,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
 
   return (
     <Modal
+      aria-labelledby={titleId}
       show={show}
       onHide={onHide}
       backdrop="static"
@@ -185,7 +187,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title>Review and Approve Local Bug</Modal.Title>
+        <Modal.Title id={titleId}>Review and Approve Local Bug</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleSubmit(handleFormSubmit)}>

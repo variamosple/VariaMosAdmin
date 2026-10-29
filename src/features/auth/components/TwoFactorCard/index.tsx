@@ -1,6 +1,6 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
 import { QRCodeSVG } from "qrcode.react";
-import { type FC, useCallback, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useId, useState } from "react";
 import {
   Alert,
   Badge,
@@ -52,6 +52,7 @@ const downloadCodes = (codes: string[]) => {
  * off with the password and a code.
  */
 export const TwoFactorCard: FC = () => {
+  const titleId = useId();
   const [status, setStatus] = useState<MfaStatus | null>(null);
   const [load, setLoad] = useState<Load>("loading");
   const [step, setStep] = useState<Step>({ name: "closed" });
@@ -213,13 +214,14 @@ export const TwoFactorCard: FC = () => {
       </Card.Body>
 
       <Modal
+        aria-labelledby={titleId}
         show={step.name !== "closed"}
         onHide={step.name === "codes" ? undefined : close}
         backdrop={step.name === "codes" ? "static" : true}
         centered
       >
         <Modal.Header closeButton={step.name !== "codes"}>
-          <Modal.Title>Two-factor authentication</Modal.Title>
+          <Modal.Title id={titleId}>Two-factor authentication</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {step.name === "password" && (

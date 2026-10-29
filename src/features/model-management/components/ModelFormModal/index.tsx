@@ -1,5 +1,5 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useEffect, useRef, useState } from "react";
+import { type FC, useEffect, useId, useRef, useState } from "react";
 import { Button, Dropdown, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
@@ -141,19 +141,22 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
 
   const isEdit = !!defaultValue?.id;
 
+  const titleId = useId();
+
   return (
     <Modal
+      aria-labelledby={titleId}
       show={showModal}
       backdrop={isLoading ? "static" : true}
       onHide={onCloseModal}
     >
       <Modal.Header closeButton={!isLoading}>
-        <Modal.Title>{modalTitle}</Modal.Title>
+        <Modal.Title id={titleId}>{modalTitle}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-3">
-          <Form.Group className="col-12" controlId="name">
+          <Form.Group className="col-12" controlId="modelName">
             <Form.Label className="form-label">Name</Form.Label>
             <Form.Control
               type="text"

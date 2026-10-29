@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useId, useState } from "react";
 import {
   Alert,
   Badge,
@@ -139,10 +139,19 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
     }
   };
 
+  const titleId = useId();
+
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered animation={false}>
+    <Modal
+      aria-labelledby={titleId}
+      show={show}
+      onHide={onHide}
+      size="lg"
+      centered
+      animation={false}
+    >
       <Modal.Header closeButton>
-        <Modal.Title>
+        <Modal.Title id={titleId}>
           ⚙️ Settings & Audit -{" "}
           <span className="text-primary">{displayName}</span>
         </Modal.Title>

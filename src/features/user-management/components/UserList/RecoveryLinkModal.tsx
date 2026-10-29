@@ -1,4 +1,4 @@
-import { type FC, useState } from "react";
+import { type FC, useId, useState } from "react";
 import { Button, Form, InputGroup, Modal, Spinner } from "react-bootstrap";
 import { Clipboard, ClipboardCheck } from "react-bootstrap-icons";
 import { generateRecoveryLink } from "@/features/user-management/api/UserRepository";
@@ -62,10 +62,12 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
     }
   };
 
+  const titleId = useId();
+
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal aria-labelledby={titleId} show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Generate Recovery Link</Modal.Title>
+        <Modal.Title id={titleId}>Generate Recovery Link</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>

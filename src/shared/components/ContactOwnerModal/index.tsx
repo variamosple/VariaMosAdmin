@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 
 interface Owner {
@@ -50,10 +50,12 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
       `Hello,\n\nI am reaching out to you as the owner of the ${entityType.toLowerCase()} '${entityName}' registered on VariaMos Admin.\n\nBest regards,\nVariaMos Administration Team`,
   )}`;
 
+  const titleId = useId();
+
   return (
-    <Modal show={show} onHide={onClose} centered>
+    <Modal aria-labelledby={titleId} show={show} onHide={onClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Contact Owners of {entityName}</Modal.Title>
+        <Modal.Title id={titleId}>Contact Owners of {entityName}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>

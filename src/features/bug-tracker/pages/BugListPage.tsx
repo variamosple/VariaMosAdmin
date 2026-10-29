@@ -1,5 +1,5 @@
 import { Paginator, withPageVisit } from "@variamosple/variamos-components";
-import { type FC, useState } from "react";
+import { type FC, useId, useState } from "react";
 import {
   Alert,
   Badge,
@@ -178,6 +178,8 @@ const BugListPageComponent: FC = () => {
     setIsSubmittingNote(false);
   };
 
+  const titleId = useId();
+
   return (
     <Container fluid="sm" className="my-2">
       <Row className="align-items-center mb-3">
@@ -301,6 +303,7 @@ const BugListPageComponent: FC = () => {
       />
 
       <Modal
+        aria-labelledby={titleId}
         show={!!selectedBugForDetails}
         onHide={() => setSelectedBugForDetails(null)}
         size="lg"
@@ -308,7 +311,7 @@ const BugListPageComponent: FC = () => {
         scrollable
       >
         <Modal.Header closeButton>
-          <Modal.Title>
+          <Modal.Title id={titleId}>
             Bug Details{" "}
             {selectedBugForDetails?.gitIssueNumber
               ? `#${selectedBugForDetails.gitIssueNumber}`
