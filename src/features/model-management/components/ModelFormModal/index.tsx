@@ -1,5 +1,5 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 import { Button, Dropdown, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
@@ -19,7 +19,33 @@ export interface ModelFormModalProps {
   submitText?: string;
   projects?: { id: string; name: string }[];
   languages?: { id: number; name: string }[];
+  /** Searches the projects by name on the server: the list holds one page */
+  onProjectSearch?: (name: string) => void;
+  /** Searches the languages by name on the server */
+  onLanguageSearch?: (name: string) => void;
 }
+
+// Pause in the typing before the server is asked
+const SEARCH_DELAY_MS = 300;
+
+/**
+ * Calls `search` with `term` once the typing pauses, and only when the term
+ * differs from the last one searched: opening the form asks nothing.
+ */
+const useServerSearch = (
+  term: string,
+  search: ((name: string) => void) | undefined,
+) => {
+  const lastSearched = useRef("");
+  useEffect(() => {
+    if (!search || term === lastSearched.current) return;
+    const timer = setTimeout(() => {
+      lastSearched.current = term;
+      search(term);
+    }, SEARCH_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [term, search]);
+};
 
 export const ModelFormModal: FC<ModelFormModalProps> = ({
   modalTitle,
@@ -31,9 +57,16 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
   submitText = "Edit Model",
   projects = [],
   languages = [],
+  onProjectSearch,
+  onLanguageSearch,
 }) => {
   const [languageSearch, setLanguageSearch] = useState("");
   const [projectSearch, setProjectSearch] = useState("");
+  useServerSearch(projectSearch, onProjectSearch);
+  useServerSearch(languageSearch, onLanguageSearch);
+  // Names of the items picked: a later search may leave them out of the list
+  const [pickedProjectName, setPickedProjectName] = useState<string>();
+  const [pickedLanguageName, setPickedLanguageName] = useState<string>();
   const [selectedLanguageId, setSelectedLanguageId] = useState<
     number | undefined
   >(defaultValue?.languageId);
@@ -59,6 +92,8 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
     });
     setSelectedLanguageId(defaultValue?.languageId);
     setSelectedProjectId(defaultValue?.projectId);
+    setPickedLanguageName(undefined);
+    setPickedProjectName(undefined);
   }, [defaultValue, reset]);
 
   const onSubmit: SubmitHandler<ModelFormFields> = (data) => {
@@ -74,6 +109,8 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
           reset();
           setSelectedLanguageId(undefined);
           setSelectedProjectId(undefined);
+          setPickedLanguageName(undefined);
+          setPickedProjectName(undefined);
         }
       });
     }
@@ -84,14 +121,22 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
     reset();
     setSelectedLanguageId(defaultValue?.languageId);
     setSelectedProjectId(defaultValue?.projectId);
+    setPickedLanguageName(undefined);
+    setPickedProjectName(undefined);
   };
 
   const selectedLanguageName =
     languages.find((l) => l.id === selectedLanguageId)?.name ||
+    pickedLanguageName ||
+    (selectedLanguageId ? `Language #${selectedLanguageId}` : undefined) ||
     "Select a language...";
 
   const selectedProjectName =
     projects.find((p) => p.id === selectedProjectId)?.name ||
+    pickedProjectName ||
+    (selectedProjectId === defaultValue?.projectId
+      ? defaultValue?.projectName
+      : undefined) ||
     "Select a project...";
 
   const isEdit = !!defaultValue?.id;
@@ -140,7 +185,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
                   <Form.Control
                     autoFocus
                     className="mx-3 my-2 w-auto"
-                    placeholder="Type to filter..."
+                    placeholder="Type to search..."
                     onChange={(e) => setProjectSearch(e.target.value)}
                     value={projectSearch}
                   />
@@ -157,6 +202,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
                         active={selectedProjectId === p.id}
                         onClick={() => {
                           setSelectedProjectId(p.id);
+                          setPickedProjectName(p.name);
                           setValue("projectId", p.id, {
                             shouldValidate: true,
                             shouldDirty: true,
@@ -206,7 +252,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
                 <Form.Control
                   autoFocus
                   className="mx-3 my-2 w-auto"
-                  placeholder="Type to filter..."
+                  placeholder="Type to search..."
                   onChange={(e) => setLanguageSearch(e.target.value)}
                   value={languageSearch}
                 />
@@ -221,6 +267,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
                       active={Number(selectedLanguageId) === l.id}
                       onClick={() => {
                         setSelectedLanguageId(l.id);
+                        setPickedLanguageName(l.name);
                         setValue("languageId", l.id, {
                           shouldValidate: true,
                           shouldDirty: true,

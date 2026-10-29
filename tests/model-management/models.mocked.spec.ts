@@ -179,7 +179,7 @@ test.describe("Model Management - Mocked Flows", () => {
     await page.getByRole("button", { name: "Select a language..." }).click();
     
     // Search for Python
-    const searchInput = page.locator('.modal input[placeholder="Type to filter..."]');
+    const searchInput = page.locator('.modal input[placeholder="Type to search..."]');
     await searchInput.fill("Py");
     
     // Check Java is hidden, Python is shown
