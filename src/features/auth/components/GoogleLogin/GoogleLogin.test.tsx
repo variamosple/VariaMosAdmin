@@ -81,4 +81,15 @@ describe("GoogleLogin Component", () => {
     expect(mockInitialize).toHaveBeenCalled();
     expect(mockRenderButton).toHaveBeenCalled();
   });
+
+  it("stops waiting for the Google script when the page is left", () => {
+    vi.stubGlobal("google", undefined);
+    const { unmount } = render(<GoogleLogin />);
+    expect(vi.getTimerCount()).toBe(1);
+
+    // The script never loads (blocked, offline): nothing keeps checking
+    unmount();
+
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
