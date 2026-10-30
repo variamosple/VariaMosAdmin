@@ -1,4 +1,5 @@
-import { expect, type Page, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "../helpers/mockedTest";
 import { json, mockSignedIn, mockSignedOut } from "../helpers/session";
 
 // MA-NF-10: the main screens are usable at 375, 768 and 1440 px without

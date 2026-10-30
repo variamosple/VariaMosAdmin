@@ -1,4 +1,5 @@
-import { type Page, test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { test, expect } from "../helpers/mockedTest";
 import { mockSignedIn } from "../helpers/session";
 
 test.describe("Admin - Bug Tracker E2E Flows", () => {

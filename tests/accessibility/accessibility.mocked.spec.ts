@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "../helpers/mockedTest";
 import { json, mockSignedIn, mockSignedOut } from "../helpers/session";
 
 // WCAG 2.1 A and AA rules, checked by axe-core on the main screens (EV-96)
