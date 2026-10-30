@@ -31,7 +31,11 @@
       "suspicious": {
         "noExplicitAny": "warn",
         "noArrayIndexKey": "warn",
-        "noImplicitAnyLet": "warn"
+        "noImplicitAnyLet": "warn",
+        "noSkippedTests": "error"
+      },
+      "complexity": {
+        "noExcessiveNestedTestSuites": "error"
       },
       "a11y": {
         "useButtonType": "warn"
