@@ -19,9 +19,34 @@ Configuration: `vitest.config.mts` (setup file `src/setupTests.ts`), `playwright
 ## Writing unit and component tests
 
 - **Test what the user sees.** Query by role, label, placeholder or text (`screen.getByRole`, `getByLabelText`...), not by CSS class or component state.
-- **Interact with `userEvent`.** Start with `const user = userEvent.setup()`, then `await user.click(...)`, `await user.type(...)`. Use `fireEvent` only when `userEvent` cannot reach the event.
+- **Interact with `userEvent`.** Render with `renderWithUser` or `renderPage` (below), which return the `user`, then `await user.click(...)`, `await user.type(...)`. Use `fireEvent` only when `userEvent` cannot reach the event.
 - **Assert the effect, not the call alone.** Prefer `toHaveBeenCalledWith(...)` with the expected arguments to a bare `toHaveBeenCalled()`, and a visible text to `toBeTruthy()`.
 - **Name the behaviour.** A test title says what happens ("keeps the refused edit with its reason"), and refers to the audit finding or evolution when there is one (`(UX-14)`, `(EV-31)`).
+
+### Rendering
+
+`src/shared/tests/render.tsx` sets up `userEvent` before the render, as Testing Library recommends, and returns it with the usual result of `render`:
+
+```typescript
+import { renderPage, renderWithUser } from "@/shared/tests/render";
+
+// A component
+const { user } = renderWithUser(<SearchForm onSubmit={onSubmit} />);
+
+// A page: inside a router, which starts at `route`, and the toast provider
+const { user } = renderPage(<UserListPage />, { route: "/users?search=jane" });
+```
+
+- Every option of `render` goes through (`wrapper`, `container`...), except `wrapper` for `renderPage`, which has its own.
+- With fake timers, pass `userEventOptions`, as for `userEvent.setup()`:
+  ```typescript
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  const { user } = renderWithUser(<Form />, {
+    userEventOptions: { advanceTimers: vi.advanceTimersByTime },
+  });
+  ```
+- Use them in new tests. Older tests still call `userEvent.setup()` and `render` themselves, which stays valid: move a file to the helpers when you modify it, not all at once (EV-28).
+- A component that only needs a provider takes it as `wrapper`: `render(<List />, { wrapper: ToastProvider })`.
 
 ### HTTP requests
 
@@ -49,7 +74,7 @@ vi.mock("@variamosple/variamos-components", async () =>
 
 - `src/shared/tests/factories.ts`: builders of domain objects (`createUserMock(overrides)`).
 - Mock a module with `vi.mock` at the top of the file, and read its functions with `vi.mocked(fn)` rather than a cast to `vi.Mock`.
-- Wrap a component that uses the router in `<MemoryRouter>`.
+- Render a component that uses the router with `renderPage`, or wrap it in `<MemoryRouter>`.
 - Replace a global (`window.open`, `location`, `IntersectionObserver`…) with `vi.stubGlobal`, and an environment variable with `vi.stubEnv`, never by assignment or `Object.defineProperty`: the configuration restores them after each test (`unstubGlobals`, `unstubEnvs`). `userEvent.setup()` already puts a clipboard on `navigator`.
 
 ---

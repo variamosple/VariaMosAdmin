@@ -1,11 +1,8 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
-import { MemoryRouter } from "react-router-dom";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { ProjectListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -113,16 +110,8 @@ describe("ProjectListPage Integration", () => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <MemoryRouter>
-        <ToastProvider>{ui}</ToastProvider>
-      </MemoryRouter>,
-    );
-  };
-
   it("renders page components correctly", async () => {
-    renderWithProviders(<ProjectListPage />);
+    renderPage(<ProjectListPage />);
     expect(screen.getByText("Projects list")).toBeInTheDocument();
 
     // Wait for the MSW handlers to return projects
@@ -131,8 +120,7 @@ describe("ProjectListPage Integration", () => {
   });
 
   it("shows and handles ProjectFormModal for editing", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<ProjectListPage />);
+    const { user } = renderPage(<ProjectListPage />);
 
     expect(await screen.findByText("Project One")).toBeInTheDocument();
 
@@ -162,8 +150,7 @@ describe("ProjectListPage Integration", () => {
   });
 
   it("shows and handles ConfirmationModal for deleting", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<ProjectListPage />);
+    const { user } = renderPage(<ProjectListPage />);
 
     expect(await screen.findByText("Project Two")).toBeInTheDocument();
 
@@ -198,7 +185,7 @@ describe("ProjectListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<ProjectListPage />);
+    renderPage(<ProjectListPage />);
     expect(screen.getByText("Projects list")).toBeInTheDocument();
 
     await waitFor(() => {
@@ -224,7 +211,7 @@ describe("ProjectListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<ProjectListPage />);
+    renderPage(<ProjectListPage />);
     // In the table, with Retry, and not repeated in a toast (UX-23)
     const table = await screen.findByRole("table");
     expect(

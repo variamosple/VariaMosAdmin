@@ -1,5 +1,4 @@
 import { render, screen, within } from "@testing-library/react";
-import type React from "react";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import type { MicroService } from "../../domain/Entity/MicroService";
 import { MicroServiceList } from "./index";
@@ -50,12 +49,8 @@ describe("MicroServiceList", () => {
     onMicroServiceStop: vi.fn(),
   };
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
-  };
-
   it("renders list of microservices correctly", () => {
-    renderWithProviders(<MicroServiceList {...defaultProps} />);
+    render(<MicroServiceList {...defaultProps} />, { wrapper: ToastProvider });
     expect(screen.getByText("Service 1")).toBeInTheDocument();
     expect(screen.getByText("Service 2")).toBeInTheDocument();
   });
@@ -89,11 +84,12 @@ describe("MicroServiceList", () => {
   };
 
   it("shows a running service never checked as NO DATA, without uptime", () => {
-    renderWithProviders(
+    render(
       <MicroServiceList
         {...defaultProps}
         items={[serviceWith("never-checked", "NO_DATA", "running")]}
       />,
+      { wrapper: ToastProvider },
     );
 
     const row = rowOf("never-checked");
@@ -105,11 +101,12 @@ describe("MicroServiceList", () => {
   });
 
   it("lets a running service that answers badly be restarted", () => {
-    renderWithProviders(
+    render(
       <MicroServiceList
         {...defaultProps}
         items={[serviceWith("failing", "DOWN", "running")]}
       />,
+      { wrapper: ToastProvider },
     );
 
     const row = rowOf("failing");
@@ -118,11 +115,12 @@ describe("MicroServiceList", () => {
   });
 
   it("offers to start a stopped container, whatever its last check", () => {
-    renderWithProviders(
+    render(
       <MicroServiceList
         {...defaultProps}
         items={[serviceWith("stopped", "UP", "exited")]}
       />,
+      { wrapper: ToastProvider },
     );
 
     const row = rowOf("stopped");

@@ -1,11 +1,8 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
-import { MemoryRouter } from "react-router-dom";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { PermissionListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -96,16 +93,8 @@ describe("PermissionListPage Integration", () => {
     );
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <MemoryRouter>
-        <ToastProvider>{ui}</ToastProvider>
-      </MemoryRouter>,
-    );
-  };
-
   it("should render list title, search form, and permission list", async () => {
-    renderWithProviders(<PermissionListPage />);
+    renderPage(<PermissionListPage />);
 
     expect(screen.getByText("Permissions list")).toBeInTheDocument();
 
@@ -115,8 +104,7 @@ describe("PermissionListPage Integration", () => {
   });
 
   it("should show create modal when create button is clicked and submit", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<PermissionListPage />);
+    const { user } = renderPage(<PermissionListPage />);
     expect(await screen.findByText("READ_PRIVILEGES")).toBeInTheDocument();
 
     const createBtn = screen.getByRole("button", {
@@ -144,8 +132,7 @@ describe("PermissionListPage Integration", () => {
   });
 
   it("should display edit modal when clicking edit button and submit", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<PermissionListPage />);
+    const { user } = renderPage(<PermissionListPage />);
     expect(await screen.findByText("READ_PRIVILEGES")).toBeInTheDocument();
 
     // Click edit on the first permission row
@@ -173,8 +160,7 @@ describe("PermissionListPage Integration", () => {
   });
 
   it("should handle delete confirmation", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<PermissionListPage />);
+    const { user } = renderPage(<PermissionListPage />);
     expect(await screen.findByText("WRITE_PRIVILEGES")).toBeInTheDocument();
 
     // Click delete on the second permission row
@@ -202,7 +188,7 @@ describe("PermissionListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<PermissionListPage />);
+    renderPage(<PermissionListPage />);
     expect(
       screen.getByRole("heading", { name: "Permissions list" }),
     ).toBeInTheDocument();
@@ -224,7 +210,7 @@ describe("PermissionListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<PermissionListPage />);
+    renderPage(<PermissionListPage />);
     // In the table, with Retry, and not repeated in a toast (UX-23)
     const table = await screen.findByRole("table");
     expect(

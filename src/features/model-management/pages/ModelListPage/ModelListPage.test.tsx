@@ -1,8 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import type React from "react";
-import { MemoryRouter } from "react-router-dom";
-import { ToastProvider } from "@/shared/context/ToastContext";
+import { screen, waitFor } from "@testing-library/react";
+import { renderPage } from "@/shared/tests/render";
 import { ModelListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -110,16 +107,8 @@ describe("ModelListPage Integration", () => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <MemoryRouter>
-        <ToastProvider>{ui}</ToastProvider>
-      </MemoryRouter>,
-    );
-  };
-
   it("renders page components correctly", async () => {
-    renderWithProviders(<ModelListPage />);
+    renderPage(<ModelListPage />);
     expect(screen.getByText("Models list")).toBeInTheDocument();
 
     // Wait for the MSW handlers to return models
@@ -128,8 +117,7 @@ describe("ModelListPage Integration", () => {
   });
 
   it("shows and handles ModelFormModal for editing", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<ModelListPage />);
+    const { user } = renderPage(<ModelListPage />);
 
     expect(await screen.findByText("Model One")).toBeInTheDocument();
 

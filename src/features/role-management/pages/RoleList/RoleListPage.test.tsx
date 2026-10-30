@@ -1,11 +1,8 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
-import { MemoryRouter } from "react-router-dom";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { RoleListPage } from "./index";
 
 const mockNavigate = vi.fn();
@@ -87,16 +84,8 @@ describe("RoleListPage", () => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <MemoryRouter>
-        <ToastProvider>{ui}</ToastProvider>
-      </MemoryRouter>,
-    );
-  };
-
   it("should render page header, create button, and lists", async () => {
-    renderWithProviders(<RoleListPage />);
+    renderPage(<RoleListPage />);
     expect(
       screen.getByRole("heading", { name: "Roles list" }),
     ).toBeInTheDocument();
@@ -110,8 +99,7 @@ describe("RoleListPage", () => {
   });
 
   it("should show create role modal when clicking create role button and submit", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<RoleListPage />);
+    const { user } = renderPage(<RoleListPage />);
 
     expect(await screen.findByText("Admin")).toBeInTheDocument();
 
@@ -139,8 +127,7 @@ describe("RoleListPage", () => {
   });
 
   it("should render the RoleFormModal for editing when clicking edit button and submit", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<RoleListPage />);
+    const { user } = renderPage(<RoleListPage />);
 
     expect(await screen.findByText("Admin")).toBeInTheDocument();
 
@@ -169,8 +156,7 @@ describe("RoleListPage", () => {
   });
 
   it("should handle delete confirmation", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<RoleListPage />);
+    const { user } = renderPage(<RoleListPage />);
 
     expect(await screen.findByText("User")).toBeInTheDocument();
 
@@ -199,7 +185,7 @@ describe("RoleListPage", () => {
       }),
     );
 
-    renderWithProviders(<RoleListPage />);
+    renderPage(<RoleListPage />);
     expect(
       screen.getByRole("heading", { name: "Roles list" }),
     ).toBeInTheDocument();
@@ -221,7 +207,7 @@ describe("RoleListPage", () => {
       }),
     );
 
-    renderWithProviders(<RoleListPage />);
+    renderPage(<RoleListPage />);
     // In the table, with Retry, and not repeated in a toast (UX-23)
     const table = await screen.findByRole("table");
     expect(

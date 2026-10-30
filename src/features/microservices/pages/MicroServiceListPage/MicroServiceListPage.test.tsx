@@ -1,10 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
-import { MemoryRouter } from "react-router-dom";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { MicroServiceListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -153,16 +150,8 @@ describe("MicroServiceListPage Integration", () => {
     );
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <MemoryRouter>
-        <ToastProvider>{ui}</ToastProvider>
-      </MemoryRouter>,
-    );
-  };
-
   it("renders page header and list of microservices correctly", async () => {
-    renderWithProviders(<MicroServiceListPage />);
+    renderPage(<MicroServiceListPage />);
     expect(
       screen.getByRole("heading", { name: "Microservices & System Status" }),
     ).toBeInTheDocument();
@@ -173,8 +162,7 @@ describe("MicroServiceListPage Integration", () => {
   });
 
   it("handles start microservice action correctly", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<MicroServiceListPage />);
+    const { user } = renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service B")).toBeInTheDocument();
 
     // Click Start Microservice button for Service B
@@ -196,8 +184,7 @@ describe("MicroServiceListPage Integration", () => {
   });
 
   it("handles restart microservice action correctly", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<MicroServiceListPage />);
+    const { user } = renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
 
     // Click Restart Microservice button for Service A
@@ -219,8 +206,7 @@ describe("MicroServiceListPage Integration", () => {
   });
 
   it("handles stop microservice action correctly", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<MicroServiceListPage />);
+    const { user } = renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
 
     // Click Stop Microservice button for Service A
@@ -242,8 +228,7 @@ describe("MicroServiceListPage Integration", () => {
   });
 
   it("keeps the last statuses and says the connection is lost when a reload fails", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<MicroServiceListPage />);
+    const { user } = renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
 
     server.use(
@@ -274,8 +259,7 @@ describe("MicroServiceListPage Integration", () => {
         ),
       ),
     );
-    const user = userEvent.setup();
-    renderWithProviders(<MicroServiceListPage />);
+    const { user } = renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
 
     await user.click(screen.getByTitle("Stop Service"));
