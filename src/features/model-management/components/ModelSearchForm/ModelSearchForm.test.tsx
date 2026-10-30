@@ -8,16 +8,7 @@ import { ModelSearchForm } from "./index";
 
 // Mock @variamosple/variamos-components before any other imports that might use it
 vi.mock("@variamosple/variamos-components", async () => {
-  return {
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(p?: number, s?: number) {
-        this.pageNumber = p;
-        this.pageSize = s;
-      }
-    },
-  };
+  return {};
 });
 
 describe("ModelSearchForm Component", () => {

@@ -27,7 +27,6 @@ vi.mock("@variamosple/variamos-components", async () => ({
       this.data = data;
     }
   },
-  PagedModel: class PagedModel {},
 }));
 
 describe("PasswordUpdateForm Component", () => {

@@ -59,7 +59,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.type = type;
       }
     },
-    PagedModel: class PagedModel {},
   };
 });
 

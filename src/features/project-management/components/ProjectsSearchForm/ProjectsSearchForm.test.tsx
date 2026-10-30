@@ -5,16 +5,7 @@ import { ProjectSearchForm } from "./index";
 
 // Mock the variamos-components library which is imported by ProjectsFilter
 vi.mock("@variamosple/variamos-components", async () => {
-  return {
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-      }
-    },
-  };
+  return {};
 });
 
 describe("ProjectSearchForm Component", () => {

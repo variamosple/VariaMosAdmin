@@ -1,20 +1,19 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { PagedModel, ResponseModel } from "@variamosple/variamos-components";
+import { ResponseModel } from "@variamosple/variamos-components";
 import { describe, expect, it, vi } from "vitest";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
+import { PagedModel } from "@/shared/domain/Entity/PagedModel";
 import { usePagedList } from "./usePagedList";
 
 // The real paging hook and models: the wrapper is tested as it runs
 vi.mock("@variamosple/variamos-components", async () => {
   const dist = "@variamosple/variamos-components/dist";
-  const [hook, paged, response] = await Promise.all([
+  const [hook, response] = await Promise.all([
     import(`${dist}/Hooks/usePaginatedQuery.js`),
-    import(`${dist}/Model/PagedModel.js`),
     import(`${dist}/Model/ResponseModel.js`),
   ]);
   return {
     usePaginatedQuery: hook.usePaginatedQuery,
-    PagedModel: paged.PagedModel,
     ResponseModel: response.ResponseModel,
   };
 });

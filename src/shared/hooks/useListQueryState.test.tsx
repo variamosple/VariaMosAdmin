@@ -1,6 +1,5 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import {
-  PagedModel,
   ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
@@ -10,6 +9,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { PagedModel } from "@/shared/domain/Entity/PagedModel";
 import {
   paramsOf,
   readBooleanParam,
@@ -22,14 +22,12 @@ import {
 // The real paging hook and models: the address follows the hook as it runs
 vi.mock("@variamosple/variamos-components", async () => {
   const dist = "@variamosple/variamos-components/dist";
-  const [hook, paged, response] = await Promise.all([
+  const [hook, response] = await Promise.all([
     import(`${dist}/Hooks/usePaginatedQuery.js`),
-    import(`${dist}/Model/PagedModel.js`),
     import(`${dist}/Model/ResponseModel.js`),
   ]);
   return {
     usePaginatedQuery: hook.usePaginatedQuery,
-    PagedModel: paged.PagedModel,
     ResponseModel: response.ResponseModel,
   };
 });

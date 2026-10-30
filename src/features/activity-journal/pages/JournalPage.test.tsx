@@ -10,16 +10,14 @@ import { JournalPage } from "./JournalPage";
 // that the global mock avoids: the page is tested as it runs
 vi.mock("@variamosple/variamos-components", async () => {
   const dist = "@variamosple/variamos-components/dist";
-  const [hook, paginator, paged, response] = await Promise.all([
+  const [hook, paginator, response] = await Promise.all([
     import(`${dist}/Hooks/usePaginatedQuery.js`),
     import(`${dist}/Components/Paginator/index.js`),
-    import(`${dist}/Model/PagedModel.js`),
     import(`${dist}/Model/ResponseModel.js`),
   ]);
   return {
     usePaginatedQuery: hook.usePaginatedQuery,
     Paginator: paginator.Paginator,
-    PagedModel: paged.PagedModel,
     ResponseModel: response.ResponseModel,
     withPageVisit: <T,>(component: T): T => component,
   };

@@ -8,7 +8,6 @@ vi.mock("@variamosple/variamos-components", async () => {
   return {
     useSession: vi.fn(),
     useRouter: vi.fn(),
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel {
       type: string;
       constructor(type: string) {

@@ -14,7 +14,6 @@ vi.mock("@variamosple/variamos-components", async () => {
   const { useState, useCallback } = React;
   return {
     withPageVisit: <T,>(component: T): T => component,
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;

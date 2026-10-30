@@ -54,14 +54,6 @@ vi.mock("@variamosple/variamos-components", async () => {
       setCurrentPage: vi.fn(),
       totalItems: 2,
     }),
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-      }
-    },
     ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number;
       message?: string;

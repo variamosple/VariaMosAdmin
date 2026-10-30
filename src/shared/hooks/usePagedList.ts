@@ -1,10 +1,10 @@
 import {
-  type PagedModel,
   type ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
 import { useCallback, useMemo, useState } from "react";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
+import type { PagedModel } from "@/shared/domain/Entity/PagedModel";
 
 /** What a list table needs to tell loading, failure and emptiness apart. */
 export interface ListState {

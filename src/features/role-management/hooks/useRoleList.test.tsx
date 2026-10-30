@@ -36,14 +36,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         return this;
       }
     },
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-      }
-    },
     usePaginatedQuery: vi.fn(),
   };
 });

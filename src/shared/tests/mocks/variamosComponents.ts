@@ -2,7 +2,7 @@ import type * as Library from "@variamosple/variamos-components";
 
 /**
  * The component library for a vi.mock factory: its real model classes
- * (ResponseModel, PagedModel...), so that a test cannot drift from their
+ * (ResponseModel...), so that a test cannot drift from their
  * shape, and withPageVisit as a pass-through, since it needs the app shell.
  * The full library is not loaded: it imports a stylesheet, which Node
  * cannot load in a mock factory. A test adds the rest it uses (Paginator,

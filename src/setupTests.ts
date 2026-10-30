@@ -158,7 +158,7 @@ afterAll(async () => {
   }
 });
 
-// Global mock for @variamosple/variamos-components to satisfy ResponseModel and PagedModel usages in all unit tests
+// Global mock for @variamosple/variamos-components to satisfy ResponseModel usages in all unit tests
 vi.mock("@variamosple/variamos-components", () => {
   class ResponseModel<T = Record<string, never>> {
     status: string;
@@ -185,7 +185,6 @@ vi.mock("@variamosple/variamos-components", () => {
     AuthWrapper: ({ children }: { children: ReactNode }) => children,
     NotAuthorized: () => null,
     ProtectedRoute: ({ children }: { children: ReactNode }) => children,
-    PagedModel: class PagedModel {},
     // One button to the next page: enough to drive a paged list in a test
     Paginator: (props: {
       currentPage: number;

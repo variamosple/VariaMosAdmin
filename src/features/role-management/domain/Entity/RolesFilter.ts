@@ -1,5 +1,5 @@
-import { PagedModel } from "@variamosple/variamos-components";
 import type { SortOrder } from "@/shared/domain/Entity/ListSort";
+import { PagedModel } from "@/shared/domain/Entity/PagedModel";
 
 export const ROLE_SORT_FIELDS = ["id", "name"] as const;
 export type RoleSortField = (typeof ROLE_SORT_FIELDS)[number];
