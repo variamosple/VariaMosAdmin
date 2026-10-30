@@ -124,4 +124,60 @@ describe("ConfigurationListPage (UX-14)", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("UNSAVED")).toBeInTheDocument();
   });
+
+  it("shows a tab for each category found, with the unit of a value", async () => {
+    const loaded = new ResponseModel<Configuration[]>("ok");
+    loaded.data = [
+      ...CONFIGURATIONS,
+      {
+        ...toggle("monitoring.health_check_interval_seconds", false),
+        type: "number",
+        value: 30,
+        category: "monitoring",
+        accepts: {
+          text: "a whole number of seconds from 5 to 86400",
+          min: 5,
+          max: 86400,
+          unit: "seconds",
+        },
+      },
+    ];
+    vi.mocked(ConfigurationRepository.queryConfigurations).mockResolvedValue(
+      loaded,
+    );
+    const user = await renderPage();
+
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+      "General Options",
+      "Monitoring",
+    ]);
+
+    await user.click(screen.getByRole("tab", { name: "Monitoring" }));
+
+    expect(
+      await screen.findByText("monitoring.health_check_interval_seconds"),
+    ).toBeVisible();
+    expect(screen.getByText("Monitoring Settings")).toBeInTheDocument();
+    expect(screen.getByText("seconds")).toBeInTheDocument();
+  });
+
+  it("opens on the first category when there is no general one", async () => {
+    const loaded = new ResponseModel<Configuration[]>("ok");
+    loaded.data = [
+      { ...toggle("security.mfa.enabled", false), category: "security" },
+    ];
+    vi.mocked(ConfigurationRepository.queryConfigurations).mockResolvedValue(
+      loaded,
+    );
+    render(
+      <ToastProvider>
+        <ConfigurationListPage />
+      </ToastProvider>,
+    );
+
+    expect(await screen.findByText("security.mfa.enabled")).toBeVisible();
+    expect(
+      screen.getByRole("tab", { name: "Security & Passwords" }),
+    ).toHaveAttribute("aria-selected", "true");
+  });
 });
