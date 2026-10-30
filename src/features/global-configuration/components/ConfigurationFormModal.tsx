@@ -1,9 +1,25 @@
 import { type FC, useEffect, useId, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import type {
+  AcceptedValues,
   Configuration,
   ConfigurationValue,
 } from "../domain/Entity/Configuration";
+
+/** A whole number within the bounds the server sent; true without bounds. */
+const isWithinAccepted = (value: number, accepts?: AcceptedValues) =>
+  accepts?.min === undefined ||
+  accepts.max === undefined ||
+  (Number.isInteger(value) && value >= accepts.min && value <= accepts.max);
+
+/** Time zones the browser knows, offered while typing one. */
+const knownTimeZones = (): string[] => {
+  try {
+    return Intl.supportedValuesOf("timeZone");
+  } catch {
+    return [];
+  }
+};
 
 export interface ConfigurationFormModalProps {
   showModal: boolean;
@@ -19,6 +35,7 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
   onConfigSubmit,
 }) => {
   const titleId = useId();
+  const timeZonesId = useId();
   const [inputValue, setInputValue] = useState<string>("");
   const [boolValue, setBoolValue] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -57,6 +74,11 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
         const num = Number(inputValue);
         if (Number.isNaN(num)) {
           setValidationError("Please enter a valid number.");
+          return;
+        }
+        // The server refuses it too; saying it here spares a failed save
+        if (!isWithinAccepted(num, config.accepts)) {
+          setValidationError(`Enter ${config.accepts?.text}.`);
           return;
         }
         finalValue = num;
@@ -100,7 +122,9 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
         <Modal.Title id={titleId}>Edit Configuration</Modal.Title>
       </Modal.Header>
 
-      <Form onSubmit={handleSubmit}>
+      {/* The bounds of the field help the input; the form says what it
+          accepts in its own words rather than with the browser bubble */}
+      <Form noValidate onSubmit={handleSubmit}>
         <Modal.Body className="d-flex flex-column gap-3">
           <div>
             <div className="fw-bold text-muted small">KEY</div>
@@ -183,8 +207,32 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
                 disabled={config.isReadOnly}
                 autoComplete={config.isSecret ? "new-password" : "off"}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder={config.isSecret ? "New value" : "Enter value"}
+                placeholder={
+                  config.isSecret
+                    ? "New value"
+                    : config.accepts?.format === "timeSpan"
+                      ? "20:00-07:00"
+                      : "Enter value"
+                }
+                min={config.accepts?.min}
+                max={config.accepts?.max}
+                step={config.accepts?.min === undefined ? undefined : 1}
+                list={
+                  config.accepts?.format === "timeZone"
+                    ? timeZonesId
+                    : undefined
+                }
               />
+            )}
+            {config.accepts?.format === "timeZone" && (
+              <datalist id={timeZonesId}>
+                {knownTimeZones().map((zone) => (
+                  <option key={zone} value={zone} />
+                ))}
+              </datalist>
+            )}
+            {config.accepts && config.type !== "boolean" && (
+              <Form.Text muted>Accepted: {config.accepts.text}.</Form.Text>
             )}
             {config.isSecret && (
               <Form.Text muted>
