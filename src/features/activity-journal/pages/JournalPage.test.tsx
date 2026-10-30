@@ -155,6 +155,24 @@ describe("Journal page (T-24 lot 3)", () => {
     });
   });
 
+  it("filters on the bug operations", async () => {
+    const user = userEvent.setup();
+    const requests = serveJournals();
+    render(<JournalPage />);
+    await screen.findByRole("cell", { name: "role.update" });
+
+    await user.selectOptions(
+      screen.getByLabelText("Action"),
+      "bug.attachment.delete",
+    );
+    await user.selectOptions(screen.getByLabelText("Entity"), "bug");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => expect(requests).toHaveLength(2));
+    expect(requests[1].params.get("action")).toBe("bug.attachment.delete");
+    expect(requests[1].params.get("entityType")).toBe("bug");
+  });
+
   it("sends the period as ISO dates", async () => {
     const user = userEvent.setup();
     const requests = serveJournals();

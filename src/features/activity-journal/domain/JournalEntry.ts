@@ -85,7 +85,7 @@ export class AccessFilter extends JournalFilter {
   }
 }
 
-/** The operations of the activity journal (T-24 lot 1). */
+/** The operations of the activity journal (T-24 lot 1, bugs: EV-20). */
 export const ACTIVITY_ACTIONS = [
   "user.enable",
   "user.disable",
@@ -107,6 +107,14 @@ export const ACTIVITY_ACTIONS = [
   "micro-service.stop",
   "micro-service.restart",
   "notification.dispatch",
+  "bug.status.update",
+  "bug.assignees.update",
+  "bug.reject",
+  "bug.restore",
+  "bug.attachment.create",
+  "bug.attachment.delete",
+  "bug.note.create",
+  "bug.sync",
 ];
 
 export const ENTITY_TYPES = [
@@ -116,6 +124,7 @@ export const ENTITY_TYPES = [
   "configuration",
   "micro-service",
   "notification",
+  "bug",
 ];
 
 /** The events of the access journal (T-24 lot 2). */
