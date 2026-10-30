@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../helpers/mockedTest";
 import { mockSignedOut } from "../helpers/session";
 
 test.describe("Auth - Comprehensive Mocked Flows", () => {

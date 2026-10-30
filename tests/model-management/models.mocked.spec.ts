@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../helpers/mockedTest";
 import { mockSignedIn } from "../helpers/session";
 
 test.describe("Model Management - Mocked Flows", () => {
