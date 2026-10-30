@@ -1,8 +1,5 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import type React from "react";
-import { MemoryRouter } from "react-router-dom";
-import { ToastProvider } from "@/shared/context/ToastContext";
+import { screen, waitFor, within } from "@testing-library/react";
+import { renderPage } from "@/shared/tests/render";
 import { LanguageListPage } from "./index";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
@@ -113,16 +110,8 @@ describe("LanguageListPage", () => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <MemoryRouter>
-        <ToastProvider>{ui}</ToastProvider>
-      </MemoryRouter>,
-    );
-  };
-
   it("renders page components correctly", async () => {
-    renderWithProviders(<LanguageListPage />);
+    renderPage(<LanguageListPage />);
     expect(screen.getByText("Languages list")).toBeInTheDocument();
 
     // Wait for the MSW handlers to return English and Spanish
@@ -131,8 +120,7 @@ describe("LanguageListPage", () => {
   });
 
   it("shows and handles LanguageFormModal for editing", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<LanguageListPage />);
+    const { user } = renderPage(<LanguageListPage />);
 
     expect(await screen.findByText("English")).toBeInTheDocument();
 
@@ -162,8 +150,7 @@ describe("LanguageListPage", () => {
   });
 
   it("shows and handles ConfirmationModal for deleting", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<LanguageListPage />);
+    const { user } = renderPage(<LanguageListPage />);
 
     expect(await screen.findByText("Spanish")).toBeInTheDocument();
 
@@ -188,8 +175,7 @@ describe("LanguageListPage", () => {
   });
 
   it("shows and handles ConfirmationModal for activating a language", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<LanguageListPage />);
+    const { user } = renderPage(<LanguageListPage />);
 
     expect(await screen.findByText("Spanish")).toBeInTheDocument();
 
@@ -214,8 +200,7 @@ describe("LanguageListPage", () => {
   });
 
   it("shows and handles ConfirmationModal for deactivating a language", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<LanguageListPage />);
+    const { user } = renderPage(<LanguageListPage />);
 
     expect(await screen.findByText("English")).toBeInTheDocument();
 

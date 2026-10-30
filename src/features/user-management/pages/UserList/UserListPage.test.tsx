@@ -1,10 +1,7 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
-import { MemoryRouter } from "react-router-dom";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { UserListPage } from "./index";
 
 const mockNavigate = vi.fn();
@@ -178,14 +175,6 @@ describe("UserListPage Integration", () => {
     );
   });
 
-  const renderWithProviders = (ui: React.ReactElement, entry = "/users") => {
-    return render(
-      <MemoryRouter initialEntries={[entry]}>
-        <ToastProvider>{ui}</ToastProvider>
-      </MemoryRouter>,
-    );
-  };
-
   it("searches what the address says, and shows it in the field (UX-26)", async () => {
     const searches: (string | null)[] = [];
     server.use(
@@ -195,7 +184,7 @@ describe("UserListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<UserListPage />, "/users?search=jane");
+    renderPage(<UserListPage />, { route: "/users?search=jane" });
 
     await waitFor(() => expect(searches).toEqual(["jane"]));
     expect(
@@ -204,7 +193,7 @@ describe("UserListPage Integration", () => {
   });
 
   it("renders page components correctly", async () => {
-    renderWithProviders(<UserListPage />);
+    renderPage(<UserListPage />, { route: "/users" });
     expect(screen.getByText("Users list")).toBeInTheDocument();
 
     // Wait for the MSW handlers to return users
@@ -213,8 +202,7 @@ describe("UserListPage Integration", () => {
   });
 
   it("renders RecoveryLinkModal when reset link button is clicked and user generates link", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<UserListPage />);
+    const { user } = renderPage(<UserListPage />, { route: "/users" });
     expect(await screen.findByText("Admin User")).toBeInTheDocument();
 
     // Click Reset Password key icon for Admin User (first active user)
@@ -249,8 +237,7 @@ describe("UserListPage Integration", () => {
   });
 
   it("renders and handles disable confirmation modal", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<UserListPage />);
+    const { user } = renderPage(<UserListPage />, { route: "/users" });
     expect(await screen.findByText("Admin User")).toBeInTheDocument();
 
     // Click disable button (Ban icon)
@@ -271,8 +258,7 @@ describe("UserListPage Integration", () => {
   });
 
   it("renders and handles enable confirmation modal", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<UserListPage />);
+    const { user } = renderPage(<UserListPage />, { route: "/users" });
     expect(await screen.findByText("Normal User")).toBeInTheDocument();
 
     // Click enable button (CheckCircle icon - only available on disabled users)
@@ -293,8 +279,7 @@ describe("UserListPage Integration", () => {
   });
 
   it("renders and handles delete confirmation modal", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<UserListPage />);
+    const { user } = renderPage(<UserListPage />, { route: "/users" });
     expect(await screen.findByText("Admin User")).toBeInTheDocument();
 
     // Click delete user button (Trash icon)
@@ -321,7 +306,7 @@ describe("UserListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<UserListPage />);
+    renderPage(<UserListPage />, { route: "/users" });
     expect(screen.getByText("Users list")).toBeInTheDocument();
 
     await waitFor(() => {
@@ -341,7 +326,7 @@ describe("UserListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<UserListPage />);
+    renderPage(<UserListPage />, { route: "/users" });
     // In the table, with Retry, and not repeated in a toast (UX-23)
     const table = await screen.findByRole("table");
     expect(

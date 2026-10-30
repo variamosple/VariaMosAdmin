@@ -17,7 +17,8 @@ export default defineConfig({
       "**/build/**",
       "**/.stryker-tmp/**",
       "**/strykerTmp/**",
-      "**/tests/**",
+      // The end-to-end tests at the root, not the helpers of src/shared/tests
+      "tests/**",
       "**/.worktrees/**"
     ],
     coverage: {
