@@ -1,19 +1,19 @@
 import { useEffect } from "react";
-
-const APP_TITLE = "VariaMos";
+import { useSiteName } from "./useSiteName";
 
 /**
  * Names the browser tab, the history entry and the page announced by a
- * screen reader after the screen (UX-35). The former title comes back when
- * the screen goes away. Without a title, the tab keeps the application name.
+ * screen reader after the screen (UX-35), followed by the site name set on
+ * the configuration screen (EV-87 lot 2). When the screen goes away, the tab
+ * shows the site name alone. Without a title, the tab is left as it is.
  */
 export const usePageTitle = (title?: string) => {
+  const siteName = useSiteName();
   useEffect(() => {
     if (!title) return;
-    const previous = document.title;
-    document.title = `${title} — ${APP_TITLE}`;
+    document.title = `${title} — ${siteName}`;
     return () => {
-      document.title = previous;
+      document.title = siteName;
     };
-  }, [title]);
+  }, [title, siteName]);
 };

@@ -1,9 +1,14 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import { HttpResponse, http } from "msw";
 import { afterEach, describe, expect, it } from "vitest";
+import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { server } from "@/shared/tests/mocks/server";
 import { usePageTitle } from "./usePageTitle";
+import { loadSiteName, resetSiteName } from "./useSiteName";
 
 describe("usePageTitle", () => {
   afterEach(() => {
+    act(() => resetSiteName());
     document.title = "VariaMos";
   });
 
@@ -26,5 +31,23 @@ describe("usePageTitle", () => {
     document.title = "VariaMos";
     renderHook(() => usePageTitle(undefined));
     expect(document.title).toBe("VariaMos");
+  });
+
+  it("follows the site name set on the configuration screen (EV-87 lot 2)", async () => {
+    document.title = "VariaMos";
+    server.use(
+      http.get(
+        `${(AppConfig.ADMIN_API_URL || "").replace(/\/$/, "")}/v1/configurations/public`,
+        () => HttpResponse.json({ data: { siteName: "VariaMos Lab" } }),
+      ),
+    );
+    const { unmount } = renderHook(() => usePageTitle("Users"));
+    expect(document.title).toBe("Users — VariaMos");
+
+    await act(() => loadSiteName());
+    expect(document.title).toBe("Users — VariaMos Lab");
+
+    unmount();
+    expect(document.title).toBe("VariaMos Lab");
   });
 });

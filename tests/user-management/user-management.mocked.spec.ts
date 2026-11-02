@@ -85,6 +85,15 @@ test.describe("User Management - Mocked Flows", () => {
     await expect(page).toHaveTitle(`User ${mockUsers[0].name} — VariaMos`);
   });
 
+  test("ends the tab title with the site name set on the configuration screen (EV-87 lot 2)", async ({ page }) => {
+    await page.route("**/v1/configurations/public", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: { siteName: "VariaMos Lab" } }) });
+    });
+    await page.reload();
+
+    await expect(page).toHaveTitle("Users — VariaMos Lab");
+  });
+
   test("should inspect user details, layout fields, and toggle active/disabled states", async ({ page }) => {
     await page.route("**/v1/users/u1", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: mockUsers[0] }) });
