@@ -105,6 +105,9 @@
     "underscore": "^1.13.8",
     "sockjs": {
       "uuid": "^14.0.1"
+    },
+    "@stryker-mutator/core": {
+      "minimatch": "^11.0.1"
     }
   },
   "allowScripts": {
