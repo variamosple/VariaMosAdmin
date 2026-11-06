@@ -71,14 +71,18 @@ jobs:
           key: ${{ secrets.VARIAMOS_AWS_PEM }}
           script: |
             echo "Executing command on remote server..."
+            # Keep the image in service: the rollback step puts it back (D6)
+            previous=$(sudo docker inspect -f '{{.Image}}' "$(sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml ps -q variamosadminaws)" 2>/dev/null || true)
+            if [ -n "$previous" ]; then sudo docker tag "$previous" variamosadminaws:rollback; fi
             sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml pull variamosadminaws
             sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml up -d --force-recreate variamosadminaws
             sudo docker image prune -f
 
-      # Alert only (T-25, decision D6): a red run on main warns whoever merged;
-      # nothing is rolled back. The page must come from this run's build (nginx
-      # gives the build time as Last-Modified) and its main script must load.
+      # The page must come from this run's build (nginx gives the build time as
+      # Last-Modified) and its main script must load. Otherwise the previous
+      # image is put back and the run stays red (T-25, decision D6).
       - name: Check the deployed page answers
+        id: health
         env:
           PAGE_URL: https://app.variamos.com/variamos_admin/
         run: |
@@ -101,6 +105,51 @@ jobs:
             fi
             if [ "$(date +%s)" -ge "$deadline" ]; then
               echo "::error::Within 5 minutes, $problem"
+              exit 1
+            fi
+            sleep 10
+          done
+
+      # A migration is not undone: the previous code must accept the schema
+      # left by the new one, as every migration so far does
+      - name: Roll back to the previous image
+        id: rollback
+        if: failure() && steps.health.outcome == 'failure'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.VARIAMOS_AWS_PEM }}
+          script: |
+            set -e
+            container=$(sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml ps -q variamosadminaws)
+            if ! sudo docker image inspect variamosadminaws:rollback >/dev/null 2>&1; then
+              echo "No previous image kept: nothing to roll back to"
+              exit 1
+            fi
+            if [ "$(sudo docker inspect -f '{{.Image}}' "$container")" = "$(sudo docker image inspect -f '{{.Id}}' variamosadminaws:rollback)" ]; then
+              echo "The service still runs the previous image: nothing was rolled back"
+              exit 1
+            fi
+            # The compose file names the image: that name points back to the previous one
+            sudo docker tag variamosadminaws:rollback "$(sudo docker inspect -f '{{.Config.Image}}' "$container")"
+            sudo docker compose --env-file .env.aws.develop -f docker-compose-aws-develop-nginx.yml up -d --force-recreate --pull never variamosadminaws
+            echo "Rolled back to the previous image"
+
+      - name: Check the rolled back page answers
+        if: failure() && steps.rollback.outcome == 'success'
+        env:
+          PAGE_URL: https://app.variamos.com/variamos_admin/
+        run: |
+          deadline=$(( $(date +%s) + 300 ))
+          while :; do
+            script=$(curl -sf --max-time 10 "$PAGE_URL" | grep -oE 'assets/[A-Za-z0-9_.-]+\.js' | head -1 || true)
+            if [ -n "$script" ] && curl -sf --max-time 10 -o /dev/null "$PAGE_URL$script"; then
+              echo "::warning::The page was rolled back to the previous image and answers"
+              exit 0
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error::The page does not answer after the rollback either"
               exit 1
             fi
             sleep 10
