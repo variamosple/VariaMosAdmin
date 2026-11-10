@@ -78,12 +78,11 @@ jobs:
   # minutes. Edge (T-31) is installed on the GitHub runner but not in the
   # image, so its job runs on the runner.
   e2e-mocked:
+    name: e2e-mocked (${{ matrix.browser }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    # Edge does not block the required check yet: it becomes blocking after
-    # five green runs in a row (decision of 2026-11-02, EV-95). Its job still
-    # shows red when it fails.
-    continue-on-error: ${{ matrix.optional }}
+    # Every browser blocks the required check, Edge included since its five
+    # green runs in a row (decision of 2026-11-02, EV-95)
     strategy:
       # Every browser reports, even when another one fails
       fail-fast: false
@@ -92,19 +91,15 @@ jobs:
           - browser: chromium
             in-docker: '1'
             edge: ''
-            optional: false
           - browser: firefox
             in-docker: '1'
             edge: ''
-            optional: false
           - browser: webkit
             in-docker: '1'
             edge: ''
-            optional: false
           - browser: msedge
             in-docker: ''
             edge: '1'
-            optional: true
 
     steps:
       - name: Checkout repository
