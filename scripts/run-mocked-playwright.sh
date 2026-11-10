@@ -38,7 +38,8 @@ echo " Ready!"
 # Run Playwright
 echo "Running Playwright mocked tests..."
 status=0
-bash ./scripts/playwright-test.sh --grep .mocked. || status=$?
+# Extra arguments go to Playwright, for example --project=webkit
+bash ./scripts/playwright-test.sh --grep .mocked. "$@" || status=$?
 
 # Cleanup
 echo "Cleaning up Docker container..."

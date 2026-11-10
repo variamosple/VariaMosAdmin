@@ -119,4 +119,6 @@ npm run playwright:run:mocked   # frontend image, backend mocked
 npm run playwright:run:real     # frontend and real services
 ```
 
+The mocked tests run in Chromium, Firefox and WebKit. To run one browser only, as each CI job does: `npm run playwright:run:mocked -- --project=webkit`.
+
 `playwright:run:real` stops its containers with `npm run docker:test:down`, which also runs `docker image prune -f`: it removes every dangling image of the machine, not only those of the tests.

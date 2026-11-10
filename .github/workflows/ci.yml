@@ -72,10 +72,17 @@ jobs:
 
   # Runs next to the checks. Playwright runs in its official image, which
   # already holds the browsers: no apt-get on the Ubuntu mirror, which can
-  # take more than 45 minutes.
+  # take more than 45 minutes. One job per browser, each on its own runner:
+  # the three run at the same time. `npm run playwright:run:mocked` without
+  # arguments still runs the three browsers in one go.
   e2e-mocked:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      # Every browser reports, even when another one fails
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
 
     steps:
       - name: Checkout repository
@@ -94,7 +101,7 @@ jobs:
 
       - name: Run Mocked E2E Tests (Playwright in Docker)
         run: |
-          npm run playwright:run:mocked
+          npm run playwright:run:mocked -- --project=${{ matrix.browser }}
         env:
           PLAYWRIGHT_IN_DOCKER: 1
 
@@ -102,7 +109,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-mocked-report
+          name: playwright-mocked-report-${{ matrix.browser }}
           path: playwright-report/
           retention-days: 7
 
