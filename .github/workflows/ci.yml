@@ -70,48 +70,41 @@ jobs:
           # SHA above when Dependabot updates the action
           version: 3.99.7
 
-  # Runs next to the checks. Playwright runs in its official image, which
-  # already holds the browsers: no apt-get on the Ubuntu mirror, which can
-  # take more than 45 minutes.
+  # Runs next to the checks, one job per browser, each on its own runner:
+  # the four run at the same time. `npm run playwright:run:mocked` without
+  # arguments still runs Chromium, Firefox and WebKit in one go.
+  # Playwright runs in its official image, which already holds these
+  # browsers: no apt-get on the Ubuntu mirror, which can take more than 45
+  # minutes. Edge (T-31) is installed on the GitHub runner but not in the
+  # image, so its job runs on the runner.
   e2e-mocked:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-
-      - name: Install dependencies
-        run: |
-          npm ci
-
-      - name: Run Mocked E2E Tests (Playwright in Docker)
-        run: |
-          npm run playwright:run:mocked
-        env:
-          PLAYWRIGHT_IN_DOCKER: 1
-
-      - name: Upload Playwright Report
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-mocked-report
-          path: playwright-report/
-          retention-days: 7
-
-  # The mocked e2e in Microsoft Edge (T-31). Edge is installed on the GitHub
-  # runner but not in the Playwright image, so the tests run on the runner.
-  # Not required for now: it shares the Chromium engine, already tested.
-  e2e-edge:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Edge does not block the required check yet: it becomes blocking after
+    # five green runs in a row (decision of 2026-11-02, EV-95). Its job still
+    # shows red when it fails.
+    continue-on-error: ${{ matrix.optional }}
+    strategy:
+      # Every browser reports, even when another one fails
+      fail-fast: false
+      matrix:
+        include:
+          - browser: chromium
+            in-docker: '1'
+            edge: ''
+            optional: false
+          - browser: firefox
+            in-docker: '1'
+            edge: ''
+            optional: false
+          - browser: webkit
+            in-docker: '1'
+            edge: ''
+            optional: false
+          - browser: msedge
+            in-docker: ''
+            edge: '1'
+            optional: true
 
     steps:
       - name: Checkout repository
@@ -129,26 +122,29 @@ jobs:
           npm ci
 
       - name: Show the Edge version
+        if: matrix.browser == 'msedge'
         run: |
           /opt/microsoft/msedge/msedge --version
 
       # Videos of failed tests need the ffmpeg build of Playwright, which
       # the image has and the runner has not
       - name: Install the Playwright ffmpeg
+        if: matrix.browser == 'msedge'
         run: |
           npx playwright install ffmpeg
 
-      - name: Run Mocked E2E Tests (Edge)
+      - name: Run Mocked E2E Tests (${{ matrix.browser }})
         run: |
-          npm run playwright:run:mocked
+          npm run playwright:run:mocked -- --project=${{ matrix.browser }}
         env:
-          PLAYWRIGHT_EDGE: 1
+          PLAYWRIGHT_IN_DOCKER: ${{ matrix.in-docker }}
+          PLAYWRIGHT_EDGE: ${{ matrix.edge }}
 
       - name: Upload Playwright Report
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-edge-report
+          name: playwright-mocked-report-${{ matrix.browser }}
           path: playwright-report/
           retention-days: 7
 
