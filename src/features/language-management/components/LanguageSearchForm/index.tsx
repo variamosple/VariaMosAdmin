@@ -1,7 +1,8 @@
 import { type FC, useCallback, useEffect, useRef } from "react";
-import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
+import { Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import { IconButton } from "@/shared/components/IconButton";
 import { LanguageStatus } from "../../domain/Entity/Language";
 import type { LanguagesFilter } from "../../domain/Entity/LanguageFilter";
 
@@ -9,11 +10,14 @@ export interface LanguageSearchFormProps {
   onSubmit: (search?: LanguagesFilter) => void;
   isLoading: boolean;
   onSearchReset: () => void;
+  // The search restored from the address (UX-26)
+  defaultFilter?: LanguagesFilter;
 }
 export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
   onSubmit,
   isLoading,
   onSearchReset,
+  defaultFilter,
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
@@ -22,7 +26,12 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
     reset,
     formState: { errors, isDirty },
     watch,
-  } = useForm<LanguagesFilter>();
+  } = useForm<LanguagesFilter>({
+    defaultValues: {
+      name: defaultFilter?.name ?? "",
+      status: defaultFilter?.status ?? "",
+    },
+  });
 
   const _values = watch();
 
@@ -97,15 +106,14 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
                 <option value={LanguageStatus.DELETED}>Deleted</option>
               </Form.Select>
 
-              <Button
-                title="Clear results"
+              <IconButton
+                label="Clear results"
                 variant="outline-secondary"
                 onClick={onReset}
                 className="fw-bold"
                 disabled={isLoading}
-              >
-                <Trash />
-              </Button>
+                icon={<Trash />}
+              />
             </InputGroup>
           </Form.Group>
         </Col>

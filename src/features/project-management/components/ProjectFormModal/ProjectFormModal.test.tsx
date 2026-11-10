@@ -30,7 +30,7 @@ describe("ProjectFormModal Component", () => {
   it("renders the modal when showModal is true", () => {
     render(
       <ProjectFormModal
-        modalTitle="Create a Project"
+        modalTitle="New project"
         showModal={true}
         onClose={mockOnClose}
         onProjectSubmit={mockOnSubmit}
@@ -38,7 +38,7 @@ describe("ProjectFormModal Component", () => {
       />,
     );
 
-    expect(screen.getByText("Create a Project")).toBeInTheDocument();
+    expect(screen.getByText("New project")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Project name")).toBeInTheDocument();
     expect(screen.getByLabelText("Access level")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Project author")).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe("ProjectFormModal Component", () => {
   it("does not render the modal when showModal is false", () => {
     render(
       <ProjectFormModal
-        modalTitle="Create a Project"
+        modalTitle="New project"
         showModal={false}
         onClose={mockOnClose}
         onProjectSubmit={mockOnSubmit}
@@ -59,7 +59,7 @@ describe("ProjectFormModal Component", () => {
       />,
     );
 
-    expect(screen.queryByText("Create a Project")).not.toBeInTheDocument();
+    expect(screen.queryByText("New project")).not.toBeInTheDocument();
   });
 
   it("displays default values when editing a project", () => {
@@ -96,7 +96,7 @@ describe("ProjectFormModal Component", () => {
     const user = userEvent.setup();
     render(
       <ProjectFormModal
-        modalTitle="Create Project"
+        modalTitle="Create project"
         showModal={true}
         onClose={mockOnClose}
         onProjectSubmit={mockOnSubmit}
@@ -119,7 +119,7 @@ describe("ProjectFormModal Component", () => {
 
     render(
       <ProjectFormModal
-        modalTitle="Create Project"
+        modalTitle="Create project"
         showModal={true}
         onClose={mockOnClose}
         onProjectSubmit={mockOnSubmit}
@@ -157,7 +157,7 @@ describe("ProjectFormModal Component", () => {
     const user = userEvent.setup();
     render(
       <ProjectFormModal
-        modalTitle="Create Project"
+        modalTitle="Create project"
         showModal={true}
         onClose={mockOnClose}
         onProjectSubmit={mockOnSubmit}

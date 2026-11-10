@@ -1,8 +1,4 @@
-import {
-  usePaginatedQuery,
-  useRouter,
-  withPageVisit,
-} from "@variamosple/variamos-components";
+import { useRouter, withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useCallback, useEffect, useState } from "react";
 import { Button, Container, Spinner } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
@@ -20,7 +16,14 @@ import type { User } from "@/features/user-management/domain/Entity/User";
 import { UserRole } from "@/features/user-management/domain/Entity/UserRole";
 import { UserRoleFilter } from "@/features/user-management/domain/Entity/UserRoleFilter";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import {
+  LoadProblem,
+  type LoadProblemKind,
+  loadProblemOf,
+} from "@/shared/components/LoadProblem";
 import { useToast } from "@/shared/context/ToastContext";
+import { usePagedList } from "@/shared/hooks/usePagedList";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { UserRoleForm } from "../components/UserRoleForm";
 import { UserRoleList } from "../components/UserRoleList";
 
@@ -29,6 +32,8 @@ const UserDetailsPageComponent: FC = () => {
   const { navigate } = useRouter();
   const { userId: userIdParam } = useParams();
   const [user, setUser] = useState<User>();
+  usePageTitle(user ? `User ${user.name}` : "User");
+  const [problem, setProblem] = useState<LoadProblemKind | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
@@ -41,7 +46,8 @@ const UserDetailsPageComponent: FC = () => {
     totalPages: userRoleTotalPages,
     filter: userRolesFilter,
     onPageChange: onUserRolesPageChange,
-  } = usePaginatedQuery<UserRoleFilter, Role>({
+    listState: userRolesState,
+  } = usePagedList<UserRoleFilter, Role>({
     queryFunction: queryUserRoles,
     initialFilter: new UserRoleFilter(),
   });
@@ -50,6 +56,7 @@ const UserDetailsPageComponent: FC = () => {
     setIsLoading(true);
     queryUserById(userId)
       .then((response) => {
+        setProblem(loadProblemOf(response));
         setUser(response.data);
       })
       .finally(() => setIsLoading(false));
@@ -68,7 +75,7 @@ const UserDetailsPageComponent: FC = () => {
     setIsCreating(true);
     const toastId = pushToast({
       title: "Role assignment",
-      message: "Deleting role...",
+      message: "Assigning role...",
     });
 
     createUserRole({
@@ -107,7 +114,7 @@ const UserDetailsPageComponent: FC = () => {
   const performDeleteUserRole = (role: Role) => {
     if (!userIdParam || !role.id) {
       pushToast({
-        title: "Role delete",
+        title: "Role removal",
         message: "User ID or Role ID is missing",
         variant: "danger",
       });
@@ -115,8 +122,8 @@ const UserDetailsPageComponent: FC = () => {
     }
 
     const toastId = pushToast({
-      title: "Role delete",
-      message: "Deleting role...",
+      title: "Role removal",
+      message: "Removing role...",
     });
 
     deleteUserRole(new UserRole(userIdParam, role.id)).then((response) => {
@@ -124,14 +131,14 @@ const UserDetailsPageComponent: FC = () => {
 
       if (response.errorCode) {
         pushToast({
-          title: "Role delete",
+          title: "Role removal",
           message: response.message || "Failed to delete role",
           variant: "danger",
         });
       } else {
         pushToast({
-          title: "Role delete",
-          message: "Role deleted successfully",
+          title: "Role removal",
+          message: "Role removed successfully",
           variant: "success",
         });
       }
@@ -174,38 +181,53 @@ const UserDetailsPageComponent: FC = () => {
 
         <div>
           <Button onClick={() => navigate("/users")}>
-            <ArrowLeft /> Back To User List
+            <ArrowLeft /> Back to user list
           </Button>
         </div>
       </div>
 
       <hr />
 
+      {problem && userIdParam && (
+        <LoadProblem
+          problem={problem}
+          item="user"
+          onRetry={() => queryUser(userIdParam)}
+        />
+      )}
+
       {!!user && <UserDetails user={user} />}
 
-      {!!userIdParam && <AccountMfaSection userId={userIdParam} />}
+      {!!user && !!userIdParam && <AccountMfaSection userId={userIdParam} />}
 
-      <h2 className="mt-3">User roles</h2>
+      {!!user && (
+        <>
+          <h2 className="mt-3">User roles</h2>
 
-      <hr />
+          <hr />
 
-      <UserRoleForm
-        isLoading={isCreating}
-        onUserRoleSubmit={onUserRoleCreate}
-        submitText="Assign role"
-      />
+          <UserRoleForm
+            isLoading={isCreating}
+            onUserRoleSubmit={onUserRoleCreate}
+            submitText="Assign role"
+          />
 
-      <UserRoleList
-        items={userRoles}
-        totalPages={userRoleTotalPages}
-        currentPage={currentUserRolePage}
-        onPageChange={onUserRolesPageChange}
-        onRoleDelete={onUserRoleDelete}
-      />
+          <UserRoleList
+            items={userRoles}
+            state={userRolesState}
+            totalPages={userRoleTotalPages}
+            currentPage={currentUserRolePage}
+            onPageChange={onUserRolesPageChange}
+            onRoleDelete={onUserRoleDelete}
+          />
+        </>
+      )}
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to remove the user role?"
+        title="Remove role"
+        message={`Remove the role "${toDeleteRole?.name ?? ""}" from "${user?.name ?? ""}"?`}
+        confirmLabel="Remove role"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteRole) {

@@ -3,12 +3,16 @@ import type { FC } from "react";
 import { Container } from "react-bootstrap";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { SearchForm } from "@/shared/components/SearchForm";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { UserList } from "../../components/UserList";
 import { RecoveryLinkModal } from "../../components/UserList/RecoveryLinkModal";
 import { useUserList } from "../../hooks/useUserList";
 
 const UserListPageComponent: FC = () => {
+  usePageTitle("Users");
   const {
+    restoredFilter,
+    restoreKey,
     showResetLink,
     setShowResetLink,
     showEnable,
@@ -31,8 +35,11 @@ const UserListPageComponent: FC = () => {
     performDeleteUser,
     onSearchReset,
     onSearchSubmit,
+    sort,
+    onSort,
     currentPage,
     onPageChange,
+    listState,
   } = useUserList();
 
   return (
@@ -41,6 +48,9 @@ const UserListPageComponent: FC = () => {
       <hr />
 
       <SearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultSearch={restoredFilter?.search}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}
@@ -49,9 +59,12 @@ const UserListPageComponent: FC = () => {
 
       <UserList
         items={users}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
+        sort={sort}
+        onSort={onSort}
         onUserResetLink={onUserResetLink}
         onUserDisable={onUserDisable}
         onUserEnable={onUserEnable}
@@ -66,7 +79,9 @@ const UserListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDisable}
-        message="Are you sure you want to disable the user?"
+        title="Disable user"
+        message={`Disable the account of "${selectedUser?.name ?? ""}"? The user can no longer sign in.`}
+        confirmLabel="Disable user"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (selectedUser) {
@@ -82,7 +97,9 @@ const UserListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showEnable}
-        message="Are you sure you want to enable the user?"
+        title="Enable user"
+        message={`Enable the account of "${selectedUser?.name ?? ""}"?`}
+        confirmLabel="Enable user"
         onConfirm={() => {
           if (selectedUser) {
             performEnableUser(selectedUser);
@@ -97,7 +114,9 @@ const UserListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the user?"
+        title="Delete user"
+        message={`Delete the account of "${selectedUser?.name ?? ""}"?`}
+        confirmLabel="Delete user"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (selectedUser) {

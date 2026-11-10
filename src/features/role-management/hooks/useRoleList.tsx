@@ -1,5 +1,4 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createRole,
   deleteRole,
@@ -7,8 +6,36 @@ import {
   updateRole,
 } from "@/features/role-management/api/RoleRepository";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
-import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
+import {
+  ROLE_SORT_FIELDS,
+  type RoleSortField,
+  RolesFilter,
+} from "@/features/role-management/domain/Entity/RolesFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  type ListSort,
+  nextSort,
+  readSort,
+  sortFields,
+} from "@/shared/domain/Entity/ListSort";
+import {
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
+import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const rolesFromParams = (params: URLSearchParams) => {
+  const { sortBy, sortOrder } = readSort(params, ROLE_SORT_FIELDS);
+  return new RolesFilter(
+    readParam(params, "name"),
+    readPage(params),
+    undefined,
+    sortBy,
+    sortOrder,
+  );
+};
 
 export const useRoleList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -26,25 +53,20 @@ export const useRoleList = () => {
     data: roles,
     currentPage,
     loadData,
+    filter,
     totalPages,
     isLoading,
     onPageChange,
-  } = usePaginatedQuery<RolesFilter, Role>({
+    listState,
+  } = usePagedList<RolesFilter, Role>({
     queryFunction: queryRoles,
     initialFilter: new RolesFilter(),
   });
 
-  useEffect(() => {
-    loadData(new RolesFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Role query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    rolesFromParams,
+  );
 
   const onRoleCreate = (role: Role) => {
     setIsCreating(true);
@@ -146,31 +168,34 @@ export const useRoleList = () => {
     setShowDelete(true);
   };
 
+  // The search keeps the sort, and the sort keeps the search
+  const rolesFilter = (name?: string, sort?: ListSort<RoleSortField>) => {
+    const { sortBy, sortOrder } = sort
+      ? sortFields(sort)
+      : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
+    return new RolesFilter(name, undefined, undefined, sortBy, sortOrder);
+  };
+
   const onSearchReset = () => {
-    loadData(new RolesFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Role query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(rolesFilter());
   };
 
   const onSearchSubmit = (search?: string) => {
-    loadData(new RolesFilter(search)).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Role query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(rolesFilter(search));
+  };
+
+  const sort: ListSort<RoleSortField> = {
+    by: filter?.sortBy ?? "name",
+    order: filter?.sortOrder ?? "asc",
+  };
+  const onSort = (field: RoleSortField) => {
+    void loadData(rolesFilter(filter?.name, nextSort(sort, field)));
   };
 
   return {
+    restoredFilter,
+    restoreKey,
+    listState,
     showCreate,
     setShowCreate,
     showEdit,
@@ -193,6 +218,8 @@ export const useRoleList = () => {
     performDeleteRole,
     onRoleDelete,
     onSearchReset,
+    sort,
+    onSort,
     onSearchSubmit,
   };
 };

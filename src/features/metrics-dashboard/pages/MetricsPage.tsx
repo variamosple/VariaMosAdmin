@@ -1,11 +1,13 @@
 import { withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useCallback, useEffect, useState } from "react";
 import { Container, Row, Spinner } from "react-bootstrap";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { queryMetrics } from "../api/MetricsRepository";
 import { ChartComponent } from "../components/Chart";
 import type { Metric } from "../domain/Entity/Metric";
 
 const MetricsPageComponent: FC = () => {
+  usePageTitle("Metrics");
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 

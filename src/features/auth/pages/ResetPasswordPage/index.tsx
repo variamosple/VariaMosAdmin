@@ -2,6 +2,7 @@ import { type FC, useEffect, useState } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ErrorCodes, isErrorCode } from "@/shared/api/errorCodes";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import {
   resetPassword,
   verifyPasswordResetToken,
@@ -9,6 +10,7 @@ import {
 import { ResetPasswordForm } from "../../components/ResetPasswordForm";
 
 export const ResetPasswordPage: FC = () => {
+  usePageTitle("Reset password");
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +100,9 @@ export const ResetPasswordPage: FC = () => {
       {isVerifyingToken ? (
         <div className="text-center my-3">
           <Spinner animation="border" variant="light" size="sm" />
-          <p className="text-secondary small mt-2">Checking link validity...</p>
+          <p className="text-body-secondary small mt-2">
+            Checking link validity...
+          </p>
         </div>
       ) : !isTokenValid ? (
         <div className="w-100 text-center">
@@ -106,10 +110,7 @@ export const ResetPasswordPage: FC = () => {
             This password reset link is invalid, has expired, or has already
             been used.
           </Alert>
-          <Link
-            to="/forgot-password"
-            className="text-decoration-none text-primary-small"
-          >
+          <Link to="/forgot-password" className="text-decoration-none">
             Request a new link
           </Link>
         </div>
@@ -118,14 +119,14 @@ export const ResetPasswordPage: FC = () => {
           <Alert variant="success" className="w-100 small mb-3">
             {message}
           </Alert>
-          <Link to="/login" className="text-decoration-none text-primary-small">
-            Back to Sign In
+          <Link to="/login" className="text-decoration-none">
+            Back to sign in
           </Link>
         </div>
       ) : (
         <>
           <div className="w-100 text-center">
-            <p className="text-secondary small">
+            <p className="text-body-secondary small">
               Enter your new password to reset your account credentials.
             </p>
           </div>

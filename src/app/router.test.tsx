@@ -1,3 +1,5 @@
+import { render, screen } from "@testing-library/react";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { ROUTES } from "./router";
 
 // Mock SecurityWrapper and Layouts
@@ -104,5 +106,43 @@ describe("Router Configuration", () => {
 
     const wildcardRoute = ROUTES.find((r) => r.path === "*");
     expect(wildcardRoute).toBeTruthy();
+  });
+
+  const renderAt = (path: string) => {
+    const route = ROUTES.find((r) => r.path === path);
+    const router = createMemoryRouter(
+      [
+        { path: "*", element: route?.element },
+        { path: "/", element: <div>HomePage</div> },
+      ],
+      { initialEntries: [path === "*" ? "/no-such-page" : path] },
+    );
+    render(<RouterProvider router={router} />);
+  };
+
+  it("answers an unknown address with a not found page (UX-25)", () => {
+    renderAt("*");
+
+    expect(
+      screen.getByRole("heading", { name: "Page not found" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("/no-such-page")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Go to the home page" }),
+    ).toHaveAttribute("href", "/");
+  });
+
+  it("still sends the former /variamos_admin address home", () => {
+    const route = ROUTES.find((r) => r.path === "/variamos_admin");
+    const router = createMemoryRouter(
+      [
+        { path: "/variamos_admin", element: route?.element },
+        { path: "/", element: <div>HomePage</div> },
+      ],
+      { initialEntries: ["/variamos_admin"] },
+    );
+    render(<RouterProvider router={router} />);
+
+    expect(screen.getByText("HomePage")).toBeInTheDocument();
   });
 });

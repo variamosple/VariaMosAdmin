@@ -27,11 +27,12 @@ export const UptimeBar: FC<UptimeBarProps> = ({
         uptimePercentage: 0,
       }));
 
+  // The color follows the status set by the API: DOWN only when every
+  // check failed, DEGRADED when some did or answered degraded
   const getSlotColor = (slot: UptimeHistorySlot): string => {
     if (slot.status === "NO_DATA") return "#e9ecef"; // Gray / No check during the slot
-    if (slot.status === "DOWN" || slot.uptimePercentage < 80) return "#dc3545"; // Red
-    if (slot.status === "DEGRADED" || slot.uptimePercentage < 98)
-      return "#ffc107"; // Yellow/Orange
+    if (slot.status === "DOWN") return "#dc3545"; // Red
+    if (slot.status === "DEGRADED") return "#ffc107"; // Yellow/Orange
     return "#198754"; // Green
   };
 

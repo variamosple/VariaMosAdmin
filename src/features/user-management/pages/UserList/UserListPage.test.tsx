@@ -1,9 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { UserListPage } from "./index";
 
 const mockNavigate = vi.fn();
@@ -22,7 +20,6 @@ vi.mock("@variamosple/variamos-components", async () => {
     useRouter: () => ({
       navigate: mockNavigate,
     }),
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number;
       message?: string;
@@ -178,12 +175,25 @@ describe("UserListPage Integration", () => {
     );
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
-  };
+  it("searches what the address says, and shows it in the field (UX-26)", async () => {
+    const searches: (string | null)[] = [];
+    server.use(
+      http.get("*/v1/users", ({ request }) => {
+        searches.push(new URL(request.url).searchParams.get("search"));
+        return HttpResponse.json({ data: [] });
+      }),
+    );
+
+    renderPage(<UserListPage />, { route: "/users?search=jane" });
+
+    await waitFor(() => expect(searches).toEqual(["jane"]));
+    expect(
+      screen.getByPlaceholderText("Search by user name or email"),
+    ).toHaveValue("jane");
+  });
 
   it("renders page components correctly", async () => {
-    renderWithProviders(<UserListPage />);
+    renderPage(<UserListPage />, { route: "/users" });
     expect(screen.getByText("Users list")).toBeInTheDocument();
 
     // Wait for the MSW handlers to return users
@@ -192,8 +202,7 @@ describe("UserListPage Integration", () => {
   });
 
   it("renders RecoveryLinkModal when reset link button is clicked and user generates link", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<UserListPage />);
+    const { user } = renderPage(<UserListPage />, { route: "/users" });
     expect(await screen.findByText("Admin User")).toBeInTheDocument();
 
     // Click Reset Password key icon for Admin User (first active user)
@@ -228,74 +237,65 @@ describe("UserListPage Integration", () => {
   });
 
   it("renders and handles disable confirmation modal", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<UserListPage />);
+    const { user } = renderPage(<UserListPage />, { route: "/users" });
     expect(await screen.findByText("Admin User")).toBeInTheDocument();
 
     // Click disable button (Ban icon)
     const disableButtons = screen.getAllByTitle("Disable user");
     await user.click(disableButtons[0]);
 
-    expect(
-      screen.getByText("Are you sure you want to disable the user?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Disable user" });
 
-    // Confirm (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Disable user" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to disable the user?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
   it("renders and handles enable confirmation modal", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<UserListPage />);
+    const { user } = renderPage(<UserListPage />, { route: "/users" });
     expect(await screen.findByText("Normal User")).toBeInTheDocument();
 
     // Click enable button (CheckCircle icon - only available on disabled users)
     const enableButtons = screen.getAllByTitle("Enable user");
     await user.click(enableButtons[0]);
 
-    expect(
-      screen.getByText("Are you sure you want to enable the user?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Enable user" });
 
-    // Confirm (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Enable user" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to enable the user?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
   it("renders and handles delete confirmation modal", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<UserListPage />);
+    const { user } = renderPage(<UserListPage />, { route: "/users" });
     expect(await screen.findByText("Admin User")).toBeInTheDocument();
 
     // Click delete user button (Trash icon)
     const deleteButtons = screen.getAllByTitle("Delete user");
     await user.click(deleteButtons[0]);
 
-    expect(
-      screen.getByText("Are you sure you want to delete the user?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Delete user" });
 
-    // Confirm (Accept button)
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Delete user" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to delete the user?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
@@ -306,7 +306,7 @@ describe("UserListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<UserListPage />);
+    renderPage(<UserListPage />, { route: "/users" });
     expect(screen.getByText("Users list")).toBeInTheDocument();
 
     await waitFor(() => {
@@ -315,7 +315,7 @@ describe("UserListPage Integration", () => {
     expect(screen.queryByText("Normal User")).not.toBeInTheDocument();
   });
 
-  it("shows error toast when API fails to load users", async () => {
+  it("shows a failed load of the users in the table", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/users", () => {
@@ -326,9 +326,16 @@ describe("UserListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<UserListPage />);
-    expect(await screen.findByText("User query error")).toBeInTheDocument();
-    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
+    renderPage(<UserListPage />, { route: "/users" });
+    // In the table, with Retry, and not repeated in a toast (UX-23)
+    const table = await screen.findByRole("table");
+    expect(
+      await within(table).findByText(SYSTEM_ERROR_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("button", { name: "Retry" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(SYSTEM_ERROR_MESSAGE)).toHaveLength(1);
     consoleSpy.mockRestore();
   });
 });

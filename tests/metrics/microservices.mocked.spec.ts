@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../helpers/mockedTest";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Microservices - Complete Mocked E2E Workflow", () => {
   const mockMicroservices = [
@@ -42,24 +43,7 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
     await context.clearCookies();
 
     // Mock session info
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["micro-services::query", "micro-services::manage"],
-            },
-          },
-        }),
-      });
-    });
+    await mockSignedIn(page, ["micro-services::query", "micro-services::manage"]);
   });
 
   test("should load dashboard, display metrics/uptime, trigger refresh, configure params, and manage container lifecycle", async ({
@@ -123,15 +107,8 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({
-          data: [
-            {
-              serviceName: "variamos_ms_admin",
-              status: "UP",
-              responseTimeMs: 25,
-            },
-          ],
-        }),
+        // The server answers no data: the results come with the next list
+        body: JSON.stringify({ transactionId: "triggerHealthChecks" }),
       });
     });
 
@@ -233,15 +210,15 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
     });
     await updatedAdminRow.locator('button[title="Stop Service"]').click();
     await expect(
-      page.getByText("Are you sure you want to stop Administration Service?"),
+      page.getByText("Stop Administration Service?"),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("button", { name: "Stop microservice" }).click();
 
     // 8. Test Start Container Confirmation Flow
     await langRow.locator('button[title="Start Service"]').click();
     await expect(
-      page.getByText("Are you sure you want to start Languages Service?"),
+      page.getByText("Start Languages Service?"),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Accept" }).click();
+    await page.getByRole("button", { name: "Start microservice" }).click();
   });
 });

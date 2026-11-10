@@ -7,13 +7,18 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
     pool: "forks",
+    // Globals and variables stubbed by vi.stubGlobal and vi.stubEnv come back
+    // after each test, whatever the test does (EV-53)
+    unstubGlobals: true,
+    unstubEnvs: true,
     exclude: [
       "**/node_modules/**",
       "**/dist/**",
       "**/build/**",
       "**/.stryker-tmp/**",
       "**/strykerTmp/**",
-      "**/tests/**",
+      // The end-to-end tests at the root, not the helpers of src/shared/tests
+      "tests/**",
       "**/.worktrees/**"
     ],
     coverage: {

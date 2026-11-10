@@ -1,14 +1,26 @@
 import { type FC, useCallback, useEffect, useRef } from "react";
-import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
+import { Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
+import { IconButton } from "@/shared/components/IconButton";
 
 export interface ModelSearchFormProps {
   onSubmit: (search?: ModelsFilter) => void;
   isLoading: boolean;
   onSearchReset: () => void;
+  // The search restored from the address (UX-26)
+  defaultFilter?: ModelsFilter;
 }
+// A yes, no or any choice of the form, from a filter value
+const choiceOf = (value?: boolean) =>
+  value === undefined ? "all" : String(value);
+
+// The "deleted" choice: only deleted, deleted or not, or not deleted
+const deletedChoiceOf = (isDeleted?: boolean, includeDeleted?: boolean) => {
+  if (isDeleted === true) return "true";
+  return includeDeleted ? "all" : "false";
+};
 
 interface ModelSearchFormFields {
   name?: string;
@@ -21,6 +33,7 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
   onSubmit,
   isLoading,
   onSearchReset,
+  defaultFilter,
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
@@ -31,10 +44,13 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
     watch,
   } = useForm<ModelSearchFormFields>({
     defaultValues: {
-      name: "",
-      modelLevel: "all",
-      isDeleted: "false",
-      isPublic: "all",
+      name: defaultFilter?.name ?? "",
+      modelLevel: defaultFilter?.modelLevel ?? "all",
+      isDeleted: deletedChoiceOf(
+        defaultFilter?.isDeleted,
+        defaultFilter?.includeDeleted,
+      ),
+      isPublic: choiceOf(defaultFilter?.isPublic),
     },
   });
 
@@ -169,15 +185,14 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
                 <option value="true">Deleted</option>
                 <option value="all">All</option>
               </Form.Select>
-              <Button
-                title="Clear results"
+              <IconButton
+                label="Clear results"
                 variant="outline-secondary"
                 onClick={onReset}
                 className="fw-bold"
                 disabled={isLoading}
-              >
-                <Trash />
-              </Button>
+                icon={<Trash />}
+              />
             </InputGroup>
           </Form.Group>
         </Col>

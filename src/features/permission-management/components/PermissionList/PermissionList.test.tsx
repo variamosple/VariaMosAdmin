@@ -83,4 +83,33 @@ describe("PermissionList Component", () => {
     expect(mockOnPermissionDelete).toHaveBeenCalledTimes(1);
     expect(mockOnPermissionDelete).toHaveBeenCalledWith(mockPermissions[1]);
   });
+
+  it("sorts from the ID and Name headers, and says which one is sorted (EV-32)", async () => {
+    const onSort = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <PermissionList
+        items={mockPermissions}
+        currentPage={1}
+        totalPages={1}
+        onPageChange={vi.fn()}
+        onPermissionEdit={mockOnPermissionEdit}
+        onPermissionDelete={mockOnPermissionDelete}
+        sort={{ by: "name", order: "desc" }}
+        onSort={onSort}
+      />,
+    );
+
+    expect(screen.getByRole("columnheader", { name: "Name" })).toHaveAttribute(
+      "aria-sort",
+      "descending",
+    );
+    expect(screen.getByRole("columnheader", { name: "ID" })).toHaveAttribute(
+      "aria-sort",
+      "none",
+    );
+
+    await user.click(screen.getByRole("button", { name: "ID" }));
+    expect(onSort).toHaveBeenCalledWith("id");
+  });
 });

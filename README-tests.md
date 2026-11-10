@@ -1,67 +1,122 @@
-# Unit Testing & Coverage Guide (VariaMosAdmin)
+# Testing guide (VariaMosAdmin)
 
-This guide provides developers with the essential principles, rules, and commands to maintain and extend the unit testing suite.
-
----
-
-## Testing Philosophy
-
-We follow modern testing practices using **Jest** and **React Testing Library (RTL)**:
-- **Test User-Visible Behavior**: Query components based on how users interact with them (preferring `screen.getByRole`, `screen.getByPlaceholderText`, `screen.getByLabelText`, or `screen.getByText`). Avoid relying on internal implementation details like local states or direct DOM class selectors.
-- **Use `userEvent` over `fireEvent`**: RTL recommends using `@testing-library/user-event` to simulate real browser interactions. Always initialize interactions with `const user = userEvent.setup()`.
-- **Decoupled Business Logic**: Keep React components focused on rendering and UI behavior, keeping core business logic decoupled.
+How the tests of the administration frontend are organised, written and run.
 
 ---
 
-## Mocking & Routing Best Practices
+## The three layers
 
-### 1. Mocking External Components
-If you encounter ESM-related import errors in Jest with third-party libraries, mock them at the top of your test file:
+| Layer | Tool | Where | What it checks |
+| --- | --- | --- | --- |
+| Unit and component | Vitest 4, React Testing Library, jsdom | `src/**/*.test.ts(x)`, next to the code | Hooks, components, pages, domain helpers |
+| HTTP doubles | msw 2 | `src/shared/tests/mocks/` (`server.ts`, `handlers.ts`) | The requests a component sends, and its reaction to the answers |
+| End-to-end | Playwright | `tests/<feature>/*.spec.ts` | Whole journeys in a browser, against a mocked or a real backend |
+
+Configuration: `vitest.config.mts` (setup file `src/setupTests.ts`), `playwright.config.ts`, `stryker.config.json`.
+
+---
+
+## Writing unit and component tests
+
+- **Test what the user sees.** Query by role, label, placeholder or text (`screen.getByRole`, `getByLabelText`...), not by CSS class or component state.
+- **Interact with `userEvent`.** Render with `renderWithUser` or `renderPage` (below), which return the `user`, then `await user.click(...)`, `await user.type(...)`. Use `fireEvent` only when `userEvent` cannot reach the event.
+- **Assert the effect, not the call alone.** Prefer `toHaveBeenCalledWith(...)` with the expected arguments to a bare `toHaveBeenCalled()`, and a visible text to `toBeTruthy()`.
+- **Name the behaviour.** A test title says what happens ("keeps the refused edit with its reason"), and refers to the audit finding or evolution when there is one (`(UX-14)`, `(EV-31)`).
+
+### Rendering
+
+`src/shared/tests/render.tsx` sets up `userEvent` before the render, as Testing Library recommends, and returns it with the usual result of `render`:
+
 ```typescript
-jest.mock("@variamosple/variamos-components", () => ({
-  useSession: jest.fn(),
-  PagedModel: class PagedModel {},
-}));
+import { renderPage, renderWithUser } from "@/shared/tests/render";
+
+// A component
+const { user } = renderWithUser(<SearchForm onSubmit={onSubmit} />);
+
+// A page: inside a router, which starts at `route`, and the toast provider
+const { user } = renderPage(<UserListPage />, { route: "/users?search=jane" });
 ```
 
-### 2. Wrapping Router Dependencies
-If the component under test contains navigation links or hooks (`Link`, `useNavigate`), wrap the rendered component inside a `<MemoryRouter>`:
-```typescript
-import { MemoryRouter } from "react-router-dom";
+- Every option of `render` goes through (`wrapper`, `container`...), except `wrapper` for `renderPage`, which has its own.
+- With fake timers, pass `userEventOptions`, as for `userEvent.setup()`:
+  ```typescript
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  const { user } = renderWithUser(<Form />, {
+    userEventOptions: { advanceTimers: vi.advanceTimersByTime },
+  });
+  ```
+- Use them in new tests. Older tests still call `userEvent.setup()` and `render` themselves, which stays valid: move a file to the helpers when you modify it, not all at once (EV-28).
+- A component that only needs a provider takes it as `wrapper`: `render(<List />, { wrapper: ToastProvider })`.
 
-render(
-  <MemoryRouter>
-    <LoginForm onSignIn={mockOnSignIn} />
-  </MemoryRouter>,
+### HTTP requests
+
+`src/setupTests.ts` starts the msw server with `onUnhandledRequest: "error"`: a request without a handler fails the test, since it would otherwise reach the network. Declare the answers a test needs with `server.use(http.get(...))`; `server.resetHandlers()` runs after each test.
+
+### React warnings
+
+A React warning (an update outside `act()`, an invalid nesting, an unknown tag...) fails the test: it points to a real fault, in the component or in the test double. Wrap waits that let the component update in `act()`, and make a mock render what the real component renders (a modal in a portal, a chart in an `<svg>`). The application's own error logs stay allowed.
+
+### The component library
+
+Components from `@variamosple/variamos-components` that need the application shell (session, page visits, router) are mocked. For new or modified tests, start from the shared factory, which keeps the **real** model classes (`ResponseModel`, `PagedModel`...) so that a test cannot drift from their shape:
+
+```typescript
+vi.mock("@variamosple/variamos-components", async () =>
+  (await import("@/shared/tests/mocks/variamosComponents")).variamosComponents({
+    Paginator: () => <div data-testid="paginator" />,
+  }),
 );
 ```
 
----
+`withPageVisit` is a pass-through; add anything else the test uses (`Paginator`, `usePaginatedQuery`...) in the argument. Older tests still declare their own copy of the library; move them to the factory when you modify them.
 
-## Jest Coverage Configuration & Exclusions
+### Other doubles
 
-To maintain realistic and meaningful coverage metrics, files and directories containing no business or testing logic are excluded (configured in the `"jest"` section of `package.json`):
-
-1. **Entities & Typings**: Plain TypeScript interfaces and pure types (`*.types.ts`, `WithPagination.tsx`, `domain/Entity/**`).
-2. **Static Layouts & Views**: Plain textual components like the `About/` directory or static templates.
-3. **Repository Wrappers**: Direct API Axios wrappers ending in `*Repository.ts` (e.g., `BugRepository.ts`, `MetricsRepository.ts`).
-
-### Rule for Adding Code:
-- **Interceptors & Custom Network Logic**: If you develop dynamic logic inside `/api/` (e.g., caching interceptors, global error handlers, security token insertion), **do not name the file `*Repository.ts`**. By keeping it standard, it will automatically be included in the coverage report, reminding you to write unit/integration tests for that logic.
+- `src/shared/tests/factories.ts`: builders of domain objects (`createUserMock(overrides)`).
+- Mock a module with `vi.mock` at the top of the file, and read its functions with `vi.mocked(fn)` rather than a cast to `vi.Mock`.
+- Render a component that uses the router with `renderPage`, or wrap it in `<MemoryRouter>`.
+- Replace a global (`window.open`, `location`, `IntersectionObserver`…) with `vi.stubGlobal`, and an environment variable with `vi.stubEnv`, never by assignment or `Object.defineProperty`: the configuration restores them after each test (`unstubGlobals`, `unstubEnvs`). `userEvent.setup()` already puts a clipboard on `navigator`.
 
 ---
 
-## Helpful Commands
+## End-to-end tests
 
-- **Run unit tests locally (watch mode)**:
-  ```bash
-  npm run test
-  ```
-- **Run tests and generate coverage report**:
-  ```bash
-  npm run jest:coverage
-  ```
-- **Simulate CI verification (type check + non-interactive tests)**:
-  ```bash
-  npm run typecheck && CI=true npm run test
-  ```
+- `*.mocked.spec.ts`: the backend is replaced by `page.route(...)` answers.
+- `*.real.spec.ts`: the real services and a test database (`docker-compose.test.yml`, data in `tests/db/`).
+- `tests/helpers/`: login commands, TOTP codes, database helper.
+- Prefer `page.getByRole` and `getByLabel` to CSS selectors: find a dialog by `getByRole("dialog", { name })`, a field by its label, a message by `getByRole("alert")`. They also check that the dialog has a name and the field a label. A `<Modal>` gets its name from `aria-labelledby`, set to the id of its `Modal.Title` (`useId`).
+- Mock the session with `mockSignedIn(page, permissions)` or `mockSignedOut(page)` (`tests/helpers/session.ts`).
+- In the CI, a test that passes only on a retry fails the run (`failOnFlakyTests`): fix its cause rather than rely on the retry.
+- The e2e files are type-checked with the rest (`tsconfig.e2e.json`, run by `npm run typecheck`).
+- `tests/accessibility/` checks the WCAG A and AA rules with axe-core; `tests/responsive/` checks that the main screens fit 375, 768 and 1440 px without sideways scrolling. A table scrolls inside its own frame: give it the `responsive` prop.
+
+---
+
+## Coverage and mutation
+
+- `npm run test:coverage` measures every file of `src/`, apart from tests, mocks and start-up files. The thresholds in `vitest.config.mts` block a regression: raise them, never lower them.
+- Stryker mutates the domain helpers and shared hooks (`stryker.config.json`). It is slow: the CI runs it every night.
+
+---
+
+## Commands
+
+Prerequisite: Node 24 (`.nvmrc`, `.mise.toml`).
+
+```bash
+npm test                  # unit and component tests, once
+npm run test:watch        # the same, on each change
+npm run test:coverage     # with the coverage report and thresholds
+npm run typecheck         # application, unit tests and e2e tests
+npm run lint
+npm run stryker           # mutation testing (long)
+```
+
+End-to-end tests need Docker:
+
+```bash
+npm run playwright:run:mocked   # frontend image, backend mocked
+npm run playwright:run:real     # frontend and real services
+```
+
+`playwright:run:real` stops its containers with `npm run docker:test:down`, which also runs `docker image prune -f`: it removes every dangling image of the machine, not only those of the tests.

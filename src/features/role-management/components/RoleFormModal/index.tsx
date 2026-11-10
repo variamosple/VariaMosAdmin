@@ -1,8 +1,11 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useEffect } from "react";
+import { type FC, useEffect, useId } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
-import type { Role } from "@/features/role-management/domain/Entity/Role";
+import {
+  ROLE_NAME_PATTERN,
+  type Role,
+} from "@/features/role-management/domain/Entity/Role";
 
 export interface RoleFormModalProps {
   modalTitle: string;
@@ -49,14 +52,17 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
     reset();
   };
 
+  const titleId = useId();
+
   return (
     <Modal
+      aria-labelledby={titleId}
       show={showModal}
       backdrop={isLoading ? "static" : true}
       onHide={onCloseModal}
     >
       <Modal.Header closeButton={!isLoading}>
-        <Modal.Title>{modalTitle}</Modal.Title>
+        <Modal.Title id={titleId}>{modalTitle}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleSubmit(onSubmit)}>
@@ -67,7 +73,14 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
               type="text"
               className="form-control "
               placeholder="Role name"
-              {...register("name", { required: "Role name is required" })}
+              {...register("name", {
+                required: "Role name is required",
+                pattern: {
+                  value: ROLE_NAME_PATTERN,
+                  message:
+                    "Start with a capital letter, then lowercase words separated by single spaces (e.g. 'Test role').",
+                },
+              })}
               isInvalid={!!errors.name}
             />
             <Form.Control.Feedback type="invalid">

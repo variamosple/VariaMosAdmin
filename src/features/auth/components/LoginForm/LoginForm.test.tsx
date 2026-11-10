@@ -29,7 +29,7 @@ describe("LoginForm Component", () => {
     expect(
       screen.getByRole("button", { name: /sign in/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Forgot Password?")).toBeInTheDocument();
+    expect(screen.getByText("Forgot password?")).toBeInTheDocument();
   });
 
   it("shows validation errors when fields are empty on submit", async () => {

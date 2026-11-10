@@ -1,4 +1,3 @@
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import { type FC, useState } from "react";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
 import {
@@ -11,7 +10,9 @@ import {
   TrashFill,
 } from "react-bootstrap-icons";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
+import { IconButton } from "@/shared/components/IconButton";
 import { formatBoolean } from "@/shared/constants";
 
 export interface ModelRowProps {
@@ -118,50 +119,45 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
 
         <td>
           <ButtonGroup size="sm">
-            <Button
+            <IconButton
               variant="primary"
               onClick={() => onModelEdit(model)}
-              title="Edit model"
-            >
-              <PencilFill />
-            </Button>
+              label="Edit model"
+              icon={<PencilFill />}
+            />
 
-            <Button
+            <IconButton
               variant="danger"
               onClick={() => onModelDelete(model)}
-              title="Delete model"
-            >
-              <TrashFill />
-            </Button>
+              label="Delete model"
+              icon={<TrashFill />}
+            />
 
             {isActive && (
               <>
-                <Button
+                <IconButton
                   variant="warning"
                   onClick={() => setShowLevelConfirm(true)}
-                  title="Toggle model level (Domain/Application)"
-                >
-                  <ArrowRepeat />
-                </Button>
+                  label="Toggle model level (Domain/Application)"
+                  icon={<ArrowRepeat />}
+                />
 
-                <Button
+                <IconButton
                   variant="secondary"
                   onClick={() => setShowVisibilityConfirm(true)}
-                  title="Toggle model visibility (Public/Private)"
-                >
-                  <LockFill />
-                </Button>
+                  label="Toggle model visibility (Public/Private)"
+                  icon={<LockFill />}
+                />
               </>
             )}
 
-            <Button
+            <IconButton
               size="sm"
               variant="info"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide model details"
-            >
-              {!show ? <PlusCircle /> : <DashCircle />}
-            </Button>
+              label="Show/Hide model details"
+              icon={!show ? <PlusCircle /> : <DashCircle />}
+            />
           </ButtonGroup>
         </td>
       </tr>
@@ -189,7 +185,9 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
 
       <ConfirmationModal
         show={showLevelConfirm}
-        message={`Are you sure you want to change this model level to ${model.modelLevel === "application" ? "Domain Model" : "Application Model"}?`}
+        title="Change model level"
+        message={`Change the level of the model "${model.name}" to ${model.modelLevel === "application" ? "Domain Model" : "Application Model"}?`}
+        confirmLabel="Change level"
         confirmButtonVariant="warning"
         onConfirm={() => {
           onModelToggleLevel(model);
@@ -200,7 +198,9 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
 
       <ConfirmationModal
         show={showVisibilityConfirm}
-        message={`Are you sure you want to change this model visibility to ${model.isPublic ? "Private" : "Public"}?`}
+        title="Change model visibility"
+        message={`Make the model "${model.name}" ${model.isPublic ? "private" : "public"}?`}
+        confirmLabel={model.isPublic ? "Make private" : "Make public"}
         confirmButtonVariant="secondary"
         onConfirm={() => {
           onModelToggleVisibility(model);
@@ -281,7 +281,10 @@ const ModelDetails: FC<ModelDetailsProps> = ({ model, onContactClick }) => {
 
         <Col xs={6}>
           {(model.owners || [])
-            .map((owner) => `${owner.name || "N/A"} (${owner.email})`)
+            .map(
+              (owner) =>
+                `${owner.name || "N/A"} (${owner.email || "no email"})`,
+            )
             .join(", ") || "No owners registered"}
         </Col>
 

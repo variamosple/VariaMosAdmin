@@ -3,6 +3,7 @@ import {
   type ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
+import { MemoryRouter } from "react-router-dom";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
 import * as ModelRepository from "../api/ModelRepository";
 import { useModelList } from "./useModelList";
@@ -31,14 +32,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.errorCode = code;
         this.message = msg;
         return this;
-      }
-    },
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
       }
     },
     usePaginatedQuery: vi.fn(),
@@ -78,7 +71,9 @@ describe("useModelList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useModelList());
+    const { result } = renderHook(() => useModelList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.models).toEqual([
       { id: "1", projectId: "p1", name: "Model One" },
@@ -88,7 +83,9 @@ describe("useModelList Hook", () => {
   });
 
   it("should handle performEditModel successfully", async () => {
-    const { result } = renderHook(() => useModelList());
+    const { result } = renderHook(() => useModelList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditModel({
@@ -110,7 +107,9 @@ describe("useModelList Hook", () => {
   });
 
   it("should handle performDeleteModel successfully", async () => {
-    const { result } = renderHook(() => useModelList());
+    const { result } = renderHook(() => useModelList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteModel({
@@ -131,7 +130,9 @@ describe("useModelList Hook", () => {
   });
 
   it("should handle performEditModel failure", async () => {
-    const { result } = renderHook(() => useModelList());
+    const { result } = renderHook(() => useModelList(), {
+      wrapper: MemoryRouter,
+    });
     updateModelSpy.mockResolvedValueOnce({
       errorCode: 500,
       message: "Edit failed",
@@ -155,21 +156,16 @@ describe("useModelList Hook", () => {
     expect(result.current.isEditing).toBe(false);
   });
 
-  it("should handle query error toast on loadData", async () => {
+  it("leaves a load error to the table, without a toast (UX-23)", async () => {
     mockLoadData.mockResolvedValueOnce({
       errorCode: 500,
       message: "Query failed",
     });
-    renderHook(() => useModelList());
+    renderHook(() => useModelList(), { wrapper: MemoryRouter });
 
     await waitFor(() => {
-      expect(mockPushToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Model query error",
-          message: "Query failed",
-          variant: "danger",
-        }),
-      );
+      expect(mockLoadData).toHaveBeenCalled();
     });
+    expect(mockPushToast).not.toHaveBeenCalled();
   });
 });

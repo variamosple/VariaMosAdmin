@@ -1,10 +1,12 @@
 import { type FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { requestPasswordReset } from "../../api/AuthRepository";
 import { ForgotPasswordForm } from "../../components/ForgotPasswordForm";
 
 export const ForgotPasswordPage: FC = () => {
+  usePageTitle("Forgot password");
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,15 +52,15 @@ export const ForgotPasswordPage: FC = () => {
           <Alert variant="success" className="w-100 small mb-3">
             {message}
           </Alert>
-          <Link to="/login" className="text-decoration-none text-primary-small">
-            Back to Sign In
+          <Link to="/login" className="text-decoration-none">
+            Back to sign in
           </Link>
         </div>
       ) : (
         <>
           <div className="w-100 text-center">
-            <h4 className="text-light mb-2">Forgot Password</h4>
-            <p className="text-secondary small">
+            <h4 className="text-light mb-2">Forgot password</h4>
+            <p className="text-body-secondary small">
               Enter your email address to receive a temporary reset link.
             </p>
           </div>
@@ -73,11 +75,8 @@ export const ForgotPasswordPage: FC = () => {
           />
 
           <div className="mt-2">
-            <Link
-              to="/login"
-              className="text-decoration-none text-primary-small"
-            >
-              Back to Sign In
+            <Link to="/login" className="text-decoration-none">
+              Back to sign in
             </Link>
           </div>
         </>

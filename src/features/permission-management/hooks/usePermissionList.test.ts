@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router-dom";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
@@ -37,14 +38,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         return this;
       }
     },
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-      }
-    },
     usePaginatedQuery: vi.fn(),
   };
 });
@@ -68,7 +61,9 @@ describe("usePermissionList Hook", () => {
   });
 
   it("should initialize with expected values from query hook", () => {
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.permissions).toEqual([{ id: 1, name: "read:users" }]);
     expect(result.current.currentPage).toBe(1);
@@ -81,11 +76,14 @@ describe("usePermissionList Hook", () => {
     server.use(
       http.post(apiTarget("/v1/permissions"), async ({ request }) => {
         createPayload = (await request.json()) as Partial<Permission>;
-        return HttpResponse.json({ errorCode: null });
+        // The server answers the permission it created
+        return HttpResponse.json({ data: { id: 30, ...createPayload } });
       }),
     );
 
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.onPermissionCreate({ name: "write:roles" });
@@ -108,7 +106,9 @@ describe("usePermissionList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.onPermissionCreate({ name: "write:roles" });
@@ -132,12 +132,14 @@ describe("usePermissionList Hook", () => {
         async ({ request, params }) => {
           editPermissionId = params.id as string;
           editPayload = (await request.json()) as Permission;
-          return HttpResponse.json({ errorCode: null });
+          return HttpResponse.json({ data: editPayload });
         },
       ),
     );
 
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditPermission({
@@ -163,7 +165,9 @@ describe("usePermissionList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => usePermissionList());
+    const { result } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeletePermission({
@@ -179,6 +183,51 @@ describe("usePermissionList Hook", () => {
         title: "Permission delete",
         message: "Permission deleted successfully",
       }),
+    );
+  });
+
+  it("sorts by a column, turns its order on a second click, and keeps the search (EV-32)", () => {
+    usePaginatedQueryMock.mockReturnValue({
+      data: [],
+      currentPage: 1,
+      loadData: mockLoadData,
+      isLoading: false,
+      totalPages: 1,
+      onPageChange: mockOnPageChange,
+      filter: { name: "users", pageNumber: 1, pageSize: 20 },
+    });
+    const { result, rerender } = renderHook(() => usePermissionList(), {
+      wrapper: MemoryRouter,
+    });
+    expect(result.current.sort).toEqual({ by: "name", order: "asc" });
+
+    act(() => result.current.onSort("id"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        name: "users",
+        sortBy: "id",
+        sortOrder: undefined,
+      }),
+    );
+
+    usePaginatedQueryMock.mockReturnValue({
+      data: [],
+      currentPage: 1,
+      loadData: mockLoadData,
+      isLoading: false,
+      totalPages: 1,
+      onPageChange: mockOnPageChange,
+      filter: { name: "users", sortBy: "id", pageNumber: 1, pageSize: 20 },
+    });
+    rerender();
+    act(() => result.current.onSort("id"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortBy: "id", sortOrder: "desc" }),
+    );
+
+    act(() => result.current.onSearchSubmit("roles"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ name: "roles", sortBy: "id" }),
     );
   });
 });

@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useId, useState } from "react";
 import {
   Alert,
   Badge,
@@ -11,6 +11,7 @@ import {
   Tabs,
 } from "react-bootstrap";
 import { Check, PencilSquare, PlusLg } from "react-bootstrap-icons";
+import { DateTime } from "@/shared/components/DateTime";
 import {
   getMicroServiceAuditLogs,
   getMicroServiceConfigurations,
@@ -74,8 +75,10 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
     setEditValue(config.isSecret ? "" : config.value);
   };
 
+  // On a failure the edit stays open with what was typed, and says why (UX-07)
   const handleSaveConfig = async (key: string) => {
     setIsSaving(true);
+    setSaveError(null);
     try {
       const res = await updateMicroServiceConfiguration(
         serviceName,
@@ -87,6 +90,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
         setConfigs((prev) =>
           prev.map((c) => (c.key === key ? updatedData : c)),
         );
+        setEditingKey(null);
         // Refresh audit logs
         const auditRes = await getMicroServiceAuditLogs(serviceName);
         if (auditRes.data) setAuditLogs(auditRes.data);
@@ -95,15 +99,16 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
       }
     } catch (error) {
       console.error("Error saving microservice configuration:", error);
+      setSaveError(`The parameter ${key} could not be saved.`);
     } finally {
       setIsSaving(false);
-      setEditingKey(null);
     }
   };
 
   const handleAddNewParam = async () => {
     if (!newKey.trim()) return;
     setIsAdding(true);
+    setSaveError(null);
     try {
       const res = await updateMicroServiceConfiguration(
         serviceName,
@@ -121,18 +126,32 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
         setShowAddForm(false);
         const auditRes = await getMicroServiceAuditLogs(serviceName);
         if (auditRes.data) setAuditLogs(auditRes.data);
+      } else {
+        setSaveError(
+          res.message ?? `The parameter ${newKey.trim()} could not be added.`,
+        );
       }
     } catch (error) {
       console.error("Error creating microservice configuration:", error);
+      setSaveError(`The parameter ${newKey.trim()} could not be added.`);
     } finally {
       setIsAdding(false);
     }
   };
 
+  const titleId = useId();
+
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered animation={false}>
+    <Modal
+      aria-labelledby={titleId}
+      show={show}
+      onHide={onHide}
+      size="lg"
+      centered
+      animation={false}
+    >
       <Modal.Header closeButton>
-        <Modal.Title>
+        <Modal.Title id={titleId}>
           ⚙️ Settings & Audit -{" "}
           <span className="text-primary">{displayName}</span>
         </Modal.Title>
@@ -164,13 +183,13 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                 onClick={() => setShowAddForm(!showAddForm)}
               >
                 <PlusLg size={14} className="me-1" />
-                {showAddForm ? "Cancel" : "Add Parameter"}
+                {showAddForm ? "Cancel" : "Add parameter"}
               </Button>
             </div>
 
             {showAddForm && (
               <div className="bg-light p-3 rounded mb-3 border">
-                <h6 className="fw-bold mb-2">Add New Configuration Key</h6>
+                <h6 className="fw-bold mb-2">Add new configuration key</h6>
                 <div className="row g-2">
                   <div className="col-md-5">
                     <Form.Control
@@ -209,7 +228,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
             ) : configs.length === 0 ? (
               <div className="text-muted text-center my-4">
                 No custom configuration parameters found for this service. Click{" "}
-                <strong>Add Parameter</strong> above to configure environment
+                <strong>Add parameter</strong> above to configure environment
                 overrides.
               </div>
             ) : (
@@ -256,7 +275,9 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                           {config.isReadOnly ? (
                             <Badge bg="dark">Read-only</Badge>
                           ) : (
-                            <Badge bg="info">Editable</Badge>
+                            <Badge bg="info" text="dark">
+                              Editable
+                            </Badge>
                           )}
                         </td>
                         <td className="text-end">
@@ -320,7 +341,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                   {auditLogs.map((log, idx) => (
                     <tr key={log.id || idx}>
                       <td className="small text-muted">
-                        {new Date(log.createdAt).toLocaleString()}
+                        <DateTime value={log.createdAt} />
                       </td>
                       <td>
                         <Badge

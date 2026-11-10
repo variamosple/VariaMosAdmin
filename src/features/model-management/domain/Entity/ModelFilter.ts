@@ -1,4 +1,4 @@
-import { PagedModel } from "@variamosple/variamos-components";
+import { PagedModel } from "@/shared/domain/Entity/PagedModel";
 
 export class ModelsFilter extends PagedModel {
   constructor(

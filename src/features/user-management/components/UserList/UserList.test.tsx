@@ -18,14 +18,6 @@ vi.mock("@variamosple/variamos-components", async () => {
       filter: {},
       isLoaded: true,
     }),
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-      }
-    },
     ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number;
       message?: string;
@@ -171,5 +163,39 @@ describe("UserList Component", () => {
     await user.click(deleteButtons[0]);
 
     expect(mockOnUserDelete).toHaveBeenCalledWith(mockUsers[0]);
+  });
+
+  it("sorts from the column headers, and says which one is sorted (EV-95)", async () => {
+    const onSort = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <UserList
+        items={mockUsers}
+        currentPage={1}
+        totalPages={1}
+        onPageChange={vi.fn()}
+        onUserResetLink={vi.fn()}
+        onUserDisable={vi.fn()}
+        onUserEnable={vi.fn()}
+        onUserDelete={vi.fn()}
+        sort={{ by: "lastLogin", order: "desc" }}
+        onSort={onSort}
+      />,
+    );
+
+    expect(
+      screen.getByRole("columnheader", { name: "Last Login" }),
+    ).toHaveAttribute("aria-sort", "descending");
+    expect(screen.getByRole("columnheader", { name: "Name" })).toHaveAttribute(
+      "aria-sort",
+      "none",
+    );
+    // Status mixes two flags, and the actions are not data: not sortable
+    expect(
+      screen.getByRole("columnheader", { name: "Status" }),
+    ).not.toHaveAttribute("aria-sort");
+
+    await user.click(screen.getByRole("button", { name: "Created At" }));
+    expect(onSort).toHaveBeenCalledWith("createdAt");
   });
 });

@@ -10,16 +10,14 @@ import { JournalPage } from "./JournalPage";
 // that the global mock avoids: the page is tested as it runs
 vi.mock("@variamosple/variamos-components", async () => {
   const dist = "@variamosple/variamos-components/dist";
-  const [hook, paginator, paged, response] = await Promise.all([
+  const [hook, paginator, response] = await Promise.all([
     import(`${dist}/Hooks/usePaginatedQuery.js`),
     import(`${dist}/Components/Paginator/index.js`),
-    import(`${dist}/Model/PagedModel.js`),
     import(`${dist}/Model/ResponseModel.js`),
   ]);
   return {
     usePaginatedQuery: hook.usePaginatedQuery,
     Paginator: paginator.Paginator,
-    PagedModel: paged.PagedModel,
     ResponseModel: response.ResponseModel,
     withPageVisit: <T,>(component: T): T => component,
   };
@@ -155,6 +153,24 @@ describe("Journal page (T-24 lot 3)", () => {
       action: "user.disable",
       entityType: "user",
     });
+  });
+
+  it("filters on the bug operations", async () => {
+    const user = userEvent.setup();
+    const requests = serveJournals();
+    render(<JournalPage />);
+    await screen.findByRole("cell", { name: "role.update" });
+
+    await user.selectOptions(
+      screen.getByLabelText("Action"),
+      "bug.attachment.delete",
+    );
+    await user.selectOptions(screen.getByLabelText("Entity"), "bug");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => expect(requests).toHaveLength(2));
+    expect(requests[1].params.get("action")).toBe("bug.attachment.delete");
+    expect(requests[1].params.get("entityType")).toBe("bug");
   });
 
   it("sends the period as ISO dates", async () => {

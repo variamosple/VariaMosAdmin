@@ -2,17 +2,21 @@ import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Table } from "react-bootstrap";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 import { ProjectRowComponent } from "./ProjectRow";
 
 export interface ProjectListProps extends PaginationControlsProps {
   items: Project[];
+  state?: ListState;
   onProjectEdit: (project: Project) => void;
   onProjectDelete: (project: Project) => void;
 }
 
 export const ProjectList: FC<ProjectListProps> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -27,7 +31,7 @@ export const ProjectList: FC<ProjectListProps> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover responsive>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
             <th>Name</th>
@@ -57,6 +61,14 @@ export const ProjectList: FC<ProjectListProps> = ({
               onProjectDelete={onProjectDelete}
             />
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={8}
+              items="projects"
+            />
+          )}
         </tbody>
       </Table>
 

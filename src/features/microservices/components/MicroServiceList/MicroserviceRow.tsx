@@ -1,6 +1,7 @@
 import { useLineBuffer } from "@/shared/hooks/useLineBuffer";
 import { useSocket } from "@/shared/hooks/useSocket";
 import { watchMicroserviceLogs } from "../../api/MicroServiceRepository";
+import type { FollowUp, FollowUpStep } from "../../domain/actionFollowUp";
 import type {
   HealthStatus,
   MicroService,
@@ -9,7 +10,7 @@ import { UptimeBar } from "../UptimeBar";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
 import { type FC, useEffect, useState } from "react";
-import { Badge, Button, ButtonGroup, Spinner } from "react-bootstrap";
+import { Badge, ButtonGroup, Spinner } from "react-bootstrap";
 import {
   ArrowClockwise,
   DashCircle,
@@ -18,6 +19,7 @@ import {
   Sliders,
   StopFill,
 } from "react-bootstrap-icons";
+import { IconButton } from "@/shared/components/IconButton";
 
 export interface MicroServiceRowProps {
   microService: MicroService;
@@ -25,6 +27,8 @@ export interface MicroServiceRowProps {
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
   onMicroServiceConfigure?: (microservice: MicroService) => void;
+  // A start, restart or stop under way, or one that failed (EV-86 lot 3)
+  followUp?: FollowUp;
 }
 
 const STATUS_BADGES: Record<
@@ -38,12 +42,23 @@ const STATUS_BADGES: Record<
   NO_DATA: { bg: "secondary", label: "NO DATA" },
 };
 
+const FOLLOW_UP_BADGES: Record<
+  FollowUpStep,
+  { bg: string; text?: "dark"; label: string }
+> = {
+  starting: { bg: "info", text: "dark", label: "STARTING" },
+  restarting: { bg: "info", text: "dark", label: "RESTARTING" },
+  stopping: { bg: "info", text: "dark", label: "STOPPING" },
+  failed: { bg: "danger", label: "NOT BACK" },
+};
+
 export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
   microService,
   onMicroServiceStart,
   onMicroServiceRestart,
   onMicroServiceStop,
   onMicroServiceConfigure,
+  followUp,
 }) => {
   const [show, setShow] = useState(false);
   const { buffer: logs, addToBuffer: addToLogsBuffer } = useLineBuffer(40960);
@@ -61,7 +76,11 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
   const isRunning = microService.containers?.length
     ? microService.containers.some((c) => c.state === "running")
     : microService.state === "running" || isUp;
-  const badge = STATUS_BADGES[status] ?? STATUS_BADGES.DOWN;
+  const badge = followUp
+    ? FOLLOW_UP_BADGES[followUp.step]
+    : (STATUS_BADGES[status] ?? STATUS_BADGES.DOWN);
+  // No second action on a service while one is under way
+  const isBusy = !!followUp && followUp.step !== "failed";
   const hasUptime = !!microService.uptimeSummary?.history?.length;
 
   let port = "—";
@@ -151,13 +170,22 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         </td>
 
         <td>
-          <Badge bg={badge.bg} text={badge.text} className="text-uppercase">
+          <Badge
+            bg={badge.bg}
+            text={badge.text}
+            className="text-uppercase d-inline-flex align-items-center gap-1"
+          >
+            {isBusy && (
+              <Spinner animation="border" size="sm" aria-hidden="true" />
+            )}
             {badge.label}
           </Badge>
         </td>
 
         <td>
-          {isUp && microService.health?.responseTimeMs !== undefined
+          {/* A slow answer is what makes a service DEGRADED: show it */}
+          {(isUp || status === "DEGRADED") &&
+          microService.health?.responseTimeMs !== undefined
             ? `${microService.health.responseTimeMs} ms`
             : "—"}
         </td>
@@ -195,51 +223,49 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         <td className="text-center">
           <ButtonGroup size="sm">
             {!isRunning && (
-              <Button
+              <IconButton
                 variant="success"
                 onClick={() => onMicroServiceStart(microService)}
-                title="Start Service"
-              >
-                <PlayFill />
-              </Button>
+                label="Start Service"
+                disabled={isBusy}
+                icon={<PlayFill />}
+              />
             )}
 
             {isRunning && (
               <>
-                <Button
+                <IconButton
                   variant="warning"
                   onClick={() => onMicroServiceRestart(microService)}
-                  title="Restart Service"
-                >
-                  <ArrowClockwise />
-                </Button>
+                  label="Restart Service"
+                  disabled={isBusy}
+                  icon={<ArrowClockwise />}
+                />
 
-                <Button
+                <IconButton
                   variant="danger"
                   onClick={() => onMicroServiceStop(microService)}
-                  title="Stop Service"
-                >
-                  <StopFill />
-                </Button>
+                  label="Stop Service"
+                  disabled={isBusy}
+                  icon={<StopFill />}
+                />
               </>
             )}
 
-            <Button
+            <IconButton
               variant="outline-secondary"
               onClick={() => onMicroServiceConfigure?.(microService)}
-              title="Configure service parameters"
-            >
-              <Sliders size={14} />
-            </Button>
+              label="Configure service parameters"
+              icon={<Sliders size={14} />}
+            />
 
-            <Button
+            <IconButton
               variant="outline-secondary"
               size="sm"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide logs"
-            >
-              {!show ? <Search size={14} /> : <DashCircle size={14} />}
-            </Button>
+              label="Show/Hide logs"
+              icon={!show ? <Search size={14} /> : <DashCircle size={14} />}
+            />
           </ButtonGroup>
         </td>
       </tr>

@@ -106,7 +106,7 @@ describe("BugFormModal Component", () => {
     );
 
     fireEvent.submit(
-      screen.getByRole("button", { name: "Create Public GitHub Issue" }),
+      screen.getByRole("button", { name: "Create public GitHub issue" }),
     );
 
     expect(await screen.findByText("Title is required")).toBeInTheDocument();

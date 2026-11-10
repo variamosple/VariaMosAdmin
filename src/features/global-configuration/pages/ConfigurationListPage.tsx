@@ -21,34 +21,50 @@ import {
   ShieldFillExclamation,
   ShieldLockFill,
 } from "react-bootstrap-icons";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { IconButton } from "@/shared/components/IconButton";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
 import type { Configuration } from "../domain/Entity/Configuration";
+import {
+  categoriesOf,
+  categoryLabel,
+} from "../domain/Entity/ConfigurationCategory";
 import { useConfigurationList } from "../hooks/useConfigurationList";
 
+const lockedLabel = (config: Configuration) =>
+  config.isReadOnly
+    ? "This setting is read-only"
+    : "This setting is locked until a second-factor check is available";
+
 const ConfigurationListPageComponent: FC = () => {
+  usePageTitle("Global configurations");
   const {
     configurations,
     isLoading,
     isUpdating,
     isDirty,
     modifiedKeys,
+    saveFailures,
     setLocalValue,
     discardChanges,
     saveChanges,
   } = useConfigurationList();
+  const [confirming, setConfirming] = useState<"discard">();
 
   const [activeTab, setActiveTab] = useState<string>("general");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [toEditConfig, setToEditConfig] = useState<Configuration>();
   const [showEdit, setShowEdit] = useState<boolean>(false);
 
-  // Group configurations by categories and sub-groups
-  const categories = [
-    { key: "general", label: "General Options" },
-    { key: "security", label: "Security & Passwords" },
-    { key: "notification", label: "Notifications & SMTP" },
-    { key: "env", label: "System & Environments" },
-  ];
+  // One tab per category found in the configurations
+  const categories = useMemo(
+    () => categoriesOf(configurations),
+    [configurations],
+  );
+  const shownTab = categories.some((category) => category.key === activeTab)
+    ? activeTab
+    : categories[0]?.key;
 
   // Helper to determine Card Group Name from config key
   const getGroupName = (config: Configuration): string => {
@@ -66,7 +82,8 @@ const ConfigurationListPageComponent: FC = () => {
     if (config.category === "security") return "General Security Settings";
     if (config.category === "notification")
       return "General Notification Settings";
-    return "Environment Settings";
+    if (config.category === "env") return "Environment Settings";
+    return `${categoryLabel(config.category)} Settings`;
   };
 
   // Filter configurations by search term and category
@@ -129,6 +146,10 @@ const ConfigurationListPageComponent: FC = () => {
                   const isSecret = config.isSecret;
                   const isBoolean = config.type === "boolean";
                   const isModified = modifiedKeys.includes(config.key);
+                  const saveFailure = saveFailures[config.key];
+                  // The server refuses a change to a key that requires MFA
+                  // until it can check a second factor (T-10)
+                  const isLocked = config.isReadOnly || config.requiresMfa;
 
                   return (
                     <tr key={config.key}>
@@ -141,6 +162,11 @@ const ConfigurationListPageComponent: FC = () => {
                             </Badge>
                           )}
                         </div>
+                        {saveFailure && isModified && (
+                          <div className="text-danger small mt-1" role="alert">
+                            Not saved: {saveFailure}
+                          </div>
+                        )}
                         {config.description && (
                           <div className="text-muted small mt-1">
                             {config.description}
@@ -149,7 +175,7 @@ const ConfigurationListPageComponent: FC = () => {
                         <div className="mt-2 d-flex gap-2">
                           <Badge
                             bg="light"
-                            className="text-secondary border text-uppercase"
+                            className="text-dark border text-uppercase"
                           >
                             {config.type}
                           </Badge>
@@ -158,14 +184,14 @@ const ConfigurationListPageComponent: FC = () => {
                               placement="top"
                               overlay={
                                 <Tooltip>
-                                  Modifying this setting requires Multi-Factor
-                                  Authentication
+                                  Changing this setting needs a second-factor
+                                  check, which is not available yet.
                                 </Tooltip>
                               }
                             >
                               <Badge bg="warning" className="text-dark">
                                 <ShieldLockFill className="me-1" />
-                                MFA PROTECTED
+                                LOCKED
                               </Badge>
                             </OverlayTrigger>
                           )}
@@ -196,7 +222,7 @@ const ConfigurationListPageComponent: FC = () => {
                               type="switch"
                               id={`toggle-${config.key}`}
                               checked={Boolean(config.value)}
-                              disabled={config.isReadOnly || isUpdating}
+                              disabled={isLocked || isUpdating}
                               onChange={(e) =>
                                 setLocalValue(config.key, e.target.checked)
                               }
@@ -217,6 +243,12 @@ const ConfigurationListPageComponent: FC = () => {
                         ) : (
                           <span className="text-dark fw-medium">
                             {String(config.value)}
+                            {config.accepts?.unit && (
+                              <span className="text-muted fw-normal">
+                                {" "}
+                                {config.accepts.unit}
+                              </span>
+                            )}
                           </span>
                         )}
                       </td>
@@ -241,31 +273,30 @@ const ConfigurationListPageComponent: FC = () => {
                         </div>
                       </td>
                       <td className="text-center">
-                        {config.isReadOnly ? (
+                        {isLocked ? (
                           <OverlayTrigger
                             placement="top"
-                            overlay={
-                              <Tooltip>This setting is read-only</Tooltip>
-                            }
+                            overlay={<Tooltip>{lockedLabel(config)}</Tooltip>}
                           >
-                            <Button
+                            <IconButton
                               size="sm"
                               variant="outline-secondary"
                               disabled
-                            >
-                              <ShieldFillExclamation className="text-muted" />
-                            </Button>
+                              label={lockedLabel(config)}
+                              icon={
+                                <ShieldFillExclamation className="text-muted" />
+                              }
+                            />
                           </OverlayTrigger>
                         ) : (
-                          <Button
+                          <IconButton
                             size="sm"
                             variant="primary"
                             disabled={isUpdating}
                             onClick={() => onConfigEdit(config)}
-                            title="Edit setting"
-                          >
-                            <PencilFill />
-                          </Button>
+                            label="Edit setting"
+                            icon={<PencilFill />}
+                          />
                         )}
                       </td>
                     </tr>
@@ -308,7 +339,7 @@ const ConfigurationListPageComponent: FC = () => {
               variant="outline-secondary"
               size="sm"
               disabled={isUpdating}
-              onClick={discardChanges}
+              onClick={() => setConfirming("discard")}
             >
               Discard
             </Button>
@@ -316,7 +347,7 @@ const ConfigurationListPageComponent: FC = () => {
               variant="primary"
               size="sm"
               disabled={isUpdating}
-              onClick={saveChanges}
+              onClick={() => void saveChanges()}
             >
               {isUpdating ? (
                 <Spinner
@@ -331,6 +362,19 @@ const ConfigurationListPageComponent: FC = () => {
           </div>
         </Alert>
       )}
+
+      <ConfirmationModal
+        show={confirming === "discard"}
+        title="Discard changes"
+        message={`Discard ${modifiedKeys.length} unsaved change(s)? The settings go back to their saved values.`}
+        confirmLabel="Discard changes"
+        confirmButtonVariant="danger"
+        onConfirm={() => {
+          discardChanges();
+          setConfirming(undefined);
+        }}
+        onCancel={() => setConfirming(undefined)}
+      />
 
       <ConfigurationFormModal
         showModal={showEdit}
@@ -354,25 +398,31 @@ const ConfigurationListPageComponent: FC = () => {
         </InputGroup>
       </div>
 
-      <Tabs
-        id="config-category-tabs"
-        activeKey={activeTab}
-        onSelect={(k) => k && setActiveTab(k)}
-        className="mb-4"
-      >
-        {categories.map((cat) => (
-          <Tab key={cat.key} eventKey={cat.key} title={cat.label}>
-            {isLoading && configurations.length === 0 ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" variant="primary" />
-                <div className="mt-2 text-muted">Loading settings...</div>
-              </div>
-            ) : (
-              renderCategoryGroups(cat.key)
-            )}
-          </Tab>
-        ))}
-      </Tabs>
+      {categories.length === 0 ? (
+        isLoading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+            <div className="mt-2 text-muted">Loading settings...</div>
+          </div>
+        ) : (
+          <div className="text-center py-4 text-muted bg-light rounded border">
+            No configurations found.
+          </div>
+        )
+      ) : (
+        <Tabs
+          id="config-category-tabs"
+          activeKey={shownTab}
+          onSelect={(k) => k && setActiveTab(k)}
+          className="mb-4"
+        >
+          {categories.map((cat) => (
+            <Tab key={cat.key} eventKey={cat.key} title={cat.label}>
+              {renderCategoryGroups(cat.key)}
+            </Tab>
+          ))}
+        </Tabs>
+      )}
     </Container>
   );
 };
@@ -381,4 +431,3 @@ export const ConfigurationListPage = withPageVisit(
   ConfigurationListPageComponent,
   "AdminConfigurationList",
 );
-export default ConfigurationListPage;

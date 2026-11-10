@@ -1,14 +1,24 @@
 import { withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useState } from "react";
-import { Button, Col, Container, Form, Row, Spinner } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Col,
+  Container,
+  Form,
+  Row,
+  Spinner,
+} from "react-bootstrap";
 import { ArrowClockwise } from "react-bootstrap-icons";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { MicroServiceConfigModal } from "../../components/MicroServiceConfigModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
 import type { MicroService } from "../../domain/Entity/MicroService";
 import { useMicroServiceList } from "../../hooks/useMicroServiceList";
 
 const MicroServiceListPageComponent: FC = () => {
+  usePageTitle("Microservices");
   const [selectedConfigService, setSelectedConfigService] = useState<
     MicroService | undefined
   >(undefined);
@@ -40,7 +50,14 @@ const MicroServiceListPageComponent: FC = () => {
     setRefreshInterval,
     refreshList,
     isRefreshing,
+    listState,
+    lastRefreshedAt,
+    followUps,
   } = useMicroServiceList();
+
+  // A failed reload leaves the last statuses on screen: say they are old
+  // instead of letting them pass for current ones (EV-86 lot 2)
+  const isConnectionLost = !!listState.error && microServices.length > 0;
 
   return (
     <Container fluid="sm" className="my-2">
@@ -51,6 +68,9 @@ const MicroServiceListPageComponent: FC = () => {
         </Col>
 
         <Col xs="auto" className="d-flex align-items-center gap-2">
+          <small className="text-muted">
+            Updated {lastRefreshedAt.toLocaleTimeString()}
+          </small>
           <Form.Select
             size="sm"
             style={{ width: "160px" }}
@@ -97,9 +117,29 @@ const MicroServiceListPageComponent: FC = () => {
 
       <hr />
 
+      {isConnectionLost && (
+        <Alert variant="warning" className="d-flex align-items-center gap-2">
+          <span>
+            Connection to the administration service lost: the statuses below
+            date from {lastRefreshedAt.toLocaleTimeString()}. ({listState.error}
+            )
+          </span>
+          <Button
+            size="sm"
+            variant="outline-dark"
+            className="ms-auto"
+            onClick={() => refreshList(true)}
+          >
+            Retry
+          </Button>
+        </Alert>
+      )}
+
       {/* Microservice Cards List */}
       <MicroServiceList
         items={microServices}
+        state={isConnectionLost ? { ...listState, error: null } : listState}
+        followUps={followUps}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
@@ -125,7 +165,9 @@ const MicroServiceListPageComponent: FC = () => {
       {/* Confirmation Modals */}
       <ConfirmationModal
         show={showStart}
-        message={`Are you sure you want to start ${toStartMicroService?.displayName || toStartMicroService?.serviceName || "this microservice"}?`}
+        title="Start microservice"
+        message={`Start ${toStartMicroService?.displayName || toStartMicroService?.serviceName || "this microservice"}?`}
+        confirmLabel="Start microservice"
         onConfirm={() => {
           if (toStartMicroService) {
             performMicroSerViceStart(toStartMicroService);
@@ -140,7 +182,9 @@ const MicroServiceListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showRestart}
-        message={`Are you sure you want to restart ${toRestartMicroService?.displayName || toRestartMicroService?.serviceName || "this microservice"}?`}
+        title="Restart microservice"
+        message={`Restart ${toRestartMicroService?.displayName || toRestartMicroService?.serviceName || "this microservice"}?`}
+        confirmLabel="Restart microservice"
         confirmButtonVariant="warning"
         onConfirm={() => {
           if (toRestartMicroService) {
@@ -156,7 +200,9 @@ const MicroServiceListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showStop}
-        message={`Are you sure you want to stop ${toStopMicroService?.displayName || toStopMicroService?.serviceName || "this microservice"}?`}
+        title="Stop microservice"
+        message={`Stop ${toStopMicroService?.displayName || toStopMicroService?.serviceName || "this microservice"}?`}
+        confirmLabel="Stop microservice"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toStopMicroService) {

@@ -3,14 +3,21 @@ import {
   type SessionInfoResponse,
   type singInResponse,
 } from "@variamosple/variamos-components";
+import { userSchema } from "@/features/user-management/api/userSchemas";
 import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
+import { parseResponse } from "@/shared/api/parseResponse";
 import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { PasswordPolicy } from "../domain/PasswordPolicy";
+import {
+  passwordPolicySchema,
+  signedInSchema,
+  signInSchema,
+} from "./authSchemas";
 
 export const getSessionInfo = (): Promise<
   ResponseModel<SessionInfoResponse>
@@ -53,36 +60,28 @@ export const MFA_REQUIRED_CODE = 428;
 export const requestSignIn = (
   request: Credentials,
 ): Promise<ResponseModel<SignInResult>> => {
+  const failure = "Error when trying to sign in, please try again later.";
   return ADMIN_CLIENT.post("/auth/sign-in", request)
     .then((response) => {
-      const result: ResponseModel<SignInResult> = Object.assign(
-        new ResponseModel(),
-        response.data,
-      );
-      if (result.data?.mfaRequired) {
+      const result = parseResponse(signInSchema, response.data, failure);
+      if (result.data && "mfaRequired" in result.data) {
         result.errorCode = MFA_REQUIRED_CODE;
       }
-      return result;
+      // Checked by the schema; the answer that waits for the code has no
+      // redirect, and travels as an error the login page reads
+      return result as ResponseModel<SignInResult>;
     })
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to sign in, please try again later.",
-      ),
-    );
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const requestSignInAsGuest = (
   guestId?: string | null,
 ): Promise<ResponseModel<singInResponse>> => {
+  const failure =
+    "Error when trying to sign in as guest, please try again later.";
   return ADMIN_CLIENT.post("/auth/guest/sign-in", { guestId })
-    .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to sign in as guest, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(signedInSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const requestSignUp = (
@@ -99,14 +98,11 @@ export const requestSignUp = (
 };
 
 export const getMyAccount = (): Promise<ResponseModel<User>> => {
+  const failure =
+    "Error when trying to get account details, please try again later.";
   return ADMIN_CLIENT.get("/auth/my-account")
-    .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) =>
-      toErrorResponse(
-        error,
-        "Error when trying to get account details, please try again later.",
-      ),
-    );
+    .then((response) => parseResponse(userSchema, response.data, failure))
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const updatePersonalInformation = (
@@ -147,11 +143,12 @@ export const registerRedirect = (url: string): Promise<ResponseModel<void>> => {
 };
 
 export const getPasswordPolicy = (): Promise<ResponseModel<PasswordPolicy>> => {
+  const failure = "Could not read the password policy.";
   return ADMIN_CLIENT.get("/auth/password-policy")
-    .then((response) => Object.assign(new ResponseModel(), response.data))
-    .catch((error) =>
-      toErrorResponse(error, "Could not read the password policy."),
-    );
+    .then((response) =>
+      parseResponse(passwordPolicySchema, response.data, failure),
+    )
+    .catch((error) => toErrorResponse(error, failure));
 };
 
 export const requestPasswordReset = (

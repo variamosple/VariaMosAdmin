@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Badge, Button } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";
-import { formatDate } from "@/shared/constants";
+import { DateTime } from "@/shared/components/DateTime";
 import { attachmentUrl } from "../../api/attachmentUrl";
 import type { Bug } from "../../domain/Bug";
 import { componentLabel } from "../../domain/BugComponent";
@@ -52,7 +52,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
       </td>
 
       <td
-        className="align-middle font-weight-bold text-dark"
+        className="align-middle fw-bold text-dark"
         style={{ minWidth: "150px" }}
       >
         {bug.title}
@@ -94,7 +94,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
             : bug.createdBy?.name || bug.reporterEmail || "Guest"}
         </div>
         <div className="text-muted" style={{ fontSize: "0.75rem" }}>
-          {bug.createdAt ? formatDate(new Date(bug.createdAt)) : "N/A"}
+          <DateTime value={bug.createdAt} dateOnly />
         </div>
       </td>
 

@@ -3,20 +3,22 @@ import { type FC, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { GoogleLogin } from "../components/GoogleLogin";
 import { SignUpForm } from "../components/SignUpForm";
 
 export const SignUpPage: FC = () => {
+  usePageTitle("Sign up");
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const [successMessage, setSuccessMessage] = useState<string | undefined>();
+  const [signedUp, setSignedUp] = useState(false);
   const { signUp } = useSession();
 
   const onSignUp = (registration: UserRegistration) => {
     signUp(registration).then((response) => {
       if (response?.errorCode) {
         setErrorMessage(response.message);
-      } else if (response?.message) {
-        setSuccessMessage(response.message);
+      } else if (response) {
+        setSignedUp(true);
       }
     });
   };
@@ -49,11 +51,18 @@ export const SignUpPage: FC = () => {
       <Alert
         className="w-100 m-0"
         variant="success"
-        show={!!successMessage}
+        show={signedUp}
         dismissible
-        onClose={() => setSuccessMessage(undefined)}
+        onClose={() => setSignedUp(false)}
       >
-        {successMessage}
+        {/* The API answers the same for a taken address, so as not to tell
+            who has an account: the text covers both cases (UX-33) */}
+        If this email address was not registered yet, your account is ready.
+        Already registered?{" "}
+        <Link className="alert-link" to="/forgot-password">
+          Reset your password
+        </Link>
+        .
       </Alert>
 
       <GoogleLogin text="signup_with" />

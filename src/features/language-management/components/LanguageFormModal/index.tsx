@@ -1,5 +1,5 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useEffect } from "react";
+import { type FC, useEffect, useId } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { Language } from "../../domain/Entity/Language";
@@ -49,19 +49,22 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
     reset();
   };
 
+  const titleId = useId();
+
   return (
     <Modal
+      aria-labelledby={titleId}
       show={showModal}
       backdrop={isLoading ? "static" : true}
       onHide={onCloseModal}
     >
       <Modal.Header closeButton={!isLoading}>
-        <Modal.Title>{modalTitle}</Modal.Title>
+        <Modal.Title id={titleId}>{modalTitle}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-3">
-          <Form.Group className="col-12" controlId="name">
+          <Form.Group className="col-12" controlId="languageName">
             <Form.Label className="form-label">Name</Form.Label>
             <Form.Control
               type="text"

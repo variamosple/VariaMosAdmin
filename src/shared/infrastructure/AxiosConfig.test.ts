@@ -66,7 +66,9 @@ describe("AxiosConfig Interceptors", () => {
     );
 
     await expect(testClient.get("/secure")).rejects.toThrow();
-    expect(navigateMock).toHaveBeenCalledWith("/login?reason=session-expired");
+    expect(navigateMock).toHaveBeenCalledWith(
+      `/login?reason=session-expired&redirectTo=${encodeURIComponent(window.location.href)}`,
+    );
   });
 
   it("should navigate to login with a reason, not the server message, on 401", async () => {
@@ -81,8 +83,12 @@ describe("AxiosConfig Interceptors", () => {
     );
 
     await expect(testClient.get("/secure")).rejects.toThrow();
-    // The server text is not put in the address
-    expect(navigateMock).toHaveBeenCalledWith("/login?reason=session-expired");
+    // The server text is not put in the address, the current page is
+    const target = navigateMock.mock.calls[0][0] as string;
+    expect(target).not.toContain("Token expired");
+    const params = new URLSearchParams(target.split("?")[1]);
+    expect(params.get("reason")).toBe("session-expired");
+    expect(params.get("redirectTo")).toMatch(/#\/dashboard$/);
   });
 
   it("should not navigate to login on 401 error if route is public", async () => {
@@ -100,6 +106,24 @@ describe("AxiosConfig Interceptors", () => {
     );
 
     await expect(testClient.get("/public-endpoint")).rejects.toThrow();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("treats only the listed sign-in pages as public", async () => {
+    // A private page whose address merely contains "/login"
+    window.location.hash = "#/users/login-history";
+    server.use(
+      http.get("http://api.test/secure", () =>
+        HttpResponse.json({}, { status: 401 }),
+      ),
+    );
+
+    await expect(testClient.get("/secure")).rejects.toThrow();
+    expect(navigateMock).toHaveBeenCalledOnce();
+
+    navigateMock.mockClear();
+    window.location.hash = "#/reset-password?token=abc";
+    await expect(testClient.get("/secure")).rejects.toThrow();
     expect(navigateMock).not.toHaveBeenCalled();
   });
 

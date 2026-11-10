@@ -7,7 +7,6 @@ import { SignUpForm } from "./index";
 // Mock @variamosple/variamos-components
 vi.mock("@variamosple/variamos-components", async () => ({
   useSession: vi.fn(),
-  PagedModel: class PagedModel {},
 }));
 
 describe("SignUpForm Component", () => {

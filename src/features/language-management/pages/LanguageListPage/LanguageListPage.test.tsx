@@ -1,7 +1,5 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import type React from "react";
-import { ToastProvider } from "@/shared/context/ToastContext";
+import { screen, waitFor, within } from "@testing-library/react";
+import { renderPage } from "@/shared/tests/render";
 import { LanguageListPage } from "./index";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
@@ -10,7 +8,6 @@ vi.mock("@variamosple/variamos-components", async () => {
   const { useState, useCallback } = React;
   return {
     withPageVisit: <T,>(component: T): T => component,
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
@@ -77,51 +74,44 @@ vi.mock("@variamosple/variamos-components", async () => {
   };
 });
 
-// Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-vi.mock(
-  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
-  async () => {
-    return {
-      __esModule: true,
-      default: ({
-        show,
-        message,
-        onConfirm,
-        onCancel,
-      }: {
-        show: boolean;
-        message: string;
-        onConfirm: () => void;
-        onCancel: () => void;
-      }) => {
-        if (!show) return null;
-        return (
-          <div data-testid="confirm-modal">
-            <span>{message}</span>
-            <button type="button" onClick={onConfirm}>
-              Confirm
-            </button>
-            <button type="button" onClick={onCancel}>
-              Cancel
-            </button>
-          </div>
-        );
-      },
-    };
-  },
-);
+// Mock the shared ConfirmationModal
+vi.mock("@/shared/components/ConfirmationModal", async () => {
+  return {
+    __esModule: true,
+    default: ({
+      show,
+      message,
+      onConfirm,
+      onCancel,
+    }: {
+      show: boolean;
+      message: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => {
+      if (!show) return null;
+      return (
+        <div data-testid="confirm-modal">
+          <span>{message}</span>
+          <button type="button" onClick={onConfirm}>
+            Confirm
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      );
+    },
+  };
+});
 
 describe("LanguageListPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
-  };
-
   it("renders page components correctly", async () => {
-    renderWithProviders(<LanguageListPage />);
+    renderPage(<LanguageListPage />);
     expect(screen.getByText("Languages list")).toBeInTheDocument();
 
     // Wait for the MSW handlers to return English and Spanish
@@ -130,8 +120,7 @@ describe("LanguageListPage", () => {
   });
 
   it("shows and handles LanguageFormModal for editing", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<LanguageListPage />);
+    const { user } = renderPage(<LanguageListPage />);
 
     expect(await screen.findByText("English")).toBeInTheDocument();
 
@@ -161,8 +150,7 @@ describe("LanguageListPage", () => {
   });
 
   it("shows and handles ConfirmationModal for deleting", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<LanguageListPage />);
+    const { user } = renderPage(<LanguageListPage />);
 
     expect(await screen.findByText("Spanish")).toBeInTheDocument();
 
@@ -174,7 +162,7 @@ describe("LanguageListPage", () => {
     // Delete confirmation modal should be visible
     expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
     expect(
-      screen.getByText("Are you sure you want to delete the language?"),
+      screen.getByText('Delete the language "Spanish"?'),
     ).toBeInTheDocument();
 
     // Click confirm delete
@@ -187,8 +175,7 @@ describe("LanguageListPage", () => {
   });
 
   it("shows and handles ConfirmationModal for activating a language", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<LanguageListPage />);
+    const { user } = renderPage(<LanguageListPage />);
 
     expect(await screen.findByText("Spanish")).toBeInTheDocument();
 
@@ -200,9 +187,7 @@ describe("LanguageListPage", () => {
     // Confirmation modal should be visible
     expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Are you sure you want to activate the language 'Spanish'?",
-      ),
+      screen.getByText('Activate the language "Spanish"?'),
     ).toBeInTheDocument();
 
     // Click confirm
@@ -215,8 +200,7 @@ describe("LanguageListPage", () => {
   });
 
   it("shows and handles ConfirmationModal for deactivating a language", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<LanguageListPage />);
+    const { user } = renderPage(<LanguageListPage />);
 
     expect(await screen.findByText("English")).toBeInTheDocument();
 
@@ -230,9 +214,7 @@ describe("LanguageListPage", () => {
     // Confirmation modal should be visible
     expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Are you sure you want to deactivate the language 'English'?",
-      ),
+      screen.getByText('Deactivate the language "English"?'),
     ).toBeInTheDocument();
 
     // Click confirm

@@ -1,5 +1,6 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { readPage, useListParams } from "@/shared/hooks/useListQueryState";
 import {
   addBugNote,
   createBug,
@@ -18,6 +19,45 @@ import type { Bug, BugStatusLog, BugUserRef, RawBugNote } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
 import type { BugPriority } from "../domain/BugPriority";
 
+const BUG_PAGE_SIZE = 20;
+
+export type BugTab = "github" | "local" | "trash";
+const BUG_TABS: readonly string[] = ["github", "local", "trash"];
+const FILTER_KEYS = [
+  "repo",
+  "status",
+  "priority",
+  "search",
+  "assignee",
+  "component",
+] as const;
+
+// The tab, the filters and the page live in the address (UX-26)
+const tabOf = (params: URLSearchParams): BugTab => {
+  const tab = params.get("tab") ?? "";
+  return BUG_TABS.includes(tab) ? (tab as BugTab) : "github";
+};
+
+const filterOf = (params: URLSearchParams): BugFilter => {
+  const filter: BugFilter = {};
+  for (const key of FILTER_KEYS) {
+    const value = params.get(key);
+    if (value) filter[key] = value;
+  }
+  return filter;
+};
+
+const paramsFor = (tab: BugTab, filter: BugFilter, page: number) => {
+  const params = new URLSearchParams();
+  if (tab !== "github") params.set("tab", tab);
+  for (const key of FILTER_KEYS) {
+    const value = filter[key];
+    if (value) params.set(key, value);
+  }
+  if (page > 1) params.set("page", String(page));
+  return params;
+};
+
 export const useBugList = () => {
   // 1. States for data
   const [bugs, setBugs] = useState<Bug[]>([]);
@@ -31,21 +71,21 @@ export const useBugList = () => {
   // Creation failures are shown in the form, which stays open (UX-08)
   const [createError, setCreateError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<"github" | "local" | "trash">(
-    "github",
+  const { params, write, restoreKey } = useListParams();
+  const activeTab = tabOf(params);
+  const pageNumber = readPage(params);
+  // The same filter object while its values stay: one load per change
+  const filterKey = paramsFor("github", filterOf(params), 1).toString();
+  const filter = useMemo(
+    () => filterOf(new URLSearchParams(filterKey)),
+    [filterKey],
   );
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / BUG_PAGE_SIZE));
 
   // Bug Notes States
   const [notes, setNotes] = useState<BugStatusLog[]>([]);
   const [isLoadingNotes, setIsLoadingNotes] = useState<boolean>(false);
-
-  // 2. State for filtering
-  const [filter, setFilter] = useState<BugFilter>({
-    repo: "",
-    status: "",
-    priority: "",
-    search: "",
-  });
 
   // Fetch repos and categories on mount
   useEffect(() => {
@@ -61,16 +101,6 @@ export const useBugList = () => {
     });
   }, []);
 
-  // Reset filters when changing tabs
-  useEffect(() => {
-    setFilter({
-      repo: "",
-      status: "",
-      priority: "",
-      search: "",
-    });
-  }, []);
-
   // 3. State for the creation modal
   const [showCreate, setShowCreate] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -80,22 +110,32 @@ export const useBugList = () => {
     setIsLoading(true);
     setLoadError(null);
 
+    const page = { pageNumber, pageSize: BUG_PAGE_SIZE };
     let response: ResponseModel<Bug[]>;
     if (activeTab === "github") {
-      response = await queryBugs(filter);
+      response = await queryBugs({ ...filter, ...page });
     } else {
       const status = activeTab === "local" ? "pending" : "rejected";
-      response = await queryLocalBugs({ ...filter, status });
+      response = await queryLocalBugs({ ...filter, ...page, status });
     }
 
     if (response.errorCode) {
       setBugs([]);
       setLoadError(response.message || "Failed to load bugs");
     } else {
-      setBugs(response.data || []);
+      const data = response.data || [];
+      // A server without paging sends every bug and no count
+      const count = response.totalCount ?? data.length;
+      setBugs(data);
+      setTotalCount(count);
+      // The last bugs of the page were moved away: show the new last page
+      const lastPage = Math.max(1, Math.ceil(count / BUG_PAGE_SIZE));
+      if (pageNumber > lastPage) {
+        write(paramsFor(activeTab, filter, lastPage), "replace");
+      }
     }
     setIsLoading(false);
-  }, [filter, activeTab]);
+  }, [filter, activeTab, pageNumber, write]);
 
   // Trigger loading
   useEffect(() => {
@@ -124,15 +164,17 @@ export const useBugList = () => {
     setIsLoadingNotes(false);
   }, []);
 
-  const handleAddNote = async (bugId: string, body: string) => {
-    setError(null);
+  // Resolves to the error message, shown in the details modal (UX-09)
+  const handleAddNote = async (
+    bugId: string,
+    body: string,
+  ): Promise<string | null> => {
     const response = await addBugNote(bugId, body);
     if (response.errorCode) {
-      setError(response.message || "Failed to add bug note");
-      return false;
+      return response.message || "Failed to add the comment";
     }
     await fetchNotes(bugId);
-    return true;
+    return null;
   };
 
   // 5. Function to submit the creation of a bug
@@ -276,13 +318,27 @@ export const useBugList = () => {
     createError,
     clearCreateError: () => setCreateError(null),
     filter,
-    setFilter,
+    // Changes with a filter restored from the address: the search form
+    // starts again from it
+    restoreKey,
+    // Another filter or tab starts again from the first page
+    setFilter: (next: BugFilter) => {
+      write(paramsFor(activeTab, next, 1));
+    },
     showCreate,
     setShowCreate,
     isSubmitting,
     isSyncing,
     activeTab,
-    setActiveTab,
+    // A tab is a place: Back returns to the previous one
+    setActiveTab: (tab: BugTab) => {
+      write(paramsFor(tab, filter, 1), "push");
+    },
+    currentPage: pageNumber,
+    totalPages,
+    onPageChange: (page: number) => {
+      write(paramsFor(activeTab, filter, page));
+    },
     handleCreateBug,
     handleSyncBugs,
     handleReject,

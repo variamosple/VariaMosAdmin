@@ -7,7 +7,6 @@ import { MetricsPage } from "./MetricsPage";
 vi.mock("@variamosple/variamos-components", async () => {
   return {
     withPageVisit: <T,>(component: T): T => component,
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel {
       type: string;
       errorCode?: number;

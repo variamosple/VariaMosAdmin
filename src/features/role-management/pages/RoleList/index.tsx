@@ -4,11 +4,15 @@ import { Button, Container } from "react-bootstrap";
 import { RoleFormModal } from "@/features/role-management/components/RoleFormModal";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { SearchForm } from "@/shared/components/SearchForm";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { RoleList } from "../../components/RoleList";
 import { useRoleList } from "../../hooks/useRoleList";
 
 const RoleListPageComponent: FC = () => {
+  usePageTitle("Roles");
   const {
+    restoredFilter,
+    restoreKey,
     showCreate,
     setShowCreate,
     showEdit,
@@ -32,6 +36,9 @@ const RoleListPageComponent: FC = () => {
     onRoleDelete,
     onSearchReset,
     onSearchSubmit,
+    sort,
+    onSort,
+    listState,
   } = useRoleList();
 
   return (
@@ -40,13 +47,13 @@ const RoleListPageComponent: FC = () => {
         <h1 className="mb-0">Roles list</h1>
 
         <div>
-          <Button onClick={() => setShowCreate(true)}>Create Role</Button>
+          <Button onClick={() => setShowCreate(true)}>Create role</Button>
         </div>
       </div>
       <hr />
 
       <RoleFormModal
-        modalTitle="Create a Role"
+        modalTitle="New role"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onRoleSubmit={onRoleCreate}
@@ -64,6 +71,9 @@ const RoleListPageComponent: FC = () => {
       />
 
       <SearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultSearch={restoredFilter?.name}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}
@@ -72,16 +82,21 @@ const RoleListPageComponent: FC = () => {
 
       <RoleList
         items={roles}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
+        sort={sort}
+        onSort={onSort}
         onRoleEdit={onRoleEdit}
         onRoleDelete={onRoleDelete}
       />
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the role?"
+        title="Delete role"
+        message={`Delete the role "${toDeleteRole?.name ?? ""}"?`}
+        confirmLabel="Delete role"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteRole) {

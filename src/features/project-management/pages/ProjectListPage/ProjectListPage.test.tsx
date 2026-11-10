@@ -1,10 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { ProjectListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -13,7 +11,6 @@ vi.mock("@variamosple/variamos-components", async () => {
   const { useState, useCallback } = React;
   return {
     withPageVisit: <T,>(component: T): T => component,
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
@@ -77,51 +74,44 @@ vi.mock("@variamosple/variamos-components", async () => {
   };
 });
 
-// Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-vi.mock(
-  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
-  async () => {
-    return {
-      __esModule: true,
-      default: ({
-        show,
-        message,
-        onConfirm,
-        onCancel,
-      }: {
-        show: boolean;
-        message: string;
-        onConfirm: () => void;
-        onCancel: () => void;
-      }) => {
-        if (!show) return null;
-        return (
-          <div data-testid="delete-confirm-modal">
-            <span>{message}</span>
-            <button type="button" onClick={onConfirm}>
-              Confirm Delete
-            </button>
-            <button type="button" onClick={onCancel}>
-              Cancel Delete
-            </button>
-          </div>
-        );
-      },
-    };
-  },
-);
+// Mock the shared ConfirmationModal
+vi.mock("@/shared/components/ConfirmationModal", async () => {
+  return {
+    __esModule: true,
+    default: ({
+      show,
+      message,
+      onConfirm,
+      onCancel,
+    }: {
+      show: boolean;
+      message: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => {
+      if (!show) return null;
+      return (
+        <div data-testid="delete-confirm-modal">
+          <span>{message}</span>
+          <button type="button" onClick={onConfirm}>
+            Confirm Delete
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel Delete
+          </button>
+        </div>
+      );
+    },
+  };
+});
 
 describe("ProjectListPage Integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
-  };
-
   it("renders page components correctly", async () => {
-    renderWithProviders(<ProjectListPage />);
+    renderPage(<ProjectListPage />);
     expect(screen.getByText("Projects list")).toBeInTheDocument();
 
     // Wait for the MSW handlers to return projects
@@ -130,8 +120,7 @@ describe("ProjectListPage Integration", () => {
   });
 
   it("shows and handles ProjectFormModal for editing", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<ProjectListPage />);
+    const { user } = renderPage(<ProjectListPage />);
 
     expect(await screen.findByText("Project One")).toBeInTheDocument();
 
@@ -161,8 +150,7 @@ describe("ProjectListPage Integration", () => {
   });
 
   it("shows and handles ConfirmationModal for deleting", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<ProjectListPage />);
+    const { user } = renderPage(<ProjectListPage />);
 
     expect(await screen.findByText("Project Two")).toBeInTheDocument();
 
@@ -173,7 +161,7 @@ describe("ProjectListPage Integration", () => {
     // Delete confirmation modal should be visible
     expect(screen.getByTestId("delete-confirm-modal")).toBeInTheDocument();
     expect(
-      screen.getByText("Are you sure you want to delete the project?"),
+      screen.getByText('Delete the project "Project Two"?'),
     ).toBeInTheDocument();
 
     // Click confirm delete
@@ -197,7 +185,7 @@ describe("ProjectListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<ProjectListPage />);
+    renderPage(<ProjectListPage />);
     expect(screen.getByText("Projects list")).toBeInTheDocument();
 
     await waitFor(() => {
@@ -206,7 +194,7 @@ describe("ProjectListPage Integration", () => {
     expect(screen.queryByText("Project Two")).not.toBeInTheDocument();
   });
 
-  it("shows error toast when API fails to load projects", async () => {
+  it("shows a failed load of the projects in the table", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/projects", () => {
@@ -223,9 +211,16 @@ describe("ProjectListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<ProjectListPage />);
-    expect(await screen.findByText("Project query error")).toBeInTheDocument();
-    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
+    renderPage(<ProjectListPage />);
+    // In the table, with Retry, and not repeated in a toast (UX-23)
+    const table = await screen.findByRole("table");
+    expect(
+      await within(table).findByText(SYSTEM_ERROR_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("button", { name: "Retry" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(SYSTEM_ERROR_MESSAGE)).toHaveLength(1);
     consoleSpy.mockRestore();
   });
 });

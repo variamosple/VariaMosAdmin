@@ -1,10 +1,17 @@
 import { withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
-import { PersonalInformationUpdateForModal } from "@/features/user-management/components/UserInformationUpdateFormModal";
+import { PersonalInformationUpdateForModal } from "@/features/auth/components/UserInformationUpdateFormModal";
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import type { User } from "@/features/user-management/domain/Entity/User";
+import {
+  LoadProblem,
+  type LoadProblemKind,
+  loadProblemOf,
+} from "@/shared/components/LoadProblem";
+import { useToast } from "@/shared/context/ToastContext";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import {
   getMyAccount,
   updatePersonalInformation,
@@ -14,13 +21,16 @@ import { PasswordUpdateForm } from "../components/PasswordUpdateForm";
 import { TwoFactorCard } from "../components/TwoFactorCard";
 
 const MyAccountPageComponent: FC = () => {
+  usePageTitle("My account");
   const [user, setUser] = useState<User>();
+  const [problem, setProblem] = useState<LoadProblemKind | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordUpdate, setShowPasswordUpdate] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const [showInformationUpdate, setShowInformationUpdate] = useState(false);
   const [isUpdatingInformation, setIsUpdatingInformation] = useState(false);
+  const { pushToast } = useToast();
 
   const personalInformation: PersonalInformationUpdate = useMemo(
     () => ({ countryCode: user?.countryCode }),
@@ -31,6 +41,7 @@ const MyAccountPageComponent: FC = () => {
     setIsLoading(true);
     getMyAccount()
       .then((response) => {
+        setProblem(loadProblemOf(response));
         setUser(response.data);
       })
       .finally(() => setIsLoading(false));
@@ -46,6 +57,11 @@ const MyAccountPageComponent: FC = () => {
       .then((response) => {
         if (!response.errorCode) {
           setShowPasswordUpdate(false);
+          pushToast({
+            title: "Password updated",
+            message: "Your password has been changed.",
+            variant: "success",
+          });
         }
 
         return response;
@@ -63,6 +79,11 @@ const MyAccountPageComponent: FC = () => {
       .then((response) => {
         if (!response.errorCode) {
           setShowInformationUpdate(false);
+          pushToast({
+            title: "Information updated",
+            message: "Your information has been saved.",
+            variant: "success",
+          });
           queryUser();
         }
 
@@ -83,6 +104,17 @@ const MyAccountPageComponent: FC = () => {
             variant="primary"
           />
         </div>
+      </Container>
+    );
+  }
+
+  // A failed read shows its message, not empty fields (UX-24)
+  if (problem) {
+    return (
+      <Container fluid="sm" className="my-2">
+        <h1>My account</h1>
+        <hr />
+        <LoadProblem problem={problem} item="account" onRetry={queryUser} />
       </Container>
     );
   }

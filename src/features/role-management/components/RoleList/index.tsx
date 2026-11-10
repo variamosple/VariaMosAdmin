@@ -1,23 +1,35 @@
 import { Paginator, useRouter } from "@variamosple/variamos-components";
 import type { FC } from "react";
-import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { ButtonGroup, Table } from "react-bootstrap";
 import { PencilFill, Search, TrashFill } from "react-bootstrap-icons";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
+import type { RoleSortField } from "@/features/role-management/domain/Entity/RolesFilter";
+import { IconButton } from "@/shared/components/IconButton";
+import { SortableHeader } from "@/shared/components/SortableHeader";
+import { TableStateRow } from "@/shared/components/TableStateRow";
+import type { ListSort } from "@/shared/domain/Entity/ListSort";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 
 export interface RoleListParameters extends PaginationControlsProps {
   items: Role[];
+  state?: ListState;
   onRoleEdit: (role: Role) => void;
   onRoleDelete: (role: Role) => void;
+  sort?: ListSort<RoleSortField>;
+  onSort?: (field: RoleSortField) => void;
 }
 
 export const RoleList: FC<RoleListParameters> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
   onRoleEdit,
   onRoleDelete,
+  sort,
+  onSort,
 }) => {
   const { navigate } = useRouter();
   return (
@@ -28,12 +40,17 @@ export const RoleList: FC<RoleListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
-            <th>ID</th>
+            <SortableHeader field="id" label="ID" sort={sort} onSort={onSort} />
 
-            <th>Name</th>
+            <SortableHeader
+              field="name"
+              label="Name"
+              sort={sort}
+              onSort={onSort}
+            />
 
             <th>Actions</th>
           </tr>
@@ -48,33 +65,38 @@ export const RoleList: FC<RoleListParameters> = ({
 
               <td>
                 <ButtonGroup size="sm">
-                  <Button
+                  <IconButton
                     variant="secondary"
                     onClick={() => navigate(`/roles/${role.id}`)}
-                    title="See role details"
-                  >
-                    <Search />
-                  </Button>
+                    label="See role details"
+                    icon={<Search />}
+                  />
 
-                  <Button
+                  <IconButton
                     variant="primary"
                     onClick={() => onRoleEdit(role)}
-                    title="Edit role"
-                  >
-                    <PencilFill />
-                  </Button>
+                    label="Edit role"
+                    icon={<PencilFill />}
+                  />
 
-                  <Button
+                  <IconButton
                     variant="danger"
                     onClick={() => onRoleDelete(role)}
-                    title="Delete role"
-                  >
-                    <TrashFill />
-                  </Button>
+                    label="Delete role"
+                    icon={<TrashFill />}
+                  />
                 </ButtonGroup>
               </td>
             </tr>
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={3}
+              items="roles"
+            />
+          )}
         </tbody>
       </Table>
 

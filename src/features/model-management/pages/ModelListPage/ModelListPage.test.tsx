@@ -1,7 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import type React from "react";
-import { ToastProvider } from "@/shared/context/ToastContext";
+import { screen, waitFor } from "@testing-library/react";
+import { renderPage } from "@/shared/tests/render";
 import { ModelListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -10,7 +8,6 @@ vi.mock("@variamosple/variamos-components", async () => {
   const { useState, useCallback } = React;
   return {
     withPageVisit: <T,>(component: T): T => component,
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
@@ -74,51 +71,44 @@ vi.mock("@variamosple/variamos-components", async () => {
   };
 });
 
-// Mock ConfirmationModal from @variamosple/variamos-components/dist/Components/ConfirmationModal
-vi.mock(
-  "@variamosple/variamos-components/dist/Components/ConfirmationModal",
-  async () => {
-    return {
-      __esModule: true,
-      default: ({
-        show,
-        message,
-        onConfirm,
-        onCancel,
-      }: {
-        show: boolean;
-        message: string;
-        onConfirm: () => void;
-        onCancel: () => void;
-      }) => {
-        if (!show) return null;
-        return (
-          <div data-testid="delete-confirm-modal">
-            <span>{message}</span>
-            <button type="button" onClick={onConfirm}>
-              Confirm Delete
-            </button>
-            <button type="button" onClick={onCancel}>
-              Cancel Delete
-            </button>
-          </div>
-        );
-      },
-    };
-  },
-);
+// Mock the shared ConfirmationModal
+vi.mock("@/shared/components/ConfirmationModal", async () => {
+  return {
+    __esModule: true,
+    default: ({
+      show,
+      message,
+      onConfirm,
+      onCancel,
+    }: {
+      show: boolean;
+      message: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => {
+      if (!show) return null;
+      return (
+        <div data-testid="delete-confirm-modal">
+          <span>{message}</span>
+          <button type="button" onClick={onConfirm}>
+            Confirm Delete
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel Delete
+          </button>
+        </div>
+      );
+    },
+  };
+});
 
 describe("ModelListPage Integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
-  };
-
   it("renders page components correctly", async () => {
-    renderWithProviders(<ModelListPage />);
+    renderPage(<ModelListPage />);
     expect(screen.getByText("Models list")).toBeInTheDocument();
 
     // Wait for the MSW handlers to return models
@@ -127,8 +117,7 @@ describe("ModelListPage Integration", () => {
   });
 
   it("shows and handles ModelFormModal for editing", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<ModelListPage />);
+    const { user } = renderPage(<ModelListPage />);
 
     expect(await screen.findByText("Model One")).toBeInTheDocument();
 

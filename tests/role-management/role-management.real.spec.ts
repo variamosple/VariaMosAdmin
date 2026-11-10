@@ -21,7 +21,7 @@ test.describe("Role & Permission Management - Real E2E Flows", () => {
     await page.getByText("Roles", { exact: true }).click();
     await expect(page).toHaveURL(/.*roles.*/);
 
-    await page.getByRole("button", { name: "Create Role" }).click();
+    await page.getByRole("button", { name: "Create role" }).click();
     await expect(page.locator(".modal-content")).toBeVisible();
     await page.locator('input[id="name"]').fill(customRoleName);
     const createPromise = page.waitForResponse(response => 

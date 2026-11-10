@@ -36,6 +36,10 @@ interface ModelRequestBody {
 }
 
 export const handlers = [
+  // Read by the application at start-up (EV-87 lot 2)
+  http.get(apiTarget("/v1/configurations/public"), () =>
+    HttpResponse.json({ data: { siteName: "VariaMos" } }),
+  ),
   http.get(apiTarget("/v1/metrics"), () => {
     return HttpResponse.json({
       data: [

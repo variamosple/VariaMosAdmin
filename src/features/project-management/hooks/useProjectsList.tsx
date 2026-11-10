@@ -1,5 +1,4 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createProject,
   deleteProject,
@@ -9,6 +8,23 @@ import {
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  readBooleanParam,
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
+import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const projectsFromParams = (params: URLSearchParams) =>
+  new ProjectsFilter(
+    readParam(params, "name"),
+    readBooleanParam(params, "isTemplate"),
+    readBooleanParam(params, "isDeleted"),
+    readBooleanParam(params, "includeDeleted"),
+    readPage(params),
+  );
 
 export const useProjectList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -25,25 +41,20 @@ export const useProjectList = () => {
     data: projects,
     currentPage,
     loadData,
+    filter,
     isLoading,
     totalPages,
     onPageChange,
-  } = usePaginatedQuery<ProjectsFilter, Project>({
+    listState,
+  } = usePagedList<ProjectsFilter, Project>({
     queryFunction: queryProjects,
     initialFilter: new ProjectsFilter(),
   });
 
-  useEffect(() => {
-    loadData(new ProjectsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Project query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    projectsFromParams,
+  );
 
   const onProjectEdit = (project: Project) => {
     setToEditProject(project);
@@ -109,7 +120,7 @@ export const useProjectList = () => {
   const performDeleteProject = (project: Project) => {
     pushToast({
       title: "Project delete",
-      message: "Deleting role...",
+      message: "Deleting project...",
     });
 
     if (project.id !== undefined) {
@@ -138,37 +149,24 @@ export const useProjectList = () => {
   };
 
   const onSearchReset = () => {
-    loadData(new ProjectsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Project query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(new ProjectsFilter());
   };
 
   const onSearchSubmit = (search?: ProjectsFilter) => {
-    loadData(
+    void loadData(
       new ProjectsFilter(
         search?.name,
         search?.isTemplate,
         search?.isDeleted,
         search?.includeDeleted,
       ),
-    ).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Project query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    );
   };
 
   return {
+    restoredFilter,
+    restoreKey,
+    listState,
     showEdit,
     setShowEdit,
     showCreate,

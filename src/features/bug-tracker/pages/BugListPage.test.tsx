@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useSession } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router-dom";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import { server } from "@/shared/tests/mocks/server";
@@ -19,7 +20,11 @@ describe("BugListPage Component", () => {
   });
 
   it("renders correctly with initial state", async () => {
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(screen.getByText("Bugs list")).toBeInTheDocument();
 
     // Wait for the real API calls to complete via MSW
@@ -27,11 +32,15 @@ describe("BugListPage Component", () => {
     expect(screen.getAllByText("Bug Two")).not.toHaveLength(0);
     expect(screen.getByText("Sync GitHub")).toBeInTheDocument();
     expect(screen.getByText("Report a Bug")).toBeInTheDocument();
-    expect(screen.getByText("Create GitHub Issue")).toBeInTheDocument();
+    expect(screen.getByText("Create GitHub issue")).toBeInTheDocument();
   });
 
   it("shows loader spinner initially", async () => {
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(screen.getAllByText("Loading bugs...")).not.toHaveLength(0);
     // Wait for the data loading to finish to avoid act warnings from unhandled state updates
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
@@ -48,7 +57,11 @@ describe("BugListPage Component", () => {
       }),
     );
 
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText(SYSTEM_ERROR_MESSAGE)).not.toHaveLength(
       0,
     );
@@ -70,7 +83,11 @@ describe("BugListPage Component", () => {
       ),
     );
 
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     await user.click(screen.getByRole("tab", { name: /local inbox/i }));
@@ -82,10 +99,62 @@ describe("BugListPage Component", () => {
     consoleSpy.mockRestore();
   });
 
+  it("pages through the bugs only when there is more than one page", async () => {
+    const user = userEvent.setup();
+    const pagesAsked: (string | null)[] = [];
+    server.use(
+      http.get("*/bugs", ({ request }) => {
+        const pageNumber = new URL(request.url).searchParams.get("pageNumber");
+        pagesAsked.push(pageNumber);
+        return HttpResponse.json({
+          data: [
+            {
+              id: `bug-${pageNumber}`,
+              title: `Bug of page ${pageNumber}`,
+              description: "Desc",
+              priority: "low",
+            },
+          ],
+          totalCount: 21,
+        });
+      }),
+      http.get("*/bugs/local", () =>
+        HttpResponse.json({ data: [], totalCount: 0 }),
+      ),
+    );
+
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
+    expect(await screen.findAllByText("Bug of page 1")).not.toHaveLength(0);
+    // Above and below the list of the active tab
+    const activeTab = document.querySelector(".tab-pane.active") as HTMLElement;
+    const paginators = within(activeTab).getAllByRole("button", {
+      name: "Page 1 of 2",
+    });
+    expect(paginators).toHaveLength(2);
+
+    await user.click(paginators[0] as HTMLElement);
+
+    expect(await screen.findAllByText("Bug of page 2")).not.toHaveLength(0);
+    expect(pagesAsked.at(-1)).toBe("2");
+
+    await user.click(screen.getByRole("tab", { name: /local inbox/i }));
+    await waitFor(() =>
+      expect(screen.queryByText(/^Page \d of/)).not.toBeInTheDocument(),
+    );
+  });
+
   it("hides the actions the operator has no permission for", async () => {
     const user = userEvent.setup();
     givePermissions(["bugs::query"]);
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     expect(screen.getByText("Report a Bug")).toBeInTheDocument();
@@ -108,7 +177,11 @@ describe("BugListPage Component", () => {
 
   it("shows sync but not the bug actions with bugs::sync alone", async () => {
     givePermissions(["bugs::query", "bugs::sync"]);
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     expect(
@@ -145,7 +218,11 @@ describe("BugListPage Component", () => {
         return HttpResponse.json({ data: { id: params.bugId } });
       }),
     );
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     const [details] = await screen.findAllByRole("button", {
       name: /details/i,
     });
@@ -199,12 +276,22 @@ describe("BugListPage Component", () => {
         HttpResponse.json({
           data:
             sent.length > 0
-              ? [{ id: 1, body: "[Audit] Assigned to: Ben (was: nobody)." }]
+              ? [
+                  {
+                    id: 1,
+                    body: "[Audit] Assigned to: Ben (was: nobody).",
+                    createdAt: "2026-10-27T10:00:00.000Z",
+                  },
+                ]
               : [],
         }),
       ),
     );
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     // Each tab renders the list: the GitHub one comes first
     expect(await screen.findAllByText("Unassigned")).not.toHaveLength(0);
     const [details] = screen.getAllByRole("button", { name: /details/i });
@@ -260,7 +347,11 @@ describe("BugListPage Component", () => {
         }),
       ),
     );
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     const [details] = await screen.findAllByRole("button", {
       name: /details/i,
     });
@@ -282,7 +373,11 @@ describe("BugListPage Component", () => {
         return HttpResponse.json({ data: { id: params.id } });
       }),
     );
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     await user.click(await screen.findByRole("tab", { name: /local inbox/i }));
 
     const [rejectBtn] = await screen.findAllByRole("button", {
@@ -313,7 +408,11 @@ describe("BugListPage Component", () => {
         ),
       ),
     );
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     await user.click(screen.getByRole("button", { name: /report a bug/i }));
@@ -332,7 +431,11 @@ describe("BugListPage Component", () => {
 
   it("triggers sync when sync button is clicked", async () => {
     const user = userEvent.setup();
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     const syncBtn = screen.getByRole("button", { name: /sync github/i });
@@ -345,7 +448,11 @@ describe("BugListPage Component", () => {
 
   it("does not show sync button on other tabs", async () => {
     const user = userEvent.setup();
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     const localTab = screen.getByRole("tab", { name: /local inbox/i });
@@ -358,7 +465,11 @@ describe("BugListPage Component", () => {
 
   it("opens User Report Modal when clicking Report a Bug and submits it", async () => {
     const user = userEvent.setup();
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     await user.click(screen.getByRole("button", { name: /report a bug/i }));
@@ -382,7 +493,11 @@ describe("BugListPage Component", () => {
 
   it("sends the chosen component with a new report", async () => {
     const user = userEvent.setup();
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     await user.click(screen.getByRole("button", { name: /report a bug/i }));
@@ -410,9 +525,13 @@ describe("BugListPage Component", () => {
     post.mockRestore();
   });
 
-  it("opens Admin Report Modal when clicking Create GitHub Issue and submits it", async () => {
+  it("opens Admin Report Modal when clicking Create GitHub issue and submits it", async () => {
     const user = userEvent.setup();
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     await user.click(
@@ -466,13 +585,13 @@ describe("BugListPage Component", () => {
         return HttpResponse.json({
           data: [
             {
-              id: "note-1",
+              id: 1,
               body: "Simple comment",
               createdAt: "2026-07-17T13:00:00Z",
               author: { name: "Alice" },
             },
             {
-              id: "note-2",
+              id: 2,
               body: "[Audit] Status changed: open -> closed",
               createdAt: "2026-07-17T14:00:00Z",
             },
@@ -486,7 +605,11 @@ describe("BugListPage Component", () => {
       }),
     );
 
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     const localTab = await screen.findByRole("tab", { name: /local inbox/i });
     await user.click(localTab);
 
@@ -517,9 +640,62 @@ describe("BugListPage Component", () => {
     });
   });
 
+  it("shows a refused comment in the details modal and keeps the text", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get("*/bugs/local", () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: "local-1",
+              title: "Local Bug",
+              description: "Desc",
+              priority: "medium",
+              category: "frontend",
+              status: "pending",
+            },
+          ],
+        }),
+      ),
+      http.get("*/bugs/local-1/notes", () => HttpResponse.json({ data: [] })),
+      http.post("*/bugs/local-1/notes", () =>
+        HttpResponse.json(
+          { errorCode: "INVALID_INPUT", message: "The comment is too long" },
+          { status: 400 },
+        ),
+      ),
+    );
+
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
+    await user.click(await screen.findByRole("tab", { name: /local inbox/i }));
+    await user.click(
+      (await screen.findAllByRole("button", { name: /details/i }))[0],
+    );
+
+    const dialog = await screen.findByRole("dialog");
+    const textarea = within(dialog).getByPlaceholderText("Write a comment...");
+    await user.type(textarea, "New user note");
+    await user.click(
+      within(dialog).getByRole("button", { name: /add comment/i }),
+    );
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "The comment is too long",
+    );
+    expect(textarea).toHaveValue("New user note");
+  });
+
   it("renders closed discussion notice if status is not pending", async () => {
     const user = userEvent.setup();
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
 
     // Wait for GitHub bugs to appear
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
@@ -537,7 +713,11 @@ describe("BugListPage Component", () => {
 
   it("opens approval modal for a local bug, modifies fields and submits successfully", async () => {
     const user = userEvent.setup();
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
 
     // Wait for initial load
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
@@ -601,7 +781,11 @@ describe("BugListPage Component", () => {
 
   it("closes the approval modal and resets selected bug state when cancelled", async () => {
     const user = userEvent.setup();
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
@@ -644,7 +828,11 @@ describe("BugListPage Component", () => {
       }),
     );
 
-    render(<BugListPage />);
+    render(
+      <MemoryRouter>
+        <BugListPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     // Switch to Local tab

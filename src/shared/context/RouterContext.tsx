@@ -37,12 +37,22 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
         Events.publish<Record<string, never>>("openReportBugModal", {});
         return;
       }
-      const basePath = window.location.origin + pathname;
-      if (isAbsoluteUrl(url) && !url.startsWith(basePath)) {
+      const base = pathname.endsWith("/") ? pathname : `${pathname}/`;
+      const fullBase = window.location.origin + base;
+      if (isAbsoluteUrl(url) && !url.startsWith(fullBase)) {
         window.open(url, options?.target || "_self");
-      } else {
-        navigate(url.replace(basePath, "").replace(/^#/, ""), options);
+        return;
       }
+      // An address of this application, in full or from its base path
+      // ("/variamos_admin/#/my-account" from the menu), is a route of the
+      // hash router: without its base, it was routed as "/variamos_admin/"
+      let route = url;
+      if (route.startsWith(fullBase)) {
+        route = route.slice(fullBase.length);
+      } else if (base !== "/" && route.startsWith(base)) {
+        route = route.slice(base.length);
+      }
+      navigate(route.replace(/^\/?#/, "") || "/", options);
     },
     [navigate, pathname],
   );

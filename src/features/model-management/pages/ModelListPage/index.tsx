@@ -1,15 +1,19 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import type { FC } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
 import { ModelFormModal } from "@/features/model-management/components/ModelFormModal";
 import { ModelList } from "@/features/model-management/components/ModelList";
 import { ModelSearchForm } from "@/features/model-management/components/ModelSearchForm";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useModelList } from "../../hooks/useModelList";
 
 const ModelListPageComponent: FC = () => {
+  usePageTitle("Models");
   const {
+    restoredFilter,
+    restoreKey,
     models,
     totalPages,
     currentPage,
@@ -37,6 +41,9 @@ const ModelListPageComponent: FC = () => {
     onModelToggleVisibility,
     projects,
     languages,
+    searchProjects,
+    searchLanguages,
+    listState,
   } = useModelList();
   return (
     <Container fluid="sm" className="my-2">
@@ -46,7 +53,7 @@ const ModelListPageComponent: FC = () => {
         </Col>
         <Col className="text-end">
           <Button variant="primary" onClick={() => setShowCreate(true)}>
-            <Plus className="me-1" /> Create Model
+            <Plus className="me-1" /> Create model
           </Button>
         </Col>
       </Row>
@@ -62,10 +69,12 @@ const ModelListPageComponent: FC = () => {
         isLoading={isEditing}
         projects={projects}
         languages={languages}
+        onProjectSearch={searchProjects}
+        onLanguageSearch={searchLanguages}
       />
 
       <ModelFormModal
-        modalTitle="Create a Model"
+        modalTitle="New model"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onModelSubmit={performCreateModel}
@@ -73,9 +82,14 @@ const ModelListPageComponent: FC = () => {
         isLoading={isCreating}
         projects={projects}
         languages={languages}
+        onProjectSearch={searchProjects}
+        onLanguageSearch={searchLanguages}
       />
 
       <ModelSearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultFilter={restoredFilter ?? undefined}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}
@@ -83,6 +97,7 @@ const ModelListPageComponent: FC = () => {
 
       <ModelList
         items={models}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
@@ -94,7 +109,9 @@ const ModelListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the model?"
+        title="Delete model"
+        message={`Delete the model "${toDeleteModel?.name ?? ""}"?`}
+        confirmLabel="Delete model"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteModel) {

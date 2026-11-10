@@ -46,7 +46,7 @@ test.describe("Bug Tracker - Real DB E2E Flows", () => {
     await page.locator('textarea[placeholder="Write a comment..."]').fill(testComment);
     
     const commentPromise = page.waitForResponse("**/bugs/*/notes");
-    await page.getByRole("button", { name: "Add Comment" }).click();
+    await page.getByRole("button", { name: "Add comment" }).click();
     await commentPromise;
 
     await expect(page.getByText(testComment)).toBeVisible();

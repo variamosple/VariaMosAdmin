@@ -1,10 +1,12 @@
-import { PagedModel } from "@variamosple/variamos-components";
+import { PagedModel } from "@/shared/domain/Entity/PagedModel";
 
 export class RolePermissionFilter extends PagedModel {
   constructor(
     public roleId?: number,
     pageNumber?: number,
     pageSize?: number,
+    /** Part of the permission name, or its exact id */
+    public search?: string,
   ) {
     super(pageNumber, pageSize);
   }

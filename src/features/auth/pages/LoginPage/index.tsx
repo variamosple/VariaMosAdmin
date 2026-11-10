@@ -4,6 +4,7 @@ import { Alert, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import { loginMessageOf } from "@/shared/api/errorMessages";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { pageLoader } from "@/shared/infrastructure/PageLoader";
 import { registerRedirect } from "../../api/AuthRepository";
@@ -11,8 +12,10 @@ import { requestSignInMfa } from "../../api/MfaRepository";
 import { GoogleLogin } from "../../components/GoogleLogin";
 import { LoginForm } from "../../components/LoginForm";
 import { MfaCodeForm } from "../../components/MfaCodeForm";
+import { safeRedirectOf } from "../../domain/Redirect";
 
 export const LoginPage: FC = () => {
+  usePageTitle("Sign in");
   const { queryParams, navigate } = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isMfaStep, setIsMfaStep] = useState(false);
@@ -34,7 +37,9 @@ export const LoginPage: FC = () => {
       } else if (response.errorCode) {
         setErrorMessage(response.message);
       } else {
-        navigate(response.data?.redirect || AppConfig.HOME_PAGE);
+        navigate(
+          safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
+        );
       }
     });
   };
@@ -44,7 +49,9 @@ export const LoginPage: FC = () => {
     requestSignInMfa(code, rememberDevice)
       .then((response) => {
         if (!response.errorCode) {
-          pageLoader.load(response.data?.redirect || AppConfig.HOME_PAGE);
+          pageLoader.load(
+            safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
+          );
           return;
         }
         setErrorMessage(response.message);
@@ -61,7 +68,9 @@ export const LoginPage: FC = () => {
       if (response.errorCode) {
         setErrorMessage(response.message);
       } else {
-        navigate(response.data?.redirect || AppConfig.HOME_PAGE);
+        navigate(
+          safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
+        );
       }
     });
   };
@@ -78,12 +87,12 @@ export const LoginPage: FC = () => {
       setIsMfaStep(true);
     }
 
-    if (queryParams.has("redirectTo")) {
-      const decodedRedirectTo = decodeURIComponent(
-        queryParams.get("redirectTo") || "",
-      );
-
-      registerRedirect(decodedRedirectTo).then();
+    // Only a web address is kept as the page to go back to
+    const redirectTo = safeRedirectOf(
+      decodeURIComponent(queryParams.get("redirectTo") || ""),
+    );
+    if (redirectTo) {
+      registerRedirect(redirectTo).then();
     }
   }, [queryParams]);
 

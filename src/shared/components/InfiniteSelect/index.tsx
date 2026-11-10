@@ -31,7 +31,7 @@ export const InfiniteSelect = <ValueType,>({
     if (isFetchingOptions) return <Spinner animation="border" role="status" />;
 
     return (
-      <div className="relative cursor-default select-none py-2 pl-3 pr-9">
+      <div className="py-2">
         <span className="font-normal block truncate text-sm text-text-tertiary">
           No options available
         </span>
@@ -46,7 +46,7 @@ export const InfiniteSelect = <ValueType,>({
             <button
               type="button"
               key={String(option.value) + String(index)}
-              className="dropdown-item relative cursor-default select-none p-1 rounded-0 btn btn-light"
+              className="dropdown-item p-1 rounded-0 btn btn-light"
               onClick={() => {
                 handleSelect(option);
                 closeDropdown();

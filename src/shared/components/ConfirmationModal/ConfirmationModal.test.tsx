@@ -6,52 +6,50 @@ describe("ConfirmationModal Component", () => {
   const mockOnConfirm = vi.fn();
   const mockOnCancel = vi.fn();
 
+  const renderModal = () =>
+    render(
+      <ConfirmationModal
+        show={true}
+        onConfirm={mockOnConfirm}
+        onCancel={mockOnCancel}
+        title="Delete role"
+        message='Delete the role "Editors"?'
+        confirmLabel="Delete role"
+      />,
+    );
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should render message and buttons when show is true", () => {
-    render(
-      <ConfirmationModal
-        show={true}
-        onConfirm={mockOnConfirm}
-        onCancel={mockOnCancel}
-        message="Test confirmation message"
-      />,
-    );
+  it("is a dialog named by its title, with the action as its button", () => {
+    renderModal();
 
-    expect(screen.getByText("Test confirmation message")).toBeInTheDocument();
-    expect(screen.getByText("Accept")).toBeInTheDocument();
-    expect(screen.getByText("Cancel")).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: "Delete role" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Delete the role "Editors"?')).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Delete role" }),
+    ).toBeInTheDocument();
   });
 
-  it("should call onConfirm when Accept is clicked", async () => {
+  it("confirms with the action button", async () => {
     const user = userEvent.setup();
-    render(
-      <ConfirmationModal
-        show={true}
-        onConfirm={mockOnConfirm}
-        onCancel={mockOnCancel}
-        message="Test confirmation message"
-      />,
-    );
+    renderModal();
 
-    await user.click(screen.getByText("Accept"));
+    await user.click(screen.getByRole("button", { name: "Delete role" }));
     expect(mockOnConfirm).toHaveBeenCalledTimes(1);
+    expect(mockOnCancel).not.toHaveBeenCalled();
   });
 
-  it("should call onCancel when Cancel is clicked", async () => {
+  it("cancels with Cancel or the close button", async () => {
     const user = userEvent.setup();
-    render(
-      <ConfirmationModal
-        show={true}
-        onConfirm={mockOnConfirm}
-        onCancel={mockOnCancel}
-        message="Test confirmation message"
-      />,
-    );
+    renderModal();
 
-    await user.click(screen.getByText("Cancel"));
-    expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(mockOnCancel).toHaveBeenCalledTimes(2);
+    expect(mockOnConfirm).not.toHaveBeenCalled();
   });
 });

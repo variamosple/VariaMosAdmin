@@ -2,11 +2,14 @@ import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Table } from "react-bootstrap";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 import { ModelRowComponent } from "./ModelRow";
 
 export interface ModelListProps extends PaginationControlsProps {
   items: Model[];
+  state?: ListState;
   onModelEdit: (model: Model) => void;
   onModelDelete: (model: Model) => void;
   onModelToggleLevel: (model: Model) => void;
@@ -15,6 +18,7 @@ export interface ModelListProps extends PaginationControlsProps {
 
 export const ModelList: FC<ModelListProps> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -31,7 +35,7 @@ export const ModelList: FC<ModelListProps> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover responsive>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
             <th>Name</th>
@@ -67,6 +71,14 @@ export const ModelList: FC<ModelListProps> = ({
               onModelToggleVisibility={onModelToggleVisibility}
             />
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={10}
+              items="models"
+            />
+          )}
         </tbody>
       </Table>
 

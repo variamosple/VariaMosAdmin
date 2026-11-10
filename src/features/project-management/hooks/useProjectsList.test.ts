@@ -3,6 +3,7 @@ import {
   type ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
+import { MemoryRouter } from "react-router-dom";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import * as ProjectRepository from "../api/ProjectRepository";
 import { useProjectList } from "./useProjectsList";
@@ -31,14 +32,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.errorCode = code;
         this.message = msg;
         return this;
-      }
-    },
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
       }
     },
     usePaginatedQuery: vi.fn(),
@@ -78,7 +71,9 @@ describe("useProjectList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useProjectList());
+    const { result } = renderHook(() => useProjectList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.projects).toEqual([
       { id: 1, name: "Project One", template: false },
@@ -88,7 +83,9 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle performEditProject successfully", async () => {
-    const { result } = renderHook(() => useProjectList());
+    const { result } = renderHook(() => useProjectList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditProject({
@@ -108,7 +105,9 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle performDeleteProject successfully", async () => {
-    const { result } = renderHook(() => useProjectList());
+    const { result } = renderHook(() => useProjectList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteProject({
@@ -119,6 +118,10 @@ describe("useProjectList Hook", () => {
 
     expect(deleteProjectSpy).toHaveBeenCalledWith("1");
     expect(mockOnPageChange).toHaveBeenCalledWith(1);
+    // The progress toast names the project, not a role (UX-37)
+    expect(mockPushToast).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Deleting project..." }),
+    );
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Project delete",
@@ -128,7 +131,9 @@ describe("useProjectList Hook", () => {
   });
 
   it("should handle performEditProject failure", async () => {
-    const { result } = renderHook(() => useProjectList());
+    const { result } = renderHook(() => useProjectList(), {
+      wrapper: MemoryRouter,
+    });
     updateProjectSpy.mockResolvedValueOnce({
       errorCode: 500,
       message: "Edit failed",
@@ -151,21 +156,16 @@ describe("useProjectList Hook", () => {
     expect(result.current.isEditing).toBe(false);
   });
 
-  it("should handle query error toast on loadData", async () => {
+  it("leaves a load error to the table, without a toast (UX-23)", async () => {
     mockLoadData.mockResolvedValueOnce({
       errorCode: 500,
       message: "Query failed",
     });
-    renderHook(() => useProjectList());
+    renderHook(() => useProjectList(), { wrapper: MemoryRouter });
 
     await waitFor(() => {
-      expect(mockPushToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Project query error",
-          message: "Query failed",
-          variant: "danger",
-        }),
-      );
+      expect(mockLoadData).toHaveBeenCalled();
     });
+    expect(mockPushToast).not.toHaveBeenCalled();
   });
 });

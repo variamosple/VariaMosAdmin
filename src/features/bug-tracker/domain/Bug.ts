@@ -13,14 +13,15 @@ export interface Bug {
   description: string;
   priority: BugPriority;
   category: string;
-  component?: BugComponent | "";
+  // Free text in reports older than the list of components
+  component?: BugComponent | (string & {});
   status?: string;
   githubRepo?: string;
   gitIssueNumber?: number;
   githubCreator?: string;
   createdAt?: string;
   updatedAt?: string;
-  createdBy?: { id: string; name: string; email: string };
+  createdBy?: { id: string; name: string; email?: string };
   attachments?: BugAttachment[];
   reporterEmail?: string;
   assignedAdmins?: BugUserRef[];

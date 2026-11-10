@@ -1,8 +1,9 @@
-import { type FC, useState } from "react";
+import { type FC, useId, useState } from "react";
 import { Button, Form, InputGroup, Modal, Spinner } from "react-bootstrap";
 import { Clipboard, ClipboardCheck } from "react-bootstrap-icons";
 import { generateRecoveryLink } from "@/features/user-management/api/UserRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
+import { IconButton } from "@/shared/components/IconButton";
 import { useToast } from "@/shared/context/ToastContext";
 
 interface RecoveryLinkModalProps {
@@ -61,10 +62,12 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
     }
   };
 
+  const titleId = useId();
+
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal aria-labelledby={titleId} show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Generate Recovery Link</Modal.Title>
+        <Modal.Title id={titleId}>Generate Recovery Link</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -101,12 +104,12 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
                 value={recoveryUrl}
                 className="bg-light text-dark border-secondary small font-monospace"
               />
-              <Button
+              <IconButton
                 variant={copied ? "success" : "outline-primary"}
                 onClick={handleCopyToClipboard}
-              >
-                {copied ? <ClipboardCheck /> : <Clipboard />}
-              </Button>
+                label={copied ? "Link copied" : "Copy link"}
+                icon={copied ? <ClipboardCheck /> : <Clipboard />}
+              />
             </InputGroup>
             {copied && (
               <p className="text-success small mt-1">Copied to clipboard!</p>

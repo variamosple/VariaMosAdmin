@@ -2,19 +2,28 @@ import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Table } from "react-bootstrap";
 import type { User } from "@/features/user-management/domain/Entity/User";
+import type { UserSortField } from "@/features/user-management/domain/Entity/UsersFilter";
+import { SortableHeader } from "@/shared/components/SortableHeader";
+import { TableStateRow } from "@/shared/components/TableStateRow";
+import type { ListSort } from "@/shared/domain/Entity/ListSort";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 import { UserRowComponent } from "./UserRow";
 
 export interface UserListParameters extends PaginationControlsProps {
   items: User[];
+  state?: ListState;
   onUserResetLink: (user: User) => void;
   onUserDisable: (user: User) => void;
   onUserEnable: (user: User) => void;
   onUserDelete: (user: User) => void;
+  sort?: ListSort<UserSortField>;
+  onSort?: (field: UserSortField) => void;
 }
 
 export const UserList: FC<UserListParameters> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -22,6 +31,8 @@ export const UserList: FC<UserListParameters> = ({
   onUserDisable,
   onUserEnable,
   onUserDelete,
+  sort,
+  onSort,
 }) => {
   return (
     <>
@@ -31,20 +42,45 @@ export const UserList: FC<UserListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
-            <th>user</th>
+            <SortableHeader
+              field="user"
+              label="User"
+              sort={sort}
+              onSort={onSort}
+            />
 
-            <th>Name</th>
+            <SortableHeader
+              field="name"
+              label="Name"
+              sort={sort}
+              onSort={onSort}
+            />
 
-            <th>Email</th>
+            <SortableHeader
+              field="email"
+              label="Email"
+              sort={sort}
+              onSort={onSort}
+            />
 
             <th>Status</th>
 
-            <th>Created At</th>
+            <SortableHeader
+              field="createdAt"
+              label="Created At"
+              sort={sort}
+              onSort={onSort}
+            />
 
-            <th>Last Login</th>
+            <SortableHeader
+              field="lastLogin"
+              label="Last Login"
+              sort={sort}
+              onSort={onSort}
+            />
 
             <th>Actions</th>
           </tr>
@@ -61,6 +97,14 @@ export const UserList: FC<UserListParameters> = ({
               onUserEnable={onUserEnable}
             />
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={7}
+              items="users"
+            />
+          )}
         </tbody>
       </Table>
 

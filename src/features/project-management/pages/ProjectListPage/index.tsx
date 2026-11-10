@@ -1,15 +1,19 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import type { FC } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
 import { ProjectFormModal } from "@/features/project-management/components/ProjectFormModal";
 import { ProjectList } from "@/features/project-management/components/ProjectList";
 import { ProjectSearchForm } from "@/features/project-management/components/ProjectsSearchForm";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useProjectList } from "../../hooks/useProjectsList";
 
 const ProjectListPageComponent: FC = () => {
+  usePageTitle("Projects");
   const {
+    restoredFilter,
+    restoreKey,
     projects,
     totalPages,
     currentPage,
@@ -33,6 +37,7 @@ const ProjectListPageComponent: FC = () => {
     showDelete,
     setShowDelete,
     performDeleteProject,
+    listState,
   } = useProjectList();
   return (
     <Container fluid="sm" className="my-2">
@@ -42,7 +47,7 @@ const ProjectListPageComponent: FC = () => {
         </Col>
         <Col className="text-end">
           <Button variant="primary" onClick={() => setShowCreate(true)}>
-            <Plus className="me-1" /> Create Project
+            <Plus className="me-1" /> Create project
           </Button>
         </Col>
       </Row>
@@ -59,7 +64,7 @@ const ProjectListPageComponent: FC = () => {
       />
 
       <ProjectFormModal
-        modalTitle="Create a Project"
+        modalTitle="New project"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onProjectSubmit={performCreateProject}
@@ -68,6 +73,9 @@ const ProjectListPageComponent: FC = () => {
       />
 
       <ProjectSearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultFilter={restoredFilter ?? undefined}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}
@@ -75,6 +83,7 @@ const ProjectListPageComponent: FC = () => {
 
       <ProjectList
         items={projects}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
@@ -84,7 +93,9 @@ const ProjectListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the project?"
+        title="Delete project"
+        message={`Delete the project "${toDeleteProject?.name ?? ""}"?`}
+        confirmLabel="Delete project"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteProject) {

@@ -1,19 +1,11 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../helpers/mockedTest";
+import { mockSignedOut } from "../helpers/session";
 
 test.describe("Auth - Login Mocked Flows", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
 
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 401,
-        contentType: "application/json",
-        body: JSON.stringify({
-          errorCode: 401,
-          message: "Your session has expired, please log in again."
-        })
-      });
-    });
+    await mockSignedOut(page);
 
     await page.addInitScript(() => {
       window.localStorage.clear();
@@ -87,16 +79,12 @@ test.describe("Auth - Login Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
+        // The answer of variamos_ms_admin: the session itself is read
+        // from session-info right after
         body: JSON.stringify({
           data: {
-            user: {
-              id: "1",
-              user: "admin_test",
-              name: "Admin Test",
-              email: "admin@variamos-test.com",
-              roles: ["Admin"],
-            },
-            authToken: "mock-auth-token-1234"
+            id: "1",
+            redirect: "http://localhost:3000/#/"
           }
         })
       });
@@ -121,7 +109,7 @@ test.describe("Auth - Login Mocked Flows", () => {
   });
 
   test("should allow navigating to forgot password, validate empty input, and show success message on submit (mocked)", async ({ page }) => {
-    await page.getByText("Forgot Password?").click();
+    await page.getByText("Forgot password?").click();
     await expect(page).toHaveURL(/.*\/forgot-password/);
 
     await page.locator('button[type="submit"]').click();

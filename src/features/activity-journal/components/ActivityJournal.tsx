@@ -1,7 +1,7 @@
 import { type FC, Fragment, useState } from "react";
 import { Button, Col, Form, Row, Table } from "react-bootstrap";
 import { useForm } from "react-hook-form";
-import { formatDateTime } from "@/shared/constants";
+import { DateTime } from "@/shared/components/DateTime";
 import { queryActivityLogs } from "../api/JournalRepository";
 import {
   ACTIVITY_ACTIONS,
@@ -134,7 +134,9 @@ export const ActivityJournal: FC = () => {
             {journal.entries.map((entry) => (
               <Fragment key={entry.id}>
                 <tr>
-                  <td>{formatDateTime(entry.occurredAt)}</td>
+                  <td>
+                    <DateTime value={entry.occurredAt} />
+                  </td>
                   <td>{accountLabel(entry.actorId, entry.actor)}</td>
                   <td>{entry.action}</td>
                   <td>

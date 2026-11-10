@@ -1,10 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { RoleListPage } from "./index";
 
 const mockNavigate = vi.fn();
@@ -18,7 +16,6 @@ vi.mock("@variamosple/variamos-components", async () => {
     useRouter: () => ({
       navigate: mockNavigate,
     }),
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
@@ -87,17 +84,13 @@ describe("RoleListPage", () => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
-  };
-
   it("should render page header, create button, and lists", async () => {
-    renderWithProviders(<RoleListPage />);
+    renderPage(<RoleListPage />);
     expect(
       screen.getByRole("heading", { name: "Roles list" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Create Role" }),
+      screen.getByRole("button", { name: "Create role" }),
     ).toBeInTheDocument();
 
     // Wait for the real API calls to complete via MSW
@@ -106,33 +99,35 @@ describe("RoleListPage", () => {
   });
 
   it("should show create role modal when clicking create role button and submit", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<RoleListPage />);
+    const { user } = renderPage(<RoleListPage />);
 
     expect(await screen.findByText("Admin")).toBeInTheDocument();
 
-    const createBtn = screen.getByRole("button", { name: "Create Role" });
+    const createBtn = screen.getByRole("button", { name: "Create role" });
     await user.click(createBtn);
 
     // Modal should be visible
-    expect(screen.getByText("Create a Role")).toBeInTheDocument();
+    expect(screen.getByText("New role")).toBeInTheDocument();
 
     // Fill form
     const input = screen.getByPlaceholderText("Role name");
-    await user.type(input, "NewRole");
+    await user.type(input, "New role");
 
-    // Click submit
-    await user.click(screen.getByRole("button", { name: "Create role" }));
+    // Click submit, in the dialog: the page button has the same name
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Create role",
+      }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(screen.queryByText("Create a Role")).not.toBeInTheDocument();
+      expect(screen.queryByText("New role")).not.toBeInTheDocument();
     });
   });
 
   it("should render the RoleFormModal for editing when clicking edit button and submit", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<RoleListPage />);
+    const { user } = renderPage(<RoleListPage />);
 
     expect(await screen.findByText("Admin")).toBeInTheDocument();
 
@@ -146,7 +141,7 @@ describe("RoleListPage", () => {
     // Modify the role name
     const input = screen.getByPlaceholderText("Role name");
     await user.clear(input);
-    await user.type(input, "Admin Edited");
+    await user.type(input, "Admin edited");
 
     // Click submit inside the modal
     const editRoleButtons = screen.getAllByRole("button", {
@@ -161,8 +156,7 @@ describe("RoleListPage", () => {
   });
 
   it("should handle delete confirmation", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<RoleListPage />);
+    const { user } = renderPage(<RoleListPage />);
 
     expect(await screen.findByText("User")).toBeInTheDocument();
 
@@ -171,18 +165,16 @@ describe("RoleListPage", () => {
     await user.click(deleteButtons[1]);
 
     // Delete confirmation modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to delete the role?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Delete role" });
 
-    // Click Accept to confirm delete
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Delete role" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to delete the role?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
@@ -193,7 +185,7 @@ describe("RoleListPage", () => {
       }),
     );
 
-    renderWithProviders(<RoleListPage />);
+    renderPage(<RoleListPage />);
     expect(
       screen.getByRole("heading", { name: "Roles list" }),
     ).toBeInTheDocument();
@@ -204,7 +196,7 @@ describe("RoleListPage", () => {
     expect(screen.queryByText("User")).not.toBeInTheDocument();
   });
 
-  it("shows error toast when API fails to load roles", async () => {
+  it("shows a failed load of the roles in the table", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/roles", () => {
@@ -215,9 +207,16 @@ describe("RoleListPage", () => {
       }),
     );
 
-    renderWithProviders(<RoleListPage />);
-    expect(await screen.findByText("Role query error")).toBeInTheDocument();
-    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
+    renderPage(<RoleListPage />);
+    // In the table, with Retry, and not repeated in a toast (UX-23)
+    const table = await screen.findByRole("table");
+    expect(
+      await within(table).findByText(SYSTEM_ERROR_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("button", { name: "Retry" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(SYSTEM_ERROR_MESSAGE)).toHaveLength(1);
     consoleSpy.mockRestore();
   });
 });

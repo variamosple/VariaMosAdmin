@@ -3,7 +3,7 @@ import {
   NotificationProvider,
   SessionProvider,
 } from "@variamosple/variamos-components";
-import type { FC } from "react";
+import { type FC, useEffect } from "react";
 import { HashRouter, useRoutes } from "react-router-dom";
 import "./App.css";
 import {
@@ -16,6 +16,7 @@ import {
 import { registerVisit } from "@/features/metrics-dashboard/api/VisitsRepository";
 import { RouterProvider } from "@/shared/context/RouterContext";
 import { ToastProvider } from "@/shared/context/ToastContext";
+import { loadSiteName } from "@/shared/hooks/useSiteName";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { ROUTES } from "./router";
 
@@ -24,6 +25,10 @@ const Routes: FC = () => {
 };
 
 function App() {
+  useEffect(() => {
+    void loadSiteName();
+  }, []);
+
   return (
     <ToastProvider>
       <AnalyticsProvider onVisit={registerVisit} />

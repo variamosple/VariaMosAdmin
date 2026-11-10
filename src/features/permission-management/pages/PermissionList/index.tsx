@@ -5,10 +5,14 @@ import { PermissionFormModal } from "@/features/permission-management/components
 import { PermissionList } from "@/features/permission-management/components/PermissionList";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { SearchForm } from "@/shared/components/SearchForm";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { usePermissionList } from "../../hooks/usePermissionList";
 
 const PermissionListPageComponent: FC = () => {
+  usePageTitle("Permissions");
   const {
+    restoredFilter,
+    restoreKey,
     showCreate,
     setShowCreate,
     showEdit,
@@ -32,6 +36,9 @@ const PermissionListPageComponent: FC = () => {
     onPermissionDelete,
     onSearchReset,
     onSearchSubmit,
+    sort,
+    onSort,
+    listState,
   } = usePermissionList();
 
   return (
@@ -40,13 +47,13 @@ const PermissionListPageComponent: FC = () => {
         <h1 className="mb-0">Permissions list</h1>
 
         <div>
-          <Button onClick={() => setShowCreate(true)}>Create Permission</Button>
+          <Button onClick={() => setShowCreate(true)}>Create permission</Button>
         </div>
       </div>
       <hr />
 
       <PermissionFormModal
-        modalTitle="Create a Permission"
+        modalTitle="New permission"
         showModal={showCreate}
         onClose={() => setShowCreate(false)}
         onPermissionSubmit={onPermissionCreate}
@@ -64,24 +71,32 @@ const PermissionListPageComponent: FC = () => {
       />
 
       <SearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultSearch={restoredFilter?.name}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}
-        placeholder="Search by permission name"
+        placeholder="Search by permission name or id"
       />
 
       <PermissionList
         items={permissions}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
         onPermissionEdit={onPermissionEdit}
         onPermissionDelete={onPermissionDelete}
+        sort={sort}
+        onSort={onSort}
       />
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the permission?"
+        title="Delete permission"
+        message={`Delete the permission "${toDeletePermission?.name ?? ""}"?`}
+        confirmLabel="Delete permission"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeletePermission) {

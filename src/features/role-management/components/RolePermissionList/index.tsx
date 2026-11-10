@@ -1,17 +1,22 @@
 import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
-import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { ButtonGroup, Table } from "react-bootstrap";
 import { TrashFill } from "react-bootstrap-icons";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
+import { IconButton } from "@/shared/components/IconButton";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 
 export interface PermissionListParameters extends PaginationControlsProps {
   items: Permission[];
+  state?: ListState;
   onPermissionDelete: (permission: Permission) => void;
 }
 
 export const RolePermissionList: FC<PermissionListParameters> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -25,7 +30,7 @@ export const RolePermissionList: FC<PermissionListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
             <th>ID</th>
@@ -45,17 +50,24 @@ export const RolePermissionList: FC<PermissionListParameters> = ({
 
               <td>
                 <ButtonGroup size="sm">
-                  <Button
+                  <IconButton
                     variant="danger"
                     onClick={() => onPermissionDelete(permission)}
-                    title="Delete role permission"
-                  >
-                    <TrashFill />
-                  </Button>
+                    label="Delete role permission"
+                    icon={<TrashFill />}
+                  />
                 </ButtonGroup>
               </td>
             </tr>
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={3}
+              items="permissions"
+            />
+          )}
         </tbody>
       </Table>
 

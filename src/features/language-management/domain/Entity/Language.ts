@@ -11,7 +11,7 @@ export interface Language {
   owners?: LanguageOwner[];
 }
 
-export interface LanguageOwner {
+interface LanguageOwner {
   id?: string;
   name?: string;
   email?: string;
@@ -25,22 +25,8 @@ export enum LanguageStatus {
 
   // Target (Future)
   DRAFT = "DRAFT",
-  IN_REVIEW = "IN_REVIEW",
   APPROVED = "APPROVED",
   REQUEST_CHANGES = "REQUEST_CHANGES",
   DISABLED = "DISABLED",
   DELETED = "DELETED",
 }
-
-// Temporary mapping for compatibility with current DB state
-export const MAP_TO_CURRENT_STATUS: Record<LanguageStatus, string> = {
-  [LanguageStatus.APPROVED]: "ACTIVE",
-  [LanguageStatus.IN_REVIEW]: "PENDING",
-  [LanguageStatus.DRAFT]: "PENDING",
-  [LanguageStatus.REQUEST_CHANGES]: "PENDING",
-  [LanguageStatus.DISABLED]: "PENDING",
-  [LanguageStatus.DELETED]: "DELETED",
-  // Fallbacks
-  [LanguageStatus.ACTIVE]: "ACTIVE",
-  [LanguageStatus.PENDING]: "PENDING",
-};

@@ -12,6 +12,26 @@ describe("useSocket Hook", () => {
     mockSocketFunction = vi.fn().mockReturnValue(mockWebSocket as WebSocket);
   });
 
+  it("does not connect on mount unless asked", () => {
+    const { result } = renderHook(() => useSocket(mockSocketFunction));
+
+    expect(result.current.socket).toBeNull();
+    expect(mockSocketFunction).not.toHaveBeenCalled();
+  });
+
+  it("closes a socket opened by connect when the component goes away", () => {
+    const { result, unmount } = renderHook(() =>
+      useSocket(mockSocketFunction, false),
+    );
+    act(() => {
+      result.current.connect();
+    });
+
+    unmount();
+
+    expect(mockWebSocket.close).toHaveBeenCalledTimes(1);
+  });
+
   it("should not connect on mount if connectOnMount is false", () => {
     const { result } = renderHook(() => useSocket(mockSocketFunction, false));
 

@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router-dom";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
@@ -33,14 +34,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.errorCode = code;
         this.message = msg;
         return this;
-      }
-    },
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
       }
     },
     usePaginatedQuery: vi.fn(),
@@ -86,12 +79,13 @@ describe("useRoleList Hook", () => {
       http.post(apiTarget("/v1/roles"), async ({ request }) => {
         createRoleCalled++;
         createRolePayload = (await request.json()) as Partial<Role>;
-        return HttpResponse.json({ errorCode: null });
+        // The server answers the role it created
+        return HttpResponse.json({ data: { id: 30, ...createRolePayload } });
       }),
       http.put(apiTarget("/v1/roles/:roleId"), async ({ request }) => {
         updateRoleCalled++;
         updateRolePayload = (await request.json()) as Role;
-        return HttpResponse.json({ errorCode: null });
+        return HttpResponse.json({ data: updateRolePayload });
       }),
       http.delete(apiTarget("/v1/roles/:roleId"), ({ params }) => {
         deleteRoleCalled++;
@@ -102,35 +96,32 @@ describe("useRoleList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.roles).toEqual([{ id: 1, name: "Admin" }]);
     expect(result.current.currentPage).toBe(1);
     expect(result.current.isLoading).toBe(false);
   });
 
-  it("should load data on mount and handle query error toast", async () => {
+  it("leaves a load error to the table, without a toast (UX-23)", async () => {
     mockLoadData.mockResolvedValueOnce({
       errorCode: 500,
       message: "Query failed",
     });
+    renderHook(() => useRoleList(), { wrapper: MemoryRouter });
 
-    renderHook(() => useRoleList());
-
-    expect(mockLoadData).toHaveBeenCalled();
     await waitFor(() => {
-      expect(mockPushToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Role query error",
-          message: "Query failed",
-          variant: "danger",
-        }),
-      );
+      expect(mockLoadData).toHaveBeenCalled();
     });
+    expect(mockPushToast).not.toHaveBeenCalled();
   });
 
   it("should handle role creation successfully", async () => {
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.onRoleCreate({ name: "New Role" });
@@ -150,7 +141,9 @@ describe("useRoleList Hook", () => {
 
   it("should handle performEditRole successfully", async () => {
     mockPushToast.mockReturnValue("toast-123");
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditRole({ id: 1, name: "Admin Edit" });
@@ -163,7 +156,9 @@ describe("useRoleList Hook", () => {
   });
 
   it("should handle performDeleteRole successfully", async () => {
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteRole({ id: 1, name: "Admin" });
@@ -185,7 +180,9 @@ describe("useRoleList Hook", () => {
       }),
     );
 
-    const { result } = renderHook(() => useRoleList());
+    const { result } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditRole({ id: 1, name: "Admin Edit" });
@@ -200,5 +197,48 @@ describe("useRoleList Hook", () => {
     );
     expect(result.current.isEditing).toBe(false);
     consoleSpy.mockRestore();
+  });
+
+  it("sorts by a column, turns its order on a second click, and keeps the search (EV-95)", () => {
+    const state = (filter: object) => ({
+      data: [],
+      currentPage: 1,
+      loadData: mockLoadData,
+      isLoading: false,
+      totalPages: 1,
+      onPageChange: mockOnPageChange,
+      filter: { name: "admin", pageNumber: 1, pageSize: 20, ...filter },
+    });
+    usePaginatedQueryMock.mockReturnValue(state({}));
+    const { result, rerender } = renderHook(() => useRoleList(), {
+      wrapper: MemoryRouter,
+    });
+    expect(result.current.sort).toEqual({ by: "name", order: "asc" });
+
+    act(() => result.current.onSort("id"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        name: "admin",
+        sortBy: "id",
+        sortOrder: undefined,
+      }),
+    );
+
+    usePaginatedQueryMock.mockReturnValue(state({ sortBy: "id" }));
+    rerender();
+    act(() => result.current.onSort("id"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortBy: "id", sortOrder: "desc" }),
+    );
+
+    act(() => result.current.onSearchSubmit("other"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ name: "other", sortBy: "id" }),
+    );
+
+    act(() => result.current.onSearchReset());
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ name: undefined, sortBy: "id" }),
+    );
   });
 });

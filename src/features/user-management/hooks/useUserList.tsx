@@ -1,5 +1,4 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   deleteUser,
   disableUser,
@@ -7,8 +6,38 @@ import {
   queryUsers,
 } from "@/features/user-management/api/UserRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
-import { UsersFilter } from "@/features/user-management/domain/Entity/UsersFilter";
+import {
+  USER_SORT_FIELDS,
+  type UserSortField,
+  UsersFilter,
+} from "@/features/user-management/domain/Entity/UsersFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  type ListSort,
+  nextSort,
+  readSort,
+  sortFields,
+} from "@/shared/domain/Entity/ListSort";
+import {
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
+import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const usersFromParams = (params: URLSearchParams) => {
+  const { sortBy, sortOrder } = readSort(params, USER_SORT_FIELDS);
+  return new UsersFilter(
+    undefined,
+    undefined,
+    readParam(params, "search"),
+    readPage(params),
+    undefined,
+    sortBy,
+    sortOrder,
+  );
+};
 
 export const useUserList = () => {
   const [showResetLink, setShowResetLink] = useState(false);
@@ -23,25 +52,20 @@ export const useUserList = () => {
     data: users,
     currentPage,
     loadData,
+    filter,
     totalPages,
     isLoading,
     onPageChange,
-  } = usePaginatedQuery<UsersFilter, User>({
+    listState,
+  } = usePagedList<UsersFilter, User>({
     queryFunction: queryUsers,
     initialFilter: new UsersFilter(),
   });
 
-  useEffect(() => {
-    loadData(new UsersFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "User query error",
-          message: response.message || "Failed to query users",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    usersFromParams,
+  );
 
   const onUserResetLink = (user: User) => {
     setSelectedUser(user);
@@ -65,7 +89,7 @@ export const useUserList = () => {
 
     pushToast({
       title: "User disable",
-      message: "Disabling users...",
+      message: "Disabling user...",
     });
 
     return disableUser(user.id).then((response) => {
@@ -106,7 +130,7 @@ export const useUserList = () => {
 
     pushToast({
       title: "User enable",
-      message: "Enabling users...",
+      message: "Enabling user...",
     });
 
     return enableUser(user.id).then((response) => {
@@ -166,31 +190,42 @@ export const useUserList = () => {
     });
   };
 
+  // The search keeps the sort, and the sort keeps the search
+  const usersFilter = (search?: string, sort?: ListSort<UserSortField>) => {
+    const { sortBy, sortOrder } = sort
+      ? sortFields(sort)
+      : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
+    return new UsersFilter(
+      undefined,
+      undefined,
+      search,
+      undefined,
+      undefined,
+      sortBy,
+      sortOrder,
+    );
+  };
+
   const onSearchReset = () => {
-    loadData(new UsersFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "User query error",
-          message: response.message || "Failed to query users",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(usersFilter());
   };
 
   const onSearchSubmit = (search?: string) => {
-    loadData(new UsersFilter(undefined, undefined, search)).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "User query error",
-          message: response.message || "Failed to query users",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(usersFilter(search));
+  };
+
+  const sort: ListSort<UserSortField> = {
+    by: filter?.sortBy ?? "name",
+    order: filter?.sortOrder ?? "asc",
+  };
+  const onSort = (field: UserSortField) => {
+    void loadData(usersFilter(filter?.search, nextSort(sort, field)));
   };
 
   return {
+    restoredFilter,
+    restoreKey,
+    listState,
     currentPage,
     onPageChange,
     showResetLink,
@@ -214,6 +249,8 @@ export const useUserList = () => {
     onUserDelete,
     performDeleteUser,
     onSearchReset,
+    sort,
+    onSort,
     onSearchSubmit,
   };
 };

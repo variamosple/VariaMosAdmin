@@ -62,15 +62,8 @@ describe("RecoveryLinkModal Component", () => {
     delayRecoveryQuery = false;
     isRecoveryError = false;
 
-    // Mock navigator.clipboard using Object.defineProperty
-    const mockClipboard = {
-      writeText: vi.fn().mockImplementation(() => Promise.resolve()),
-    };
-    Object.defineProperty(navigator, "clipboard", {
-      value: mockClipboard,
-      configurable: true,
-      writable: true,
-    });
+    // No clipboard of our own: userEvent.setup() puts its stub on navigator
+    // and removes it after each test
 
     server.use(
       http.post(apiTarget("/v1/users/:userId/recovery-link"), () => {
@@ -163,8 +156,7 @@ describe("RecoveryLinkModal Component", () => {
       ).toBeInTheDocument();
     });
 
-    const copyBtn = screen.getByRole("button", { name: "" }); // icon button has no label by default
-    await user.click(copyBtn);
+    await user.click(screen.getByRole("button", { name: "Copy link" }));
 
     expect(writeTextSpy).toHaveBeenCalledWith(
       "https://variamos.com/recover?token=xyz",
@@ -176,6 +168,9 @@ describe("RecoveryLinkModal Component", () => {
       }),
     );
     expect(screen.getByText("Copied to clipboard!")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Link copied" }),
+    ).toBeInTheDocument();
   });
 
   it("handles generation error response", async () => {

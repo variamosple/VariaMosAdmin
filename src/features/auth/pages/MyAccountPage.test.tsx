@@ -6,6 +6,11 @@ import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
 import { MyAccountPage } from "./MyAccountPage";
 
+const pushToast = vi.fn();
+vi.mock("@/shared/context/ToastContext", () => ({
+  useToast: () => ({ pushToast, removeToast: vi.fn() }),
+}));
+
 const apiTarget = (path: string) => {
   const base = AppConfig.ADMIN_API_URL || "";
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
@@ -53,7 +58,7 @@ vi.mock("../components/PasswordUpdateForm", async () => ({
 }));
 
 vi.mock(
-  "@/features/user-management/components/UserInformationUpdateFormModal",
+  "@/features/auth/components/UserInformationUpdateFormModal",
   async () => ({
     PersonalInformationUpdateForModal: ({
       showModal,
@@ -102,9 +107,13 @@ describe("MyAccountPage Component", () => {
     email: "john@example.com",
     countryCode: "US",
     countryName: "United States",
+    isEnabled: true,
+    isDeleted: false,
+    createdAt: "2026-07-20T22:00:00.000Z",
   };
 
   beforeEach(() => {
+    pushToast.mockClear();
     server.use(
       http.get(apiTarget("/auth/my-account"), () => {
         return HttpResponse.json({ data: mockUser });
@@ -179,6 +188,36 @@ describe("MyAccountPage Component", () => {
     expect(
       screen.queryByTestId("password-update-form"),
     ).not.toBeInTheDocument();
+    expect(pushToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Password updated",
+        variant: "success",
+      }),
+    );
+  });
+
+  it("keeps the password modal open, without a toast, when the update is refused", async () => {
+    server.use(
+      http.put(apiTarget("/auth/password-update"), () =>
+        HttpResponse.json(
+          { errorCode: 400, message: "Current password is incorrect" },
+          { status: 400 },
+        ),
+      ),
+    );
+
+    render(<MyAccountPage />);
+    await screen.findByText("My account");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /update/i }));
+    await user.click(screen.getByText("Submit Password Update"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Loading: No")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("password-update-form")).toBeInTheDocument();
+    expect(pushToast).not.toHaveBeenCalled();
   });
 
   it("handles personal information update submission successfully", async () => {
@@ -216,6 +255,12 @@ describe("MyAccountPage Component", () => {
       expect(updatePersonalInformationPayload).toEqual({ countryCode: "FR" });
     });
     expect(screen.queryByTestId("info-update-form")).not.toBeInTheDocument();
+    expect(pushToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Information updated",
+        variant: "success",
+      }),
+    );
     await waitFor(() => {
       expect(getMyAccountCalledCount).toBe(2); // Initial query + query after update
     });
@@ -238,5 +283,25 @@ describe("MyAccountPage Component", () => {
     await user.click(screen.getByRole("button", { name: /edit information/i }));
     await user.click(screen.getByText("Close Info Modal"));
     expect(screen.queryByTestId("info-update-form")).not.toBeInTheDocument();
+  });
+
+  it("shows a failed read with Retry instead of empty fields (UX-24)", async () => {
+    let calls = 0;
+    server.use(
+      http.get(apiTarget("/auth/my-account"), () => {
+        calls++;
+        return calls === 1
+          ? HttpResponse.json({ errorCode: "SYSTEM_ERROR" }, { status: 500 })
+          : HttpResponse.json({ data: mockUser });
+      }),
+    );
+    render(<MyAccountPage />);
+
+    const retry = await screen.findByRole("button", { name: "Retry" });
+    expect(screen.queryByText("Edit information")).not.toBeInTheDocument();
+
+    await userEvent.click(retry);
+
+    expect(await screen.findByText("John Doe")).toBeInTheDocument();
   });
 });

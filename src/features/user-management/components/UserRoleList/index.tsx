@@ -1,17 +1,22 @@
 import { Paginator } from "@variamosple/variamos-components";
 import type { FC } from "react";
-import { Button, ButtonGroup, Table } from "react-bootstrap";
+import { ButtonGroup, Table } from "react-bootstrap";
 import { TrashFill } from "react-bootstrap-icons";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
+import { IconButton } from "@/shared/components/IconButton";
+import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
+import type { ListState } from "@/shared/hooks/usePagedList";
 
 export interface UserRoleListParameters extends PaginationControlsProps {
   items: Role[];
+  state?: ListState;
   onRoleDelete: (role: Role) => void;
 }
 
 export const UserRoleList: FC<UserRoleListParameters> = ({
   items,
+  state,
   currentPage,
   totalPages,
   onPageChange,
@@ -25,7 +30,7 @@ export const UserRoleList: FC<UserRoleListParameters> = ({
         onPageChange={onPageChange}
       />
 
-      <Table striped bordered hover>
+      <Table aria-busy={state?.isLoading} striped bordered hover responsive>
         <thead>
           <tr>
             <th>ID</th>
@@ -45,17 +50,24 @@ export const UserRoleList: FC<UserRoleListParameters> = ({
 
               <td>
                 <ButtonGroup size="sm">
-                  <Button
+                  <IconButton
                     variant="danger"
                     onClick={() => onRoleDelete(role)}
-                    title="Delete user role"
-                  >
-                    <TrashFill />
-                  </Button>
+                    label="Delete user role"
+                    icon={<TrashFill />}
+                  />
                 </ButtonGroup>
               </td>
             </tr>
           ))}
+          {state && (
+            <TableStateRow
+              state={state}
+              isEmpty={!items?.length}
+              colSpan={3}
+              items="roles"
+            />
+          )}
         </tbody>
       </Table>
 

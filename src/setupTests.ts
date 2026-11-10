@@ -7,7 +7,7 @@ import { TextDecoder, TextEncoder } from "node:util";
 
 import "@testing-library/jest-dom/vitest";
 
-import type { ReactNode } from "react";
+import { createElement, type ReactNode } from "react";
 import { vi } from "vitest";
 import { server } from "./shared/tests/mocks/server";
 
@@ -122,8 +122,32 @@ window.getComputedStyle = function (elt, ...args) {
   return style;
 };
 
-beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
+// A request with no handler fails the test: it would reach the network
+// (TST-FRONT-06). A test that expects one declares it with server.use.
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
+
+// A React warning fails the test (TST-FRONT-05): an update outside act(), an
+// invalid nesting or an unknown tag points to a real fault, in the component
+// or in the test. React logs them as format strings ("%s"); the application's
+// own error logs ("Axios error: ...") stay allowed. A test that silences
+// console.error with a spy silences these too.
+const reactWarnings: string[] = [];
+const logError = console.error;
+console.error = (...args: Parameters<typeof console.error>) => {
+  if (typeof args[0] === "string" && args[0].includes("%s")) {
+    reactWarnings.push(args[0].split("\n")[0]);
+  }
+  logError(...args);
+};
+afterEach(() => {
+  const warnings = reactWarnings.splice(0);
+  if (warnings.length > 0) {
+    throw new Error(
+      `React warned during the test:\n- ${warnings.join("\n- ")}`,
+    );
+  }
+});
 afterAll(async () => {
   server.close();
   if (getGlobalDispatcher) {
@@ -134,7 +158,7 @@ afterAll(async () => {
   }
 });
 
-// Global mock for @variamosple/variamos-components to satisfy ResponseModel and PagedModel usages in all unit tests
+// Global mock for @variamosple/variamos-components to satisfy ResponseModel usages in all unit tests
 vi.mock("@variamosple/variamos-components", () => {
   class ResponseModel<T = Record<string, never>> {
     status: string;
@@ -161,7 +185,20 @@ vi.mock("@variamosple/variamos-components", () => {
     AuthWrapper: ({ children }: { children: ReactNode }) => children,
     NotAuthorized: () => null,
     ProtectedRoute: ({ children }: { children: ReactNode }) => children,
-    PagedModel: class PagedModel {},
+    // One button to the next page: enough to drive a paged list in a test
+    Paginator: (props: {
+      currentPage: number;
+      totalPages: number;
+      onPageChange: (page: number) => void;
+    }) =>
+      createElement(
+        "button",
+        {
+          type: "button",
+          onClick: () => props.onPageChange(props.currentPage + 1),
+        },
+        `Page ${props.currentPage} of ${props.totalPages}`,
+      ),
     ResponseModel,
     useRouter: vi.fn(),
     useSession: vi.fn(),

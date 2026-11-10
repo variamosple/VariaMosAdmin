@@ -3,6 +3,7 @@ import {
   ResponseModel,
   usePaginatedQuery,
 } from "@variamosple/variamos-components";
+import { MemoryRouter } from "react-router-dom";
 import * as LanguageRepository from "../api/LanguageRepository";
 import type { Language } from "../domain/Entity/Language";
 import { useLanguageList } from "./useLanguageList";
@@ -31,14 +32,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.errorCode = code;
         this.message = msg;
         return this;
-      }
-    },
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
       }
     },
     usePaginatedQuery: vi.fn(),
@@ -78,7 +71,9 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should initialize with values from query hook", () => {
-    const { result } = renderHook(() => useLanguageList());
+    const { result } = renderHook(() => useLanguageList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.languages).toEqual([
       { id: 1, name: "Language One", stateAccept: "ACTIVE" },
@@ -88,7 +83,9 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle performEditLanguage successfully", async () => {
-    const { result } = renderHook(() => useLanguageList());
+    const { result } = renderHook(() => useLanguageList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEditLanguage({
@@ -110,7 +107,9 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle performDeleteLanguage successfully", async () => {
-    const { result } = renderHook(() => useLanguageList());
+    const { result } = renderHook(() => useLanguageList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteLanguage({
@@ -135,7 +134,9 @@ describe("useLanguageList Hook", () => {
   });
 
   it("should handle performEditLanguage failure", async () => {
-    const { result } = renderHook(() => useLanguageList());
+    const { result } = renderHook(() => useLanguageList(), {
+      wrapper: MemoryRouter,
+    });
     updateLanguageSpy.mockResolvedValueOnce(
       new ResponseModel<Language>("error").withError(500, "Edit failed"),
     );
@@ -158,21 +159,16 @@ describe("useLanguageList Hook", () => {
     expect(result.current.isEditing).toBe(false);
   });
 
-  it("should handle query error toast on loadData", async () => {
+  it("leaves a load error to the table, without a toast (UX-23)", async () => {
     mockLoadData.mockResolvedValueOnce({
       errorCode: 500,
       message: "Query failed",
     });
-    renderHook(() => useLanguageList());
+    renderHook(() => useLanguageList(), { wrapper: MemoryRouter });
 
     await waitFor(() => {
-      expect(mockPushToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Language query error",
-          message: "Query failed",
-          variant: "danger",
-        }),
-      );
+      expect(mockLoadData).toHaveBeenCalled();
     });
+    expect(mockPushToast).not.toHaveBeenCalled();
   });
 });

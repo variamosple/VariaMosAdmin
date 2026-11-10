@@ -59,7 +59,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.type = type;
       }
     },
-    PagedModel: class PagedModel {},
   };
 });
 
@@ -153,7 +152,7 @@ describe("RoleDetailsPage Component", () => {
             permissionId: number;
             roleId: number;
           };
-          return HttpResponse.json({ errorCode: null });
+          return HttpResponse.json({ data: createRolePermissionPayload });
         },
       ),
       http.delete(
@@ -199,7 +198,7 @@ describe("RoleDetailsPage Component", () => {
     expect(await screen.findByText("Admin Role")).toBeInTheDocument();
 
     const backButton = screen.getByRole("button", {
-      name: /Back To Role List/i,
+      name: /Back to role list/i,
     });
     await user.click(backButton);
 
@@ -230,6 +229,34 @@ describe("RoleDetailsPage Component", () => {
     );
   });
 
+  it("shows the refusal of a permission assignment in a danger toast", async () => {
+    server.use(
+      http.post(apiTarget("/v1/roles/:roleId/permissions"), () =>
+        HttpResponse.json(
+          { errorCode: 409, message: "The role already has this permission" },
+          { status: 409 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+
+    render(<RoleDetailsPage />);
+    expect(await screen.findByText("Admin Role")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Add permission/i }));
+
+    await waitFor(() => {
+      expect(mockPushToast).toHaveBeenCalledWith({
+        title: "Permission assignment",
+        message: "The role already has this permission",
+        variant: "danger",
+      });
+    });
+    expect(mockPushToast).not.toHaveBeenCalledWith(
+      expect.objectContaining({ variant: "success" }),
+    );
+  });
+
   it("opens deletion modal and deletes a permission on confirmation", async () => {
     const user = userEvent.setup();
 
@@ -242,11 +269,15 @@ describe("RoleDetailsPage Component", () => {
 
     // Confirmation modal should be visible
     expect(
-      screen.getByText("Are you sure you want to remove the role permission?"),
-    ).toBeInTheDocument();
+      screen.getByRole("dialog", { name: "Remove permission" }),
+    ).toHaveTextContent(
+      'Remove the permission "READ_PRIVILEGES" from the role "Admin"?',
+    );
 
-    // Click Confirm on ConfirmationModal
-    const confirmButton = screen.getByRole("button", { name: /Accept/i });
+    // Confirm with the action button
+    const confirmButton = screen.getByRole("button", {
+      name: "Remove permission",
+    });
     await user.click(confirmButton);
 
     await waitFor(() => {
@@ -257,9 +288,76 @@ describe("RoleDetailsPage Component", () => {
     );
     expect(mockPushToast).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Permission delete",
+        title: "Permission removal",
         variant: "success",
       }),
+    );
+  });
+
+  it("says the role does not exist instead of a bare title (UX-24)", async () => {
+    // The API answers a missing role with a success without data
+    server.use(
+      http.get(apiTarget("/v1/roles/:roleId"), () =>
+        HttpResponse.json({ errorCode: null, data: null }),
+      ),
+    );
+    render(<RoleDetailsPage />);
+
+    expect(
+      await screen.findByText("This role does not exist, or it was deleted."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      /^Role$/,
+    );
+    expect(
+      screen.queryByTestId("role-permission-form"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers Retry when the role could not be read", async () => {
+    let calls = 0;
+    server.use(
+      http.get(apiTarget("/v1/roles/:roleId"), () => {
+        calls++;
+        return calls === 1
+          ? HttpResponse.json({ errorCode: "SYSTEM_ERROR" }, { status: 500 })
+          : HttpResponse.json({
+              errorCode: null,
+              data: { id: 123, name: "Admin" },
+            });
+      }),
+    );
+    render(<RoleDetailsPage />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Retry" }));
+
+    expect(
+      await screen.findByRole("heading", { name: "Admin Role" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("role-permission-form")).toBeInTheDocument();
+  });
+
+  it("searches the role's permissions on the server (EV-31)", async () => {
+    const user = userEvent.setup();
+    render(<RoleDetailsPage />);
+    await screen.findByText("Admin Role");
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ roleId: 123, search: undefined }),
+    );
+
+    await user.type(
+      screen.getByPlaceholderText(
+        "Search the role's permissions by name or id",
+      ),
+      "users",
+    );
+
+    await waitFor(
+      () =>
+        expect(mockLoadData).toHaveBeenLastCalledWith(
+          expect.objectContaining({ roleId: 123, search: "users" }),
+        ),
+      { timeout: 2000 },
     );
   });
 });

@@ -32,14 +32,6 @@ vi.mock("@variamosple/variamos-components", async () => {
     withPageVisit: (component: ComponentType) => component,
     useRouter: vi.fn(),
     usePaginatedQuery: vi.fn(),
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(p?: number, s?: number) {
-        this.pageNumber = p;
-        this.pageSize = s;
-      }
-    },
     ResponseModel: class ResponseModel<T = undefined> {
       errorCode?: number | null;
       message?: string;
@@ -208,13 +200,23 @@ describe("UserDetailsPage Component", () => {
           });
         }
         return HttpResponse.json({
-          data: { id: "user-123", name: "John Doe", email: "john@doe.com" },
+          data: {
+            id: "user-123",
+            user: "john",
+            name: "John Doe",
+            email: "john@doe.com",
+            isEnabled: true,
+            isDeleted: false,
+            createdAt: "2026-07-20T22:00:00.000Z",
+          },
         });
       }),
       http.post(apiTarget("/v1/users/:userId/roles"), async ({ request }) => {
         createUserRoleCalled++;
         createUserRolePayload = (await request.json()) as UserRole;
-        return HttpResponse.json({ errorCode: null });
+        return HttpResponse.json({
+          data: { userId: "user-123", roleId: 1 },
+        });
       }),
       http.delete(
         apiTarget("/v1/users/:userId/roles/:roleId"),
@@ -239,7 +241,15 @@ describe("UserDetailsPage Component", () => {
     await act(async () => {
       resolveUserPromise(
         HttpResponse.json({
-          data: { id: "user-123", name: "John Doe", email: "john@doe.com" },
+          data: {
+            id: "user-123",
+            user: "john",
+            name: "John Doe",
+            email: "john@doe.com",
+            isEnabled: true,
+            isDeleted: false,
+            createdAt: "2026-07-20T22:00:00.000Z",
+          },
         }),
       );
     });
@@ -259,6 +269,11 @@ describe("UserDetailsPage Component", () => {
     expect(screen.getByTestId("role-row-role-1")).toHaveTextContent(
       "Administrator",
     );
+    // The browser tab names the user once it is read (UX-35); the title is
+    // set by an effect, which runs after the text is on screen
+    await waitFor(() => {
+      expect(document.title).toBe("User John Doe — VariaMos");
+    });
   });
 
   it("handles back to user list click", async () => {
@@ -283,8 +298,12 @@ describe("UserDetailsPage Component", () => {
     const assignBtn = screen.getByRole("button", { name: /assign role/i });
     await user.click(assignBtn);
 
+    // An assignment is announced as such, not as a deletion (UX-37)
     expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Role assignment" }),
+      expect.objectContaining({
+        title: "Role assignment",
+        message: "Assigning role...",
+      }),
     );
     await waitFor(() => {
       expect(createUserRoleCalled).toBe(1);
@@ -313,14 +332,14 @@ describe("UserDetailsPage Component", () => {
 
     expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
     expect(
-      screen.getByText("Are you sure you want to remove the user role?"),
+      screen.getByText(/^Remove the role "Administrator" from /),
     ).toBeInTheDocument();
 
     const confirmBtn = screen.getByRole("button", { name: /confirm action/i });
     await user.click(confirmBtn);
 
     expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Role delete" }),
+      expect.objectContaining({ title: "Role removal" }),
     );
     await waitFor(() => {
       expect(deleteUserRoleCalled).toBe(1);
@@ -329,8 +348,60 @@ describe("UserDetailsPage Component", () => {
       expect.objectContaining({ userId: "user-123", roleId: "role-1" }),
     );
     expect(mockPushToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Role delete", variant: "success" }),
+      expect.objectContaining({ title: "Role removal", variant: "success" }),
     );
     expect(mockOnUserRolesPageChange).toHaveBeenCalledWith(1);
+  });
+
+  it("says the user does not exist instead of an empty page (UX-24)", async () => {
+    server.use(
+      http.get(apiTarget("/v1/users/:userId"), () =>
+        HttpResponse.json(
+          { errorCode: "ENTITY_NOT_FOUND", message: "User not found" },
+          { status: 404 },
+        ),
+      ),
+    );
+    render(<UserDetailsPage />);
+
+    expect(
+      await screen.findByText("This user does not exist, or it was deleted."),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("user-role-form")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Retry" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers Retry when the user could not be read", async () => {
+    let calls = 0;
+    server.use(
+      http.get(apiTarget("/v1/users/:userId"), () => {
+        calls++;
+        return calls === 1
+          ? HttpResponse.json({ errorCode: "SYSTEM_ERROR" }, { status: 500 })
+          : HttpResponse.json({
+              data: {
+                id: "user-123",
+                user: "john",
+                name: "John Doe",
+                email: "john@doe.com",
+                isEnabled: true,
+                isDeleted: false,
+                createdAt: "2026-07-20T22:00:00.000Z",
+              },
+            });
+      }),
+    );
+    render(<UserDetailsPage />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Retry" }));
+
+    expect(await screen.findByTestId("user-details")).toHaveTextContent(
+      "User: John Doe",
+    );
+    expect(
+      screen.queryByRole("button", { name: "Retry" }),
+    ).not.toBeInTheDocument();
   });
 });

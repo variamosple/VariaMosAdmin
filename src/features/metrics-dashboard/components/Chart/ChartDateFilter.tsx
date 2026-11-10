@@ -1,6 +1,7 @@
 import { type FC, useRef, useState } from "react";
-import { Button, Overlay, Popover } from "react-bootstrap";
+import { Overlay, Popover } from "react-bootstrap";
 import { Funnel } from "react-bootstrap-icons";
+import { IconButton } from "@/shared/components/IconButton";
 import {
   type ChartDateFormProperties,
   useChartContext,
@@ -23,14 +24,14 @@ export const ChartDateFilter: FC<ChartDateFilterProperties> = ({ id }) => {
 
   return (
     <>
-      <Button
+      <IconButton
         ref={ref}
         size="sm"
         variant="outline-primary"
         onClick={() => setShowFilter((show) => !show)}
-      >
-        <Funnel />
-      </Button>
+        label="Filter by date"
+        icon={<Funnel />}
+      />
 
       <Overlay
         show={showFilter}

@@ -69,4 +69,19 @@ describe("usePagination Hook", () => {
     expect(result.current.totalPages).toBe(1);
     expect(result.current.currentPage).toBe(1);
   });
+
+  it("stays on the page it was brought back to when the list grows again", () => {
+    let totalItems = 35;
+    const { result, rerender } = renderHook(() =>
+      usePagination({ totalItems, pageSize: 10, initialPage: 4 }),
+    );
+
+    totalItems = 5;
+    rerender();
+    totalItems = 35;
+    rerender();
+
+    expect(result.current.totalPages).toBe(4);
+    expect(result.current.currentPage).toBe(1);
+  });
 });

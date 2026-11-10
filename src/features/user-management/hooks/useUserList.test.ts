@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router-dom";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
@@ -31,14 +32,6 @@ vi.mock("@variamosple/variamos-components", async () => {
         this.errorCode = code;
         this.message = msg;
         return this;
-      }
-    },
-    PagedModel: class PagedModel {
-      pageNumber?: number;
-      pageSize?: number;
-      constructor(pageNumber?: number, pageSize?: number) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
       }
     },
     usePaginatedQuery: vi.fn(),
@@ -109,7 +102,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should initialize with expected values and load user list on mount", () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     expect(result.current.users).toEqual([dummyUser]);
     expect(result.current.currentPage).toBe(1);
@@ -119,7 +114,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle onUserResetLink", () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     act(() => {
       result.current.onUserResetLink(dummyUser);
@@ -130,7 +127,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDisableUser successfully", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDisableUser(dummyUser);
@@ -153,7 +152,9 @@ describe("useUserList Hook", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
     disableUserError = true;
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDisableUser(dummyUser);
@@ -171,7 +172,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performEnableUser successfully", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performEnableUser(dummyUser);
@@ -190,7 +193,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should handle performDeleteUser successfully", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       await result.current.performDeleteUser(dummyUser);
@@ -209,7 +214,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should trigger loadData on search submit", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       result.current.onSearchSubmit("john");
@@ -221,7 +228,9 @@ describe("useUserList Hook", () => {
   });
 
   it("should trigger loadData on search reset", async () => {
-    const { result } = renderHook(() => useUserList());
+    const { result } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
 
     await act(async () => {
       result.current.onSearchReset();
@@ -229,6 +238,49 @@ describe("useUserList Hook", () => {
 
     expect(mockLoadData).toHaveBeenLastCalledWith(
       expect.objectContaining({ search: undefined }),
+    );
+  });
+
+  it("sorts by a column, turns its order on a second click, and keeps the search (EV-95)", () => {
+    const state = (filter: object) => ({
+      data: [],
+      currentPage: 1,
+      loadData: mockLoadData,
+      isLoading: false,
+      totalPages: 1,
+      onPageChange: mockOnPageChange,
+      filter: { search: "doe", pageNumber: 1, pageSize: 20, ...filter },
+    });
+    usePaginatedQueryMock.mockReturnValue(state({}));
+    const { result, rerender } = renderHook(() => useUserList(), {
+      wrapper: MemoryRouter,
+    });
+    expect(result.current.sort).toEqual({ by: "name", order: "asc" });
+
+    act(() => result.current.onSort("lastLogin"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        search: "doe",
+        sortBy: "lastLogin",
+        sortOrder: undefined,
+      }),
+    );
+
+    usePaginatedQueryMock.mockReturnValue(state({ sortBy: "lastLogin" }));
+    rerender();
+    act(() => result.current.onSort("lastLogin"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortBy: "lastLogin", sortOrder: "desc" }),
+    );
+
+    act(() => result.current.onSearchSubmit("other"));
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: "other", sortBy: "lastLogin" }),
+    );
+
+    act(() => result.current.onSearchReset());
+    expect(mockLoadData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: undefined, sortBy: "lastLogin" }),
     );
   });
 });

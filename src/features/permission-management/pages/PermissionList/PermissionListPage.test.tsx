@@ -1,10 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { PermissionListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -13,7 +11,6 @@ vi.mock("@variamosple/variamos-components", async () => {
   const { useState, useCallback } = React;
   return {
     withPageVisit: <T,>(component: T): T => component,
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
@@ -83,11 +80,11 @@ describe("PermissionListPage Integration", () => {
 
     server.use(
       http.post("*/v1/permissions", () => {
-        return HttpResponse.json({ data: { id: 3, name: "NEW_PERM" } });
+        return HttpResponse.json({ data: { id: 3, name: "reports::create" } });
       }),
       http.put("*/v1/permissions/:id", () => {
         return HttpResponse.json({
-          data: { id: 1, name: "READ_PRIVILEGES_EDITED" },
+          data: { id: 1, name: "reports::read-all" },
         });
       }),
       http.delete("*/v1/permissions/:id", () => {
@@ -96,12 +93,8 @@ describe("PermissionListPage Integration", () => {
     );
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
-  };
-
   it("should render list title, search form, and permission list", async () => {
-    renderWithProviders(<PermissionListPage />);
+    renderPage(<PermissionListPage />);
 
     expect(screen.getByText("Permissions list")).toBeInTheDocument();
 
@@ -111,8 +104,7 @@ describe("PermissionListPage Integration", () => {
   });
 
   it("should show create modal when create button is clicked and submit", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<PermissionListPage />);
+    const { user } = renderPage(<PermissionListPage />);
     expect(await screen.findByText("READ_PRIVILEGES")).toBeInTheDocument();
 
     const createBtn = screen.getByRole("button", {
@@ -121,27 +113,26 @@ describe("PermissionListPage Integration", () => {
     await user.click(createBtn);
 
     // Modal should be visible
-    expect(screen.getByText("Create a Permission")).toBeInTheDocument();
+    expect(screen.getByText("New permission")).toBeInTheDocument();
 
     // Fill form
     const input = screen.getByPlaceholderText("Permission name");
-    await user.type(input, "NEW_PERM");
+    await user.type(input, "reports::create");
 
     // Click submit
     const submitBtns = screen.getAllByRole("button", {
-      name: "Create Permission",
+      name: "Create permission",
     });
     await user.click(submitBtns[submitBtns.length - 1]);
 
     // Verify modal closes
     await waitFor(() => {
-      expect(screen.queryByText("Create a Permission")).not.toBeInTheDocument();
+      expect(screen.queryByText("New permission")).not.toBeInTheDocument();
     });
   });
 
   it("should display edit modal when clicking edit button and submit", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<PermissionListPage />);
+    const { user } = renderPage(<PermissionListPage />);
     expect(await screen.findByText("READ_PRIVILEGES")).toBeInTheDocument();
 
     // Click edit on the first permission row
@@ -154,7 +145,7 @@ describe("PermissionListPage Integration", () => {
     // Modify permission name
     const input = screen.getByPlaceholderText("Permission name");
     await user.clear(input);
-    await user.type(input, "READ_PRIVILEGES_EDITED");
+    await user.type(input, "reports::read-all");
 
     // Click submit inside the modal
     const editRoleButtons = screen.getAllByRole("button", {
@@ -169,8 +160,7 @@ describe("PermissionListPage Integration", () => {
   });
 
   it("should handle delete confirmation", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<PermissionListPage />);
+    const { user } = renderPage(<PermissionListPage />);
     expect(await screen.findByText("WRITE_PRIVILEGES")).toBeInTheDocument();
 
     // Click delete on the second permission row
@@ -178,18 +168,16 @@ describe("PermissionListPage Integration", () => {
     await user.click(deleteButtons[1]);
 
     // Confirmation modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to delete the permission?"),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Delete permission" });
 
-    // Click Accept to confirm
-    await user.click(screen.getByRole("button", { name: "Accept" }));
+    // Confirm with the action button
+    await user.click(
+      within(dialog).getByRole("button", { name: "Delete permission" }),
+    );
 
     // Verify modal closes
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to delete the permission?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
@@ -200,7 +188,7 @@ describe("PermissionListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<PermissionListPage />);
+    renderPage(<PermissionListPage />);
     expect(
       screen.getByRole("heading", { name: "Permissions list" }),
     ).toBeInTheDocument();
@@ -211,7 +199,7 @@ describe("PermissionListPage Integration", () => {
     expect(screen.queryByText("WRITE_PRIVILEGES")).not.toBeInTheDocument();
   });
 
-  it("shows error toast when API fails to load permissions", async () => {
+  it("shows a failed load of the permissions in the table", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get("*/v1/permissions", () => {
@@ -222,11 +210,16 @@ describe("PermissionListPage Integration", () => {
       }),
     );
 
-    renderWithProviders(<PermissionListPage />);
+    renderPage(<PermissionListPage />);
+    // In the table, with Retry, and not repeated in a toast (UX-23)
+    const table = await screen.findByRole("table");
     expect(
-      await screen.findByText("Permission query error"),
+      await within(table).findByText(SYSTEM_ERROR_MESSAGE),
     ).toBeInTheDocument();
-    expect(screen.getByText(SYSTEM_ERROR_MESSAGE)).toBeInTheDocument();
+    expect(
+      within(table).getByRole("button", { name: "Retry" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(SYSTEM_ERROR_MESSAGE)).toHaveLength(1);
     consoleSpy.mockRestore();
   });
 });

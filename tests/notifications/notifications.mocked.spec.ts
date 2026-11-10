@@ -1,9 +1,10 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../helpers/mockedTest";
+import { mockSignedIn } from "../helpers/session";
 
 test.describe("Notifications Admin - Mocked E2E Flows", () => {
   const mockUsers = [
-    { id: "user-1", name: "Alice Smith", email: "alice@example.com", isEnabled: true, isDeleted: false },
-    { id: "user-2", name: "Bob Jones", email: "bob@example.com", isEnabled: true, isDeleted: false },
+    { id: "user-1", user: "alice", name: "Alice Smith", email: "alice@example.com", isEnabled: true, isDeleted: false, createdAt: "2026-07-20T22:00:00.000Z" },
+    { id: "user-2", user: "bob", name: "Bob Jones", email: "bob@example.com", isEnabled: true, isDeleted: false, createdAt: "2026-07-20T22:00:00.000Z" },
   ];
 
   const mockRoles = [
@@ -15,24 +16,7 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
     await context.clearCookies();
 
     // Mock session info
-    await page.route("**/auth/session-info", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            user: {
-              id: "admin-1",
-              user: "admin",
-              name: "Admin User",
-              email: "admin@example.com",
-              roles: ["Admin"],
-              permissions: ["admin::notifications::dispatch"],
-            },
-          },
-        }),
-      });
-    });
+    await mockSignedIn(page, ["admin::notifications::dispatch"], { id: "admin-1" });
 
     // Mock query users
     await page.route("**/v1/users*", async (route) => {
@@ -64,7 +48,7 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
 
     // Test form validation: submit without title/body
     await page.click('button[type="submit"]');
-    await expect(page.locator(".alert-danger")).toContainText("Please provide both title and message body.");
+    await expect(page.getByRole("alert")).toContainText("Please provide both title and message body.");
 
     // Fill title & body
     await page.fill('input[placeholder="e.g., Scheduled Maintenance Alert"]', "Service Maintenance");
@@ -99,10 +83,24 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
       });
     });
 
-    // Dispatch
+    await page.route("**/v1/admin/notifications/recipients/count", async (route) => {
+      const postData = JSON.parse(route.request().postData() || "{}");
+      expect(postData.userIds).toEqual(["user-1"]);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: { count: 1 } }),
+      });
+    });
+
+    // Dispatch, after the confirmation that counts the accounts
     await page.click('button[type="submit"]');
+    await page
+      .getByRole("dialog", { name: "Send notification" })
+      .getByRole("button", { name: "Send to 1 account" })
+      .click();
 
     // Success alert should show up
-    await expect(page.locator(".alert-success")).toContainText("Notifications dispatched successfully!");
+    await expect(page.getByRole("alert")).toContainText("Notifications dispatched successfully!");
   });
 });

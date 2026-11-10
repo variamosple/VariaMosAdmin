@@ -68,7 +68,7 @@ export const LOGIN_REASON_MESSAGES = {
   "account-inactive": "This account is not active. Contact an administrator.",
 } as const;
 
-export type LoginReason = keyof typeof LOGIN_REASON_MESSAGES;
+type LoginReason = keyof typeof LOGIN_REASON_MESSAGES;
 
 /**
  * The message of the login page. An old `errorMessage` link gets the

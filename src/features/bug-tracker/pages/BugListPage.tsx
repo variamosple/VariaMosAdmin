@@ -1,5 +1,5 @@
-import { withPageVisit } from "@variamosple/variamos-components";
-import { type FC, useState } from "react";
+import { Paginator, withPageVisit } from "@variamosple/variamos-components";
+import { type FC, useId, useState } from "react";
 import {
   Alert,
   Badge,
@@ -15,6 +15,8 @@ import {
 } from "react-bootstrap";
 import { ArrowRepeat, Github, Plus } from "react-bootstrap-icons";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { DateTime } from "@/shared/components/DateTime";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { attachmentUrl } from "../api/attachmentUrl";
 import { BugApprovalModal } from "../components/BugApprovalModal";
 import { BugAssigneesForm } from "../components/BugAssigneesForm";
@@ -32,6 +34,7 @@ import { useBugList } from "../hooks/useBugList";
 import { useBugPermissions } from "../hooks/useBugPermissions";
 
 const BugListPageComponent: FC = () => {
+  usePageTitle("Bugs");
   const {
     bugs,
     repos,
@@ -39,12 +42,17 @@ const BugListPageComponent: FC = () => {
     isLoading,
     isSubmitting,
     isSyncing,
+    filter,
+    restoreKey,
     setFilter,
     handleCreateBug,
     refreshBugs,
     handleSyncBugs,
     activeTab,
     setActiveTab,
+    currentPage,
+    totalPages,
+    onPageChange,
     handleReject,
     handleRestore,
     handleApprove,
@@ -70,9 +78,11 @@ const BugListPageComponent: FC = () => {
     useState<Bug | null>(null);
   const [newNoteBody, setNewNoteBody] = useState("");
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
+  const [noteError, setNoteError] = useState<string | null>(null);
 
   const handleViewDetails = (bug: Bug) => {
     setSelectedBugForDetails(bug);
+    setNoteError(null);
     if (bug?.id) {
       fetchNotes(bug.id);
     }
@@ -125,20 +135,32 @@ const BugListPageComponent: FC = () => {
         </Alert>
       );
     }
-    return (
-      <BugList
-        items={bugs}
-        onViewDetails={handleViewDetails}
-        activeTab={activeTab}
-        onReject={
-          canUpdate
-            ? (id: string) =>
-                setBugToReject(bugs.find((bug) => bug.id === id) ?? null)
-            : undefined
-        }
-        onRestore={canUpdate ? handleRestore : undefined}
-        onApprove={canUpdate ? setBugToApprove : undefined}
+    // One page is shown without a paginator
+    const paginator = totalPages > 1 && (
+      <Paginator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
       />
+    );
+    return (
+      <>
+        {paginator}
+        <BugList
+          items={bugs}
+          onViewDetails={handleViewDetails}
+          activeTab={activeTab}
+          onReject={
+            canUpdate
+              ? (id: string) =>
+                  setBugToReject(bugs.find((bug) => bug.id === id) ?? null)
+              : undefined
+          }
+          onRestore={canUpdate ? handleRestore : undefined}
+          onApprove={canUpdate ? setBugToApprove : undefined}
+        />
+        {paginator}
+      </>
     );
   };
 
@@ -146,12 +168,17 @@ const BugListPageComponent: FC = () => {
     e.preventDefault();
     if (!newNoteBody.trim() || !selectedBugForDetails?.id) return;
     setIsSubmittingNote(true);
-    const success = await handleAddNote(selectedBugForDetails.id, newNoteBody);
-    if (success) {
+    setNoteError(null);
+    const failure = await handleAddNote(selectedBugForDetails.id, newNoteBody);
+    if (failure) {
+      setNoteError(failure);
+    } else {
       setNewNoteBody("");
     }
     setIsSubmittingNote(false);
   };
+
+  const titleId = useId();
 
   return (
     <Container fluid="sm" className="my-2">
@@ -187,7 +214,7 @@ const BugListPageComponent: FC = () => {
               className="d-inline-flex align-items-center text-white"
               disabled={isSyncing}
             >
-              <Github size={16} className="me-1" /> Create GitHub Issue
+              <Github size={16} className="me-1" /> Create GitHub issue
             </Button>
           )}
         </Col>
@@ -201,6 +228,9 @@ const BugListPageComponent: FC = () => {
       )}
 
       <BugSearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultFilter={filter}
         onSubmit={(search?: BugFilter) => setFilter(search || {})}
         onSearchReset={() => setFilter({})}
         isLoading={isLoading}
@@ -251,6 +281,7 @@ const BugListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={!!bugToReject}
+        title="Reject bug"
         message={`Move "${bugToReject?.title ?? "this bug"}" to the Trash Bin? It can be restored for 7 days, then it is deleted.`}
         confirmLabel="Reject bug"
         confirmButtonVariant="danger"
@@ -272,6 +303,7 @@ const BugListPageComponent: FC = () => {
       />
 
       <Modal
+        aria-labelledby={titleId}
         show={!!selectedBugForDetails}
         onHide={() => setSelectedBugForDetails(null)}
         size="lg"
@@ -279,7 +311,7 @@ const BugListPageComponent: FC = () => {
         scrollable
       >
         <Modal.Header closeButton>
-          <Modal.Title>
+          <Modal.Title id={titleId}>
             Bug Details{" "}
             {selectedBugForDetails?.gitIssueNumber
               ? `#${selectedBugForDetails.gitIssueNumber}`
@@ -330,9 +362,7 @@ const BugListPageComponent: FC = () => {
                 </Col>
                 <Col md={6}>
                   <strong>Created At: </strong>{" "}
-                  {selectedBugForDetails.createdAt
-                    ? new Date(selectedBugForDetails.createdAt).toLocaleString()
-                    : "N/A"}
+                  <DateTime value={selectedBugForDetails.createdAt} />
                 </Col>
               </Row>
 
@@ -385,7 +415,7 @@ const BugListPageComponent: FC = () => {
                 selectedBugForDetails.attachments.length > 0 && (
                   <div className="mb-3">
                     <strong>Attachments:</strong>
-                    <ul className="mt-1 mb-0 pl-3">
+                    <ul className="mt-1 mb-0 ps-3">
                       {selectedBugForDetails.attachments.map(
                         (attachment: BugAttachment) => (
                           <li key={attachment.id} className="my-1">
@@ -490,7 +520,7 @@ const BugListPageComponent: FC = () => {
                           >
                             <div className="d-flex align-items-center mb-1 border-bottom pb-1">
                               <span
-                                className="badge bg-secondary-subtle text-secondary small-text font-monospace"
+                                className="badge bg-secondary-subtle text-secondary small font-monospace"
                                 style={{
                                   fontSize: "0.65rem",
                                   padding: "0.2rem 0.4rem",
@@ -499,10 +529,10 @@ const BugListPageComponent: FC = () => {
                                 SYSTEM AUDIT
                               </span>
                               <span
-                                className="text-muted small-text ms-auto"
+                                className="text-muted small ms-auto"
                                 style={{ fontSize: "0.7rem" }}
                               >
-                                {new Date(note.changedAt).toLocaleString()}
+                                <DateTime value={note.changedAt} />
                               </span>
                             </div>
                             <div
@@ -594,7 +624,7 @@ const BugListPageComponent: FC = () => {
                           className="border rounded p-2 bg-light"
                         >
                           <div
-                            className="text-dark small-text"
+                            className="text-dark small"
                             style={{ whiteSpace: "pre-wrap" }}
                           >
                             {note.comment}
@@ -604,7 +634,7 @@ const BugListPageComponent: FC = () => {
                             style={{ fontSize: "0.75rem" }}
                           >
                             {note.changedBy?.name || "Anonymous"} at{" "}
-                            {new Date(note.changedAt).toLocaleString()}
+                            <DateTime value={note.changedAt} />
                           </div>
                         </div>
                       );
@@ -629,6 +659,11 @@ const BugListPageComponent: FC = () => {
                         disabled={isSubmittingNote}
                       />
                     </Form.Group>
+                    {noteError && (
+                      <Alert variant="danger" className="py-2 small">
+                        {noteError}
+                      </Alert>
+                    )}
                     <div className="text-end">
                       <Button
                         type="submit"
@@ -636,7 +671,7 @@ const BugListPageComponent: FC = () => {
                         size="sm"
                         disabled={isSubmittingNote}
                       >
-                        {isSubmittingNote ? "Adding..." : "Add Comment"}
+                        {isSubmittingNote ? "Adding..." : "Add comment"}
                       </Button>
                     </div>
                   </Form>

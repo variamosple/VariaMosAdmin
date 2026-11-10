@@ -1,5 +1,4 @@
-import { usePaginatedQuery } from "@variamosple/variamos-components";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createPermission,
   deletePermission,
@@ -7,8 +6,36 @@ import {
   updatePermission,
 } from "@/features/permission-management/api/PermissionRepository";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
-import { PermissionsFilter } from "@/features/permission-management/domain/Entity/PermissionsFilter";
+import {
+  PERMISSION_SORT_FIELDS,
+  type PermissionSortField,
+  PermissionsFilter,
+} from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  type ListSort,
+  nextSort,
+  readSort,
+  sortFields,
+} from "@/shared/domain/Entity/ListSort";
+import {
+  readPage,
+  readParam,
+  useListQueryState,
+} from "@/shared/hooks/useListQueryState";
+import { usePagedList } from "@/shared/hooks/usePagedList";
+
+// The list shown by the address (UX-26)
+const permissionsFromParams = (params: URLSearchParams) => {
+  const { sortBy, sortOrder } = readSort(params, PERMISSION_SORT_FIELDS);
+  return new PermissionsFilter(
+    readParam(params, "name"),
+    readPage(params),
+    undefined,
+    sortBy,
+    sortOrder,
+  );
+};
 
 export const usePermissionList = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -25,25 +52,20 @@ export const usePermissionList = () => {
     data: permissions,
     currentPage,
     loadData,
+    filter,
     isLoading,
     totalPages,
     onPageChange,
-  } = usePaginatedQuery<PermissionsFilter, Permission>({
+    listState,
+  } = usePagedList<PermissionsFilter, Permission>({
     queryFunction: queryPermissions,
     initialFilter: new PermissionsFilter(),
   });
 
-  useEffect(() => {
-    loadData(new PermissionsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
-  }, [loadData, pushToast]);
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    permissionsFromParams,
+  );
 
   const onPermissionCreate = (permission: Permission) => {
     setIsCreating(true);
@@ -138,31 +160,52 @@ export const usePermissionList = () => {
     setShowDelete(true);
   };
 
+  // The search keeps the sort, and the sort keeps the search
   const onSearchReset = () => {
-    loadData(new PermissionsFilter()).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(
+      new PermissionsFilter(
+        undefined,
+        undefined,
+        undefined,
+        filter?.sortBy,
+        filter?.sortOrder,
+      ),
+    );
   };
 
   const onSearchSubmit = (search?: string) => {
-    loadData(new PermissionsFilter(search)).then((response) => {
-      if (response.errorCode) {
-        pushToast({
-          title: "Permission query error",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-    });
+    void loadData(
+      new PermissionsFilter(
+        search,
+        undefined,
+        undefined,
+        filter?.sortBy,
+        filter?.sortOrder,
+      ),
+    );
+  };
+
+  const sort: ListSort<PermissionSortField> = {
+    by: filter?.sortBy ?? "name",
+    order: filter?.sortOrder ?? "asc",
+  };
+  const onSort = (field: PermissionSortField) => {
+    const { sortBy, sortOrder } = sortFields(nextSort(sort, field));
+    void loadData(
+      new PermissionsFilter(
+        filter?.name,
+        undefined,
+        undefined,
+        sortBy,
+        sortOrder,
+      ),
+    );
   };
 
   return {
+    restoredFilter,
+    restoreKey,
+    listState,
     showCreate,
     setShowCreate,
     showEdit,
@@ -186,5 +229,7 @@ export const usePermissionList = () => {
     onPermissionDelete,
     onSearchReset,
     onSearchSubmit,
+    sort,
+    onSort,
   };
 };

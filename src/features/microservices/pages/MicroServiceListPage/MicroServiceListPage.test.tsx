@@ -1,9 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type React from "react";
-import { ToastProvider } from "@/shared/context/ToastContext";
 import { server } from "@/shared/tests/mocks/server";
+import { renderPage } from "@/shared/tests/render";
 import { MicroServiceListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -12,7 +10,6 @@ vi.mock("@variamosple/variamos-components", async () => {
   const { useState, useCallback } = React;
   return {
     withPageVisit: <T,>(component: T): T => component,
-    PagedModel: class PagedModel {},
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
@@ -153,12 +150,8 @@ describe("MicroServiceListPage Integration", () => {
     );
   });
 
-  const renderWithProviders = (ui: React.ReactElement) => {
-    return render(<ToastProvider>{ui}</ToastProvider>);
-  };
-
   it("renders page header and list of microservices correctly", async () => {
-    renderWithProviders(<MicroServiceListPage />);
+    renderPage(<MicroServiceListPage />);
     expect(
       screen.getByRole("heading", { name: "Microservices & System Status" }),
     ).toBeInTheDocument();
@@ -169,8 +162,7 @@ describe("MicroServiceListPage Integration", () => {
   });
 
   it("handles start microservice action correctly", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<MicroServiceListPage />);
+    const { user } = renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service B")).toBeInTheDocument();
 
     // Click Start Microservice button for Service B
@@ -178,26 +170,21 @@ describe("MicroServiceListPage Integration", () => {
     await user.click(startButton);
 
     // Modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to start Service B?"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Start Service B?")).toBeInTheDocument();
 
-    // Confirm action (Button label in ConfirmationModal is Accept)
+    // Confirm with the action button
     const confirmButton = screen.getByRole("button", {
-      name: /accept|confirm|yes/i,
+      name: "Start microservice",
     });
     await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to start Service B?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Start Service B?")).not.toBeInTheDocument();
     });
   });
 
   it("handles restart microservice action correctly", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<MicroServiceListPage />);
+    const { user } = renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
 
     // Click Restart Microservice button for Service A
@@ -205,26 +192,21 @@ describe("MicroServiceListPage Integration", () => {
     await user.click(restartButton);
 
     // Modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to restart Service A?"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Restart Service A?")).toBeInTheDocument();
 
     // Confirm action
     const confirmButton = screen.getByRole("button", {
-      name: /accept|confirm|yes/i,
+      name: "Restart microservice",
     });
     await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to restart Service A?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Restart Service A?")).not.toBeInTheDocument();
     });
   });
 
   it("handles stop microservice action correctly", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<MicroServiceListPage />);
+    const { user } = renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
 
     // Click Stop Microservice button for Service A
@@ -232,20 +214,59 @@ describe("MicroServiceListPage Integration", () => {
     await user.click(stopButton);
 
     // Modal should be visible
-    expect(
-      screen.getByText("Are you sure you want to stop Service A?"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Stop Service A?")).toBeInTheDocument();
 
     // Confirm action
     const confirmButton = screen.getByRole("button", {
-      name: /accept|confirm|yes/i,
+      name: "Stop microservice",
     });
     await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("Are you sure you want to stop Service A?"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Stop Service A?")).not.toBeInTheDocument();
     });
+  });
+
+  it("keeps the last statuses and says the connection is lost when a reload fails", async () => {
+    const { user } = renderPage(<MicroServiceListPage />);
+    expect(await screen.findByText("Service A")).toBeInTheDocument();
+
+    server.use(
+      http.post("*/v1/micro-services/check", () =>
+        HttpResponse.json({ data: null }),
+      ),
+      http.get("*/v1/micro-services", () =>
+        HttpResponse.json(
+          { errorCode: 500, message: "Service unavailable." },
+          { status: 500 },
+        ),
+      ),
+    );
+    await user.click(screen.getByRole("button", { name: /Refresh/ }));
+
+    expect(
+      await screen.findByText(/Connection to the administration service lost/),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Service A")).toBeInTheDocument();
+  });
+
+  it("says why an action failed", async () => {
+    server.use(
+      http.put("*/v1/micro-services/:microserviceId/stop", () =>
+        HttpResponse.json(
+          { errorCode: 500, message: "Failed to stop microservice container" },
+          { status: 500 },
+        ),
+      ),
+    );
+    const { user } = renderPage(<MicroServiceListPage />);
+    expect(await screen.findByText("Service A")).toBeInTheDocument();
+
+    await user.click(screen.getByTitle("Stop Service"));
+    await user.click(screen.getByRole("button", { name: "Stop microservice" }));
+
+    expect(
+      await screen.findByText("Service A could not be stopped"),
+    ).toBeInTheDocument();
   });
 });

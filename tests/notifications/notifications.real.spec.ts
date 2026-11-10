@@ -31,6 +31,10 @@ test.describe("Notifications Admin - Real E2E Flows", () => {
     // Intercept API call to verify real request
     const dispatchPromise = page.waitForResponse("**/v1/admin/notifications/dispatch");
     await page.click('button[type="submit"]');
+    // Nothing is sent before the confirmation that counts the accounts
+    const confirm = page.getByRole("dialog", { name: "Send notification" });
+    await expect(confirm).toContainText(`Send "E2E Live Broadcast ${suffix}" to`);
+    await confirm.getByRole("button", { name: /^Send to \d+ accounts?$/ }).click();
     const response = await dispatchPromise;
     if (response.status() !== 200) {
       console.error("DISPATCH FAILED:", response.status(), await response.text());

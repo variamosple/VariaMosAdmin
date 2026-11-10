@@ -99,3 +99,116 @@ describe("ConfigurationFormModal applied keys", () => {
     },
   );
 });
+
+describe("ConfigurationFormModal accepted values", () => {
+  const interval = configuration({
+    key: "bugs.sync_interval_minutes",
+    value: 15,
+    type: "number",
+    category: "general",
+    isSecret: false,
+    isApplied: true,
+    accepts: {
+      text: "a whole number of minutes from 5 to 1440",
+      min: 5,
+      max: 1440,
+      unit: "minutes",
+    },
+  });
+
+  it("says what the key accepts and bounds the number field", () => {
+    renderForm(interval);
+
+    expect(
+      screen.getByText("Accepted: a whole number of minutes from 5 to 1440."),
+    ).toBeTruthy();
+    const field = screen.getByLabelText("Value");
+    expect(field.getAttribute("min")).toBe("5");
+    expect(field.getAttribute("max")).toBe("1440");
+  });
+
+  it.each(["4", "1441", "7.5"])(
+    "refuses %s before sending it",
+    async (typed) => {
+      const user = userEvent.setup();
+      const { onConfigSubmit } = renderForm(interval);
+      const field = screen.getByLabelText("Value");
+
+      await user.clear(field);
+      await user.type(field, typed);
+      await user.click(screen.getByRole("button", { name: "Apply Changes" }));
+
+      expect(
+        screen.getByText("Enter a whole number of minutes from 5 to 1440."),
+      ).toBeTruthy();
+      expect(onConfigSubmit).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["5", 5],
+    ["1440", 1440],
+  ])("sends %s, within the bounds", async (typed, sent) => {
+    const user = userEvent.setup();
+    const { onConfigSubmit } = renderForm(interval);
+    const field = screen.getByLabelText("Value");
+
+    await user.clear(field);
+    await user.type(field, typed);
+    await user.click(screen.getByRole("button", { name: "Apply Changes" }));
+
+    expect(onConfigSubmit).toHaveBeenCalledWith(
+      "bugs.sync_interval_minutes",
+      sent,
+    );
+  });
+
+  it("sends any number for a key without bounds", async () => {
+    const user = userEvent.setup();
+    const { onConfigSubmit } = renderForm(
+      configuration({ type: "number", value: 1, isSecret: false }),
+    );
+    const field = screen.getByLabelText("Value");
+
+    await user.clear(field);
+    await user.type(field, "-3.5");
+    await user.click(screen.getByRole("button", { name: "Apply Changes" }));
+
+    expect(onConfigSubmit).toHaveBeenCalledWith(
+      "notification.smtp.password",
+      -3.5,
+    );
+  });
+
+  it("offers the known time zones and shows the form of a span", () => {
+    const { unmount } = render(
+      <ConfigurationFormModal
+        showModal={true}
+        onClose={vi.fn()}
+        onConfigSubmit={vi.fn()}
+        config={configuration({
+          key: "security.alerts.timezone",
+          value: "UTC",
+          isSecret: false,
+          accepts: { text: "a time zone name", format: "timeZone" },
+        })}
+      />,
+    );
+    const zones = screen.getByLabelText("Value").getAttribute("list");
+    expect(
+      document.querySelector(`[id="${zones}"] option[value="America/Bogota"]`),
+    ).toBeTruthy();
+    unmount();
+
+    renderForm(
+      configuration({
+        key: "security.alerts.off_hours",
+        value: "",
+        isSecret: false,
+        accepts: { text: "a span", format: "timeSpan" },
+      }),
+    );
+    expect(screen.getByPlaceholderText("20:00-07:00")).toBeTruthy();
+    expect(screen.getByLabelText("Value").getAttribute("list")).toBeNull();
+  });
+});

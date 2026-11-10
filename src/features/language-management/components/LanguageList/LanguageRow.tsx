@@ -10,7 +10,8 @@ import {
   TrashFill,
 } from "react-bootstrap-icons";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
-import { formatDate, formatDateTime } from "@/shared/constants";
+import { DateTime } from "@/shared/components/DateTime";
+import { IconButton } from "@/shared/components/IconButton";
 import { type Language, LanguageStatus } from "../../domain/Entity/Language";
 
 export interface LanguageRowProps {
@@ -93,65 +94,56 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
         <td>{owner?.name}</td>
 
         <td>
-          {language.createdAt
-            ? formatDate(new Date(language.createdAt))
-            : "N/A"}
+          <DateTime value={language.createdAt} dateOnly />
         </td>
 
         <td>
-          {language.updatedAt
-            ? formatDateTime(new Date(language.updatedAt))
-            : "N/A"}
+          <DateTime value={language.updatedAt} />
         </td>
 
         <td>
           <ButtonGroup size="sm">
-            <Button
+            <IconButton
               variant="primary"
               onClick={() => onLanguageEdit(language)}
-              title="Edit language"
-            >
-              <PencilFill />
-            </Button>
+              label="Edit language"
+              icon={<PencilFill />}
+            />
 
             {isActive && (
-              <Button
+              <IconButton
                 variant="warning"
                 onClick={() => onLanguageDeactivate(language)}
-                title="Deactivate language"
-              >
-                <StopFill />
-              </Button>
+                label="Deactivate language"
+                icon={<StopFill />}
+              />
             )}
 
             {isDisabledOrPending && (
-              <Button
+              <IconButton
                 variant="success"
                 onClick={() => onLanguageActivate(language)}
-                title="Activate language"
-              >
-                <PlayFill />
-              </Button>
+                label="Activate language"
+                icon={<PlayFill />}
+              />
             )}
 
             {!isActive && !isDeleted && (
-              <Button
+              <IconButton
                 variant="danger"
                 onClick={() => onLanguageDelete(language)}
-                title="Delete language"
-              >
-                <TrashFill />
-              </Button>
+                label="Delete language"
+                icon={<TrashFill />}
+              />
             )}
 
-            <Button
+            <IconButton
               size="sm"
               variant="info"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide language details"
-            >
-              {!show ? <PlusCircle /> : <DashCircle />}
-            </Button>
+              label="Show/Hide language details"
+              icon={!show ? <PlusCircle /> : <DashCircle />}
+            />
           </ButtonGroup>
         </td>
       </tr>
@@ -206,7 +198,7 @@ const LanguageDetails: FC<LanguageDetailsProps> = ({
 
         <Col xs={6}>
           {(language.owners || [])
-            .map((owner) => `${owner.name} (${owner.email})`)
+            .map((owner) => `${owner.name} (${owner.email || "no email"})`)
             .join(", ") || "No owners registered"}
         </Col>
 

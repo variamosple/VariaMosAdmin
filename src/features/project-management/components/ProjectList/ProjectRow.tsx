@@ -16,7 +16,9 @@ import {
 } from "react-bootstrap-icons";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import { ContactOwnerModal } from "@/shared/components/ContactOwnerModal";
-import { formatBoolean, formatDate } from "@/shared/constants";
+import { DateTime } from "@/shared/components/DateTime";
+import { IconButton } from "@/shared/components/IconButton";
+import { formatBoolean } from "@/shared/constants";
 
 export interface ProjectRowProps {
   project: Project;
@@ -76,7 +78,9 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
           {project.source}
         </td>
 
-        <td>{project.date && formatDate(project.date)}</td>
+        <td>
+          <DateTime value={project.date} dateOnly />
+        </td>
 
         <td>{formatBoolean(project.template, "Public", "Private")}</td>
 
@@ -84,30 +88,27 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
 
         <td>
           <ButtonGroup size="sm">
-            <Button
+            <IconButton
               variant="primary"
               onClick={() => onProjectEdit(project)}
-              title="Edit project"
-            >
-              <PencilFill />
-            </Button>
+              label="Edit project"
+              icon={<PencilFill />}
+            />
 
-            <Button
+            <IconButton
               variant="danger"
               onClick={() => onProjectDelete(project)}
-              title="Delete project"
-            >
-              <TrashFill />
-            </Button>
+              label="Delete project"
+              icon={<TrashFill />}
+            />
 
-            <Button
+            <IconButton
               size="sm"
               variant="info"
               onClick={() => setShow((isShown) => !isShown)}
-              title="Show/Hide project details"
-            >
-              {!show ? <PlusCircle /> : <DashCircle />}
-            </Button>
+              label="Show/Hide project details"
+              icon={!show ? <PlusCircle /> : <DashCircle />}
+            />
           </ButtonGroup>
         </td>
       </tr>
@@ -154,7 +155,10 @@ const ProjectDetails: FC<ProjectDetailsProps> = ({
         </Col>
         <Col xs={6}>
           {(project.owners || [])
-            .map((owner) => `${owner.name || "N/A"} (${owner.email})`)
+            .map(
+              (owner) =>
+                `${owner.name || "N/A"} (${owner.email || "no email"})`,
+            )
             .join(", ") || "No owners registered"}
         </Col>
         <Col xs={4} className="text-end">

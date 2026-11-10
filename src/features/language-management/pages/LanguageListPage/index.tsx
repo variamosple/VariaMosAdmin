@@ -1,14 +1,18 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import ConfirmationModal from "@variamosple/variamos-components/dist/Components/ConfirmationModal";
 import type { FC } from "react";
 import { Container } from "react-bootstrap";
+import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { LanguageFormModal } from "../../components/LanguageFormModal";
 import { LanguageList } from "../../components/LanguageList";
 import { LanguageSearchForm } from "../../components/LanguageSearchForm";
 import { useLanguageList } from "../../hooks/useLanguageList";
 
 const LanguageListPageComponent: FC = () => {
+  usePageTitle("Languages");
   const {
+    restoredFilter,
+    restoreKey,
     languages,
     totalPages,
     currentPage,
@@ -36,6 +40,7 @@ const LanguageListPageComponent: FC = () => {
     onLanguageActivateClick,
     onLanguageDeactivateClick,
     performDeleteLanguage,
+    listState,
   } = useLanguageList();
 
   return (
@@ -54,6 +59,9 @@ const LanguageListPageComponent: FC = () => {
       />
 
       <LanguageSearchForm
+        // A new form when the address changes by itself (UX-26)
+        key={restoreKey}
+        defaultFilter={restoredFilter ?? undefined}
         isLoading={isLoading}
         onSearchReset={onSearchReset}
         onSubmit={onSearchSubmit}
@@ -61,6 +69,7 @@ const LanguageListPageComponent: FC = () => {
 
       <LanguageList
         items={languages}
+        state={listState}
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
@@ -72,7 +81,9 @@ const LanguageListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDelete}
-        message="Are you sure you want to delete the language?"
+        title="Delete language"
+        message={`Delete the language "${toDeleteLanguage?.name ?? ""}"?`}
+        confirmLabel="Delete language"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteLanguage) {
@@ -88,7 +99,9 @@ const LanguageListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showActivateConfirm}
-        message={`Are you sure you want to activate the language '${toToggleLanguage?.name || ""}'?`}
+        title="Activate language"
+        message={`Activate the language "${toToggleLanguage?.name ?? ""}"?`}
+        confirmLabel="Activate language"
         confirmButtonVariant="success"
         onConfirm={() => {
           if (toToggleLanguage) {
@@ -105,7 +118,9 @@ const LanguageListPageComponent: FC = () => {
 
       <ConfirmationModal
         show={showDeactivateConfirm}
-        message={`Are you sure you want to deactivate the language '${toToggleLanguage?.name || ""}'?`}
+        title="Deactivate language"
+        message={`Deactivate the language "${toToggleLanguage?.name ?? ""}"?`}
+        confirmLabel="Deactivate language"
         confirmButtonVariant="warning"
         onConfirm={() => {
           if (toToggleLanguage) {
