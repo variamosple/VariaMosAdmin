@@ -72,6 +72,8 @@ test.describe("Notifications Admin - Mocked E2E Flows", () => {
       expect(postData.audience).toBe("users");
       expect(postData.userIds).toContain("user-1");
       expect(postData.title).toBe("Service Maintenance");
+      // The key of the message, made by the browser (EV-99)
+      expect(postData.eventId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
 
       await route.fulfill({
         status: 200,
