@@ -56,6 +56,31 @@ describe("reloadOnStaleFiles", () => {
     expect(reload).toHaveBeenCalledTimes(2);
   });
 
+  it.each(["beforeunload", "pagehide"])(
+    "does not reload once the page is being left (%s)",
+    (leaving) => {
+      target.dispatchEvent(new Event(leaving));
+
+      const event = fail();
+
+      expect(reload).not.toHaveBeenCalled();
+      expect(event.defaultPrevented).toBe(false);
+      // Not counted: a real reload just after is still allowed
+      expect(storage.getItem(RELOADED_AT_KEY)).toBeNull();
+    },
+  );
+
+  it("reloads again when the page comes back from the back-forward cache", () => {
+    target.dispatchEvent(new Event("pagehide"));
+    target.dispatchEvent(
+      Object.assign(new Event("pageshow"), { persisted: true }),
+    );
+
+    fail();
+
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
   it("does not reload when the storage is unavailable", () => {
     target = new EventTarget();
     storage = {
