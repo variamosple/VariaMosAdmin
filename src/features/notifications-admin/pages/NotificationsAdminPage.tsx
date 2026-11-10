@@ -1,5 +1,5 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import { type FC, useCallback, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
@@ -54,6 +54,11 @@ const NotificationsAdminPageComponent: FC = () => {
     request: DispatchNotificationRequest;
     count: number;
   } | null>(null);
+
+  // The key of the last message whose dispatch failed (EV-99). Sent again
+  // unchanged, the message keeps it: the accounts it already reached get
+  // nothing twice. A changed message is a new one, with a new key.
+  const failedDispatch = useRef<{ content: string; key: string } | null>(null);
 
   // Users are searched on the server by the picker (UX-03); roles are
   // few, they are loaded once
@@ -154,14 +159,26 @@ const NotificationsAdminPageComponent: FC = () => {
     setPending({ request, count: counted.data.count });
   };
 
+  const keyOf = (request: DispatchNotificationRequest) => {
+    const content = JSON.stringify(request);
+    if (failedDispatch.current?.content !== content) {
+      failedDispatch.current = { content, key: crypto.randomUUID() };
+    }
+    return failedDispatch.current.key;
+  };
+
   const send = async (request: DispatchNotificationRequest) => {
     setPending(null);
     setSubmitting(true);
     try {
-      const response = await dispatchNotification(request);
+      const response = await dispatchNotification({
+        ...request,
+        eventId: keyOf(request),
+      });
 
       // Success has no error code; older servers answered errorCode 0
       if (!response.errorCode) {
+        failedDispatch.current = null;
         setFeedback({
           type: "success",
           message: "Notifications dispatched successfully!",
