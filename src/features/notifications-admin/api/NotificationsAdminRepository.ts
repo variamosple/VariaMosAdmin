@@ -12,6 +12,8 @@ export interface DispatchNotificationRequest {
   userIds?: string[];
   title: string;
   body: string;
+  // Key of the message: sent again with it, it reaches each account once
+  eventId?: string;
 }
 
 export const dispatchNotification = (

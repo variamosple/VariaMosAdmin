@@ -214,6 +214,7 @@ describe("NotificationsAdminPage Component Tests", () => {
         body: "Platform offline tonight.",
         roles: undefined,
         userIds: undefined,
+        eventId: expect.stringMatching(/^[0-9a-f-]{36}$/),
       });
       expect(
         screen.getByText("Notifications dispatched successfully!"),
@@ -253,6 +254,72 @@ describe("NotificationsAdminPage Component Tests", () => {
     expect(
       screen.queryByText("Notifications dispatched successfully!"),
     ).not.toBeInTheDocument();
+  });
+
+  describe("key of the message (EV-99)", () => {
+    const failed = () =>
+      new ResponseModel<void>("dispatchNotification").withError(
+        500,
+        "An unexpected error occurred. Please try again later.",
+      );
+    const confirm = async () =>
+      userEvent.click(
+        await screen.findByRole("button", { name: "Send to 2 accounts" }),
+      );
+    const sentKeys = () =>
+      vi.mocked(dispatchNotification).mock.calls.map(([r]) => r.eventId);
+
+    it("keeps the key when the same message is sent again after a failure", async () => {
+      vi.mocked(dispatchNotification)
+        .mockResolvedValueOnce(failed())
+        .mockResolvedValueOnce(new ResponseModel<void>("success"));
+      render(<NotificationsAdminPage />);
+
+      await fillAndSubmit();
+      await confirm();
+      await screen.findByRole("alert");
+      await userEvent.click(screen.getByRole("button", { name: /Dispatch/i }));
+      await confirm();
+
+      await screen.findByText("Notifications dispatched successfully!");
+      const [first, second] = sentKeys();
+      expect(first).toBeTruthy();
+      expect(second).toBe(first);
+    });
+
+    it("gives a new key to a message changed after a failure", async () => {
+      vi.mocked(dispatchNotification).mockResolvedValue(failed());
+      render(<NotificationsAdminPage />);
+
+      await fillAndSubmit();
+      await confirm();
+      await screen.findByRole("alert");
+      await userEvent.type(screen.getByLabelText("Message Body"), " Sorry.");
+      await userEvent.click(screen.getByRole("button", { name: /Dispatch/i }));
+      await confirm();
+
+      await waitFor(() => expect(sentKeys()).toHaveLength(2));
+      const [first, second] = sentKeys();
+      expect(second).not.toBe(first);
+    });
+
+    it("gives a new key to the next message once one is sent", async () => {
+      vi.mocked(dispatchNotification).mockResolvedValue(
+        new ResponseModel<void>("success"),
+      );
+      render(<NotificationsAdminPage />);
+
+      await fillAndSubmit();
+      await confirm();
+      await screen.findByText("Notifications dispatched successfully!");
+      // The form is empty after a success: the same text again is a new message
+      await fillAndSubmit();
+      await confirm();
+
+      await waitFor(() => expect(sentKeys()).toHaveLength(2));
+      const [first, second] = sentKeys();
+      expect(second).not.toBe(first);
+    });
   });
 
   describe("confirmation before sending (UX-02)", () => {
