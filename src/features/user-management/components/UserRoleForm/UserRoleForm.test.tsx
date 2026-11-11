@@ -1,16 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { queryRoles } from "@/features/role-management/api/RoleRepository";
 import { UserRoleForm } from "./index";
-
-vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
-  return {
-    default: () => ({
-      lastEntryRef: vi.fn(),
-      setHasMore: vi.fn(),
-      page: 1,
-    }),
-  };
-});
 
 interface SelectOptionProps<T> {
   label: string;
@@ -43,48 +34,28 @@ vi.mock("@/shared/components/InfiniteSelect", async () => {
   };
 });
 
-const mockLoadData = vi.fn();
-vi.mock("@variamosple/variamos-components", async () => {
-  return {
-    useDebouncedValue: <T,>(val: T) => [val],
-    usePaginatedQuery: () => ({
-      loadData: mockLoadData,
-      isLoading: false,
-      currentPage: 1,
-      setCurrentPage: vi.fn(),
-      totalItems: 2,
-    }),
-    ResponseModel: class ResponseModel<T = undefined> {
-      errorCode?: number;
-      message?: string;
-      data?: T;
-      type: string;
-      constructor(type: string) {
-        this.type = type;
-      }
-    },
-    RolesFilter: class RolesFilter {
-      search?: string;
-      page?: number;
-      constructor(search?: string, page?: number) {
-        this.search = search;
-        this.page = page;
-      }
-    },
-  };
-});
+vi.mock("@variamosple/variamos-components", async () =>
+  (await import("@/shared/tests/mocks/variamosComponents")).variamosComponents({
+    useDebouncedValue: <T,>(value: T) => [value] as never,
+  }),
+);
+
+vi.mock("@/features/role-management/api/RoleRepository", () => ({
+  queryRoles: vi.fn(),
+}));
 
 describe("UserRoleForm Component", () => {
   const mockOnUserRoleSubmit = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLoadData.mockResolvedValue({
+    vi.mocked(queryRoles).mockResolvedValue({
       data: [
         { id: 1, name: "Admin" },
         { id: 2, name: "User" },
       ],
-    });
+      totalCount: 2,
+    } as Awaited<ReturnType<typeof queryRoles>>);
   });
 
   it("loads and renders the form with role options", async () => {

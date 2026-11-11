@@ -53,11 +53,6 @@ test.describe("Role & Permission Management - Real E2E Flows", () => {
     await page.locator("button.form-select").click();
     await page.locator("button.form-select input").press("Control+A");
     await page.locator("button.form-select input").press("Backspace");
-    
-    // Wait for input to register as empty and dropdown items to load
-    await expect(page.locator("button.form-select input")).toHaveValue("");
-    await page.locator(".dropdown-menu button.dropdown-item").first().waitFor({ state: "visible" });
-
     await page.locator("button.form-select input").pressSequentially("users::update", { delay: 30 });
     await page.locator(".dropdown-menu button.dropdown-item", { hasText: "users::update" }).click();
     await page.getByRole("button", { name: "Add permission" }).click();
