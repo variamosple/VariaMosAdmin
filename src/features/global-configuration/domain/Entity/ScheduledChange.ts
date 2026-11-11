@@ -42,43 +42,9 @@ export const STATUS_LABELS: Record<
   refused: { label: "Refused", variant: "danger" },
 };
 
-const UTC_INPUT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
-
-/**
- * The instant of a date and time typed in UTC ("2026-11-15T13:00", as a
- * datetime-local field gives it); null when it is not one.
- */
-export const instantOfUtcInput = (input: string): string | null => {
-  if (!UTC_INPUT.test(input)) return null;
-  const at = new Date(`${input}:00Z`);
-  return Number.isNaN(at.getTime()) ? null : at.toISOString();
-};
-
-/** The value of a datetime-local field for an instant, in UTC. */
-export const utcInputOf = (instant: string | Date): string =>
-  new Date(instant).toISOString().slice(0, 16);
-
 /** "2026-11-15 13:00 UTC". */
 export const formatUtc = (instant: string): string =>
   `${new Date(instant).toISOString().slice(0, 16).replace("T", " ")} UTC`;
-
-/** The same instant in the time zone of the browser, with its name. */
-export const formatLocal = (instant: string, timeZone?: string): string => {
-  try {
-    // dateStyle cannot go with timeZoneName: the fields are named one by one
-    return new Intl.DateTimeFormat(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZoneName: "short",
-      timeZone,
-    }).format(new Date(instant));
-  } catch {
-    return formatUtc(instant);
-  }
-};
 
 /** A value as the list says it. */
 export const describeValue = (value: ConfigurationValue): string => {

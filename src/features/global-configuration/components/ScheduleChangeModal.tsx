@@ -1,5 +1,21 @@
 import { type FC, useEffect, useId, useState } from "react";
-import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  ButtonGroup,
+  Form,
+  Modal,
+  Spinner,
+} from "react-bootstrap";
+import {
+  cityOf,
+  describeInstant,
+  formatOffset,
+  formatUtc,
+  inputOf,
+  instantsOfInput,
+  offsetMinutes,
+} from "@/shared/domain/TimeZone";
 import {
   rescheduleChange,
   scheduleChange,
@@ -8,20 +24,36 @@ import type {
   Configuration,
   ConfigurationValue,
 } from "../domain/Entity/Configuration";
-import {
-  formatLocal,
-  instantOfUtcInput,
-  type ScheduledChange,
-  utcInputOf,
-} from "../domain/Entity/ScheduledChange";
+import type { ScheduledChange } from "../domain/Entity/ScheduledChange";
 
 const HOUR_MS = 60 * 60 * 1000;
 
-/** Tomorrow at the next full hour, in UTC: a date to start from. */
-const defaultDueInput = (now: Date) =>
-  utcInputOf(
-    new Date(Math.ceil((now.getTime() + 24 * HOUR_MS) / HOUR_MS) * HOUR_MS),
-  );
+/** Tomorrow at the next full hour: a date to start from. */
+const defaultDue = (now: Date) =>
+  new Date(Math.ceil((now.getTime() + 24 * HOUR_MS) / HOUR_MS) * HOUR_MS);
+
+const isUtc = (zone: string) => zone === "UTC" || zone === "Etc/UTC";
+
+/** The instant typed, or why there is none. */
+const readDue = (
+  input: string,
+  zone: string,
+  pick: number,
+): { instant: Date } | { problem: string } => {
+  const typed = instantsOfInput(input, zone);
+  switch (typed.kind) {
+    case "single":
+      return { instant: typed.instant };
+    case "ambiguous":
+      return { instant: typed.instants[pick] ?? typed.instants[0] };
+    case "gap":
+      return {
+        problem: `This time does not exist in ${cityOf(zone)}: clocks move forward that night.`,
+      };
+    default:
+      return { problem: "Enter a date and a time." };
+  }
+};
 
 export interface ScheduleChangeModalProps {
   /** The setting to change; the dialog is shown while set. */
@@ -30,6 +62,8 @@ export interface ScheduleChangeModalProps {
   change?: ScheduledChange;
   onClose: () => void;
   onSaved: (change: ScheduledChange) => void;
+  /** The time zone of the profile, or the browser's; UTC can be typed too. */
+  timeZone?: string;
   now?: () => Date;
 }
 
@@ -43,12 +77,17 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
   change,
   onClose,
   onSaved,
+  timeZone = "UTC",
   now = () => new Date(),
 }) => {
   const titleId = useId();
   const [value, setValue] = useState("");
   const [enabled, setEnabled] = useState(false);
   const [dueInput, setDueInput] = useState("");
+  // The time is typed in UTC or in the time zone of the profile
+  const [inputZone, setInputZone] = useState("UTC");
+  // Which of the two instants of a time that comes twice
+  const [pick, setPick] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,15 +97,24 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
     setValue(String(start ?? ""));
     setEnabled(Boolean(start));
     setDueInput(
-      change ? utcInputOf(change.dueAt) : defaultDueInput(new Date()),
+      inputOf(change ? new Date(change.dueAt) : defaultDue(new Date()), "UTC"),
     );
+    setInputZone("UTC");
+    setPick(0);
     setError(null);
   }, [config, change]);
 
   if (!config) return null;
 
   const isBoolean = config.type === "boolean";
-  const dueAt = instantOfUtcInput(dueInput);
+  const due = readDue(dueInput, inputZone, pick);
+  const typed = instantsOfInput(dueInput, inputZone);
+  // Switching keeps the instant and shows it in the other time zone
+  const switchZone = (zone: string) => {
+    if ("instant" in due) setDueInput(inputOf(due.instant, zone));
+    setInputZone(zone);
+    setPick(0);
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,11 +128,12 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
       }
       newValue = n;
     }
-    if (!dueAt) {
-      setError("Enter a date and a time.");
+    if ("problem" in due) {
+      setError(due.problem);
       return;
     }
-    if (new Date(dueAt).getTime() <= now().getTime()) {
+    const dueAt = due.instant.toISOString();
+    if (due.instant.getTime() <= now().getTime()) {
       setError("The date of the change must be in the future.");
       return;
     }
@@ -143,16 +192,58 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
             </Form.Group>
           )}
           <Form.Group controlId={`${titleId}-due`}>
-            <Form.Label className="fw-semibold mb-1">Apply on (UTC)</Form.Label>
+            <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+              <Form.Label className="fw-semibold mb-0">
+                Apply on ({isUtc(inputZone) ? "UTC" : cityOf(inputZone)})
+              </Form.Label>
+              {!isUtc(timeZone) && (
+                <ButtonGroup size="sm" aria-label="Time zone of the date">
+                  {["UTC", timeZone].map((zone) => (
+                    <Button
+                      key={zone}
+                      variant={
+                        zone === inputZone ? "secondary" : "outline-secondary"
+                      }
+                      aria-pressed={zone === inputZone}
+                      onClick={() => switchZone(zone)}
+                    >
+                      {isUtc(zone) ? "UTC" : cityOf(zone)}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              )}
+            </div>
             <Form.Control
               type="datetime-local"
               value={dueInput}
-              onChange={(e) => setDueInput(e.target.value)}
+              onChange={(e) => {
+                setDueInput(e.target.value);
+                setPick(0);
+              }}
             />
+            {typed.kind === "ambiguous" && (
+              <fieldset className="mt-2">
+                <legend className="fs-6 mb-1">
+                  This time comes twice in {cityOf(inputZone)}: clocks move back
+                  that night.
+                </legend>
+                {typed.instants.map((instant, index) => (
+                  <Form.Check
+                    key={instant.toISOString()}
+                    type="radio"
+                    id={`${titleId}-pick-${index}`}
+                    name={`${titleId}-pick`}
+                    checked={pick === index}
+                    onChange={() => setPick(index)}
+                    label={`${index === 0 ? "First" : "Second"} time, ${formatOffset(offsetMinutes(instant, inputZone))} (${formatUtc(instant)})`}
+                  />
+                ))}
+              </fieldset>
+            )}
             <Form.Text>
-              {dueAt
-                ? `Your time: ${formatLocal(dueAt)}.`
-                : "Enter a date and a time."}{" "}
+              {"instant" in due
+                ? `${describeInstant(due.instant, timeZone)}.`
+                : due.problem}{" "}
               Applied within a minute of this time.
             </Form.Text>
           </Form.Group>

@@ -40,6 +40,10 @@ export const handlers = [
   http.get(apiTarget("/v1/configurations/public"), () =>
     HttpResponse.json({ data: { siteName: "VariaMos" } }),
   ),
+  // Read by the pages that show times: no time zone chosen (EV-115 lot C)
+  http.get(apiTarget("/auth/my-account/preferences"), () =>
+    HttpResponse.json({ data: { timeZone: null, updatedAt: null } }),
+  ),
   http.get(apiTarget("/v1/metrics"), () => {
     return HttpResponse.json({
       data: [

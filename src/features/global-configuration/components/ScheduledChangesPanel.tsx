@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { Alert, Badge, Button, Card, ListGroup } from "react-bootstrap";
+import { describeInstant } from "@/shared/domain/TimeZone";
 import {
   describeValue,
-  formatLocal,
   formatUtc,
   type ScheduledChange,
   STATUS_LABELS,
@@ -15,6 +15,8 @@ export interface ScheduledChangesPanelProps {
   userId?: string;
   /** False hides Edit and Cancel, which the server would refuse. */
   canUpdate: boolean;
+  /** The time zone of the profile, or the browser's, shown beside UTC. */
+  timeZone?: string;
   onEdit: (change: ScheduledChange) => void;
   onCancel: (change: ScheduledChange) => void;
 }
@@ -31,6 +33,7 @@ export const ScheduledChangesPanel: FC<ScheduledChangesPanelProps> = ({
   error,
   userId,
   canUpdate,
+  timeZone = "UTC",
   onEdit,
   onCancel,
 }) => {
@@ -66,11 +69,10 @@ export const ScheduledChangesPanel: FC<ScheduledChangesPanelProps> = ({
                 <span className="fw-semibold">{change.key}</span>:{" "}
                 {describeValue(change.previousValue)} →{" "}
                 <strong>{describeValue(change.newValue)}</strong> on{" "}
-                {formatUtc(change.dueAt)}
+                {describeInstant(new Date(change.dueAt), timeZone)}
               </div>
               <div className="text-muted small">
-                Your time: {formatLocal(change.dueAt)} · planned by{" "}
-                {authorOf(change, userId)}
+                Planned by {authorOf(change, userId)}
               </div>
             </div>
             {canUpdate && (
