@@ -152,7 +152,7 @@ const MyAccountPageComponent: FC = () => {
         </Col>
 
         <Col className="col-12 col-md-6">
-          <TimeZoneSetting />
+          <TimeZoneSetting countryCode={user?.countryCode} />
         </Col>
 
         <Col className="col-12 col-md-6">
