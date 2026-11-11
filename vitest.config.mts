@@ -25,6 +25,8 @@ export default defineConfig({
       provider: "v8",
       // Every source file, tested or not; tests, mocks and start-up apart
       include: ["src/**/*.{ts,tsx}"],
+      // lcov for SonarCloud, beside the reports of Vitest by default
+      reporter: ["text", "html", "clover", "json", "lcov"],
       exclude: [
         "**/*.d.ts",
         "**/*.test.{ts,tsx}",
