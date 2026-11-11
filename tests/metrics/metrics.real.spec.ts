@@ -25,7 +25,7 @@ test.describe("Metrics & Monitoring - Real E2E Flows", () => {
     await expect(page.getByText("Daily Unique Visits")).toBeVisible({ timeout: 30000 });
     await expect(page.getByText("Daily Visits")).toBeVisible();
     await expect(page.getByText("Monthly Visits")).toBeVisible();
-    await expect(page.getByText("Top visited pages (Last 3 Months)")).toBeVisible();
+    await expect(page.getByText("Top visited pages", { exact: true })).toBeVisible();
     await expect(page.getByText("Yearly visits")).toBeVisible();
   });
 
