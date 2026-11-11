@@ -49,6 +49,15 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
       });
     });
 
+    // No change planned for a later date (EV-115 lot B)
+    await page.route("**/v1/configurations/scheduled-changes", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: [] }),
+      });
+    });
+
     await page.goto("http://localhost:3000/#/configurations");
   });
 

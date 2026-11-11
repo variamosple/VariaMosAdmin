@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import {
+  CalendarEvent,
   LockFill,
   PencilFill,
   Search,
@@ -24,17 +25,27 @@ import {
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { IconButton } from "@/shared/components/IconButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { cancelScheduledChange } from "../api/ScheduledChangeRepository";
 import { AnnounceChangesModal } from "../components/AnnounceChangesModal";
 import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
+import { ScheduleChangeModal } from "../components/ScheduleChangeModal";
+import { ScheduledChangesPanel } from "../components/ScheduledChangesPanel";
 import type { ChangeAnnouncement } from "../domain/Entity/ChangeAnnouncement";
 import type { Configuration } from "../domain/Entity/Configuration";
 import {
   categoriesOf,
   categoryLabel,
 } from "../domain/Entity/ConfigurationCategory";
+import {
+  announcementOfScheduledChange,
+  formatUtc,
+  type ScheduledChange,
+} from "../domain/Entity/ScheduledChange";
 import { useConfigurationList } from "../hooks/useConfigurationList";
+import { useScheduledChanges } from "../hooks/useScheduledChanges";
 
 const NOTIFICATION_DISPATCH_PERMISSION = "admin::notifications::dispatch";
+const CONFIGURATION_UPDATE_PERMISSION = "configurations::update";
 
 const lockedLabel = (config: Configuration) =>
   config.isReadOnly
@@ -60,16 +71,63 @@ const ConfigurationListPageComponent: FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [toEditConfig, setToEditConfig] = useState<Configuration>();
   const [showEdit, setShowEdit] = useState<boolean>(false);
+  const user = useSession()?.user;
+  const permissions = user?.permissions ?? [];
   // Offered after saving a setting users notice, to whoever may send it
-  const canAnnounce = (useSession()?.user?.permissions ?? []).includes(
-    NOTIFICATION_DISPATCH_PERMISSION,
-  );
+  const canAnnounce = permissions.includes(NOTIFICATION_DISPATCH_PERMISSION);
+  // Planning is a change of the setting: the server asks the same right
+  const canUpdate = permissions.includes(CONFIGURATION_UPDATE_PERMISSION);
   const [announcement, setAnnouncement] = useState<ChangeAnnouncement | null>(
     null,
   );
   const save = async () => {
     const suggested = await saveChanges();
     if (suggested && canAnnounce) setAnnouncement(suggested);
+  };
+
+  // Changes planned for a later date (EV-115 lot B)
+  const scheduled = useScheduledChanges();
+  const plannedByKey = useMemo(
+    () =>
+      new Map(
+        scheduled.changes
+          .filter((change) => change.status === "scheduled")
+          .map((change) => [change.key, change]),
+      ),
+    [scheduled.changes],
+  );
+  const [scheduling, setScheduling] = useState<{
+    config: Configuration;
+    change?: ScheduledChange;
+  }>();
+  const [toCancel, setToCancel] = useState<ScheduledChange>();
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const offerAnnouncement = (change: ScheduledChange) => {
+    const suggested = announcementOfScheduledChange(change);
+    if (suggested && canAnnounce) setAnnouncement(suggested);
+  };
+  const editPlanned = (change: ScheduledChange) => {
+    const config = configurations.find((c) => c.key === change.key);
+    if (config) setScheduling({ config, change });
+  };
+  const onScheduled = (change: ScheduledChange) => {
+    setScheduling(undefined);
+    scheduled.reload();
+    offerAnnouncement(change);
+  };
+  const cancelPlanned = async (change: ScheduledChange) => {
+    setToCancel(undefined);
+    setCancelError(null);
+    const response = await cancelScheduledChange(change.id);
+    scheduled.reload();
+    if (response.errorCode || !response.data) {
+      setCancelError(
+        response.message || "The planned change could not be cancelled.",
+      );
+      return;
+    }
+    // A correction, for users who were told of the change
+    offerAnnouncement(response.data);
   };
 
   // One tab per category found in the configurations
@@ -165,6 +223,10 @@ const ConfigurationListPageComponent: FC = () => {
                   // The server refuses a change to a key that requires MFA
                   // until it can check a second factor (T-10)
                   const isLocked = config.isReadOnly || config.requiresMfa;
+                  const planned = plannedByKey.get(config.key);
+                  // A setting users notice may change at a later date
+                  const canSchedule =
+                    canUpdate && !isLocked && config.announcement !== undefined;
 
                   return (
                     <tr key={config.key}>
@@ -174,6 +236,11 @@ const ConfigurationListPageComponent: FC = () => {
                           {isModified && (
                             <Badge bg="warning" className="text-dark small">
                               UNSAVED
+                            </Badge>
+                          )}
+                          {planned && (
+                            <Badge bg="info" className="text-dark small">
+                              CHANGE PLANNED
                             </Badge>
                           )}
                         </div>
@@ -304,14 +371,32 @@ const ConfigurationListPageComponent: FC = () => {
                             />
                           </OverlayTrigger>
                         ) : (
-                          <IconButton
-                            size="sm"
-                            variant="primary"
-                            disabled={isUpdating}
-                            onClick={() => onConfigEdit(config)}
-                            label="Edit setting"
-                            icon={<PencilFill />}
-                          />
+                          <div className="d-flex justify-content-center gap-1">
+                            <IconButton
+                              size="sm"
+                              variant="primary"
+                              disabled={isUpdating}
+                              onClick={() => onConfigEdit(config)}
+                              label="Edit setting"
+                              icon={<PencilFill />}
+                            />
+                            {canSchedule && (
+                              <IconButton
+                                size="sm"
+                                variant="outline-primary"
+                                disabled={isUpdating}
+                                onClick={() =>
+                                  setScheduling({ config, change: planned })
+                                }
+                                label={
+                                  planned
+                                    ? `Edit the change planned for ${formatUtc(planned.dueAt)}`
+                                    : "Schedule a change"
+                                }
+                                icon={<CalendarEvent />}
+                              />
+                            )}
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -394,6 +479,48 @@ const ConfigurationListPageComponent: FC = () => {
       <AnnounceChangesModal
         announcement={announcement}
         onClose={() => setAnnouncement(null)}
+      />
+
+      {scheduling && (
+        <ScheduleChangeModal
+          config={scheduling.config}
+          change={scheduling.change}
+          onClose={() => setScheduling(undefined)}
+          onSaved={onScheduled}
+        />
+      )}
+
+      <ConfirmationModal
+        show={toCancel !== undefined}
+        title="Cancel the planned change"
+        message={
+          toCancel
+            ? `Cancel the change of ${toCancel.key} planned for ${formatUtc(toCancel.dueAt)}? The setting keeps its current value.`
+            : ""
+        }
+        confirmLabel="Cancel the change"
+        confirmButtonVariant="danger"
+        onConfirm={() => toCancel && cancelPlanned(toCancel)}
+        onCancel={() => setToCancel(undefined)}
+      />
+
+      {cancelError && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => setCancelError(null)}
+          className="py-2"
+        >
+          {cancelError}
+        </Alert>
+      )}
+      <ScheduledChangesPanel
+        changes={scheduled.changes}
+        error={scheduled.error}
+        userId={user?.id}
+        canUpdate={canUpdate}
+        onEdit={editPlanned}
+        onCancel={setToCancel}
       />
 
       <ConfigurationFormModal
