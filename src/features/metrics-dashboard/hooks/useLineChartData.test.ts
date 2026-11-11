@@ -21,7 +21,7 @@ describe("useLineChartData hook", () => {
 
     expect(result.current.activeFilter).toBe("os");
     expect(result.current.options.hAxis.title).toBe("Date");
-    expect(result.current.options.vAxis.title).toBe("Visits");
+    expect(result.current.options.vAxis.title).toBe("Count");
   });
 
   it("should format metric data into Google Chart rows grouped by activeFilter", () => {
@@ -57,5 +57,27 @@ describe("useLineChartData hook", () => {
     // Columns remain based on defaultFilter (Linux, Windows) as designed in the code
     expect(columns).toEqual(["Date", "Linux", "Windows"]);
     expect(rows).toHaveLength(2);
+  });
+
+  it("keeps a month as a month, one line per series", () => {
+    const { result } = renderHook(() =>
+      useLineChartData({
+        id: "monthly_active_users",
+        title: "Monthly active users",
+        chartType: "line",
+        defaultFilter: "series",
+        labelKey: "date",
+        data: [
+          { series: "Active users", count: 3, date: "2026-09" },
+          { series: "Active users", count: 1, date: "2026-10" },
+        ],
+      }),
+    );
+
+    expect(result.current.data).toEqual([
+      ["Date", "Active users"],
+      ["2026-09", 3],
+      ["2026-10", 1],
+    ]);
   });
 });

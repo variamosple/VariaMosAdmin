@@ -72,5 +72,9 @@ describe("ChartComponent Component", () => {
 
     render(<ChartComponent metric={pieMetric} />);
     expect(screen.getByTestId("recharts-pie-chart")).toBeInTheDocument();
+    // Filtered by period like the line charts (EV-90 lot A.3)
+    expect(
+      screen.getByRole("button", { name: "Filter by date" }),
+    ).toBeInTheDocument();
   });
 });
