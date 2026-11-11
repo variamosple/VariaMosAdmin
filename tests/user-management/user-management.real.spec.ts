@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { login } from "../helpers/commands.js";
+import { expect, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
+import { login } from "../helpers/commands.js";
 
 test.describe("User Management - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
@@ -13,7 +13,9 @@ test.describe("User Management - Real E2E Flows", () => {
     await dbHelper.seedTestUsers(suffix);
   });
 
-  test("should toggle active/disabled states for a test user, verifying UI updates and database persistence", async ({ page }) => {
+  test("should toggle active/disabled states for a test user, verifying UI updates and database persistence", async ({
+    page,
+  }) => {
     await login(page, adminEmail, adminPassword);
     await page.goto("http://localhost:3000/variamos_admin/");
 
@@ -29,7 +31,10 @@ test.describe("User Management - Real E2E Flows", () => {
 
     const disablePromise = page.waitForResponse("**/v1/users/*/disable");
     await row.locator('button[title="Disable user"]').click();
-    await page.getByRole("dialog", { name: "Disable user" }).getByRole("button", { name: "Disable user" }).click();
+    await page
+      .getByRole("dialog", { name: "Disable user" })
+      .getByRole("button", { name: "Disable user" })
+      .click();
     await disablePromise;
 
     await expect(row.locator("td").nth(3)).toHaveText("disabled");
@@ -39,7 +44,10 @@ test.describe("User Management - Real E2E Flows", () => {
 
     const enablePromise = page.waitForResponse("**/v1/users/*/enable");
     await row.locator('button[title="Enable user"]').click();
-    await page.getByRole("dialog", { name: "Enable user" }).getByRole("button", { name: "Enable user" }).click();
+    await page
+      .getByRole("dialog", { name: "Enable user" })
+      .getByRole("button", { name: "Enable user" })
+      .click();
     await enablePromise;
 
     await expect(row.locator("td").nth(3)).toHaveText("active");

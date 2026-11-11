@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { login } from "../helpers/commands.js";
+import { expect, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
+import { login } from "../helpers/commands.js";
 
 test.describe("Global Configurations - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
@@ -12,7 +12,9 @@ test.describe("Global Configurations - Real E2E Flows", () => {
     await dbHelper.seedTestUsers(suffix);
   });
 
-  test("should load configurations, modify in sandbox, and persist successfully", async ({ page }) => {
+  test("should load configurations, modify in sandbox, and persist successfully", async ({
+    page,
+  }) => {
     await login(page, adminEmail, adminPassword);
     await page.goto("http://localhost:3000/variamos_admin/");
 
@@ -23,7 +25,7 @@ test.describe("Global Configurations - Real E2E Flows", () => {
 
     // Verify configurations are loaded
     await expect(page.locator("h1")).toHaveText("Global Configurations");
-    
+
     const siteNameRow = page.locator("tr", { hasText: "general.site_name" });
     await expect(siteNameRow).toBeVisible();
 
@@ -39,31 +41,41 @@ test.describe("Global Configurations - Real E2E Flows", () => {
 
     // Verify Sandbox state
     await expect(page.locator(".alert-warning")).toBeVisible();
-    await expect(siteNameRow.locator(".badge", { hasText: "UNSAVED" })).toBeVisible();
+    await expect(
+      siteNameRow.locator(".badge", { hasText: "UNSAVED" }),
+    ).toBeVisible();
 
     // Persist changes
-    const savePromise = page.waitForResponse(response => 
-      response.url().includes('/v1/configurations/general.site_name') && 
-      response.request().method() === 'PUT'
+    const savePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/v1/configurations/general.site_name") &&
+        response.request().method() === "PUT",
     );
     // Be very explicit about which button to click
-    await page.locator('.alert-warning button', { hasText: 'Save Changes' }).click();
+    await page
+      .locator(".alert-warning button", { hasText: "Save Changes" })
+      .click();
     await savePromise;
 
     // Alert banner should be gone, and toast should display success
     await expect(page.locator(".alert-warning")).not.toBeVisible();
-    await expect(page.locator(".toast")).toContainText("Successfully saved 1 configuration(s).");
+    await expect(page.locator(".toast")).toContainText(
+      "Successfully saved 1 configuration(s).",
+    );
 
     // Cleanup: Restore original site name
     await siteNameRow.locator('button[title="Edit setting"]').click();
     await input.fill("VariaMos");
     await page.click('.modal-content button[type="submit"]');
-    
-    const cleanupPromise = page.waitForResponse(response => 
-      response.url().includes('/v1/configurations/general.site_name') && 
-      response.request().method() === 'PUT'
+
+    const cleanupPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/v1/configurations/general.site_name") &&
+        response.request().method() === "PUT",
     );
-    await page.locator('.alert-warning button', { hasText: 'Save Changes' }).click();
+    await page
+      .locator(".alert-warning button", { hasText: "Save Changes" })
+      .click();
     await cleanupPromise;
   });
 

@@ -1,3 +1,4 @@
+// cspell:ignore Withaverylongname
 import type { Page } from "@playwright/test";
 import { expect, test } from "../helpers/mockedTest";
 import { json, mockSignedIn, mockSignedOut } from "../helpers/session";
@@ -57,7 +58,7 @@ const signIn = async (page: Page) => {
   await page.route("**/v1/configurations/menu", (route) =>
     route.fulfill(json({ data: MENU })),
   );
-  const list = (data: unknown[]) => json({ data, totalCount: data.length });
+  const list = <T>(data: T[]) => json({ data, totalCount: data.length });
   await page.route("**/v1/users**", (route) => {
     const url = route.request().url();
     if (url.includes("/users/u1/roles")) return route.fulfill(list([role]));

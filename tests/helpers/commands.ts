@@ -3,9 +3,10 @@ import type { Page } from "@playwright/test";
 export async function login(page: Page, email: string, password: string) {
   const context = page.context();
   const requestContext = context.request;
-  const response = await requestContext.post("http://localhost:4000/auth/sign-in", {
-    data: { email, password }
-  });
+  const response = await requestContext.post(
+    "http://localhost:4000/auth/sign-in",
+    { data: { email, password } },
+  );
   if (!response.ok()) {
     throw new Error(`Login API failed with status ${response.status()}`);
   }

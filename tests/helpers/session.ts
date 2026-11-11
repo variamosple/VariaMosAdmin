@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 
 /** A JSON answer for page.route */
-export const json = (data: unknown, status = 200) => ({
+export const json = <T>(data: T, status = 200) => ({
   status,
   contentType: "application/json",
   body: JSON.stringify(data),

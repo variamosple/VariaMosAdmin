@@ -11,7 +11,9 @@ export default defineConfig({
   failOnFlakyTests: !!process.env.CI,
   workers: process.env.PLAYWRIGHT_WORKERS
     ? Number(process.env.PLAYWRIGHT_WORKERS)
-    : (process.env.CI ? 1 : undefined),
+    : process.env.CI
+      ? 1
+      : undefined,
   reporter: [["html", { open: "never" }]],
   use: {
     baseURL: "http://localhost:3000",
@@ -41,6 +43,8 @@ export default defineConfig({
           {
             name: "webkit",
             use: { ...devices["Desktop Safari"] },
+            // WebKit drops Secure cookies over http://localhost
+            grepInvert: /@https-only/,
           },
         ],
   webServer: {

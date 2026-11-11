@@ -1,4 +1,4 @@
-import { test, expect } from "../helpers/mockedTest";
+import { expect, test } from "../helpers/mockedTest";
 import { mockSignedIn } from "../helpers/session";
 
 test.describe("Metrics - Mocked E2E Flows", () => {
@@ -10,7 +10,12 @@ test.describe("Metrics - Mocked E2E Flows", () => {
       defaultFilter: "30days",
       filters: ["7days", "30days", "90days"],
       labelKey: "date",
-      data: [["date", "value"], ["2026-07-20", 15], ["2026-07-21", 25], ["2026-07-22", 40]]
+      data: [
+        ["date", "value"],
+        ["2026-07-20", 15],
+        ["2026-07-21", 25],
+        ["2026-07-22", 40],
+      ],
     },
     {
       id: "m2",
@@ -19,8 +24,12 @@ test.describe("Metrics - Mocked E2E Flows", () => {
       defaultFilter: "all",
       filters: [],
       labelKey: "role",
-      data: [["role", "value"], ["Admin", 2], ["User", 45]]
-    }
+      data: [
+        ["role", "value"],
+        ["Admin", 2],
+        ["User", 45],
+      ],
+    },
   ];
 
   test.beforeEach(async ({ page, context }) => {
@@ -29,12 +38,14 @@ test.describe("Metrics - Mocked E2E Flows", () => {
     await mockSignedIn(page, ["metrics::query"]);
   });
 
-  test("should render charts and date filters on the Metrics dashboard", async ({ page }) => {
+  test("should render charts and date filters on the Metrics dashboard", async ({
+    page,
+  }) => {
     await page.route("**/v1/metrics", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: mockMetrics })
+        body: JSON.stringify({ data: mockMetrics }),
       });
     });
 
@@ -44,20 +55,32 @@ test.describe("Metrics - Mocked E2E Flows", () => {
     await page.goto("http://localhost:3000/#/metrics");
 
     await expect(page.locator("h1").first()).toHaveText("Metrics");
-    await expect(page.locator("h2", { hasText: "User Logins Over Time" })).toBeVisible();
-    await expect(page.locator("h2", { hasText: "Users by Role Distribution" })).toBeVisible();
+    await expect(
+      page.locator("h2", { hasText: "User Logins Over Time" }),
+    ).toBeVisible();
+    await expect(
+      page.locator("h2", { hasText: "Users by Role Distribution" }),
+    ).toBeVisible();
 
     await page.route("**/v1/metrics/m1*", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
-          data: { ...mockMetrics[0], data: [["date", "value"], ["2026-07-01", 5]] }
-        })
+          data: {
+            ...mockMetrics[0],
+            data: [
+              ["date", "value"],
+              ["2026-07-01", 5],
+            ],
+          },
+        }),
       });
     });
 
-    const loginsSection = page.locator("h2", { hasText: "User Logins Over Time" }).locator("..");
+    const loginsSection = page
+      .locator("h2", { hasText: "User Logins Over Time" })
+      .locator("..");
     await loginsSection.locator("button").click();
 
     await page.locator('input[name="fromDate"]').fill("2026-07-01");

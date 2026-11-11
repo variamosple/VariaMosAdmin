@@ -46,6 +46,12 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/*.md", "**/*.yml", "**/*.yaml", "**/*.grit"],
+      "formatter": { "enabled": false }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "double",

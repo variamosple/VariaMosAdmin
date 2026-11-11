@@ -1,25 +1,25 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'microfrontend-redirects',
+      name: "microfrontend-redirects",
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
-          const url = req.url || '';
-          if (url.startsWith('/variamos_languages')) {
-            res.writeHead(302, { Location: '/variamos_admin/#/languages' });
+          const url = req.url || "";
+          if (url.startsWith("/variamos_languages")) {
+            res.writeHead(302, { Location: "/variamos_admin/#/languages" });
             res.end();
-          } else if (url.startsWith('/variamos_projects')) {
-            res.writeHead(302, { Location: '/variamos_admin/#/projects' });
+          } else if (url.startsWith("/variamos_projects")) {
+            res.writeHead(302, { Location: "/variamos_admin/#/projects" });
             res.end();
-          } else if (url.startsWith('/variamos_models')) {
-            res.writeHead(302, { Location: '/variamos_admin/#/models' });
+          } else if (url.startsWith("/variamos_models")) {
+            res.writeHead(302, { Location: "/variamos_admin/#/models" });
             res.end();
-          } else if (url.startsWith('/variamos_bugs')) {
-            res.writeHead(302, { Location: '/variamos_admin/#/bugs' });
+          } else if (url.startsWith("/variamos_bugs")) {
+            res.writeHead(302, { Location: "/variamos_admin/#/bugs" });
             res.end();
           } else {
             next();
@@ -28,25 +28,25 @@ export default defineConfig({
       },
       configurePreviewServer(server) {
         server.middlewares.use((req, res, next) => {
-          const url = req.url || '';
-          if (url.startsWith('/variamos_languages')) {
-            res.writeHead(302, { Location: '/variamos_admin/#/languages' });
+          const url = req.url || "";
+          if (url.startsWith("/variamos_languages")) {
+            res.writeHead(302, { Location: "/variamos_admin/#/languages" });
             res.end();
-          } else if (url.startsWith('/variamos_projects')) {
-            res.writeHead(302, { Location: '/variamos_admin/#/projects' });
+          } else if (url.startsWith("/variamos_projects")) {
+            res.writeHead(302, { Location: "/variamos_admin/#/projects" });
             res.end();
-          } else if (url.startsWith('/variamos_models')) {
-            res.writeHead(302, { Location: '/variamos_admin/#/models' });
+          } else if (url.startsWith("/variamos_models")) {
+            res.writeHead(302, { Location: "/variamos_admin/#/models" });
             res.end();
-          } else if (url.startsWith('/variamos_bugs')) {
-            res.writeHead(302, { Location: '/variamos_admin/#/bugs' });
+          } else if (url.startsWith("/variamos_bugs")) {
+            res.writeHead(302, { Location: "/variamos_admin/#/bugs" });
             res.end();
           } else {
             next();
           }
         });
-      }
-    }
+      },
+    },
   ],
   resolve: {
     tsconfigPaths: true,

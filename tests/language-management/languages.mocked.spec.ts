@@ -1,4 +1,4 @@
-import { test, expect } from "../helpers/mockedTest";
+import { expect, test } from "../helpers/mockedTest";
 import { mockSignedIn } from "../helpers/session";
 
 test.describe("Language Management - Mocked Flows", () => {
@@ -10,7 +10,14 @@ test.describe("Language Management - Mocked Flows", () => {
       stateAccept: "ACTIVE",
       createdAt: "2026-07-20T10:00:00.000Z",
       updatedAt: "2026-07-20T11:00:00.000Z",
-      owners: [{ id: "admin1", name: "Admin User", email: "admin@example.com", accessLevel: "OWNER" }]
+      owners: [
+        {
+          id: "admin1",
+          name: "Admin User",
+          email: "admin@example.com",
+          accessLevel: "OWNER",
+        },
+      ],
     },
     {
       id: 2,
@@ -19,8 +26,8 @@ test.describe("Language Management - Mocked Flows", () => {
       stateAccept: "PENDING",
       createdAt: undefined,
       updatedAt: undefined,
-      owners: []
-    }
+      owners: [],
+    },
   ];
 
   test.beforeEach(async ({ page, context }) => {
@@ -36,15 +43,17 @@ test.describe("Language Management - Mocked Flows", () => {
           data: mockLanguages,
           totalItems: 2,
           totalPages: 1,
-          currentPage: 1
-        })
+          currentPage: 1,
+        }),
       });
     });
 
     await page.goto("http://localhost:3000/#/languages");
   });
 
-  test("should display languages list with correct headers, rows, and fallback for null dates", async ({ page }) => {
+  test("should display languages list with correct headers, rows, and fallback for null dates", async ({
+    page,
+  }) => {
     await expect(page.locator("h1")).toHaveText("Languages list");
     await expect(page.locator("table")).toBeVisible();
 
@@ -60,16 +69,25 @@ test.describe("Language Management - Mocked Flows", () => {
     await expect(spanishRow.locator("td").nth(5)).toHaveText("N/A");
   });
 
-  test("should perform dynamic filtering using debounced search field", async ({ page }) => {
+  test("should perform dynamic filtering using debounced search field", async ({
+    page,
+  }) => {
     await page.route("**/v1/admin/languages?*name=Eng*", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: [mockLanguages[0]], totalItems: 1, totalPages: 1, currentPage: 1 })
+        body: JSON.stringify({
+          data: [mockLanguages[0]],
+          totalItems: 1,
+          totalPages: 1,
+          currentPage: 1,
+        }),
       });
     });
 
-    const searchPromise = page.waitForResponse("**/v1/admin/languages?*name=Eng*");
+    const searchPromise = page.waitForResponse(
+      "**/v1/admin/languages?*name=Eng*",
+    );
     await page.locator('input[id="name"]').fill("Eng");
     await searchPromise;
 
@@ -77,16 +95,23 @@ test.describe("Language Management - Mocked Flows", () => {
     await expect(page.locator("tr", { hasText: "Spanish" })).not.toBeVisible();
   });
 
-  test("should inspect modal validation and trigger successful update", async ({ page }) => {
+  test("should inspect modal validation and trigger successful update", async ({
+    page,
+  }) => {
     const englishRow = page.locator("tr", { hasText: "English" });
     await englishRow.locator('button[title="Edit language"]').click();
 
-    await expect(page.getByRole("dialog", { name: "Edit a Language" })).toBeVisible();
+    await expect(
+      page.getByRole("dialog", { name: "Edit a Language" }),
+    ).toBeVisible();
     const nameInput = page.getByRole("dialog").getByLabel("Name");
     await expect(nameInput).toHaveValue("English");
 
     await nameInput.clear();
-    await page.getByRole("dialog").getByRole("button", { name: "Edit language" }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Edit language" })
+      .click();
     await expect(page.getByText("Language name is required")).toBeVisible();
 
     await nameInput.fill("English Edited");
@@ -95,11 +120,16 @@ test.describe("Language Management - Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: { ...mockLanguages[0], name: "English Edited" } })
+        body: JSON.stringify({
+          data: { ...mockLanguages[0], name: "English Edited" },
+        }),
       });
     });
 
-    await page.getByRole("dialog").getByRole("button", { name: "Edit language" }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Edit language" })
+      .click();
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 });

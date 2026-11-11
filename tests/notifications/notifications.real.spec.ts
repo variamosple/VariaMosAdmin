@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { login } from "../helpers/commands.js";
+import { expect, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
+import { login } from "../helpers/commands.js";
 
 test.describe("Notifications Admin - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
@@ -13,7 +13,9 @@ test.describe("Notifications Admin - Real E2E Flows", () => {
     await dbHelper.seedTestUsers(suffix);
   });
 
-  test("should login, navigate to notifications admin page, and broadcast notification successfully", async ({ page }) => {
+  test("should login, navigate to notifications admin page, and broadcast notification successfully", async ({
+    page,
+  }) => {
     await login(page, adminEmail, adminPassword);
     await page.goto("http://localhost:3000/variamos_admin/");
 
@@ -22,26 +24,46 @@ test.describe("Notifications Admin - Real E2E Flows", () => {
     await expect(page).toHaveURL(/.*notifications.*/);
 
     // Verify page loads
-    await expect(page.locator("h4")).toContainText("Manual Notifications Dashboard");
+    await expect(page.locator("h4")).toContainText(
+      "Manual Notifications Dashboard",
+    );
 
     // Fill form
-    await page.fill('input[placeholder="e.g., Scheduled Maintenance Alert"]', `E2E Live Broadcast ${suffix}`);
-    await page.fill('textarea[placeholder="Enter the notification message here..."]', "This is a real live broadcast test message.");
+    await page.fill(
+      'input[placeholder="e.g., Scheduled Maintenance Alert"]',
+      `E2E Live Broadcast ${suffix}`,
+    );
+    await page.fill(
+      'textarea[placeholder="Enter the notification message here..."]',
+      "This is a real live broadcast test message.",
+    );
 
     // Intercept API call to verify real request
-    const dispatchPromise = page.waitForResponse("**/v1/admin/notifications/dispatch");
+    const dispatchPromise = page.waitForResponse(
+      "**/v1/admin/notifications/dispatch",
+    );
     await page.click('button[type="submit"]');
     // Nothing is sent before the confirmation that counts the accounts
     const confirm = page.getByRole("dialog", { name: "Send notification" });
-    await expect(confirm).toContainText(`Send "E2E Live Broadcast ${suffix}" to`);
-    await confirm.getByRole("button", { name: /^Send to \d+ accounts?$/ }).click();
+    await expect(confirm).toContainText(
+      `Send "E2E Live Broadcast ${suffix}" to`,
+    );
+    await confirm
+      .getByRole("button", { name: /^Send to \d+ accounts?$/ })
+      .click();
     const response = await dispatchPromise;
     if (response.status() !== 200) {
-      console.error("DISPATCH FAILED:", response.status(), await response.text());
+      console.error(
+        "DISPATCH FAILED:",
+        response.status(),
+        await response.text(),
+      );
     }
     expect(response.status()).toBe(200);
 
     // Verify success banner is shown
-    await expect(page.locator(".alert-success")).toContainText("Notifications dispatched successfully!");
+    await expect(page.locator(".alert-success")).toContainText(
+      "Notifications dispatched successfully!",
+    );
   });
 });
