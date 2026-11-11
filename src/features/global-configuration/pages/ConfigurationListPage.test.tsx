@@ -2,15 +2,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as NotificationsAdminRepository from "@/features/notifications-admin/api/NotificationsAdminRepository";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import * as ConfigurationRepository from "../api/ConfigurationRepository";
 import type { Configuration } from "../domain/Entity/Configuration";
 import { ConfigurationListPage } from "./ConfigurationListPage";
 
+const session = { user: { permissions: [] as string[] } };
+
 vi.mock("@variamosple/variamos-components", async () =>
-  (
-    await import("@/shared/tests/mocks/variamosComponents")
-  ).variamosComponents(),
+  (await import("@/shared/tests/mocks/variamosComponents")).variamosComponents({
+    useSession: () => session as never,
+  }),
 );
 
 const toggle = (key: string, requiresMfa: boolean): Configuration => ({
@@ -44,6 +47,7 @@ describe("ConfigurationListPage (UX-14)", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    session.user.permissions = [];
   });
 
   const renderPage = async () => {
@@ -179,5 +183,69 @@ describe("ConfigurationListPage (UX-14)", () => {
     expect(
       screen.getByRole("tab", { name: "Security & Passwords" }),
     ).toHaveAttribute("aria-selected", "true");
+  });
+
+  describe("announcement of a setting users notice (EV-115 lot A)", () => {
+    const announced = () => {
+      const saved = new ResponseModel<Configuration>("ok");
+      saved.data = {
+        ...toggle("general.show_banner", false),
+        announcement: {
+          title: "Password rules updated",
+          body: "Passwords must now contain a special character.",
+          note: "Your current password keeps working.",
+        },
+      };
+      vi.mocked(ConfigurationRepository.updateConfiguration).mockResolvedValue(
+        saved,
+      );
+    };
+    const saveOne = async () => {
+      const user = await renderPage();
+      await user.click(
+        screen.getByLabelText("Toggle setting general.show_banner"),
+      );
+      await user.click(screen.getByRole("button", { name: "Save Changes" }));
+      return user;
+    };
+
+    it("offers the suggested text after the save, and sends nothing on refusal", async () => {
+      session.user.permissions = ["admin::notifications::dispatch"];
+      announced();
+      const dispatch = vi.spyOn(
+        NotificationsAdminRepository,
+        "dispatchNotification",
+      );
+      const user = await saveOne();
+
+      expect(
+        await screen.findByRole("dialog", { name: "Announce this change?" }),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText("Title")).toHaveValue(
+        "Password rules updated",
+      );
+      expect(screen.getByLabelText("Message")).toHaveValue(
+        "Passwords must now contain a special character. Your current password keeps working.",
+      );
+
+      await user.click(screen.getByRole("button", { name: "Don't announce" }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      );
+      expect(dispatch).not.toHaveBeenCalled();
+    });
+
+    it("offers nothing to someone who may not send notifications", async () => {
+      announced();
+      await saveOne();
+
+      await waitFor(() =>
+        expect(
+          ConfigurationRepository.queryConfigurations,
+        ).toHaveBeenCalledTimes(2),
+      );
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
   });
 });

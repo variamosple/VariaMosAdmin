@@ -16,6 +16,7 @@ import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
+import { RoleCheckboxList } from "@/shared/components/RoleCheckboxList";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import {
   countNotificationRecipients,
@@ -273,47 +274,15 @@ const NotificationsAdminPageComponent: FC = () => {
                   <Card className="mb-4 bg-light border-light">
                     <Card.Body>
                       <h6 className="fw-bold mb-2">Select Roles</h6>
-                      {loadingRoles && (
-                        <div className="text-muted d-flex align-items-center gap-2">
-                          <Spinner animation="border" size="sm" /> Loading
-                          roles...
-                        </div>
-                      )}
-                      {rolesError && (
-                        <Alert
-                          variant="danger"
-                          className="py-2 d-flex align-items-center gap-2"
-                        >
-                          <span>{rolesError}</span>
-                          <Button
-                            size="sm"
-                            variant="outline-danger"
-                            className="ms-auto"
-                            onClick={loadRoles}
-                          >
-                            Retry
-                          </Button>
-                        </Alert>
-                      )}
-                      {rolesTotal > roles.length && (
-                        <p className="small text-muted">
-                          Only the first {roles.length} of {rolesTotal} roles
-                          are listed.
-                        </p>
-                      )}
-                      <Row xs={1} sm={2} className="g-2">
-                        {roles.map((role) => (
-                          <Col key={role.id}>
-                            <Form.Check
-                              type="checkbox"
-                              id={`role-${role.id}`}
-                              label={role.name}
-                              checked={selectedRoles.includes(role.name)}
-                              onChange={() => handleRoleToggle(role.name)}
-                            />
-                          </Col>
-                        ))}
-                      </Row>
+                      <RoleCheckboxList
+                        roles={roles}
+                        total={rolesTotal}
+                        loading={loadingRoles}
+                        error={rolesError}
+                        onRetry={loadRoles}
+                        selected={selectedRoles}
+                        onToggle={handleRoleToggle}
+                      />
                     </Card.Body>
                   </Card>
                 )}
