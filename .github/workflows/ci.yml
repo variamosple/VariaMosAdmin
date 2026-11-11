@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Verify commit message format
         if: github.event_name == 'pull_request' && github.event.pull_request.user.login
@@ -121,7 +121,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Show the Edge version
         if: matrix.browser == 'msedge'
@@ -133,7 +133,7 @@ jobs:
       - name: Install the Playwright ffmpeg
         if: matrix.browser == 'msedge'
         run: |
-          npx playwright install ffmpeg
+          ./node_modules/.bin/playwright install ffmpeg
 
       - name: Run Mocked E2E Tests (${{ matrix.browser }})
         run: |

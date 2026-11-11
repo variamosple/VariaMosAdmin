@@ -5,7 +5,7 @@
 # slow Ubuntu mirror. The image version is the installed @playwright/test one.
 set -e
 
-if [ "$PLAYWRIGHT_IN_DOCKER" != "1" ]; then
+if [[ "$PLAYWRIGHT_IN_DOCKER" != "1" ]]; then
     exec npx playwright test "$@"
 fi
 
