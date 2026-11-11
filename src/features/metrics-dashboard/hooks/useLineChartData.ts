@@ -6,6 +6,8 @@ interface ChartAxes {
   yAxis: string[];
 }
 
+const MONTH = /^\d{4}-\d{2}$/;
+
 export const useLineChartData = (metric: Metric) => {
   const [activeFilter, setFilter] = useState(metric.defaultFilter);
 
@@ -18,7 +20,7 @@ export const useLineChartData = (metric: Metric) => {
         },
       },
       vAxis: {
-        title: "Visits",
+        title: "Count",
       },
       chartArea: { top: 20 },
       legend: { maxLines: 3 },
@@ -75,6 +77,10 @@ export const useLineChartData = (metric: Metric) => {
     const columns = ["Date", ...yAxis];
 
     const rows: (Date | number | string)[][] = xAxis.map((x: string) => {
+      // A month ("2026-09") stays a month: as a date it would read "Sep 1"
+      if (MONTH.test(x)) {
+        return [x, ...yAxis.map((y) => groupedData.get(y)?.[x] || 0)];
+      }
       const date = new Date(x);
       const userTimezoneOffset = date.getTimezoneOffset() * 60000;
 

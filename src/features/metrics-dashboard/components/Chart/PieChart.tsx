@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { Spinner } from "react-bootstrap";
 import {
   Cell,
   Legend,
@@ -7,14 +8,16 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import type { Metric } from "../../domain/Entity/Metric";
+import {
+  useChartContext,
+  withChartContextWrapper,
+} from "../../context/ChartContext";
 import { useChart } from "../../hooks/useChart";
+import { ChartDateFilter } from "./ChartDateFilter";
 
-export interface PieChartProps {
-  metric: Metric;
-}
-
-export const PieChart: FC<PieChartProps> = ({ metric }) => {
+// Filtered by period like the line charts (EV-90 lot A.3)
+const PieChartComponent: FC = () => {
+  const { metric, isLoading } = useChartContext();
   const { data: rawData } = useChart(metric);
 
   // Transform rawData [ ["Page", "Visits"], ["Home", 10] ] into Recharts format:
@@ -41,36 +44,60 @@ export const PieChart: FC<PieChartProps> = ({ metric }) => {
 
   return (
     <div className="d-flex flex-column align-items-center col-12 col-lg-6 mb-4">
-      <h2 className="fs-4 text-center my-2">{metric.title}</h2>
+      <div className="d-flex justify-content-between align-items-center my-2 w-100">
+        <h2 className="fs-4 my-0 text-center">{metric.title}</h2>
 
-      <div className="w-100" style={{ height: "350px" }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <RechartsPieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) =>
-                `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`
-              }
-              outerRadius={100}
-              innerRadius={isDoughnut ? 60 : 0}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {chartData.map((_entry, index) => (
-                <Cell
-                  key={`cell-${_entry.name}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </RechartsPieChart>
-        </ResponsiveContainer>
+        <ChartDateFilter id={metric.title} />
+      </div>
+
+      <div
+        className="d-flex justify-content-center align-items-center w-100"
+        style={{ height: "350px" }}
+      >
+        {isLoading && (
+          <Spinner
+            data-testid="loading-spinner"
+            className="mt-5"
+            animation="border"
+            variant="primary"
+          />
+        )}
+
+        {!isLoading && !metric.data && (
+          <span className="text-muted">No data found.</span>
+        )}
+
+        {!isLoading && metric.data && (
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsPieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) =>
+                  `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`
+                }
+                outerRadius={100}
+                innerRadius={isDoughnut ? 60 : 0}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {chartData.map((_entry, index) => (
+                  <Cell
+                    key={`cell-${_entry.name}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </RechartsPieChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
 };
+
+export const PieChart = withChartContextWrapper(PieChartComponent);

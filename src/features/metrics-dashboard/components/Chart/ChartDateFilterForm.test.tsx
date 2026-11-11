@@ -70,4 +70,48 @@ describe("ChartDateFilterForm Component", () => {
       });
     });
   });
+
+  it("sends the first and last day of the chosen month", async () => {
+    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+    const user = userEvent.setup();
+
+    await user.selectOptions(screen.getByLabelText("Period"), "month");
+    expect(screen.queryByLabelText("From")).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText("Month"), "2026-02");
+    await user.click(screen.getByText("Apply"));
+
+    await waitFor(() => {
+      expect(mockFilterSubmit).toHaveBeenCalledWith({
+        fromDate: "2026-02-01",
+        toDate: "2026-02-28",
+      });
+    });
+  });
+
+  it("sends the whole chosen year", async () => {
+    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+    const user = userEvent.setup();
+
+    await user.selectOptions(screen.getByLabelText("Period"), "year");
+    await user.type(screen.getByLabelText("Year"), "2025");
+    await user.click(screen.getByText("Apply"));
+
+    await waitFor(() => {
+      expect(mockFilterSubmit).toHaveBeenCalledWith({
+        fromDate: "2025-01-01",
+        toDate: "2025-12-31",
+      });
+    });
+  });
+
+  it("asks for a year before sending anything", async () => {
+    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+    const user = userEvent.setup();
+
+    await user.selectOptions(screen.getByLabelText("Period"), "year");
+    await user.click(screen.getByText("Apply"));
+
+    expect(await screen.findByText("Year is required")).toBeInTheDocument();
+    expect(mockFilterSubmit).not.toHaveBeenCalled();
+  });
 });
