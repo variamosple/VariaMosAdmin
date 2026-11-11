@@ -1,8 +1,4 @@
-import {
-  useDebouncedValue,
-  usePaginatedQuery,
-} from "@variamosple/variamos-components";
-import { type FC, useCallback, useEffect, useState } from "react";
+import { type FC, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
 import { queryPermissions } from "@/features/permission-management/api/PermissionRepository";
@@ -11,7 +7,15 @@ import { PermissionsFilter } from "@/features/permission-management/domain/Entit
 import type { RolePermission } from "@/features/role-management/domain/Entity/RolePermission";
 import { InfiniteSelect } from "@/shared/components/InfiniteSelect";
 import type { SelectOptionProps } from "@/shared/components/InfiniteSelect/index.types";
-import useIntersectionObserver from "@/shared/hooks/useIntersectionObserver";
+import { useSearchableOptions } from "@/shared/hooks/useSearchableOptions";
+
+const searchPermissions = (search: string, page: number) =>
+  queryPermissions(new PermissionsFilter(search, page));
+
+const toOption = ({ id, name }: Permission): SelectOptionProps<number> => ({
+  label: name,
+  value: Number(id),
+});
 
 export interface RolePermissionFormProps {
   onRolePermissionSubmit: (rolePermission: RolePermission) => void;
@@ -30,72 +34,14 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
     label: "",
     value: 0,
   });
-  const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [debouncedSearchInput] = useDebouncedValue<string>(searchValue, 500);
-  const [permissionOptions, setSemanticOptions] = useState<
-    SelectOptionProps<number>[]
-  >([]);
-
-  const onSearchChange = (search: string) => {
-    setSearchInput(search);
-    setSearchValue(search);
-  };
-
-  const handleSelect = (option: SelectOptionProps<number>) => {
-    setSelectedOption(option);
-    setSearchInput(option.label);
-    setSearchValue("");
-  };
-
-  const transformToSelectOptions = useCallback(
-    (permissions: Permission[]): SelectOptionProps<number>[] => {
-      if (!permissions) return [];
-
-      return permissions?.map(({ id, name }) => {
-        return {
-          label: name,
-          value: id,
-        } as SelectOptionProps<number>;
-      });
-    },
-    [],
-  );
-
   const {
-    loadData: loadPermissionsData,
-    isLoading: isFetchingPermissions,
-    currentPage: currentPermissionsPage,
-    setCurrentPage: setPermissionsCurrentPage,
-    totalItems: totalPermissionItems,
-  } = usePaginatedQuery<PermissionsFilter, Permission>({
-    queryFunction: queryPermissions,
-    initialFilter: new PermissionsFilter(),
-  });
-
-  const { lastEntryRef, setHasMore, page } = useIntersectionObserver(
-    isFetchingPermissions,
-    currentPermissionsPage,
-    setPermissionsCurrentPage,
-  );
-
-  const fetchAndSetPermissions = useCallback(async () => {
-    loadPermissionsData(new PermissionsFilter(debouncedSearchInput, page)).then(
-      (result) => {
-        if (page === 1) setSemanticOptions([]);
-
-        setSemanticOptions((prev) => [
-          ...prev,
-          ...transformToSelectOptions(result?.data || []),
-        ]);
-      },
-    );
-  }, [
-    debouncedSearchInput,
-    page,
-    loadPermissionsData,
-    transformToSelectOptions,
-  ]);
+    options: permissionOptions,
+    isFetching,
+    lastOptionRef,
+    searchInput,
+    onSearchChange,
+    onOptionChosen,
+  } = useSearchableOptions({ query: searchPermissions, toOption });
 
   const {
     control,
@@ -108,22 +54,6 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
       onRolePermissionSubmit(data);
     }
   };
-
-  useEffect(() => {
-    fetchAndSetPermissions();
-  }, [fetchAndSetPermissions]);
-
-  useEffect(() => {
-    if (totalPermissionItems === 0) return;
-    if (!isFetchingPermissions) {
-      setHasMore(permissionOptions?.length < totalPermissionItems);
-    }
-  }, [
-    permissionOptions,
-    totalPermissionItems,
-    isFetchingPermissions,
-    setHasMore,
-  ]);
 
   return (
     <Form
@@ -142,10 +72,11 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
               placeholder="Select a permission"
               handleSelect={(option) => {
                 onChange(option.value);
-                handleSelect(option);
+                setSelectedOption(option);
+                onOptionChosen(option);
               }}
-              isFetchingOptions={isFetchingPermissions}
-              lastOptionRef={lastEntryRef}
+              isFetchingOptions={isFetching}
+              lastOptionRef={lastOptionRef}
               isSearchable={true}
               searchInput={searchInput}
               setSearchInput={onSearchChange}

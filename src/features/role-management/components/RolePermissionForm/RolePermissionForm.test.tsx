@@ -1,43 +1,18 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
-import {
-  useDebouncedValue,
-  usePaginatedQuery,
-} from "@variamosple/variamos-components";
+import { queryPermissions } from "@/features/permission-management/api/PermissionRepository";
 import { RolePermissionForm } from "./index";
 
-// Mock dependencies
-vi.mock("@/shared/hooks/useIntersectionObserver", async () => {
-  return {
-    default: () => ({
-      lastEntryRef: vi.fn(),
-      setHasMore: vi.fn(),
-      page: 1,
-    }),
-  };
-});
+vi.mock("@variamosple/variamos-components", async () =>
+  (await import("@/shared/tests/mocks/variamosComponents")).variamosComponents({
+    useDebouncedValue: <T,>(value: T) => [value] as never,
+  }),
+);
 
-vi.mock("@variamosple/variamos-components", async () => {
-  return {
-    useDebouncedValue: vi.fn((val) => [val]),
-    usePaginatedQuery: vi.fn(),
-    ResponseModel: class ResponseModel<T> {
-      errorCode?: number;
-      message?: string;
-      data?: T;
-      type: string;
-      constructor(type: string) {
-        this.type = type;
-      }
-      withError(code: number, msg: string) {
-        this.errorCode = code;
-        this.message = msg;
-        return this;
-      }
-    },
-  };
-});
+vi.mock("@/features/permission-management/api/PermissionRepository", () => ({
+  queryPermissions: vi.fn(),
+}));
 
 vi.mock("@/shared/components/InfiniteSelect", async () => {
   return {
@@ -76,32 +51,17 @@ vi.mock("@/shared/components/InfiniteSelect", async () => {
 });
 
 describe("RolePermissionForm", () => {
-  const usePaginatedQueryMock = usePaginatedQuery as import("vitest").Mock;
-  const useDebouncedValueMock = useDebouncedValue as import("vitest").Mock;
-
-  const mockLoadData = vi.fn();
-  const mockSetCurrentPage = vi.fn();
   const mockOnRolePermissionSubmit = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    useDebouncedValueMock.mockImplementation((val) => [val]);
-
-    mockLoadData.mockResolvedValue({
+    vi.mocked(queryPermissions).mockResolvedValue({
       data: [
         { id: 101, name: "Read Permission" },
         { id: 102, name: "Write Permission" },
       ],
-    });
-
-    usePaginatedQueryMock.mockReturnValue({
-      loadData: mockLoadData,
-      isLoading: false,
-      currentPage: 1,
-      setCurrentPage: mockSetCurrentPage,
-      totalItems: 2,
-    });
+      totalCount: 2,
+    } as Awaited<ReturnType<typeof queryPermissions>>);
   });
 
   it("should render selection input and submit button", async () => {
