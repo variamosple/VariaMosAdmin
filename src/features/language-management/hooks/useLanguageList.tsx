@@ -104,7 +104,7 @@ export const useLanguageList = () => {
     });
 
     if (language.id !== undefined) {
-      updateLanguage({
+      void updateLanguage({
         id: language.id,
         name: language.name,
         stateAccept: LanguageStatus.DELETED,

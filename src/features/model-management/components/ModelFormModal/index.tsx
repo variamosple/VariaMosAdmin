@@ -104,7 +104,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
         isPublic: String(data.isPublic) === "true",
         languageId: data.languageId ? Number(data.languageId) : undefined,
       } as Model;
-      onModelSubmit(formattedData).then((response) => {
+      void onModelSubmit(formattedData).then((response) => {
         if (!response.errorCode) {
           reset();
           setSelectedLanguageId(undefined);

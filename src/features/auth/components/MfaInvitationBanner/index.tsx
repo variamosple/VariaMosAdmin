@@ -61,7 +61,7 @@ export const MfaInvitationBanner: FC = () => {
     }
     if (closedRecently(userId, Date.now())) return;
     let current = true;
-    getMfaStatus().then((response) => {
+    void getMfaStatus().then((response) => {
       if (current) {
         setShow(
           !response.errorCode &&

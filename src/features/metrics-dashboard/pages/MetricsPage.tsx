@@ -13,7 +13,7 @@ const MetricsPageComponent: FC = () => {
 
   const getMetrics = useCallback(() => {
     setIsLoading(true);
-    queryMetrics()
+    void queryMetrics()
       .then((response) => {
         setMetrics(response.data || []);
       })

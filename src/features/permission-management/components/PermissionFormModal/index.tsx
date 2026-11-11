@@ -41,7 +41,7 @@ export const PermissionFormModal: FC<PermissionFormModalProps> = ({
 
   const onSubmit: SubmitHandler<Permission> = (data) => {
     if (!isLoading) {
-      onPermissionSubmit(data).then((response) => {
+      void onPermissionSubmit(data).then((response) => {
         if (!response.errorCode) {
           reset();
         }

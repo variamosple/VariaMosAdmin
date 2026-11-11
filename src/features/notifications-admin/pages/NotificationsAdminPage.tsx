@@ -79,7 +79,7 @@ const NotificationsAdminPageComponent: FC = () => {
   }, []);
 
   useEffect(() => {
-    loadRoles();
+    void loadRoles();
   }, [loadRoles]);
 
   const handleRoleToggle = (roleName: string) => {

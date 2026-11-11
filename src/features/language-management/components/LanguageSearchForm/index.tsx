@@ -56,7 +56,7 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
     }
 
     timeoutRef.current = setTimeout(() => {
-      handleSubmit(submit)();
+      void handleSubmit(submit)();
     }, 500);
 
     return () => {

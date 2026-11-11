@@ -65,7 +65,7 @@ export const setupAxiosInterceptors = (
         // A code, never the server text: the login page shows its own. The
         // current page is given back after sign-in (UX-27).
         const redirectTo = encodeURIComponent(window.location.href);
-        navigate(`/login?reason=session-expired&redirectTo=${redirectTo}`);
+        void navigate(`/login?reason=session-expired&redirectTo=${redirectTo}`);
       }
 
       return Promise.reject(error);

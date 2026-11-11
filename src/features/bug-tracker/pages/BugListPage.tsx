@@ -84,7 +84,7 @@ const BugListPageComponent: FC = () => {
     setSelectedBugForDetails(bug);
     setNoteError(null);
     if (bug?.id) {
-      fetchNotes(bug.id);
+      void fetchNotes(bug.id);
     }
   };
 
@@ -287,7 +287,7 @@ const BugListPageComponent: FC = () => {
         confirmButtonVariant="danger"
         cancelLabel="Keep in inbox"
         onConfirm={() => {
-          if (bugToReject?.id) handleReject(bugToReject.id);
+          if (bugToReject?.id) void handleReject(bugToReject.id);
           setBugToReject(null);
         }}
         onCancel={() => setBugToReject(null)}
@@ -451,7 +451,7 @@ const BugListPageComponent: FC = () => {
                       assignedAdmins: result.assignees,
                     });
                     // The API notes the change in the timeline
-                    fetchNotes(bugId);
+                    void fetchNotes(bugId);
                     return null;
                   }}
                 />
@@ -476,7 +476,7 @@ const BugListPageComponent: FC = () => {
                           ...selectedBugForDetails,
                           status,
                         });
-                        fetchNotes(bugId);
+                        void fetchNotes(bugId);
                       }
                       return failure;
                     }}

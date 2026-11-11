@@ -115,14 +115,14 @@ const ConfigurationListPageComponent: FC = () => {
   };
   const onScheduled = (change: ScheduledChange) => {
     setScheduling(undefined);
-    scheduled.reload();
+    void scheduled.reload();
     offerAnnouncement(change);
   };
   const cancelPlanned = async (change: ScheduledChange) => {
     setToCancel(undefined);
     setCancelError(null);
     const response = await cancelScheduledChange(change.id);
-    scheduled.reload();
+    void scheduled.reload();
     if (response.errorCode || !response.data) {
       setCancelError(
         response.message || "The planned change could not be cancelled.",

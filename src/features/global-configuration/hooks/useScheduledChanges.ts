@@ -18,7 +18,7 @@ export const useScheduledChanges = () => {
   }, []);
 
   useEffect(() => {
-    reload();
+    void reload();
   }, [reload]);
 
   return { changes, error, reload };

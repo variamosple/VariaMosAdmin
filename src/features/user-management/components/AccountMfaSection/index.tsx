@@ -35,7 +35,7 @@ export const AccountMfaSection: FC<AccountMfaSectionProps> = ({ userId }) => {
     operator.id !== userId;
 
   const refresh = useCallback(() => {
-    getAccountMfaStatus(userId).then((response) => {
+    void getAccountMfaStatus(userId).then((response) => {
       setStatus(response.errorCode ? null : (response.data ?? null));
     });
   }, [userId]);
@@ -49,7 +49,7 @@ export const AccountMfaSection: FC<AccountMfaSectionProps> = ({ userId }) => {
   const onConfirm = () => {
     setShowConfirm(false);
     setIsBusy(true);
-    resetAccountMfa(userId)
+    void resetAccountMfa(userId)
       .then((response) => {
         if (response.errorCode) {
           pushToast({

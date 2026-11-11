@@ -47,7 +47,7 @@ export const PersonalInformationUpdateForModal: FC<
   const onSubmit: SubmitHandler<PersonalInformationUpdate> = (data) => {
     if (!isLoading) {
       setServerError(null);
-      onUpdatePersonalInformationSubmit(data).then((response) => {
+      void onUpdatePersonalInformationSubmit(data).then((response) => {
         if (!response.errorCode) {
           reset();
         } else {
@@ -67,7 +67,7 @@ export const PersonalInformationUpdateForModal: FC<
 
   useEffect(() => {
     if (showModal && !isLoadingCountries && !areCountriesLoaded) {
-      loadData(null);
+      void loadData(null);
     }
   }, [showModal, loadData, isLoadingCountries, areCountriesLoaded]);
 

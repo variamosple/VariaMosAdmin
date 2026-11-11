@@ -53,7 +53,7 @@ const RoleDetailsPageComponent: FC = () => {
 
   const queryRole = useCallback((roleId: number) => {
     setIsLoading(true);
-    queryRoleById(roleId)
+    void queryRoleById(roleId)
       .then((response) => {
         setProblem(loadProblemOf(response));
         setRole(response.data ?? undefined);
@@ -71,7 +71,7 @@ const RoleDetailsPageComponent: FC = () => {
     });
 
     if (roleIdParam) {
-      createRolePermission({
+      void createRolePermission({
         ...rolePermission,
         roleId: Number.parseInt(roleIdParam, 10),
       })
@@ -86,7 +86,7 @@ const RoleDetailsPageComponent: FC = () => {
             });
           } else {
             if (rolePermissionsFilter) {
-              loadRolePermissions(rolePermissionsFilter);
+              void loadRolePermissions(rolePermissionsFilter);
             }
 
             pushToast({
@@ -118,7 +118,7 @@ const RoleDetailsPageComponent: FC = () => {
     });
 
     if (roleIdParam && permission.id !== undefined) {
-      deleteRolePermission(
+      void deleteRolePermission(
         new RolePermission(Number.parseInt(roleIdParam, 10), permission.id),
       ).then((response) => {
         removeToast(toastId);

@@ -63,7 +63,7 @@ export const useConfigurationList = () => {
   );
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   // Update a value locally in the sandbox

@@ -5,7 +5,8 @@ WORKDIR /app
 
 # Dependencies first: a change of the source code reuses this layer (T-30)
 COPY package.json package-lock.json ./
-RUN npm ci
+# No lifecycle script of the dependencies runs during the build
+RUN npm ci --ignore-scripts
 
 # Source code, with the .env file written by the deployment workflow; the
 # security headers list the API addresses of that same file (EV-75 lot 3)

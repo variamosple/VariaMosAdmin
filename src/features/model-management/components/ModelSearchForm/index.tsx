@@ -116,7 +116,7 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
     }
 
     timeoutRef.current = setTimeout(() => {
-      handleSubmit(submit)();
+      void handleSubmit(submit)();
     }, 500);
 
     return () => {

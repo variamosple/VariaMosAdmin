@@ -105,7 +105,10 @@ const LanguageListPageComponent: FC = () => {
         confirmButtonVariant="success"
         onConfirm={() => {
           if (toToggleLanguage) {
-            performEditLanguage({ ...toToggleLanguage, stateAccept: "ACTIVE" });
+            void performEditLanguage({
+              ...toToggleLanguage,
+              stateAccept: "ACTIVE",
+            });
           }
           setShowActivateConfirm(false);
           setToToggleLanguage(undefined);
@@ -124,7 +127,7 @@ const LanguageListPageComponent: FC = () => {
         confirmButtonVariant="warning"
         onConfirm={() => {
           if (toToggleLanguage) {
-            performEditLanguage({
+            void performEditLanguage({
               ...toToggleLanguage,
               stateAccept: "PENDING",
             });

@@ -36,7 +36,7 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
 
   const onSubmit: SubmitHandler<Language> = (data) => {
     if (!isLoading) {
-      onLanguageSubmit(data).then((response) => {
+      void onLanguageSubmit(data).then((response) => {
         if (!response.errorCode) {
           reset();
         }

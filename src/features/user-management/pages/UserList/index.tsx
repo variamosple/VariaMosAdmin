@@ -85,7 +85,7 @@ const UserListPageComponent: FC = () => {
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (selectedUser) {
-            performDisableUser(selectedUser);
+            void performDisableUser(selectedUser);
           }
           setShowDisable(false);
         }}
@@ -102,7 +102,7 @@ const UserListPageComponent: FC = () => {
         confirmLabel="Enable user"
         onConfirm={() => {
           if (selectedUser) {
-            performEnableUser(selectedUser);
+            void performEnableUser(selectedUser);
           }
           setShowEnable(false);
         }}
@@ -120,7 +120,7 @@ const UserListPageComponent: FC = () => {
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (selectedUser) {
-            performDeleteUser(selectedUser);
+            void performDeleteUser(selectedUser);
           }
           setShowDelete(false);
         }}

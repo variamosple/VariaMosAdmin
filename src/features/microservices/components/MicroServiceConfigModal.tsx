@@ -57,7 +57,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
     if (!show || !serviceName) return;
 
     setLoading(true);
-    Promise.all([
+    void Promise.all([
       getMicroServiceConfigurations(serviceName),
       getMicroServiceAuditLogs(serviceName),
     ])

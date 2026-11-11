@@ -25,7 +25,7 @@ until $(curl --output /dev/null --silent --head --fail http://localhost:$PORT); 
     printf '.'
     sleep 1
     count=$((count+1))
-    if [ $count -gt 30 ]; then
+    if [[ $count -gt 30 ]]; then
         echo "Error: Timeout waiting for frontend container to start!"
         docker stop $CONTAINER_NAME || true
         docker rm $CONTAINER_NAME || true

@@ -10,7 +10,7 @@ export const useAssignableUsers = (enabled: boolean): BugUserRef[] => {
   useEffect(() => {
     if (!enabled) return;
     let active = true;
-    queryAssignableUsers().then((res) => {
+    void queryAssignableUsers().then((res) => {
       if (active && !res.errorCode) setUsers(res.data ?? []);
     });
     return () => {

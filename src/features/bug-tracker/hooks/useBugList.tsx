@@ -89,12 +89,12 @@ export const useBugList = () => {
 
   // Fetch repos and categories on mount
   useEffect(() => {
-    queryBugRepos().then((res) => {
+    void queryBugRepos().then((res) => {
       if (!res.errorCode) {
         setRepos(res.data || []);
       }
     });
-    queryCategories().then((res) => {
+    void queryCategories().then((res) => {
       if (!res.errorCode) {
         setCategories(res.data || []);
       }
@@ -139,7 +139,7 @@ export const useBugList = () => {
 
   // Trigger loading
   useEffect(() => {
-    fetchBugs();
+    void fetchBugs();
   }, [fetchBugs]);
 
   // Bug Notes Functions
@@ -207,7 +207,7 @@ export const useBugList = () => {
 
     setShowCreate(false);
     setIsSubmitting(false);
-    fetchBugs(); // Refresh list
+    void fetchBugs(); // Refresh list
     return true; // Indicates success
   };
 

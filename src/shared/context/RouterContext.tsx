@@ -52,7 +52,7 @@ export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
       } else if (base !== "/" && route.startsWith(base)) {
         route = route.slice(base.length);
       }
-      navigate(route.replace(/^\/?#/, "") || "/", options);
+      void navigate(route.replace(/^\/?#/, "") || "/", options);
     },
     [navigate, pathname],
   );
