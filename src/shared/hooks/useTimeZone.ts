@@ -12,7 +12,8 @@ export const useTimeZone = () => {
 
   useEffect(() => {
     let current = true;
-    getMyPreferences().then((response) => {
+    // The repository turns every failure into an answer: nothing to catch
+    void getMyPreferences().then((response) => {
       const zone = response.data?.timeZone ?? null;
       // A zone this browser does not know would fail every conversion
       if (current) setChosen(zone && isKnownTimeZone(zone) ? zone : null);
