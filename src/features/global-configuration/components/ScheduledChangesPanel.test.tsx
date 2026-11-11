@@ -38,6 +38,7 @@ describe("ScheduledChangesPanel (EV-115 lot B)", () => {
         error={null}
         userId="admin-1"
         canUpdate
+        timeZone="America/Bogota"
         onEdit={onEdit}
         onCancel={onCancel}
       />,
@@ -46,8 +47,11 @@ describe("ScheduledChangesPanel (EV-115 lot B)", () => {
     expect(
       screen.getByRole("heading", { name: "Planned changes" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/on 2026-11-15 13:00 UTC/)).toBeInTheDocument();
-    expect(screen.getByText(/planned by you/)).toBeInTheDocument();
+    // In UTC, then in the time zone of the profile (EV-115 lot C)
+    expect(
+      screen.getByText(/on 2026-11-15 13:00 UTC · 08:00 Bogota \(UTC−5\)/),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Planned by you")).toBeInTheDocument();
     expect(screen.getByText("Not applied")).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -85,7 +89,7 @@ describe("ScheduledChangesPanel (EV-115 lot B)", () => {
     );
 
     expect(
-      screen.getByText(/planned by another administrator/),
+      screen.getByText("Planned by another administrator"),
     ).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });

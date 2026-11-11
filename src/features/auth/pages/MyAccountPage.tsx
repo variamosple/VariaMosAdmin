@@ -18,6 +18,7 @@ import {
   updateUserPassword,
 } from "../api/AuthRepository";
 import { PasswordUpdateForm } from "../components/PasswordUpdateForm";
+import { TimeZoneSetting } from "../components/TimeZoneSetting";
 import { TwoFactorCard } from "../components/TwoFactorCard";
 
 const MyAccountPageComponent: FC = () => {
@@ -148,6 +149,10 @@ const MyAccountPageComponent: FC = () => {
 
         <Col className="col-12 col-md-6">
           <span className="fw-bold">Country: </span> {user?.countryName}
+        </Col>
+
+        <Col className="col-12 col-md-6">
+          <TimeZoneSetting />
         </Col>
 
         <Col className="col-12 col-md-6">

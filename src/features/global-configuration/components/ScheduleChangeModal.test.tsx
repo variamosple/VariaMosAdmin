@@ -40,7 +40,7 @@ const saved = () => {
   return response;
 };
 
-const renderModal = (change?: ScheduledChange) => {
+const renderModal = (change?: ScheduledChange, timeZone?: string) => {
   const onSaved = vi.fn();
   render(
     <ScheduleChangeModal
@@ -48,6 +48,7 @@ const renderModal = (change?: ScheduledChange) => {
       change={change}
       onClose={vi.fn()}
       onSaved={onSaved}
+      timeZone={timeZone}
       now={() => NOW}
     />,
   );
@@ -75,7 +76,11 @@ describe("ScheduleChangeModal (EV-115 lot B)", () => {
       screen.getByLabelText("Apply on (UTC)"),
       "2026-11-15T13:00",
     );
-    expect(screen.getByText(/^Your time: /)).toBeInTheDocument();
+    expect(screen.getByText(/^2026-11-15 13:00 UTC\./)).toBeInTheDocument();
+    // Without a time zone of its own, nothing to switch to
+    expect(
+      screen.queryByRole("group", { name: "Time zone of the date" }),
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Schedule" }));
 
     await waitFor(() => expect(onSaved).toHaveBeenCalled());
@@ -132,5 +137,88 @@ describe("ScheduleChangeModal (EV-115 lot B)", () => {
     ).toBeInTheDocument();
     expect(reschedule).toHaveBeenCalledWith(4, 12, "2026-11-20T09:00:00.000Z");
     expect(onSaved).not.toHaveBeenCalled();
+  });
+
+  describe("in the time zone of the profile (EV-115 lot C)", () => {
+    const typeDue = async (
+      user: ReturnType<typeof userEvent.setup>,
+      label: string,
+      input: string,
+    ) => {
+      await user.clear(screen.getByLabelText(label));
+      await user.type(screen.getByLabelText(label), input);
+    };
+
+    it("takes a time typed in Bogota and plans its instant in UTC", async () => {
+      const schedule = vi
+        .spyOn(ScheduledChangeRepository, "scheduleChange")
+        .mockResolvedValue(saved());
+      const { onSaved, user } = renderModal(PLANNED, "America/Bogota");
+      vi.spyOn(ScheduledChangeRepository, "rescheduleChange").mockResolvedValue(
+        saved(),
+      );
+
+      // The planned 09:00 UTC is 04:00 in Bogota
+      await user.click(screen.getByRole("button", { name: "Bogota" }));
+      expect(screen.getByLabelText("Apply on (Bogota)")).toHaveValue(
+        "2026-11-20T04:00",
+      );
+      await typeDue(user, "Apply on (Bogota)", "2026-11-20T08:00");
+      expect(
+        screen.getByText(/^2026-11-20 13:00 UTC · 08:00 Bogota \(UTC−5\)\./),
+      ).toBeInTheDocument();
+      await user.click(
+        screen.getByRole("button", { name: "Save the planned change" }),
+      );
+
+      await waitFor(() => expect(onSaved).toHaveBeenCalled());
+      expect(ScheduledChangeRepository.rescheduleChange).toHaveBeenCalledWith(
+        4,
+        12,
+        "2026-11-20T13:00:00.000Z",
+      );
+      expect(schedule).not.toHaveBeenCalled();
+    });
+
+    it("refuses a time that does not exist when clocks move forward", async () => {
+      const schedule = vi.spyOn(ScheduledChangeRepository, "scheduleChange");
+      const { user } = renderModal(undefined, "Europe/Paris");
+
+      await user.click(screen.getByRole("button", { name: "Paris" }));
+      await typeDue(user, "Apply on (Paris)", "2027-03-28T02:30");
+      await user.click(screen.getByRole("button", { name: "Schedule" }));
+
+      expect(
+        screen.getAllByText(
+          "This time does not exist in Paris: clocks move forward that night.",
+        ).length,
+      ).toBeGreaterThan(0);
+      expect(schedule).not.toHaveBeenCalled();
+    });
+
+    it("lets the administrator choose a time that comes twice when clocks move back", async () => {
+      const schedule = vi
+        .spyOn(ScheduledChangeRepository, "scheduleChange")
+        .mockResolvedValue(saved());
+      const { user } = renderModal(undefined, "Europe/Paris");
+
+      await user.click(screen.getByRole("button", { name: "Paris" }));
+      await typeDue(user, "Apply on (Paris)", "2027-10-31T02:30");
+      expect(
+        screen.getByLabelText("First time, UTC+2 (2027-10-31 00:30 UTC)"),
+      ).toBeChecked();
+      await user.click(
+        screen.getByLabelText("Second time, UTC+1 (2027-10-31 01:30 UTC)"),
+      );
+      await user.click(screen.getByRole("button", { name: "Schedule" }));
+
+      await waitFor(() =>
+        expect(schedule).toHaveBeenCalledWith(
+          "security.password.min_length",
+          8,
+          "2027-10-31T01:30:00.000Z",
+        ),
+      );
+    });
   });
 });

@@ -25,6 +25,7 @@ import {
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { IconButton } from "@/shared/components/IconButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { useTimeZone } from "@/shared/hooks/useTimeZone";
 import { cancelScheduledChange } from "../api/ScheduledChangeRepository";
 import { AnnounceChangesModal } from "../components/AnnounceChangesModal";
 import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
@@ -85,8 +86,10 @@ const ConfigurationListPageComponent: FC = () => {
     if (suggested && canAnnounce) setAnnouncement(suggested);
   };
 
-  // Changes planned for a later date (EV-115 lot B)
+  // Changes planned for a later date (EV-115 lot B), shown beside UTC in
+  // the time zone of the profile (lot C)
   const scheduled = useScheduledChanges();
+  const { timeZone } = useTimeZone();
   const plannedByKey = useMemo(
     () =>
       new Map(
@@ -487,6 +490,7 @@ const ConfigurationListPageComponent: FC = () => {
           change={scheduling.change}
           onClose={() => setScheduling(undefined)}
           onSaved={onScheduled}
+          timeZone={timeZone}
         />
       )}
 
@@ -519,6 +523,7 @@ const ConfigurationListPageComponent: FC = () => {
         error={scheduled.error}
         userId={user?.id}
         canUpdate={canUpdate}
+        timeZone={timeZone}
         onEdit={editPlanned}
         onCancel={setToCancel}
       />

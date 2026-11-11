@@ -20,14 +20,19 @@ export const ADMIN = {
  * Answers the session check with a signed-in account that holds these
  * permissions; `user` changes the other fields of the account.
  */
-export const mockSignedIn = (
+export const mockSignedIn = async (
   page: Page,
   permissions: string[],
   user: Partial<typeof ADMIN> = {},
-) =>
-  page.route("**/auth/session-info", (route) =>
+) => {
+  await page.route("**/auth/session-info", (route) =>
     route.fulfill(json({ data: { user: { ...ADMIN, ...user, permissions } } })),
   );
+  // Read by the pages that show times: no time zone chosen (EV-115 lot C)
+  await page.route("**/auth/my-account/preferences", (route) =>
+    route.fulfill(json({ data: { timeZone: null, updatedAt: null } })),
+  );
+};
 
 /** Answers the session check as when no one is signed in */
 export const mockSignedOut = (page: Page) =>

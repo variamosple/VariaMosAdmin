@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as NotificationsAdminRepository from "@/features/notifications-admin/api/NotificationsAdminRepository";
+import * as PreferencesRepository from "@/shared/api/PreferencesRepository";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import * as ConfigurationRepository from "../api/ConfigurationRepository";
 import * as ScheduledChangeRepository from "../api/ScheduledChangeRepository";
@@ -55,6 +56,12 @@ describe("ConfigurationListPage (UX-14)", () => {
       ScheduledChangeRepository,
       "queryScheduledChanges",
     ).mockResolvedValue(planned([]));
+    // No time zone chosen: the browser's
+    const preferences = new ResponseModel<{ timeZone: string | null }>("ok");
+    preferences.data = { timeZone: null };
+    vi.spyOn(PreferencesRepository, "getMyPreferences").mockResolvedValue(
+      preferences,
+    );
   });
 
   afterEach(() => {
