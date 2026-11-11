@@ -14,6 +14,8 @@ export interface DispatchNotificationRequest {
   body: string;
   // Key of the message: sent again with it, it reaches each account once
   eventId?: string;
+  // Keys of the settings the message announces (EV-115 lot A)
+  announces?: string[];
 }
 
 export const dispatchNotification = (

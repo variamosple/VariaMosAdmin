@@ -4,8 +4,13 @@ import {
   queryConfigurations,
   updateConfiguration,
 } from "../api/ConfigurationRepository";
+import {
+  announcementOfChanges,
+  type ChangeAnnouncement,
+} from "../domain/Entity/ChangeAnnouncement";
 import type {
   Configuration,
+  ConfigurationAnnouncement,
   ConfigurationValue,
 } from "../domain/Entity/Configuration";
 
@@ -93,13 +98,18 @@ export const useConfigurationList = () => {
   /**
    * Saves every modified key, one request each, and says which were saved
    * and which were refused. A refusal does not stop the others, and the
-   * refused edits stay on screen with their reason (UX-14).
+   * refused edits stay on screen with their reason (UX-14). Answers the
+   * announcement the saved settings suggest, if any (EV-115 lot A).
    */
-  const saveChanges = async () => {
-    if (modifiedKeys.length === 0) return;
+  const saveChanges = async (): Promise<ChangeAnnouncement | null> => {
+    if (modifiedKeys.length === 0) return null;
     setIsUpdating(true);
 
     const saved: string[] = [];
+    const savedAnnouncements: {
+      key: string;
+      announcement?: ConfigurationAnnouncement;
+    }[] = [];
     const failures: Record<string, string> = {};
     const keptEdits: Record<string, ConfigurationValue> = {};
 
@@ -111,6 +121,10 @@ export const useConfigurationList = () => {
         const response = await updateConfiguration(key, localConfig.value);
         if (!response.errorCode) {
           saved.push(key);
+          savedAnnouncements.push({
+            key,
+            announcement: response.data?.announcement,
+          });
         } else {
           failures[key] =
             response.message ?? `Failed to update configuration '${key}'.`;
@@ -145,6 +159,7 @@ export const useConfigurationList = () => {
     }
     // What the server now holds, with the refused edits kept on top
     await loadData(keptEdits);
+    return announcementOfChanges(savedAnnouncements);
   };
 
   return {

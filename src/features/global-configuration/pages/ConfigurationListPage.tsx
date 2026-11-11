@@ -1,4 +1,4 @@
-import { withPageVisit } from "@variamosple/variamos-components";
+import { useSession, withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useMemo, useState } from "react";
 import {
   Alert,
@@ -24,13 +24,17 @@ import {
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { IconButton } from "@/shared/components/IconButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { AnnounceChangesModal } from "../components/AnnounceChangesModal";
 import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
+import type { ChangeAnnouncement } from "../domain/Entity/ChangeAnnouncement";
 import type { Configuration } from "../domain/Entity/Configuration";
 import {
   categoriesOf,
   categoryLabel,
 } from "../domain/Entity/ConfigurationCategory";
 import { useConfigurationList } from "../hooks/useConfigurationList";
+
+const NOTIFICATION_DISPATCH_PERMISSION = "admin::notifications::dispatch";
 
 const lockedLabel = (config: Configuration) =>
   config.isReadOnly
@@ -56,6 +60,17 @@ const ConfigurationListPageComponent: FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [toEditConfig, setToEditConfig] = useState<Configuration>();
   const [showEdit, setShowEdit] = useState<boolean>(false);
+  // Offered after saving a setting users notice, to whoever may send it
+  const canAnnounce = (useSession()?.user?.permissions ?? []).includes(
+    NOTIFICATION_DISPATCH_PERMISSION,
+  );
+  const [announcement, setAnnouncement] = useState<ChangeAnnouncement | null>(
+    null,
+  );
+  const save = async () => {
+    const suggested = await saveChanges();
+    if (suggested && canAnnounce) setAnnouncement(suggested);
+  };
 
   // One tab per category found in the configurations
   const categories = useMemo(
@@ -347,7 +362,7 @@ const ConfigurationListPageComponent: FC = () => {
               variant="primary"
               size="sm"
               disabled={isUpdating}
-              onClick={() => void saveChanges()}
+              onClick={() => void save()}
             >
               {isUpdating ? (
                 <Spinner
@@ -374,6 +389,11 @@ const ConfigurationListPageComponent: FC = () => {
           setConfirming(undefined);
         }}
         onCancel={() => setConfirming(undefined)}
+      />
+
+      <AnnounceChangesModal
+        announcement={announcement}
+        onClose={() => setAnnouncement(null)}
       />
 
       <ConfigurationFormModal

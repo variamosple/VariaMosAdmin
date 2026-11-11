@@ -14,6 +14,13 @@ export interface AcceptedValues {
   format?: "timeZone" | "timeSpan";
 }
 
+export interface ConfigurationAnnouncement {
+  title: string;
+  body: string;
+  /** Said once when several settings are announced together. */
+  note?: string;
+}
+
 export interface Configuration {
   id?: number;
   key: string;
@@ -29,6 +36,11 @@ export interface Configuration {
   isApplied?: boolean;
   /** Absent for a key that no code reads, and from older backends. */
   accepts?: AcceptedValues;
+  /**
+   * The announcement its value suggests, for a setting users notice
+   * (EV-115 lot A); absent for the others, and from older backends.
+   */
+  announcement?: ConfigurationAnnouncement;
   targetServices: string[];
   description?: string;
   updatedBy?: string;
