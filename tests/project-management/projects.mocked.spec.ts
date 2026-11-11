@@ -1,4 +1,4 @@
-import { test, expect } from "../helpers/mockedTest";
+import { expect, test } from "../helpers/mockedTest";
 import { mockSignedIn } from "../helpers/session";
 
 test.describe("Project Management - Mocked Flows", () => {
@@ -6,7 +6,8 @@ test.describe("Project Management - Mocked Flows", () => {
     {
       id: "p1",
       name: "English Web Project",
-      description: "A very long description that should be truncated by CSS styling in the table view to test text overflow handling",
+      description:
+        "A very long description that should be truncated by CSS styling in the table view to test text overflow handling",
       author: "Admin User",
       source: "Web Application Creator",
       date: "2026-07-20T10:00:00.000Z",
@@ -18,11 +19,13 @@ test.describe("Project Management - Mocked Flows", () => {
             name: "Core PL",
             type: "software",
             domain: "education",
-            domainEngineering: { models: [{ id: "m-1", name: "Domain model 1" }] },
-            applicationEngineering: { models: [] }
-          }
-        ]
-      }
+            domainEngineering: {
+              models: [{ id: "m-1", name: "Domain model 1" }],
+            },
+            applicationEngineering: { models: [] },
+          },
+        ],
+      },
     },
     {
       id: "p2",
@@ -32,8 +35,8 @@ test.describe("Project Management - Mocked Flows", () => {
       source: "Mobile app client",
       date: null,
       template: false,
-      project: {}
-    }
+      project: {},
+    },
   ];
 
   test.beforeEach(async ({ page, context }) => {
@@ -45,14 +48,21 @@ test.describe("Project Management - Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: mockProjects, totalItems: 2, totalPages: 1, currentPage: 1 })
+        body: JSON.stringify({
+          data: mockProjects,
+          totalItems: 2,
+          totalPages: 1,
+          currentPage: 1,
+        }),
       });
     });
 
     await page.goto("http://localhost:3000/#/projects");
   });
 
-  test("should display projects table, fallback values, and accordion details", async ({ page }) => {
+  test("should display projects table, fallback values, and accordion details", async ({
+    page,
+  }) => {
     await expect(page.locator("h1")).toHaveText("Projects list");
     await expect(page.locator("table")).toBeVisible();
 
@@ -68,35 +78,59 @@ test.describe("Project Management - Mocked Flows", () => {
     await expect(row2.locator("td").nth(4)).toHaveText("N/A");
 
     await row1.locator('button[title="Show/Hide project details"]').click();
-    await page.getByRole("button", { name: "Product Line: Core PL - Type: software - Domain: education" }).click();
-    await page.getByRole("button", { name: "Domain Engineering - Models" }).click();
+    await page
+      .getByRole("button", {
+        name: "Product Line: Core PL - Type: software - Domain: education",
+      })
+      .click();
+    await page
+      .getByRole("button", { name: "Domain Engineering - Models" })
+      .click();
     await expect(page.getByText("Domain model 1")).toBeVisible();
   });
 
-  test("should support dynamic query filtering via SearchForm", async ({ page }) => {
+  test("should support dynamic query filtering via SearchForm", async ({
+    page,
+  }) => {
     await page.route("**/v1/admin/projects?*name=Spanish*", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: [mockProjects[1]], totalItems: 1, totalPages: 1, currentPage: 1 })
+        body: JSON.stringify({
+          data: [mockProjects[1]],
+          totalItems: 1,
+          totalPages: 1,
+          currentPage: 1,
+        }),
       });
     });
 
     await page.locator('input[id="name"]').fill("Spanish");
-    await expect(page.locator("tr", { hasText: "Spanish Mobile Project" })).toBeVisible();
-    await expect(page.locator("tr", { hasText: "English Web Project" })).not.toBeVisible();
+    await expect(
+      page.locator("tr", { hasText: "Spanish Mobile Project" }),
+    ).toBeVisible();
+    await expect(
+      page.locator("tr", { hasText: "English Web Project" }),
+    ).not.toBeVisible();
   });
 
-  test("should inspect edit modal fields, trigger validation, and submit updates", async ({ page }) => {
+  test("should inspect edit modal fields, trigger validation, and submit updates", async ({
+    page,
+  }) => {
     const row = page.locator("tr", { hasText: "English Web Project" });
     await row.locator('button[title="Edit project"]').click();
 
-    await expect(page.getByRole("dialog", { name: "Edit a Project" })).toBeVisible();
+    await expect(
+      page.getByRole("dialog", { name: "Edit a Project" }),
+    ).toBeVisible();
     const nameInput = page.getByRole("dialog").getByLabel("Name");
     await expect(nameInput).toHaveValue("English Web Project");
 
     await nameInput.clear();
-    await page.getByRole("dialog").getByRole("button", { name: "Edit project", exact: true }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Edit project", exact: true })
+      .click();
     await expect(page.getByText("Project name is required")).toBeVisible();
 
     await nameInput.fill("English Web Project Updated");
@@ -105,11 +139,16 @@ test.describe("Project Management - Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: { ...mockProjects[0], name: "English Web Project Updated" } })
+        body: JSON.stringify({
+          data: { ...mockProjects[0], name: "English Web Project Updated" },
+        }),
       });
     });
 
-    await page.getByRole("dialog").getByRole("button", { name: "Edit project", exact: true }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Edit project", exact: true })
+      .click();
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 });

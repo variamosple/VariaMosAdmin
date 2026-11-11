@@ -1,10 +1,10 @@
-import { test, expect } from "../helpers/mockedTest";
+import { expect, test } from "../helpers/mockedTest";
 import { mockSignedOut } from "../helpers/session";
 
 test.describe("Auth - Comprehensive Mocked Flows", () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    
+
     // Default session mock (not logged in)
     await mockSignedOut(page);
   });
@@ -18,7 +18,9 @@ test.describe("Auth - Comprehensive Mocked Flows", () => {
       await page.goto("http://localhost:3000/#/login");
     });
 
-    test("should validate sign-in form inputs (empty values and syntax validation)", async ({ page }) => {
+    test("should validate sign-in form inputs (empty values and syntax validation)", async ({
+      page,
+    }) => {
       await page.locator('button[type="submit"]').click();
       await expect(page.getByText("Email is required")).toBeVisible();
       await expect(page.getByText("Password is required")).toBeVisible();
@@ -39,17 +41,23 @@ test.describe("Auth - Comprehensive Mocked Flows", () => {
       await page.goto("http://localhost:3000/#/sign-up");
     });
 
-    test("should show validation errors for empty fields and password mismatch in sign-up", async ({ page }) => {
+    test("should show validation errors for empty fields and password mismatch in sign-up", async ({
+      page,
+    }) => {
       await page.locator('button[type="submit"]').click();
       await expect(page.getByText("Full name is required")).toBeVisible();
       await expect(page.getByText("Email is required")).toBeVisible();
       await expect(page.getByText("password is required")).toBeVisible();
-      await expect(page.getByText("Please confirm your password")).toBeVisible();
+      await expect(
+        page.getByText("Please confirm your password"),
+      ).toBeVisible();
 
       await page.locator('input[name="name"]').fill("John Doe");
       await page.locator('input[name="email"]').fill("john@example.com");
       await page.locator('input[name="password"]').fill("Password123!");
-      await page.locator('input[name="passwordConfirmation"]').fill("Different123!");
+      await page
+        .locator('input[name="passwordConfirmation"]')
+        .fill("Different123!");
       await page.locator('button[type="submit"]').click();
 
       await expect(page.getByText("Passwords do not match")).toBeVisible();
@@ -65,7 +73,9 @@ test.describe("Auth - Comprehensive Mocked Flows", () => {
       await page.goto("http://localhost:3000/#/forgot-password");
     });
 
-    test("should validate input and redirect / show confirmation on success", async ({ page }) => {
+    test("should validate input and redirect / show confirmation on success", async ({
+      page,
+    }) => {
       await page.locator('button[type="submit"]').click();
       await expect(page.getByText("Email is required")).toBeVisible();
 
@@ -75,18 +85,22 @@ test.describe("Auth - Comprehensive Mocked Flows", () => {
           contentType: "application/json",
           body: JSON.stringify({
             success: true,
-            message: "Email sent successfully"
-          })
+            message: "Email sent successfully",
+          }),
         });
       });
 
       await page.locator('input[name="email"]').fill("user@variamos-test.com");
-      
+
       const responsePromise = page.waitForResponse("**/auth/forgot-password");
       await page.locator('button[type="submit"]').click();
       await responsePromise;
 
-      await expect(page.getByText("If an account with this email exists, a password reset link has been sent. Please check your inbox!")).toBeVisible();
+      await expect(
+        page.getByText(
+          "If an account with this email exists, a password reset link has been sent. Please check your inbox!",
+        ),
+      ).toBeVisible();
     });
   });
 });

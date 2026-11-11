@@ -32,7 +32,18 @@
     "autohide",
     "otpauth",
     "qrcode",
-    "totp"
+    "totp",
+    "deadcode",
+    "ILIKE",
+    "isenabled",
+    "laggy",
+    "microfrontend",
+    "networkidle",
+    "sockjs",
+    "taze",
+    "tootallnate",
+    "unstub",
+    "worktrees"
   ],
   "ignorePaths": [
     "node_modules/**",

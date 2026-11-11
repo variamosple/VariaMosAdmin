@@ -1,5 +1,5 @@
-import { defineConfig } from "vitest/config";
 import path from "node:path";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
@@ -19,7 +19,7 @@ export default defineConfig({
       "**/strykerTmp/**",
       // The end-to-end tests at the root, not the helpers of src/shared/tests
       "tests/**",
-      "**/.worktrees/**"
+      "**/.worktrees/**",
     ],
     coverage: {
       provider: "v8",
@@ -48,8 +48,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
-      "react": path.resolve(import.meta.dirname, "./node_modules/react"),
-      "react-dom": path.resolve(import.meta.dirname, "./node_modules/react-dom"),
+      react: path.resolve(import.meta.dirname, "./node_modules/react"),
+      "react-dom": path.resolve(
+        import.meta.dirname,
+        "./node_modules/react-dom",
+      ),
     },
   },
 });

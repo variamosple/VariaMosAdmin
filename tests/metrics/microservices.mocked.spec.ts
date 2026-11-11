@@ -43,7 +43,10 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
     await context.clearCookies();
 
     // Mock session info
-    await mockSignedIn(page, ["micro-services::query", "micro-services::manage"]);
+    await mockSignedIn(page, [
+      "micro-services::query",
+      "micro-services::manage",
+    ]);
   });
 
   test("should load dashboard, display metrics/uptime, trigger refresh, configure params, and manage container lifecycle", async ({
@@ -209,16 +212,12 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
       hasText: "Administration Service",
     });
     await updatedAdminRow.locator('button[title="Stop Service"]').click();
-    await expect(
-      page.getByText("Stop Administration Service?"),
-    ).toBeVisible();
+    await expect(page.getByText("Stop Administration Service?")).toBeVisible();
     await page.getByRole("button", { name: "Stop microservice" }).click();
 
     // 8. Test Start Container Confirmation Flow
     await langRow.locator('button[title="Start Service"]').click();
-    await expect(
-      page.getByText("Start Languages Service?"),
-    ).toBeVisible();
+    await expect(page.getByText("Start Languages Service?")).toBeVisible();
     await page.getByRole("button", { name: "Start microservice" }).click();
   });
 });

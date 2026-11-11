@@ -1,4 +1,4 @@
-import { test, expect } from "../helpers/mockedTest";
+import { expect, test } from "../helpers/mockedTest";
 import { mockSignedIn } from "../helpers/session";
 
 test.describe("Model Management - Mocked Flows", () => {
@@ -15,7 +15,14 @@ test.describe("Model Management - Mocked Flows", () => {
       isPublic: true,
       isDeleted: false,
       languageId: 1,
-      owners: [{ id: "admin1", name: "Admin User", email: "admin@example.com", accessLevel: "OWNER" }]
+      owners: [
+        {
+          id: "admin1",
+          name: "Admin User",
+          email: "admin@example.com",
+          accessLevel: "OWNER",
+        },
+      ],
     },
     {
       id: "2",
@@ -29,20 +36,29 @@ test.describe("Model Management - Mocked Flows", () => {
       isPublic: false,
       isDeleted: false,
       languageId: 1,
-      owners: []
-    }
+      owners: [],
+    },
   ];
 
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
 
-    await mockSignedIn(page, ["admin::models::query", "admin::models::create", "admin::models::update"]);
+    await mockSignedIn(page, [
+      "admin::models::query",
+      "admin::models::create",
+      "admin::models::update",
+    ]);
 
     await page.route("**/v1/admin/models*", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: mockModels, totalItems: 2, totalPages: 1, currentPage: 1 })
+        body: JSON.stringify({
+          data: mockModels,
+          totalItems: 2,
+          totalPages: 1,
+          currentPage: 1,
+        }),
       });
     });
 
@@ -50,7 +66,7 @@ test.describe("Model Management - Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: [{ id: "p1", name: "Project One" }] })
+        body: JSON.stringify({ data: [{ id: "p1", name: "Project One" }] }),
       });
     });
 
@@ -58,14 +74,21 @@ test.describe("Model Management - Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: [{ id: 1, name: "Java" }, { id: 2, name: "Python" }] })
+        body: JSON.stringify({
+          data: [
+            { id: 1, name: "Java" },
+            { id: 2, name: "Python" },
+          ],
+        }),
       });
     });
 
     await page.goto("http://localhost:3000/#/models");
   });
 
-  test("should display models list with correct headers, rows, and allow details expansion", async ({ page }) => {
+  test("should display models list with correct headers, rows, and allow details expansion", async ({
+    page,
+  }) => {
     await expect(page.locator("h1")).toHaveText("Models list");
     await expect(page.locator("table")).toBeVisible();
 
@@ -79,36 +102,62 @@ test.describe("Model Management - Mocked Flows", () => {
     await expect(row).toContainText("Domain Model");
 
     await row.locator('button[title="Show/Hide model details"]').click();
-    await expect(page.locator("div.row", { hasText: "Owners" }).getByText("Admin User (admin@example.com)")).toBeVisible();
+    await expect(
+      page
+        .locator("div.row", { hasText: "Owners" })
+        .getByText("Admin User (admin@example.com)"),
+    ).toBeVisible();
 
     await row.locator('button[title="Show/Hide model details"]').click();
-    await expect(page.locator("div.row", { hasText: "Owners" }).getByText("Admin User (admin@example.com)")).not.toBeVisible();
+    await expect(
+      page
+        .locator("div.row", { hasText: "Owners" })
+        .getByText("Admin User (admin@example.com)"),
+    ).not.toBeVisible();
   });
 
-  test("should perform dynamic filtering using debounced search field", async ({ page }) => {
+  test("should perform dynamic filtering using debounced search field", async ({
+    page,
+  }) => {
     await page.route("**/v1/admin/models?*name=First*", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: [mockModels[0]], totalItems: 1, totalPages: 1, currentPage: 1 })
+        body: JSON.stringify({
+          data: [mockModels[0]],
+          totalItems: 1,
+          totalPages: 1,
+          currentPage: 1,
+        }),
       });
     });
 
-    await page.locator('input[placeholder="Search by model name or project name"]').fill("First");
+    await page
+      .locator('input[placeholder="Search by model name or project name"]')
+      .fill("First");
     await expect(page.locator("tr", { hasText: "First Model" })).toBeVisible();
-    await expect(page.locator("tr", { hasText: "Second Model" })).not.toBeVisible();
+    await expect(
+      page.locator("tr", { hasText: "Second Model" }),
+    ).not.toBeVisible();
   });
 
-  test("should inspect modal validation and trigger successful update", async ({ page }) => {
+  test("should inspect modal validation and trigger successful update", async ({
+    page,
+  }) => {
     const row = page.locator("tr", { hasText: "First Model" });
     await row.locator('button[title="Edit model"]').click();
 
-    await expect(page.getByRole("dialog", { name: "Edit a Model" })).toBeVisible();
+    await expect(
+      page.getByRole("dialog", { name: "Edit a Model" }),
+    ).toBeVisible();
     const input = page.getByRole("dialog").getByLabel("Name");
     await expect(input).toHaveValue("First Model");
 
     await input.clear();
-    await page.getByRole("dialog").getByRole("button", { name: "Edit model" }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Edit model" })
+      .click();
     await expect(page.getByText("Model name is required")).toBeVisible();
 
     await input.fill("First Model Edited");
@@ -117,60 +166,81 @@ test.describe("Model Management - Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: { ...mockModels[0], name: "First Model Edited" } })
+        body: JSON.stringify({
+          data: { ...mockModels[0], name: "First Model Edited" },
+        }),
       });
     });
 
-    await page.getByRole("dialog").getByRole("button", { name: "Edit model" }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Edit model" })
+      .click();
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 
-  test("should perform quick toggles for level and visibility", async ({ page }) => {
+  test("should perform quick toggles for level and visibility", async ({
+    page,
+  }) => {
     const row = page.locator("tr", { hasText: "First Model" });
-    
+
     // Toggle Level
-    await row.locator('button[title="Toggle model level (Domain/Application)"]').click();
-    await expect(page.getByRole("dialog")).toContainText('Change the level of the model "First Model" to Application Model?');
-    
+    await row
+      .locator('button[title="Toggle model level (Domain/Application)"]')
+      .click();
+    await expect(page.getByRole("dialog")).toContainText(
+      'Change the level of the model "First Model" to Application Model?',
+    );
+
     await page.route("**/v1/admin/models/1", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: { ...mockModels[0], modelLevel: "application" } })
+        body: JSON.stringify({
+          data: { ...mockModels[0], modelLevel: "application" },
+        }),
       });
     });
     await page.getByRole("button", { name: "Change level" }).click();
 
     // Toggle Visibility
-    await row.locator('button[title="Toggle model visibility (Public/Private)"]').click();
-    await expect(page.getByRole("dialog")).toContainText('Make the model "First Model" private?');
-    
+    await row
+      .locator('button[title="Toggle model visibility (Public/Private)"]')
+      .click();
+    await expect(page.getByRole("dialog")).toContainText(
+      'Make the model "First Model" private?',
+    );
+
     await page.route("**/v1/admin/models/1", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: { ...mockModels[0], isPublic: false } })
+        body: JSON.stringify({ data: { ...mockModels[0], isPublic: false } }),
       });
     });
     await page.getByRole("button", { name: "Make private" }).click();
   });
 
-  test("should support searchable language dropdown when creating a model", async ({ page }) => {
+  test("should support searchable language dropdown when creating a model", async ({
+    page,
+  }) => {
     await page.getByRole("button", { name: "Create model" }).click();
     await expect(page.getByRole("dialog", { name: "New model" })).toBeVisible();
 
     // Open language dropdown
     await page.getByRole("button", { name: "Select a language..." }).click();
-    
+
     // Search for Python
-    const searchInput = page.getByRole("dialog").getByPlaceholder("Type to search...");
+    const searchInput = page
+      .getByRole("dialog")
+      .getByPlaceholder("Type to search...");
     await searchInput.fill("Py");
-    
+
     // Check Java is hidden, Python is shown
     await expect(page.getByRole("button", { name: "Java" })).not.toBeVisible();
     const pythonItem = page.getByRole("button", { name: "Python" });
     await expect(pythonItem).toBeVisible();
-    
+
     // Select Python
     await pythonItem.click();
     await expect(page.getByRole("button", { name: "Python" })).toBeVisible(); // Selected name displayed on toggle button

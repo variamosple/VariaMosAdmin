@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { login } from "../helpers/commands.js";
+import { expect, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
+import { login } from "../helpers/commands.js";
 
 test.describe("Metrics & Monitoring - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
@@ -13,7 +13,9 @@ test.describe("Metrics & Monitoring - Real E2E Flows", () => {
     await dbHelper.seedTestVisits(suffix);
   });
 
-  test("should retrieve and display real metric charts on the dashboard", async ({ page }) => {
+  test("should retrieve and display real metric charts on the dashboard", async ({
+    page,
+  }) => {
     await login(page, adminEmail, adminPassword);
     await page.goto("http://localhost:3000/variamos_admin/");
 
@@ -22,10 +24,14 @@ test.describe("Metrics & Monitoring - Real E2E Flows", () => {
 
     await expect(page.locator("h1").first()).toHaveText("Metrics");
 
-    await expect(page.getByText("Daily Unique Visits")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("Daily Unique Visits")).toBeVisible({
+      timeout: 30000,
+    });
     await expect(page.getByText("Daily Visits")).toBeVisible();
     await expect(page.getByText("Monthly Visits")).toBeVisible();
-    await expect(page.getByText("Top visited pages", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Top visited pages", { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText("Yearly visits")).toBeVisible();
   });
 

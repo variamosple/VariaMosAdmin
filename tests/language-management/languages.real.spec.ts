@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { login } from "../helpers/commands.js";
+import { expect, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
+import { login } from "../helpers/commands.js";
 
 test.describe("Language Management - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
@@ -13,7 +13,9 @@ test.describe("Language Management - Real E2E Flows", () => {
     await dbHelper.seedTestLanguages(suffix);
   });
 
-  test("should show seeded languages, update a language, and delete another", async ({ page }) => {
+  test("should show seeded languages, update a language, and delete another", async ({
+    page,
+  }) => {
     await login(page, adminEmail, adminPassword);
     await page.goto("http://localhost:3000/variamos_admin/");
 
@@ -23,39 +25,68 @@ test.describe("Language Management - Real E2E Flows", () => {
     await languagesPromise;
 
     // Filter table by unique suffix so the seeded languages are on page 1
-    const searchPromise = page.waitForResponse(response => 
-      response.url().includes("v1/admin/languages") && response.url().includes("name=" + suffix)
+    const searchPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("v1/admin/languages") &&
+        response.url().includes(`name=${suffix}`),
     );
     await page.locator('input[id="name"]').fill(suffix);
     await searchPromise;
 
-    await expect(page.locator("tbody tr", { hasText: `Test Custom Language-Active-${suffix}` })).toBeVisible();
-    await expect(page.locator("tbody tr", { hasText: `Test Custom Language-Pending-${suffix}` })).toBeVisible();
+    await expect(
+      page.locator("tbody tr", {
+        hasText: `Test Custom Language-Active-${suffix}`,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.locator("tbody tr", {
+        hasText: `Test Custom Language-Pending-${suffix}`,
+      }),
+    ).toBeVisible();
 
-    const activeRow = page.locator("tbody tr", { hasText: `Test Custom Language-Active-${suffix}` });
+    const activeRow = page.locator("tbody tr", {
+      hasText: `Test Custom Language-Active-${suffix}`,
+    });
     await activeRow.locator('button[title="Edit language"]').click();
 
     await expect(page.locator(".modal-title")).toHaveText("Edit a Language");
-    await page.locator('.modal input[placeholder="Language name"]').fill(`Test Custom Language-Active-${suffix} Edited`);
-    await page.locator('.modal select[aria-label="State"]').selectOption("PENDING");
+    await page
+      .locator('.modal input[placeholder="Language name"]')
+      .fill(`Test Custom Language-Active-${suffix} Edited`);
+    await page
+      .locator('.modal select[aria-label="State"]')
+      .selectOption("PENDING");
 
-    await page.locator(".modal-footer").getByRole("button", { name: "Edit language" }).click();
+    await page
+      .locator(".modal-footer")
+      .getByRole("button", { name: "Edit language" })
+      .click();
     await expect(page.locator(".modal-title")).not.toBeVisible();
 
-    const updatedRow = page.locator("tbody tr", { hasText: `Test Custom Language-Active-${suffix} Edited` });
+    const updatedRow = page.locator("tbody tr", {
+      hasText: `Test Custom Language-Active-${suffix} Edited`,
+    });
     await expect(updatedRow.locator("td").nth(2)).toHaveText("PENDING");
 
-    const pendingRow = page.locator("tbody tr", { hasText: `Test Custom Language-Pending-${suffix}` });
+    const pendingRow = page.locator("tbody tr", {
+      hasText: `Test Custom Language-Pending-${suffix}`,
+    });
     await pendingRow.locator('button[title="Delete language"]').click();
 
     const confirmModal = page.getByRole("dialog", { name: "Delete language" });
-    await expect(confirmModal).toContainText(`Delete the language "Test Custom Language-Pending-${suffix}"?`);
+    await expect(confirmModal).toContainText(
+      `Delete the language "Test Custom Language-Pending-${suffix}"?`,
+    );
     await confirmModal.getByRole("button", { name: "Delete language" }).click();
 
     // Verify the language is now DELETED and its delete button is hidden (soft-delete)
-    const deletedRow = page.locator("tbody tr", { hasText: `Test Custom Language-Pending-${suffix}` });
+    const deletedRow = page.locator("tbody tr", {
+      hasText: `Test Custom Language-Pending-${suffix}`,
+    });
     await expect(deletedRow.locator("td").nth(2)).toHaveText("DELETED");
-    await expect(deletedRow.locator('button[title="Delete language"]')).not.toBeVisible();
+    await expect(
+      deletedRow.locator('button[title="Delete language"]'),
+    ).not.toBeVisible();
   });
 
   test.afterAll(async () => {

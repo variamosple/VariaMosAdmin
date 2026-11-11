@@ -1,4 +1,4 @@
-import { test, expect } from "../helpers/mockedTest";
+import { expect, test } from "../helpers/mockedTest";
 import { mockSignedIn } from "../helpers/session";
 
 test.describe("Global Configurations - Mocked E2E Flows", () => {
@@ -35,7 +35,10 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await context.clearCookies();
 
     // Mock Session Info with proper permissions
-    await mockSignedIn(page, ["configurations::query", "configurations::update"]);
+    await mockSignedIn(page, [
+      "configurations::query",
+      "configurations::update",
+    ]);
 
     // Mock configurations query
     await page.route("**/v1/configurations", async (route) => {
@@ -50,35 +53,46 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     });
 
     // No change planned for a later date (EV-115 lot B)
-    await page.route("**/v1/configurations/scheduled-changes", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ data: [] }),
-      });
-    });
+    await page.route(
+      "**/v1/configurations/scheduled-changes",
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ data: [] }),
+        });
+      },
+    );
 
     await page.goto("http://localhost:3000/#/configurations");
   });
 
-  test("should display configurations list grouped under correct tabs", async ({ page }) => {
+  test("should display configurations list grouped under correct tabs", async ({
+    page,
+  }) => {
     await expect(page.locator("h1")).toHaveText("Global Configurations");
     await expect(page.locator("table").first()).toBeVisible();
 
     // Check General tab row
     const siteNameRow = page.locator("tr", { hasText: "general.site_name" });
-    await expect(siteNameRow.locator("td").first()).toContainText("Platform name displayed on the user interface.");
+    await expect(siteNameRow.locator("td").first()).toContainText(
+      "Platform name displayed on the user interface.",
+    );
     await expect(siteNameRow.locator("td").nth(1)).toContainText("VariaMos");
 
     // Click on Security & Passwords Tab
     await page.click('button:has-text("Security & Passwords")');
 
-    const passwordRow = page.locator("tr", { hasText: "security.password.min_length" });
+    const passwordRow = page.locator("tr", {
+      hasText: "security.password.min_length",
+    });
     await expect(passwordRow.locator("td").first()).toContainText("LOCKED");
     await expect(passwordRow.locator("td").nth(1)).toContainText("12");
   });
 
-  test("should toggle boolean configurations directly (Sandbox mode)", async ({ page }) => {
+  test("should toggle boolean configurations directly (Sandbox mode)", async ({
+    page,
+  }) => {
     // Add a boolean config to mock list temporarily
     await page.route("**/v1/configurations", async (route) => {
       await route.fulfill({
@@ -108,7 +122,9 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await page.reload();
     await page.click('button:has-text("Security & Passwords")');
 
-    const toggle = page.locator('input[type="checkbox"][id*="security.password.require_special"]');
+    const toggle = page.locator(
+      'input[type="checkbox"][id*="security.password.require_special"]',
+    );
     await expect(toggle).toBeChecked();
 
     // Toggle off locally
@@ -116,7 +132,9 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
 
     // Alert banner for unsaved changes should be visible
     await expect(page.getByRole("alert")).toBeVisible();
-    await expect(page.getByRole("alert")).toContainText("You have unsaved changes.");
+    await expect(page.getByRole("alert")).toContainText(
+      "You have unsaved changes.",
+    );
 
     // Discard changes, after the confirmation
     await page.getByRole("button", { name: "Discard" }).click();
@@ -125,13 +143,17 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await expect(toggle).toBeChecked();
   });
 
-  test("should open modal, edit config, and submit to trigger save workflow", async ({ page }) => {
+  test("should open modal, edit config, and submit to trigger save workflow", async ({
+    page,
+  }) => {
     // Edit site_name config which uses the Form Modal
     const siteNameRow = page.locator("tr", { hasText: "general.site_name" });
     await siteNameRow.locator('button[title="Edit setting"]').click();
 
     // Verify modal elements
-    await expect(page.getByRole("dialog", { name: "Edit Configuration" })).toBeVisible();
+    await expect(
+      page.getByRole("dialog", { name: "Edit Configuration" }),
+    ).toBeVisible();
     const input = page.getByRole("dialog").getByLabel("Value");
     await input.fill("VariaMos Custom");
 
@@ -142,27 +164,34 @@ test.describe("Global Configurations - Mocked E2E Flows", () => {
     await expect(page.getByRole("alert")).toBeVisible();
 
     // Mock successful update response
-    await page.route("**/v1/configurations/general.site_name", async (route) => {
-      expect(route.request().method()).toBe("PUT");
-      expect(route.request().postDataJSON().value).toBe("VariaMos Custom");
+    await page.route(
+      "**/v1/configurations/general.site_name",
+      async (route) => {
+        expect(route.request().method()).toBe("PUT");
+        expect(route.request().postDataJSON().value).toBe("VariaMos Custom");
 
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            key: "general.site_name",
-            value: "VariaMos Custom",
-          },
-        }),
-      });
-    });
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            data: {
+              key: "general.site_name",
+              value: "VariaMos Custom",
+            },
+          }),
+        });
+      },
+    );
 
     // Save changes globally
     await page.click('button:has-text("Save Changes")');
 
     // Success toast should appear
-    await expect(page.getByRole("alert").filter({ hasText: "Successfully saved" })).toBeVisible();
-    await expect(page.getByRole("alert").filter({ hasText: "Successfully saved" })).toContainText("Successfully saved 1 configuration(s).");
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Successfully saved" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Successfully saved" }),
+    ).toContainText("Successfully saved 1 configuration(s).");
   });
 });

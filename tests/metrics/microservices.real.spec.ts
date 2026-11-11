@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { login } from "../helpers/commands.js";
+import { expect, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
+import { login } from "../helpers/commands.js";
 
 test.describe("Monitoring - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
@@ -12,7 +12,9 @@ test.describe("Monitoring - Real E2E Flows", () => {
     await dbHelper.seedTestUsers(suffix);
   });
 
-  test("should query local microservices and verify they are running", async ({ page }) => {
+  test("should query local microservices and verify they are running", async ({
+    page,
+  }) => {
     test.setTimeout(180000); // Docker API discovery and the readiness wait can take a while on Github Actions
 
     await login(page, adminEmail, adminPassword);
@@ -23,11 +25,15 @@ test.describe("Monitoring - Real E2E Flows", () => {
     await expect
       .poll(
         async () => {
-          const res = await page.request.get("http://localhost:4000/v1/micro-services?page=1&limit=20");
+          const res = await page.request.get(
+            "http://localhost:4000/v1/micro-services?page=1&limit=20",
+          );
           const body = await res.json();
           return ["Admin Service", "Languages Service"].every((name) => {
             // UP now means a probe was recorded: before it, the status is NO_DATA (EV-106).
-            const health = body.data?.find((s: { displayName: string }) => s.displayName === name)?.health;
+            const health = body.data?.find(
+              (s: { displayName: string }) => s.displayName === name,
+            )?.health;
             return health?.status === "UP";
           });
         },
@@ -39,12 +45,15 @@ test.describe("Monitoring - Real E2E Flows", () => {
 
     page.on("response", async (response) => {
       // The API only: the page's own file is named microservices-*.js (T-30)
-      if (response.url().includes("/v1/micro-services") || response.url().includes("/health")) {
+      if (
+        response.url().includes("/v1/micro-services") ||
+        response.url().includes("/health")
+      ) {
         console.log(`[API] ${response.url()} - ${response.status()}`);
         try {
           const body = await response.text();
           console.log(`[API BODY] ${body}`);
-        } catch (e) {
+        } catch {
           console.log(`[API BODY ERROR] Could not read body`);
         }
       }
@@ -53,29 +62,47 @@ test.describe("Monitoring - Real E2E Flows", () => {
     await page.getByRole("button", { name: "Monitoring" }).first().click();
     await expect(page).toHaveURL(/.*monitoring.*/);
 
-    await expect(page.locator("h1")).toHaveText("Microservices & System Status");
+    await expect(page.locator("h1")).toHaveText(
+      "Microservices & System Status",
+    );
 
     try {
       const adminRow = page.locator("tr", { hasText: "Admin Service" });
-      await expect(adminRow.locator("td").nth(1)).toHaveText(/up/i, { timeout: 30000 });
-      await expect(adminRow.locator('button[title="Stop Service"]')).toBeVisible();
-      await expect(adminRow.locator('button[title="Restart Service"]')).toBeVisible();
+      await expect(adminRow.locator("td").nth(1)).toHaveText(/up/i, {
+        timeout: 30000,
+      });
+      await expect(
+        adminRow.locator('button[title="Stop Service"]'),
+      ).toBeVisible();
+      await expect(
+        adminRow.locator('button[title="Restart Service"]'),
+      ).toBeVisible();
 
       const langRow = page.locator("tr", { hasText: "Languages Service" });
-      await expect(langRow.locator("td").nth(1)).toHaveText(/up/i, { timeout: 30000 });
-      await expect(langRow.locator('button[title="Stop Service"]')).toBeVisible();
-      await expect(langRow.locator('button[title="Restart Service"]')).toBeVisible();
+      await expect(langRow.locator("td").nth(1)).toHaveText(/up/i, {
+        timeout: 30000,
+      });
+      await expect(
+        langRow.locator('button[title="Stop Service"]'),
+      ).toBeVisible();
+      await expect(
+        langRow.locator('button[title="Restart Service"]'),
+      ).toBeVisible();
     } catch (error) {
       console.error("Test failed, dumping diagnostic info...");
       try {
-        const tableContent = await page.locator("table").innerText({ timeout: 2000 });
+        const tableContent = await page
+          .locator("table")
+          .textContent({ timeout: 2000 });
         console.error("=== TABLE CONTENT ===");
         console.error(tableContent);
       } catch (e) {
         console.error("Could not get table content", e);
       }
       try {
-        const bodyContent = await page.locator("body").innerText({ timeout: 2000 });
+        const bodyContent = await page
+          .locator("body")
+          .textContent({ timeout: 2000 });
         console.error("=== BODY CONTENT ===");
         console.error(bodyContent);
       } catch (e) {

@@ -1,10 +1,28 @@
-import { test, expect } from "../helpers/mockedTest";
+import { expect, test } from "../helpers/mockedTest";
 import { mockSignedIn } from "../helpers/session";
 
 test.describe("User Management - Mocked Flows", () => {
   const mockUsers = [
-    { id: "u1", user: "john_doe", name: "John Doe", email: "john@example.com", isEnabled: true, isDeleted: false, createdAt: "2026-07-20T10:00:00Z", lastLogin: "2026-07-23T15:00:00Z" },
-    { id: "u2", user: "jane_smith", name: "Jane Smith", email: "jane@example.com", isEnabled: false, isDeleted: false, createdAt: "2026-07-21T11:00:00Z", lastLogin: null }
+    {
+      id: "u1",
+      user: "john_doe",
+      name: "John Doe",
+      email: "john@example.com",
+      isEnabled: true,
+      isDeleted: false,
+      createdAt: "2026-07-20T10:00:00Z",
+      lastLogin: "2026-07-23T15:00:00Z",
+    },
+    {
+      id: "u2",
+      user: "jane_smith",
+      name: "Jane Smith",
+      email: "jane@example.com",
+      isEnabled: false,
+      isDeleted: false,
+      createdAt: "2026-07-21T11:00:00Z",
+      lastLogin: null,
+    },
   ];
 
   test.beforeEach(async ({ page, context }) => {
@@ -16,14 +34,21 @@ test.describe("User Management - Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: mockUsers, totalItems: 2, totalPages: 1, currentPage: 1 })
+        body: JSON.stringify({
+          data: mockUsers,
+          totalItems: 2,
+          totalPages: 1,
+          currentPage: 1,
+        }),
       });
     });
 
     await page.goto("http://localhost:3000/#/users");
   });
 
-  test("should display the user list, handle search input and pagination controls", async ({ page }) => {
+  test("should display the user list, handle search input and pagination controls", async ({
+    page,
+  }) => {
     await expect(page.locator("h1")).toHaveText("Users list");
     await expect(page.locator("table")).toBeVisible();
 
@@ -38,36 +63,53 @@ test.describe("User Management - Mocked Flows", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: [mockUsers[0]], totalItems: 1, totalPages: 1, currentPage: 1 })
+        body: JSON.stringify({
+          data: [mockUsers[0]],
+          totalItems: 1,
+          totalPages: 1,
+          currentPage: 1,
+        }),
       });
     });
 
     await page.locator('input[id="search"]').fill("john");
     await expect(page.locator("td", { hasText: "john_doe" })).toBeVisible();
-    await expect(page.locator("td", { hasText: "jane_smith" })).not.toBeVisible();
+    await expect(
+      page.locator("td", { hasText: "jane_smith" }),
+    ).not.toBeVisible();
   });
 
-  test("keeps the search in the address, through a reload and Back (UX-26)", async ({ page }) => {
+  test("keeps the search in the address, through a reload and Back (UX-26)", async ({
+    page,
+  }) => {
     await page.route("**/v1/users?*search=john*", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ data: [mockUsers[0]], totalCount: 1 })
+        body: JSON.stringify({ data: [mockUsers[0]], totalCount: 1 }),
       });
     });
 
     await page.locator('input[id="search"]').fill("john");
     await expect(page).toHaveURL(/#\/users\?search=john$/);
-    await expect(page.locator("td", { hasText: "jane_smith" })).not.toBeVisible();
+    await expect(
+      page.locator("td", { hasText: "jane_smith" }),
+    ).not.toBeVisible();
 
     await page.reload();
     await expect(page.locator('input[id="search"]')).toHaveValue("john");
     await expect(page.locator("td", { hasText: "john_doe" })).toBeVisible();
-    await expect(page.locator("td", { hasText: "jane_smith" })).not.toBeVisible();
+    await expect(
+      page.locator("td", { hasText: "jane_smith" }),
+    ).not.toBeVisible();
 
     // A user's page, then Back: the list comes back with its search
     await page.route("**/v1/users/u1", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: mockUsers[0] }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: mockUsers[0] }),
+      });
     });
     await page.goto("http://localhost:3000/#/users/u1");
     await page.goBack();
@@ -75,34 +117,65 @@ test.describe("User Management - Mocked Flows", () => {
     await expect(page.locator('input[id="search"]')).toHaveValue("john");
   });
 
-  test("names the browser tab after the screen and the user (UX-35)", async ({ page }) => {
+  test("names the browser tab after the screen and the user (UX-35)", async ({
+    page,
+  }) => {
     await expect(page).toHaveTitle("Users — VariaMos");
 
     await page.route("**/v1/users/u1", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: mockUsers[0] }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: mockUsers[0] }),
+      });
     });
     await page.goto("http://localhost:3000/#/users/u1");
     await expect(page).toHaveTitle(`User ${mockUsers[0].name} — VariaMos`);
   });
 
-  test("ends the tab title with the site name set on the configuration screen (EV-87 lot 2)", async ({ page }) => {
+  test("ends the tab title with the site name set on the configuration screen (EV-87 lot 2)", async ({
+    page,
+  }) => {
     await page.route("**/v1/configurations/public", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: { siteName: "VariaMos Lab" } }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: { siteName: "VariaMos Lab" } }),
+      });
     });
     await page.reload();
 
     await expect(page).toHaveTitle("Users — VariaMos Lab");
   });
 
-  test("should inspect user details, layout fields, and toggle active/disabled states", async ({ page }) => {
+  test("should inspect user details, layout fields, and toggle active/disabled states", async ({
+    page,
+  }) => {
     await page.route("**/v1/users/u1", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: mockUsers[0] }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: mockUsers[0] }),
+      });
     });
     await page.route("**/v1/users/u1/roles*", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          data: [],
+          totalItems: 0,
+          totalPages: 1,
+          currentPage: 1,
+        }),
+      });
     });
     await page.route("**/v1/roles*", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: [] }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ data: [] }),
+      });
     });
 
     const johnRow = page.locator("tr", { hasText: "john_doe" });
@@ -110,24 +183,40 @@ test.describe("User Management - Mocked Flows", () => {
 
     await expect(page.locator("h1")).toHaveText("User information");
     await expect(page.getByText("User Id:").locator("..")).toContainText("u1");
-    await expect(page.getByText("Name:").locator("..")).toContainText("John Doe");
+    await expect(page.getByText("Name:").locator("..")).toContainText(
+      "John Doe",
+    );
 
     await page.getByRole("button", { name: "Back to user list" }).click();
     await expect(page).toHaveURL(/.*\/users/);
 
     // Disable john
     await page.route("**/v1/users/u1/disable", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true }),
+      });
     });
     await johnRow.locator('button[title="Disable user"]').click();
-    await page.getByRole("dialog", { name: "Disable user" }).getByRole("button", { name: "Disable user" }).click();
+    await page
+      .getByRole("dialog", { name: "Disable user" })
+      .getByRole("button", { name: "Disable user" })
+      .click();
 
     // Enable jane
     await page.route("**/v1/users/u2/enable", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true }),
+      });
     });
     const janeRow = page.locator("tr", { hasText: "jane_smith" });
     await janeRow.locator('button[title="Enable user"]').click();
-    await page.getByRole("dialog", { name: "Enable user" }).getByRole("button", { name: "Enable user" }).click();
+    await page
+      .getByRole("dialog", { name: "Enable user" })
+      .getByRole("button", { name: "Enable user" })
+      .click();
   });
 });

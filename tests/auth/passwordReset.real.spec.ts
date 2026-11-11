@@ -320,7 +320,7 @@ test.describe("Admin - Password Reset Flow", () => {
   });
 
   test("should prevent double-clicking the submit button", async ({ page }) => {
-    let resolveRequest: () => void;
+    let resolveRequest: () => void = () => {};
     const requestPromise = new Promise<void>((r) => {
       resolveRequest = r;
     });
@@ -347,7 +347,7 @@ test.describe("Admin - Password Reset Flow", () => {
       await expect(submitBtn).toBeDisabled();
     } finally {
       // Ensure the request finishes so Playwright can close the page
-      resolveRequest!();
+      resolveRequest();
     }
   });
 

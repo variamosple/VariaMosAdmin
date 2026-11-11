@@ -1,6 +1,7 @@
 {
-  "src/**/*.{ts,tsx,js,jsx,json,css,md}": [
-    "biome check --write",
-    "cspell"
-  ]
+  "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs,json,css}": [
+    "biome check --write --no-errors-on-unmatched",
+    "cspell --no-must-find-files"
+  ],
+  "src/**/*.md": ["cspell"]
 }

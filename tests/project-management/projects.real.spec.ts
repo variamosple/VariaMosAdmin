@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { login } from "../helpers/commands.js";
+import { expect, test } from "@playwright/test";
 import dbHelper from "../helpers/adminDbHelper.js";
+import { login } from "../helpers/commands.js";
 
 test.describe("Project Management - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
@@ -13,7 +13,9 @@ test.describe("Project Management - Real E2E Flows", () => {
     await dbHelper.seedTestModels(suffix);
   });
 
-  test("should show seeded project, update project name, and delete it", async ({ page }) => {
+  test("should show seeded project, update project name, and delete it", async ({
+    page,
+  }) => {
     await login(page, adminEmail, adminPassword);
     await page.goto("http://localhost:3000/variamos_admin/");
 
@@ -22,39 +24,60 @@ test.describe("Project Management - Real E2E Flows", () => {
     await expect(page).toHaveURL(/.*projects.*/);
     await projectsPromise;
 
-    const searchPromise = page.waitForResponse(response => 
-      response.url().includes("v1/admin/projects") && response.url().includes(suffix)
+    const searchPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("v1/admin/projects") &&
+        response.url().includes(suffix),
     );
     await page.locator('input[id="name"]').click();
-    await page.locator('input[id="name"]').fill(`Test Custom Project-${suffix}`);
+    await page
+      .locator('input[id="name"]')
+      .fill(`Test Custom Project-${suffix}`);
     await searchPromise;
 
-    await expect(page.locator("tr", { hasText: `Test Custom Project-${suffix}` })).toBeVisible();
+    await expect(
+      page.locator("tr", { hasText: `Test Custom Project-${suffix}` }),
+    ).toBeVisible();
 
-    const row = page.locator("tr", { hasText: `Test Custom Project-${suffix}` });
+    const row = page.locator("tr", {
+      hasText: `Test Custom Project-${suffix}`,
+    });
     await row.locator('button[title="Edit project"]').click();
 
     await expect(page.locator(".modal-title")).toHaveText("Edit a Project");
-    await page.locator('.modal input[placeholder="Project name"]').fill(`Test Custom Project-${suffix} Edited`);
-    
+    await page
+      .locator('.modal input[placeholder="Project name"]')
+      .fill(`Test Custom Project-${suffix} Edited`);
+
     const editPromise = page.waitForResponse("**/v1/admin/projects/*");
-    await page.locator(".modal-footer").getByRole("button", { name: "Edit project" }).click();
+    await page
+      .locator(".modal-footer")
+      .getByRole("button", { name: "Edit project" })
+      .click();
     await editPromise;
     await expect(page.locator(".modal-title")).not.toBeVisible();
 
-    await expect(page.locator("tr", { hasText: `Test Custom Project-${suffix} Edited` })).toBeVisible();
+    await expect(
+      page.locator("tr", { hasText: `Test Custom Project-${suffix} Edited` }),
+    ).toBeVisible();
 
-    const updatedRow = page.locator("tr", { hasText: `Test Custom Project-${suffix} Edited` });
+    const updatedRow = page.locator("tr", {
+      hasText: `Test Custom Project-${suffix} Edited`,
+    });
     await updatedRow.locator('button[title="Delete project"]').click();
 
     const confirmModal = page.getByRole("dialog", { name: "Delete project" });
-    await expect(confirmModal).toContainText(`Delete the project "Test Custom Project-${suffix} Edited"?`);
-    
+    await expect(confirmModal).toContainText(
+      `Delete the project "Test Custom Project-${suffix} Edited"?`,
+    );
+
     const deletePromise = page.waitForResponse("**/v1/admin/projects/*");
     await confirmModal.getByRole("button", { name: "Delete project" }).click();
     await deletePromise;
 
-    await expect(page.locator("tr", { hasText: `Test Custom Project-${suffix} Edited` })).not.toBeVisible();
+    await expect(
+      page.locator("tr", { hasText: `Test Custom Project-${suffix} Edited` }),
+    ).not.toBeVisible();
   });
 
   test.afterAll(async () => {
