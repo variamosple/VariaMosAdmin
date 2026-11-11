@@ -14,7 +14,7 @@ export const SignUpPage: FC = () => {
   const { signUp } = useSession();
 
   const onSignUp = (registration: UserRegistration) => {
-    signUp(registration).then((response) => {
+    void signUp(registration).then((response) => {
       if (response?.errorCode) {
         setErrorMessage(response.message);
       } else if (response) {

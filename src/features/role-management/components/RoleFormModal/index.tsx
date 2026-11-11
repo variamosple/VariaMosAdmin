@@ -39,7 +39,7 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
 
   const onSubmit: SubmitHandler<Role> = (data) => {
     if (!isLoading) {
-      onRoleSubmit(data).then((response) => {
+      void onRoleSubmit(data).then((response) => {
         if (!response.errorCode) {
           reset();
         }

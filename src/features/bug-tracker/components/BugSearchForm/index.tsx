@@ -76,7 +76,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
   const clearField = (fieldName: keyof BugFilter) => {
     setValue(fieldName, "");
     // Submit the form immediately to refresh results
-    handleSubmit(submit)();
+    void handleSubmit(submit)();
   };
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
     }
 
     timeoutRef.current = setTimeout(() => {
-      handleSubmit(submit)();
+      void handleSubmit(submit)();
     }, 500);
 
     return () => {

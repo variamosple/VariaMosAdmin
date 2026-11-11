@@ -64,7 +64,7 @@ export const TwoFactorCard: FC = () => {
   const [forgetMessage, setForgetMessage] = useState<string>();
 
   const refresh = useCallback(() => {
-    getMfaStatus().then((response) => {
+    void getMfaStatus().then((response) => {
       if (response.errorCode || !response.data) {
         setStatus(null);
         setLoad(isRefused(response.errorCode) ? "refused" : "failed");
@@ -102,7 +102,7 @@ export const TwoFactorCard: FC = () => {
   ) => {
     setIsBusy(true);
     setError(undefined);
-    request
+    void request
       .then((response) => {
         if (response.errorCode) {
           setError(response.message);
@@ -134,7 +134,7 @@ export const TwoFactorCard: FC = () => {
 
   const onForgetBrowsers = () => {
     setIsForgetting(true);
-    forgetTrustedDevices()
+    void forgetTrustedDevices()
       .then((response) =>
         setForgetMessage(
           response.errorCode

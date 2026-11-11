@@ -102,7 +102,7 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
     }
 
     timeoutRef.current = setTimeout(() => {
-      handleSubmit(submit)();
+      void handleSubmit(submit)();
     }, 500);
 
     return () => {

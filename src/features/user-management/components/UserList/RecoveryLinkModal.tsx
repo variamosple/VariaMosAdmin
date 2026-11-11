@@ -49,17 +49,26 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
       setLoading(false);
     }
   };
-  const handleCopyToClipboard = () => {
-    if (recoveryUrl) {
-      navigator.clipboard.writeText(recoveryUrl);
-      setCopied(true);
+  const handleCopyToClipboard = async () => {
+    if (!recoveryUrl) return;
+    try {
+      await navigator.clipboard.writeText(recoveryUrl);
+    } catch {
+      // The browser refused (no permission, page not focused): say so
       pushToast({
-        title: "Link copied",
-        message: "Recovery link copied to clipboard",
-        variant: "success",
+        title: "Copy failed",
+        message: "Select the link and copy it by hand.",
+        variant: "danger",
       });
-      setTimeout(() => setCopied(false), 2000);
+      return;
     }
+    setCopied(true);
+    pushToast({
+      title: "Link copied",
+      message: "Recovery link copied to clipboard",
+      variant: "success",
+    });
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const titleId = useId();
@@ -106,7 +115,7 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
               />
               <IconButton
                 variant={copied ? "success" : "outline-primary"}
-                onClick={handleCopyToClipboard}
+                onClick={() => void handleCopyToClipboard()}
                 label={copied ? "Link copied" : "Copy link"}
                 icon={copied ? <ClipboardCheck /> : <Clipboard />}
               />

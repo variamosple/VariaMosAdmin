@@ -69,7 +69,7 @@ export const useModelList = () => {
   // then those whose name matches what is typed, searched on the server so
   // that one beyond the first page can be chosen (EV-96)
   const searchProjects = useCallback((name?: string) => {
-    queryProjects(new ProjectsFilter(name || undefined)).then((res) => {
+    void queryProjects(new ProjectsFilter(name || undefined)).then((res) => {
       if (!res.errorCode && res.data) {
         setProjects(
           res.data.map((p) => ({ id: p.id || "", name: p.name || "" })),
@@ -79,7 +79,7 @@ export const useModelList = () => {
   }, []);
 
   const searchLanguages = useCallback((name?: string) => {
-    queryLanguages(new LanguagesFilter(name || undefined)).then((res) => {
+    void queryLanguages(new LanguagesFilter(name || undefined)).then((res) => {
       if (!res.errorCode && res.data) {
         setLanguages(
           res.data.map((l) => ({ id: l.id || 0, name: l.name || "" })),
@@ -161,7 +161,7 @@ export const useModelList = () => {
     });
 
     if (model.id !== undefined) {
-      deleteModel(model.id).then((response) => {
+      void deleteModel(model.id).then((response) => {
         if (response.errorCode) {
           pushToast({
             title: "Model delete",

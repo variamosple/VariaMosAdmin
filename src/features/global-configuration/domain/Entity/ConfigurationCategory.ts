@@ -36,7 +36,7 @@ export const categoriesOf = (
   );
   const others = [...present]
     .filter((key) => !KNOWN_CATEGORIES.some((category) => category.key === key))
-    .sort()
+    .sort((a, b) => a.localeCompare(b, "en"))
     .map((key) => ({ key, label: categoryLabel(key) }));
   return [...known, ...others];
 };

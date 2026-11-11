@@ -17,7 +17,7 @@ const rows = readFileSync(source, "utf8")
     const [country, , zone, region = ""] = line.split("\t");
     return `${country}|${zone}|${region}`;
   })
-  .sort();
+  .sort((a, b) => a.localeCompare(b, "en"));
 
 writeFileSync(
   new URL("../src/shared/domain/timeZoneCountries.ts", import.meta.url),

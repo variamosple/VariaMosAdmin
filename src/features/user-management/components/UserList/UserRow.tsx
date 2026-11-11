@@ -54,7 +54,7 @@ export const UserRowComponent: FC<UserRowProps> = ({
             userId: user.id,
           });
 
-      loadData(updated);
+      void loadData(updated);
     }
   }, [show, user, loadData, filter, isLoading, isLoaded]);
 

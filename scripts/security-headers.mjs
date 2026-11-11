@@ -31,7 +31,7 @@ export function apiOrigins(env) {
       // A relative address is covered by 'self'
     }
   }
-  return [...origins].sort();
+  return [...origins].sort((a, b) => a.localeCompare(b, "en"));
 }
 
 export function contentSecurityPolicy(env) {

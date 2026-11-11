@@ -19,7 +19,7 @@ export const ChartDateFilter: FC<ChartDateFilterProperties> = ({ id }) => {
 
   const handleSubmit = (data: ChartDateFormProperties) => {
     setShowFilter(false);
-    filterChartData(data);
+    void filterChartData(data);
   };
 
   return (

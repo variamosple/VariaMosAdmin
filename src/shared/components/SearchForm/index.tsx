@@ -58,7 +58,7 @@ export const SearchForm: FC<SearchFormProps> = ({
     }
 
     timeoutRef.current = setTimeout(() => {
-      handleSubmit(submit)();
+      void handleSubmit(submit)();
     }, 500);
 
     return () => {

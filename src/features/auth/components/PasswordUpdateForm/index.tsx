@@ -34,7 +34,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
   const onSubmit: SubmitHandler<PasswordUpdate> = (data) => {
     if (!isLoading) {
       setServerError(null);
-      onUpdatePasswordSubmit(data).then((response) => {
+      void onUpdatePasswordSubmit(data).then((response) => {
         if (!response.errorCode) {
           reset();
         } else {

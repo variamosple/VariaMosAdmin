@@ -173,6 +173,33 @@ describe("RecoveryLinkModal Component", () => {
     ).toBeInTheDocument();
   });
 
+  it("says the copy failed when the browser refuses it", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(navigator.clipboard, "writeText").mockRejectedValue(
+      new DOMException("Document is not focused.", "NotAllowedError"),
+    );
+
+    render(
+      <RecoveryLinkModal user={mockUser} show={true} onHide={mockOnHide} />,
+    );
+    await user.click(
+      screen.getByRole("button", { name: /generate secure link/i }),
+    );
+    await screen.findByDisplayValue("https://variamos.com/recover?token=xyz");
+
+    await user.click(screen.getByRole("button", { name: "Copy link" }));
+
+    await waitFor(() =>
+      expect(mockPushToast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Copy failed", variant: "danger" }),
+      ),
+    );
+    expect(mockPushToast).not.toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Link copied" }),
+    );
+    expect(screen.queryByText("Copied to clipboard!")).not.toBeInTheDocument();
+  });
+
   it("handles generation error response", async () => {
     const user = userEvent.setup();
     isRecoveryError = true;

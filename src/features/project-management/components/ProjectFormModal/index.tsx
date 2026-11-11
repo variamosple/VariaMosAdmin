@@ -59,7 +59,7 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
         template,
       } as Project;
 
-      onProjectSubmit(updatedProject).then((response) => {
+      void onProjectSubmit(updatedProject).then((response) => {
         if (!response.errorCode) {
           reset();
         }

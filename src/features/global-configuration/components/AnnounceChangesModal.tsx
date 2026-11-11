@@ -77,7 +77,7 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
   // Loaded when first needed: most announcements go to the whole site
   useEffect(() => {
     if (audience === "role" && roles.length === 0 && !loadingRoles) {
-      loadRoles();
+      void loadRoles();
     }
   }, [audience, roles.length, loadingRoles, loadRoles]);
 

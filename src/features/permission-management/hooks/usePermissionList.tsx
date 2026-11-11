@@ -134,7 +134,7 @@ export const usePermissionList = () => {
     });
 
     if (permission.id !== undefined) {
-      deletePermission(permission.id).then((response) => {
+      void deletePermission(permission.id).then((response) => {
         // alertify.dismissAll();
 
         if (response.errorCode) {

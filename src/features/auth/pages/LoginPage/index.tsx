@@ -24,7 +24,7 @@ export const LoginPage: FC = () => {
   const { signIn, signInAsGuest, isLoading } = useSession();
 
   const onSignIn = (credentials: Credentials) => {
-    signIn(credentials).then((response) => {
+    void signIn(credentials).then((response) => {
       // Right password, second factor on: the code is still expected
       const data = response.data as {
         mfaRequired?: boolean;
@@ -46,7 +46,7 @@ export const LoginPage: FC = () => {
 
   const onSubmitCode = (code: string, rememberDevice: boolean) => {
     setIsCheckingCode(true);
-    requestSignInMfa(code, rememberDevice)
+    void requestSignInMfa(code, rememberDevice)
       .then((response) => {
         if (!response.errorCode) {
           pageLoader.load(
@@ -64,7 +64,7 @@ export const LoginPage: FC = () => {
   };
 
   const onSignInAsGuest = () => {
-    signInAsGuest().then((response) => {
+    void signInAsGuest().then((response) => {
       if (response.errorCode) {
         setErrorMessage(response.message);
       } else {
@@ -92,7 +92,7 @@ export const LoginPage: FC = () => {
       decodeURIComponent(queryParams.get("redirectTo") || ""),
     );
     if (redirectTo) {
-      registerRedirect(redirectTo).then();
+      void registerRedirect(redirectTo).then();
     }
   }, [queryParams]);
 

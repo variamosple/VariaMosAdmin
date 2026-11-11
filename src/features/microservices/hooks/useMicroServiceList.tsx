@@ -99,7 +99,7 @@ export const useMicroServiceList = (
     if (refreshInterval <= 0) return;
 
     const timer = setInterval(() => {
-      refreshList();
+      void refreshList();
     }, refreshInterval);
 
     return () => clearInterval(timer);
@@ -152,7 +152,7 @@ export const useMicroServiceList = (
         });
       }
       // The pending service is checked again on its own, below
-      refreshList();
+      void refreshList();
       return response;
     });
   };

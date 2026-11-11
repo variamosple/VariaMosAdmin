@@ -124,7 +124,7 @@ export const useProjectList = () => {
     });
 
     if (project.id !== undefined) {
-      deleteProject(project.id).then((response) => {
+      void deleteProject(project.id).then((response) => {
         if (response.errorCode) {
           pushToast({
             title: "Project delete",

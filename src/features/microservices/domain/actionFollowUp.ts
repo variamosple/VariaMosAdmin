@@ -33,7 +33,9 @@ export const followUpOutcome = (
 ): "running" | "failed" | "pending" => {
   if (followUp.step === "stopping") return "pending";
   const health = microService?.health;
-  const checkedAt = health?.checkedAt ? Date.parse(health.checkedAt) : NaN;
+  const checkedAt = health?.checkedAt
+    ? Date.parse(health.checkedAt)
+    : Number.NaN;
   if (
     checkedAt >= followUp.since &&
     (health?.status === "UP" || health?.status === "DEGRADED")

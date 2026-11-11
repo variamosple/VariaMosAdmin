@@ -170,7 +170,7 @@ const MicroServiceListPageComponent: FC = () => {
         confirmLabel="Start microservice"
         onConfirm={() => {
           if (toStartMicroService) {
-            performMicroSerViceStart(toStartMicroService);
+            void performMicroSerViceStart(toStartMicroService);
           }
           setShowStart(false);
         }}
@@ -188,7 +188,7 @@ const MicroServiceListPageComponent: FC = () => {
         confirmButtonVariant="warning"
         onConfirm={() => {
           if (toRestartMicroService) {
-            performMicroSerViceRestart(toRestartMicroService);
+            void performMicroSerViceRestart(toRestartMicroService);
           }
           setShowRestart(false);
         }}
@@ -206,7 +206,7 @@ const MicroServiceListPageComponent: FC = () => {
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toStopMicroService) {
-            performMicroSerViceStop(toStopMicroService);
+            void performMicroSerViceStop(toStopMicroService);
           }
           setShowStop(false);
         }}

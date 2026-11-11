@@ -54,7 +54,7 @@ const UserDetailsPageComponent: FC = () => {
 
   const queryUser = useCallback((userId: string) => {
     setIsLoading(true);
-    queryUserById(userId)
+    void queryUserById(userId)
       .then((response) => {
         setProblem(loadProblemOf(response));
         setUser(response.data);
@@ -78,7 +78,7 @@ const UserDetailsPageComponent: FC = () => {
       message: "Assigning role...",
     });
 
-    createUserRole({
+    void createUserRole({
       ...UserRole,
       userId: userIdParam,
     })
@@ -92,7 +92,7 @@ const UserDetailsPageComponent: FC = () => {
           });
         } else {
           if (userRolesFilter) {
-            loadUserRoles(userRolesFilter);
+            void loadUserRoles(userRolesFilter);
           }
           pushToast({
             title: "Role assignment",
@@ -126,7 +126,7 @@ const UserDetailsPageComponent: FC = () => {
       message: "Removing role...",
     });
 
-    deleteUserRole(new UserRole(userIdParam, role.id)).then((response) => {
+    void deleteUserRole(new UserRole(userIdParam, role.id)).then((response) => {
       removeToast(toastId);
 
       if (response.errorCode) {
@@ -160,7 +160,7 @@ const UserDetailsPageComponent: FC = () => {
             userId: userIdParam,
           });
 
-      loadUserRoles(updated);
+      void loadUserRoles(updated);
     }
   }, [userIdParam, loadUserRoles, userRolesFilter]);
 

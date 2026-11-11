@@ -42,7 +42,7 @@ export const ResetPasswordPage: FC = () => {
       }
     };
 
-    verifyToken();
+    void verifyToken();
   }, [token]);
 
   const navigate = useNavigate();
@@ -69,7 +69,7 @@ export const ResetPasswordPage: FC = () => {
       } else {
         setMessage("Your password has been reset successfully !");
         setTimeout(() => {
-          navigate("/login");
+          void navigate("/login");
         }, 3000);
       }
     } catch {

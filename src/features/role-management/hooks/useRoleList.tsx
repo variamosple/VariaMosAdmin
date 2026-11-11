@@ -142,7 +142,7 @@ export const useRoleList = () => {
     });
 
     if (role.id !== undefined) {
-      deleteRole(role.id).then((response) => {
+      void deleteRole(role.id).then((response) => {
         removeToast(toastId);
 
         if (response.errorCode) {

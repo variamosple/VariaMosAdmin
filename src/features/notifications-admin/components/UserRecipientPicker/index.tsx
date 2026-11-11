@@ -57,7 +57,7 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
   const fetchUsers = useCallback((term: string) => {
     const request = ++latest.current;
     setSearch({ status: "loading" });
-    queryUsers(
+    void queryUsers(
       new UsersFilter(
         undefined,
         undefined,

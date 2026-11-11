@@ -40,7 +40,7 @@ const MyAccountPageComponent: FC = () => {
 
   const queryUser = useCallback(() => {
     setIsLoading(true);
-    getMyAccount()
+    void getMyAccount()
       .then((response) => {
         setProblem(loadProblemOf(response));
         setUser(response.data);
