@@ -28,35 +28,93 @@ export interface AnnounceChangesModalProps {
   onClose: () => void;
 }
 
-/**
- * Offers to tell users about the settings just saved (EV-115 lot A). The
- * text is suggested and editable; nothing is sent without "Send", then the
- * confirmation of the number of accounts reached.
- */
-export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
-  announcement,
-  onClose,
-}) => {
-  const titleId = useId();
-  const broadcastId = useId();
-  const roleAudienceId = useId();
+type Audience = "broadcast" | "role";
+
+// The roles an announcement may go to, loaded when first needed: most
+// announcements go to the whole site
+const useAnnouncementRoles = (audience: Audience) => {
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const response = await queryRoles(
+      new RolesFilter({
+        pageNumber: 1,
+        pageSize: ROLE_PAGE_SIZE,
+      }),
+    );
+    if (response.errorCode) {
+      setError(response.message || "The roles could not be loaded.");
+    } else {
+      setRoles(response.data ?? []);
+      setTotal(response.totalCount ?? response.data?.length ?? 0);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (audience === "role" && roles.length === 0 && !loading) {
+      void load();
+    }
+  }, [audience, roles.length, loading, load]);
+
+  return { roles, total, loading, error, load };
+};
+
+// The same message sent again after an error keeps its key, so that it
+// reaches each account once (EV-99); a changed message gets a new one
+const useSendKey = () => {
+  const sentKeyRef = useRef<{ content: string; key: string } | null>(null);
+  const keyOf = (request: DispatchNotificationRequest) => {
+    const content = JSON.stringify(request);
+    if (sentKeyRef.current?.content !== content) {
+      sentKeyRef.current = { content, key: crypto.randomUUID() };
+    }
+    return sentKeyRef.current.key;
+  };
+  const reset = useCallback(() => {
+    sentKeyRef.current = null;
+  }, []);
+  return { keyOf, reset };
+};
+
+interface AnnouncementInput {
+  title: string;
+  body: string;
+  audience: Audience;
+  selectedRoles: string[];
+}
+
+const invalidAnnouncement = (input: AnnouncementInput): string | null => {
+  if (!input.title.trim() || !input.body.trim()) {
+    return "Please provide both a title and a message.";
+  }
+  if (input.audience === "role" && input.selectedRoles.length === 0) {
+    return "Please select at least one role.";
+  }
+  return null;
+};
+
+interface PendingAnnouncement {
+  request: DispatchNotificationRequest;
+  count: number;
+}
+
+// The announcement being written, reviewed (number of accounts) and sent
+const useAnnouncementDraft = (props: AnnounceChangesModalProps) => {
+  const { announcement, onClose } = props;
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [audience, setAudience] = useState<"broadcast" | "role">("broadcast");
+  const [audience, setAudience] = useState<Audience>("broadcast");
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [rolesTotal, setRolesTotal] = useState(0);
-  const [loadingRoles, setLoadingRoles] = useState(false);
-  const [rolesError, setRolesError] = useState<string | null>(null);
-  const [pending, setPending] = useState<{
-    request: DispatchNotificationRequest;
-    count: number;
-  } | null>(null);
+  const [pending, setPending] = useState<PendingAnnouncement | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // The same message sent again after an error keeps its key, so that it
-  // reaches each account once (EV-99); a changed message gets a new one
-  const sentKeyRef = useRef<{ content: string; key: string } | null>(null);
+  const { keyOf, reset: resetSendKey } = useSendKey();
 
   useEffect(() => {
     if (!announcement) return;
@@ -66,33 +124,8 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
     setSelectedRoles([]);
     setPending(null);
     setError(null);
-    sentKeyRef.current = null;
-  }, [announcement]);
-
-  const loadRoles = useCallback(async () => {
-    setLoadingRoles(true);
-    setRolesError(null);
-    const response = await queryRoles(
-      new RolesFilter({
-        pageNumber: 1,
-        pageSize: ROLE_PAGE_SIZE,
-      }),
-    );
-    if (response.errorCode) {
-      setRolesError(response.message || "The roles could not be loaded.");
-    } else {
-      setRoles(response.data ?? []);
-      setRolesTotal(response.totalCount ?? response.data?.length ?? 0);
-    }
-    setLoadingRoles(false);
-  }, []);
-
-  // Loaded when first needed: most announcements go to the whole site
-  useEffect(() => {
-    if (audience === "role" && roles.length === 0 && !loadingRoles) {
-      void loadRoles();
-    }
-  }, [audience, roles.length, loadingRoles, loadRoles]);
+    resetSendKey();
+  }, [announcement, resetSendKey]);
 
   const toggleRole = (name: string) =>
     setSelectedRoles((prev) =>
@@ -101,15 +134,14 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
 
   const review = async () => {
     if (!announcement) return;
-    setError(null);
-    if (!title.trim() || !body.trim()) {
-      setError("Please provide both a title and a message.");
-      return;
-    }
-    if (audience === "role" && selectedRoles.length === 0) {
-      setError("Please select at least one role.");
-      return;
-    }
+    const invalid = invalidAnnouncement({
+      title,
+      body,
+      audience,
+      selectedRoles,
+    });
+    setError(invalid);
+    if (invalid) return;
     const request: DispatchNotificationRequest = {
       audience,
       roles: audience === "role" ? selectedRoles : undefined,
@@ -122,21 +154,11 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
     setBusy(false);
     if (counted.errorCode || !counted.data) {
       setError(counted.message || "Failed to count the recipients.");
-      return;
-    }
-    if (counted.data.count === 0) {
+    } else if (counted.data.count === 0) {
       setError("No active account matches this audience.");
-      return;
+    } else {
+      setPending({ request, count: counted.data.count });
     }
-    setPending({ request, count: counted.data.count });
-  };
-
-  const keyOf = (request: DispatchNotificationRequest) => {
-    const content = JSON.stringify(request);
-    if (sentKeyRef.current?.content !== content) {
-      sentKeyRef.current = { content, key: crypto.randomUUID() };
-    }
-    return sentKeyRef.current.key;
   };
 
   const send = async () => {
@@ -154,6 +176,151 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
     }
     onClose();
   };
+
+  return {
+    fields: { title, setTitle, body, setBody, audience, setAudience },
+    selectedRoles,
+    toggleRole,
+    pending,
+    setPending,
+    busy,
+    error,
+    review,
+    send,
+  };
+};
+
+type Draft = ReturnType<typeof useAnnouncementDraft>;
+type AnnouncementRoles = ReturnType<typeof useAnnouncementRoles>;
+
+interface DraftProps {
+  draft: Draft;
+  roles: AnnouncementRoles;
+}
+
+const AudienceChoice: FC<DraftProps> = ({ draft, roles }) => {
+  const broadcastId = useId();
+  const roleAudienceId = useId();
+  const { audience, setAudience } = draft.fields;
+  return (
+    <>
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold mb-1">Audience</Form.Label>
+        <div className="d-flex gap-3">
+          <Form.Check
+            type="radio"
+            id={broadcastId}
+            name="announce-audience"
+            label="Whole site"
+            checked={audience === "broadcast"}
+            onChange={() => setAudience("broadcast")}
+          />
+          <Form.Check
+            type="radio"
+            id={roleAudienceId}
+            name="announce-audience"
+            label="Some roles"
+            checked={audience === "role"}
+            onChange={() => setAudience("role")}
+          />
+        </div>
+      </Form.Group>
+      {audience === "role" && (
+        <div className="mb-3">
+          <RoleCheckboxList
+            idPrefix="announce-role"
+            roles={roles.roles}
+            total={roles.total}
+            loading={roles.loading}
+            error={roles.error}
+            onRetry={roles.load}
+            selected={draft.selectedRoles}
+            onToggle={draft.toggleRole}
+          />
+        </div>
+      )}
+    </>
+  );
+};
+
+const AnnouncementForm: FC<DraftProps> = ({ draft, roles }) => {
+  const { title, setTitle, body, setBody } = draft.fields;
+  return (
+    <>
+      <p className="text-muted small">
+        Users are not told about this change unless you send this notification.
+      </p>
+      <AudienceChoice draft={draft} roles={roles} />
+      <Form.Group className="mb-3" controlId="announce-title">
+        <Form.Label className="fw-semibold mb-1">Title</Form.Label>
+        <Form.Control
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </Form.Group>
+      <Form.Group controlId="announce-body">
+        <Form.Label className="fw-semibold mb-1">Message</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={4}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        />
+      </Form.Group>
+    </>
+  );
+};
+
+const AnnouncementButtons: FC<{ draft: Draft; onClose: () => void }> = ({
+  draft,
+  onClose,
+}) => {
+  const { pending, busy } = draft;
+  if (pending) {
+    return (
+      <>
+        <Button
+          variant="outline-secondary"
+          onClick={() => draft.setPending(null)}
+          disabled={busy}
+        >
+          Back
+        </Button>
+        <Button variant="primary" onClick={draft.send} disabled={busy}>
+          {busy ? (
+            <Spinner size="sm" animation="border" />
+          ) : (
+            `Send to ${accounts(pending.count)}`
+          )}
+        </Button>
+      </>
+    );
+  }
+  return (
+    <>
+      <Button variant="outline-secondary" onClick={onClose} disabled={busy}>
+        Don't announce
+      </Button>
+      <Button variant="primary" onClick={draft.review} disabled={busy}>
+        {busy ? <Spinner size="sm" animation="border" /> : "Send"}
+      </Button>
+    </>
+  );
+};
+
+/**
+ * Offers to tell users about the settings just saved (EV-115 lot A). The
+ * text is suggested and editable; nothing is sent without "Send", then the
+ * confirmation of the number of accounts reached.
+ */
+export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = (props) => {
+  const { announcement, onClose } = props;
+  const titleId = useId();
+  const draft = useAnnouncementDraft(props);
+  // Kept by the dialog: loaded once for all its openings
+  const roles = useAnnouncementRoles(draft.fields.audience);
+  const { pending, busy, error } = draft;
 
   return (
     <Modal
@@ -174,64 +341,7 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
             notification cannot be recalled.
           </p>
         ) : (
-          <>
-            <p className="text-muted small">
-              Users are not told about this change unless you send this
-              notification.
-            </p>
-            <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold mb-1">Audience</Form.Label>
-              <div className="d-flex gap-3">
-                <Form.Check
-                  type="radio"
-                  id={broadcastId}
-                  name="announce-audience"
-                  label="Whole site"
-                  checked={audience === "broadcast"}
-                  onChange={() => setAudience("broadcast")}
-                />
-                <Form.Check
-                  type="radio"
-                  id={roleAudienceId}
-                  name="announce-audience"
-                  label="Some roles"
-                  checked={audience === "role"}
-                  onChange={() => setAudience("role")}
-                />
-              </div>
-            </Form.Group>
-            {audience === "role" && (
-              <div className="mb-3">
-                <RoleCheckboxList
-                  idPrefix="announce-role"
-                  roles={roles}
-                  total={rolesTotal}
-                  loading={loadingRoles}
-                  error={rolesError}
-                  onRetry={loadRoles}
-                  selected={selectedRoles}
-                  onToggle={toggleRole}
-                />
-              </div>
-            )}
-            <Form.Group className="mb-3" controlId="announce-title">
-              <Form.Label className="fw-semibold mb-1">Title</Form.Label>
-              <Form.Control
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="announce-body">
-              <Form.Label className="fw-semibold mb-1">Message</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-              />
-            </Form.Group>
-          </>
+          <AnnouncementForm draft={draft} roles={roles} />
         )}
         {error ? (
           <Alert variant="danger" className="mt-3 mb-0 py-2">
@@ -240,37 +350,7 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
         ) : null}
       </Modal.Body>
       <Modal.Footer>
-        {pending ? (
-          <>
-            <Button
-              variant="outline-secondary"
-              onClick={() => setPending(null)}
-              disabled={busy}
-            >
-              Back
-            </Button>
-            <Button variant="primary" onClick={send} disabled={busy}>
-              {busy ? (
-                <Spinner size="sm" animation="border" />
-              ) : (
-                `Send to ${accounts(pending.count)}`
-              )}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="outline-secondary"
-              onClick={onClose}
-              disabled={busy}
-            >
-              Don't announce
-            </Button>
-            <Button variant="primary" onClick={review} disabled={busy}>
-              {busy ? <Spinner size="sm" animation="border" /> : "Send"}
-            </Button>
-          </>
-        )}
+        <AnnouncementButtons draft={draft} onClose={onClose} />
       </Modal.Footer>
     </Modal>
   );
