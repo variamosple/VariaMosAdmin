@@ -232,7 +232,7 @@ const BugListPageComponent: FC = () => {
         // A new form when the address changes by itself (UX-26)
         key={restoreKey}
         defaultFilter={filter}
-        onSubmit={(search?: BugFilter) => setFilter(search || {})}
+        onSubmit={(search?: BugFilter) => setFilter(search ?? {})}
         onSearchReset={() => setFilter({})}
         isLoading={isLoading}
         repos={repos}
