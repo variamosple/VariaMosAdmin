@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Alert, Button, Col, Form, Row, Spinner } from "react-bootstrap";
 
-export interface RoleOption {
+interface RoleOption {
   id?: number;
   name: string;
 }
