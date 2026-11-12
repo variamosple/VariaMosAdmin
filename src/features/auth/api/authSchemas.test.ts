@@ -14,6 +14,12 @@ describe("authentication answers (EV-97 lot 6c)", () => {
     ).toBe(true);
   });
 
+  it("gives the answer that waits for the code an empty redirect", () => {
+    expect(
+      signInSchema.parse({ mfaRequired: true, trustedDeviceDays: 14 }),
+    ).toEqual({ mfaRequired: true, trustedDeviceDays: 14, redirect: "" });
+  });
+
   it("refuses a sign-in answer with neither", () => {
     expect(signInSchema.safeParse({ id: "u-1" }).success).toBe(false);
   });

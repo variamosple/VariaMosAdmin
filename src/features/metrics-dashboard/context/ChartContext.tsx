@@ -1,5 +1,6 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
 import {
+  type ComponentType,
   createContext,
   type FC,
   useCallback,
@@ -102,16 +103,12 @@ export const useChartContext = () => {
   return context;
 };
 
-export const withChartContextWrapper = <P extends object>(
-  Component: React.ComponentType<P>,
-) => {
-  const WrappedComponent = (props: P & { metric: Metric }) => {
-    const { metric, ...restProps } = props;
-    return (
-      <ChartContextProvider metric={metric}>
-        <Component {...(restProps as P)} />
-      </ChartContextProvider>
-    );
-  };
+// A chart reads its metric and data from the context: it takes no props
+export const withChartContextWrapper = (Component: ComponentType) => {
+  const WrappedComponent = ({ metric }: { metric: Metric }) => (
+    <ChartContextProvider metric={metric}>
+      <Component />
+    </ChartContextProvider>
+  );
   return WrappedComponent;
 };

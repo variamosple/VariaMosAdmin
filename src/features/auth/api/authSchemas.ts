@@ -10,13 +10,25 @@ export const signedInSchema: z.ZodMiniType<singInResponse> = z.looseObject({
   redirect: z.string(),
 });
 
-/** A password sign-in either opens the session or waits for the code. */
-export const signInSchema = z.union([
-  signedInSchema,
+/** The sign-in answer; `mfaRequired` when the code is still expected. */
+export type SignInResult = singInResponse & {
+  mfaRequired?: boolean;
+  trustedDeviceDays?: number;
+};
+
+// The answer that waits for the code opens no page: its redirect is empty
+const mfaRequiredSchema = z.pipe(
   z.looseObject({
     mfaRequired: z.literal(true),
     trustedDeviceDays: z.optional(z.number()),
   }),
+  z.transform((answer) => ({ ...answer, redirect: "" })),
+);
+
+/** A password sign-in either opens the session or waits for the code. */
+export const signInSchema: z.ZodMiniType<SignInResult> = z.union([
+  signedInSchema,
+  mfaRequiredSchema,
 ]);
 
 export const passwordPolicySchema: z.ZodMiniType<PasswordPolicy> =
