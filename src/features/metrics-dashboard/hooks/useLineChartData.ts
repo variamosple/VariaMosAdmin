@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { ChartDataItem, Metric } from "../domain/Entity/Metric";
+import { chartItemsOf, type Metric } from "../domain/Entity/Metric";
 
 interface ChartAxes {
   xAxis: string[];
@@ -31,7 +31,7 @@ export const useLineChartData = (metric: Metric) => {
   );
 
   const { xAxis, yAxis }: ChartAxes = useMemo(() => {
-    const metricData = (metric.data as ChartDataItem[]) || [];
+    const metricData = chartItemsOf(metric);
     const x = new Set<string>();
     const y = new Set<string>();
     const labelKey = metric.labelKey;
@@ -50,7 +50,7 @@ export const useLineChartData = (metric: Metric) => {
   }, [metric]);
 
   const data = useMemo(() => {
-    const metricData = metric.data as ChartDataItem[] | undefined;
+    const metricData = Array.isArray(metric.data) ? metric.data : undefined;
     if (!metricData) {
       return [["Date", "Visits"]];
     }

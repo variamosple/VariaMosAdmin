@@ -28,7 +28,7 @@ export const reloadOnStaleFiles = (
   win.addEventListener("beforeunload", leave);
   win.addEventListener("pagehide", leave);
   win.addEventListener("pageshow", (event) => {
-    if ((event as PageTransitionEvent).persisted) leaving = false;
+    if ("persisted" in event && event.persisted) leaving = false;
   });
 
   win.addEventListener("vite:preloadError", (event) => {

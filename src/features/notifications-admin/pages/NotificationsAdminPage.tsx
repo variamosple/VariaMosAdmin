@@ -147,7 +147,7 @@ const NotificationsAdminPageComponent: FC = () => {
       roles: audience === "role" ? selectedRoles : undefined,
       userIds:
         audience === "users"
-          ? selectedUsers.map((user) => user.id as string)
+          ? selectedUsers.flatMap((user) => (user.id ? [user.id] : []))
           : undefined,
     };
     // Nothing is sent before the confirmation shows how many accounts

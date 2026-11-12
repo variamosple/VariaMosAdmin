@@ -68,17 +68,17 @@ export const LOGIN_REASON_MESSAGES = {
   "account-inactive": "This account is not active. Contact an administrator.",
 } as const;
 
-type LoginReason = keyof typeof LOGIN_REASON_MESSAGES;
-
 /**
  * The message of the login page. An old `errorMessage` link gets the
  * generic one: a text read from the address is never shown.
  */
 export const loginMessageOf = (params: URLSearchParams): string | undefined => {
   const reason = params.get("reason");
-  if (reason && reason in LOGIN_REASON_MESSAGES) {
-    return LOGIN_REASON_MESSAGES[reason as LoginReason];
-  }
+  // The reasons listed above only: `in` would also find "toString"
+  const known = Object.entries(LOGIN_REASON_MESSAGES).find(
+    ([key]) => key === reason,
+  );
+  if (known) return known[1];
   if (reason || params.has("errorMessage")) {
     return LOGIN_REASON_MESSAGES["sign-in-failed"];
   }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { ChartDataItem, Metric } from "../domain/Entity/Metric";
+import { chartItemsOf, type Metric } from "../domain/Entity/Metric";
 
 export const useChart = (metric: Metric) => {
   const [activeFilter, setFilter] = useState(metric.defaultFilter);
@@ -14,7 +14,7 @@ export const useChart = (metric: Metric) => {
   );
 
   const data = useMemo(() => {
-    const metricData = (metric.data as ChartDataItem[]) || [];
+    const metricData = chartItemsOf(metric);
     const labelKey = metric.labelKey;
 
     if (!labelKey) {

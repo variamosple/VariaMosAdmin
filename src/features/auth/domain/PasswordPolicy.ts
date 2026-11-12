@@ -43,7 +43,7 @@ export const describePasswordPolicy = (policy: PasswordPolicy): string => {
     policy.requireLowercase && "lowercase",
     policy.requireNumbers && "number",
     policy.requireSpecial && "special character",
-  ].filter(Boolean) as string[];
+  ].filter((part) => typeof part === "string");
   const length = `Password must be between ${policy.minLength} and ${policy.maxLength} characters long`;
   if (parts.length === 0) return `${length}.`;
   const list =

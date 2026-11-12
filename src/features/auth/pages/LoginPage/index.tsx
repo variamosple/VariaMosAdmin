@@ -26,13 +26,16 @@ export const LoginPage: FC = () => {
   const onSignIn = (credentials: Credentials) => {
     void signIn(credentials).then((response) => {
       // Right password, second factor on: the code is still expected
-      const data = response.data as {
-        mfaRequired?: boolean;
-        trustedDeviceDays?: number;
-      } | null;
-      if (data?.mfaRequired) {
+      // The session library types the answer as signed in; this one is not
+      const data = response.data;
+      if (data && "mfaRequired" in data && data.mfaRequired) {
         setErrorMessage(undefined);
-        setTrustedDeviceDays(data.trustedDeviceDays ?? 0);
+        setTrustedDeviceDays(
+          "trustedDeviceDays" in data &&
+            typeof data.trustedDeviceDays === "number"
+            ? data.trustedDeviceDays
+            : 0,
+        );
         setIsMfaStep(true);
       } else if (response.errorCode) {
         setErrorMessage(response.message);

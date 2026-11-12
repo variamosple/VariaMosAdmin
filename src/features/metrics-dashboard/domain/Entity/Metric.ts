@@ -16,3 +16,7 @@ export interface Metric {
   labelKey?: string;
   data?: MetricData | null;
 }
+
+/** The rows of a chart drawn from a list; none for the geographic form. */
+export const chartItemsOf = (metric: Metric): ChartDataItem[] =>
+  Array.isArray(metric.data) ? metric.data : [];

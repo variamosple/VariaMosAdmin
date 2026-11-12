@@ -14,7 +14,7 @@ export type LoadProblemKind = { notFound: true } | { message: string };
 export const loadProblemOf = <T,>(
   response: ResponseModel<T>,
 ): LoadProblemKind | null => {
-  const code = response.errorCode as number | string | null | undefined;
+  const code = response.errorCode;
   if (isErrorCode(code, ErrorCodes.ENTITY_NOT_FOUND) || code === 404) {
     return { notFound: true };
   }

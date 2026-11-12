@@ -7,8 +7,10 @@ const useListenOutsideClicks = <T extends HTMLElement = HTMLElement>(
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node | null;
-      if (elementRef.current && !elementRef.current.contains(target)) {
+      const target = event.target;
+      const inside =
+        target instanceof Node && elementRef.current?.contains(target);
+      if (elementRef.current && !inside) {
         onOutsideClick?.();
       }
     };
