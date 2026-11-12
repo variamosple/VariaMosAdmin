@@ -4,12 +4,16 @@ import { login } from "../helpers/commands.js";
 
 test.describe("Monitoring - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should query local microservices and verify they are running", async ({
@@ -54,7 +58,7 @@ test.describe("Monitoring - Real E2E Flows", () => {
           const body = await response.text();
           console.log(`[API BODY] ${body}`);
         } catch {
-          console.log(`[API BODY ERROR] Could not read body`);
+          console.log("[API BODY ERROR] Could not read body");
         }
       }
     });
@@ -110,9 +114,5 @@ test.describe("Monitoring - Real E2E Flows", () => {
       }
       throw error;
     }
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

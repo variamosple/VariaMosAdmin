@@ -5,7 +5,7 @@ import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 
 export const requestMenuConfig = (): Promise<ResponseModel<Menu>> => {
-  return ADMIN_CLIENT.get(`/v1/configurations/menu`)
+  return ADMIN_CLIENT.get("/v1/configurations/menu")
     .then((response) => response.data)
     .catch((error) =>
       toErrorResponse(

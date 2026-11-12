@@ -55,6 +55,6 @@ export const GoogleLogin: FC<GoogleLoginProps> = ({ text = "signin_with" }) => {
       className="g_id_signin"
       data-locale="en"
       style={{ colorScheme: "normal" }}
-    ></div>
+    />
   );
 };

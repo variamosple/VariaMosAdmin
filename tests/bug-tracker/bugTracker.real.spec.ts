@@ -4,12 +4,16 @@ import { login } from "../helpers/commands";
 
 test.describe("Bug Tracker - Real DB E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should persist a new bug in the database and support commenting in the details view", async ({
@@ -115,9 +119,5 @@ test.describe("Bug Tracker - Real DB E2E Flows", () => {
     await page.getByText("Local Inbox").click();
     const row = page.locator(".tab-pane.active tr", { hasText: bugTitle });
     await expect(row).toBeVisible();
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

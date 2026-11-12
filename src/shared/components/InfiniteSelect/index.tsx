@@ -10,7 +10,7 @@ export const InfiniteSelect = <ValueType,>({
   lastOptionRef,
   isSearchable,
   searchInput,
-  selected = { label: "", value: "" as ValueType },
+  selected,
   placeholder = "Select",
   handleSelect,
   setSearchInput,
@@ -39,9 +39,9 @@ export const InfiniteSelect = <ValueType,>({
     );
   };
 
-  const renderOptions = (options: SelectOptionProps<ValueType>[]) => {
-    return options?.length > 0
-      ? options?.map((option, index) => {
+  const renderOptions = (shown: SelectOptionProps<ValueType>[]) => {
+    return shown?.length > 0
+      ? shown?.map((option, index) => {
           return (
             <button
               type="button"
@@ -51,7 +51,7 @@ export const InfiniteSelect = <ValueType,>({
                 handleSelect(option);
                 closeDropdown();
               }}
-              ref={options?.length - 1 === index ? lastOptionRef : null}
+              ref={shown?.length - 1 === index ? lastOptionRef : null}
             >
               <span title={option.label} className="truncate d-block w-100">
                 {option.label}

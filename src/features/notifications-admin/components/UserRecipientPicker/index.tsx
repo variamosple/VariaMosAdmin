@@ -46,7 +46,7 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
   const [search, setSearch] = useState<Search>({ status: "loading" });
   const [active, setActive] = useState(-1);
   // Only the answer to the latest search is shown
-  const latest = useRef(0);
+  const latestRef = useRef(0);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -55,7 +55,7 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
   const { elementRef } = useListenOutsideClicks<HTMLDivElement>(close);
 
   const fetchUsers = useCallback((term: string) => {
-    const request = ++latest.current;
+    const request = ++latestRef.current;
     setSearch({ status: "loading" });
     void queryUsers(
       new UsersFilter(
@@ -66,7 +66,7 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
         RECIPIENT_PAGE_SIZE,
       ),
     ).then((response) => {
-      if (request !== latest.current) return;
+      if (request !== latestRef.current) return;
       if (response.errorCode) {
         setSearch({
           status: "error",

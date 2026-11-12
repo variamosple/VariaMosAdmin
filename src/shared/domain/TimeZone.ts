@@ -76,7 +76,8 @@ export const formatOffset = (minutes: number): string => {
   const sign = minutes > 0 ? "+" : "−";
   const hours = Math.floor(Math.abs(minutes) / 60);
   const rest = Math.abs(minutes) % 60;
-  return `UTC${sign}${hours}${rest ? `:${String(rest).padStart(2, "0")}` : ""}`;
+  const minutesPart = rest ? `:${String(rest).padStart(2, "0")}` : "";
+  return `UTC${sign}${hours}${minutesPart}`;
 };
 
 const two = (n: number) => String(n).padStart(2, "0");

@@ -1,7 +1,7 @@
 /* cspell:disable */
-import type { ReportCallback } from "web-vitals";
+import type { Metric } from "web-vitals";
 
-const reportWebVitals = (onPerfEntry?: ReportCallback) => {
+const reportWebVitals = (onPerfEntry?: (metric: Metric) => void) => {
   if (onPerfEntry && onPerfEntry instanceof Function) {
     void import("web-vitals").then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
       onCLS(onPerfEntry);

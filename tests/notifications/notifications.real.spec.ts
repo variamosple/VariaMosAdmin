@@ -4,7 +4,7 @@ import { login } from "../helpers/commands.js";
 
 test.describe("Notifications Admin - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 

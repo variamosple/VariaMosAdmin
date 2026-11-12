@@ -169,11 +169,17 @@ export const useRoleList = () => {
   };
 
   // The search keeps the sort, and the sort keeps the search
-  const rolesFilter = (name?: string, sort?: ListSort<RoleSortField>) => {
-    const { sortBy, sortOrder } = sort
-      ? sortFields(sort)
+  const rolesFilter = (name?: string, wantedSort?: ListSort<RoleSortField>) => {
+    const chosen = wantedSort
+      ? sortFields(wantedSort)
       : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
-    return new RolesFilter(name, undefined, undefined, sortBy, sortOrder);
+    return new RolesFilter(
+      name,
+      undefined,
+      undefined,
+      chosen.sortBy,
+      chosen.sortOrder,
+    );
   };
 
   const onSearchReset = () => {

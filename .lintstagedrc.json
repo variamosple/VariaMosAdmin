@@ -1,5 +1,5 @@
 {
-  "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs,json,css}": [
+  "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs,json,jsonc,css}": [
     "biome check --write --no-errors-on-unmatched",
     "cspell --no-must-find-files"
   ],

@@ -46,7 +46,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
           </a>
         ) : (
           <span className="text-muted font-monospace">
-            {bug.id ? `#${bug.id.substring(0, 8)}...` : "N/A"}
+            {bug.id ? `#${bug.id.slice(0, 8)}...` : "N/A"}
           </span>
         )}
       </td>

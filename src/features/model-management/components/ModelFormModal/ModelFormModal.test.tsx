@@ -202,7 +202,12 @@ describe("ModelFormModal Component", () => {
       renderCreateForm({ onProjectSearch, onLanguageSearch });
 
       // Past the search delay; inside act, since the modal keeps opening meanwhile
-      await act(() => new Promise((resolve) => setTimeout(resolve, 400)));
+      await act(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(resolve, 400);
+          }),
+      );
 
       expect(onProjectSearch).not.toHaveBeenCalled();
       expect(onLanguageSearch).not.toHaveBeenCalled();

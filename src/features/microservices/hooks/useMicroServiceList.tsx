@@ -70,10 +70,10 @@ export const useMicroServiceList = (
   });
 
   const refreshList = useCallback(
-    (triggerCheck: boolean = false) => {
+    (triggerCheck = false) => {
       setIsRefreshing(true);
       const preAction = triggerCheck
-        ? triggerMicroServicesCheck().catch(() => {})
+        ? triggerMicroServicesCheck().catch(() => undefined)
         : Promise.resolve();
 
       return (
@@ -189,7 +189,7 @@ export const useMicroServiceList = (
         waitingKeys
           .split(",")
           .map((serviceKey) =>
-            triggerMicroServicesCheck(serviceKey).catch(() => {}),
+            triggerMicroServicesCheck(serviceKey).catch(() => undefined),
           ),
       ).then(() => refreshList());
     }, FOLLOW_UP_POLL_MS);

@@ -3,12 +3,16 @@ import dbHelper from "../helpers/adminDbHelper.js";
 
 test.describe("Auth - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should log in with seeded admin credentials, verify local storage, update country in My Account, and verify persistence after reload", async ({
@@ -99,9 +103,5 @@ test.describe("Auth - Real E2E Flows", () => {
     }
 
     await expect(page).toHaveURL("http://localhost:3000/variamos_admin/#/");
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

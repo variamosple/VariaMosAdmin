@@ -4,13 +4,18 @@ import { login } from "../helpers/commands.js";
 
 test.describe("Metrics & Monitoring - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
     await dbHelper.seedTestVisits(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestVisits(suffix);
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should retrieve and display real metric charts on the dashboard", async ({
@@ -33,10 +38,5 @@ test.describe("Metrics & Monitoring - Real E2E Flows", () => {
       page.getByText("Top visited pages", { exact: true }),
     ).toBeVisible();
     await expect(page.getByText("Yearly visits")).toBeVisible();
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestVisits(suffix);
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

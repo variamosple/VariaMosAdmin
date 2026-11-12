@@ -23,14 +23,17 @@ export interface BugSearchFormProps {
   // The filters restored from the address (UX-26)
   defaultFilter?: BugFilter;
 }
+const NO_ASSIGNEES: NonNullable<BugSearchFormProps["assignees"]> = [];
+const NO_FILTER: NonNullable<BugSearchFormProps["defaultFilter"]> = {};
+
 export const BugSearchForm: FC<BugSearchFormProps> = ({
   onSubmit,
   isLoading,
   onSearchReset,
   repos,
   activeTab,
-  assignees = [],
-  defaultFilter = {},
+  assignees = NO_ASSIGNEES,
+  defaultFilter = NO_FILTER,
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {

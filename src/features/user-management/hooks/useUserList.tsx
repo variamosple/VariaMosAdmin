@@ -191,9 +191,12 @@ export const useUserList = () => {
   };
 
   // The search keeps the sort, and the sort keeps the search
-  const usersFilter = (search?: string, sort?: ListSort<UserSortField>) => {
-    const { sortBy, sortOrder } = sort
-      ? sortFields(sort)
+  const usersFilter = (
+    search?: string,
+    wantedSort?: ListSort<UserSortField>,
+  ) => {
+    const chosen = wantedSort
+      ? sortFields(wantedSort)
       : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
     return new UsersFilter(
       undefined,
@@ -201,8 +204,8 @@ export const useUserList = () => {
       search,
       undefined,
       undefined,
-      sortBy,
-      sortOrder,
+      chosen.sortBy,
+      chosen.sortOrder,
     );
   };
 

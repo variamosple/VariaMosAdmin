@@ -1,6 +1,11 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
-  "plugins": ["./rules/no-unknown.grit"],
+  "extends": ["./biome.shared.jsonc"],
+  "plugins": [
+    "./rules/no-unknown.grit",
+    "./rules/no-trivial-assertion.grit",
+    "./rules/called-without-arguments.grit"
+  ],
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -27,31 +32,16 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
       "suspicious": {
-        "noExplicitAny": "warn",
-        "noArrayIndexKey": "warn",
-        "noImplicitAnyLet": "warn",
-        "noSkippedTests": "error"
-      },
-      "complexity": {
-        "noExcessiveNestedTestSuites": "error"
-      },
-      "a11y": {
-        "useButtonType": "warn"
-      },
-      "correctness": {
-        "noUnusedVariables": "warn",
-        "useExhaustiveDependencies": "warn"
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["error", "warn"]
+          }
+        }
       }
     }
   },
-  "overrides": [
-    {
-      "includes": ["**/*.md", "**/*.yml", "**/*.yaml", "**/*.grit"],
-      "formatter": { "enabled": false }
-    }
-  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "double",
@@ -59,5 +49,176 @@
       "semicolons": "always",
       "arrowParentheses": "always"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "src/setupTests.ts",
+        "src/shared/tests/**"
+      ],
+      "javascript": {
+        "globals": ["vi"]
+      }
+    },
+    {
+      "includes": [
+        "tests/accessibility/accessibility.mocked.spec.ts",
+        "tests/responsive/responsive.mocked.spec.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noPlaywrightNetworkidle": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/features/auth/components/TwoFactorCard/index.tsx",
+        "src/features/bug-tracker/components/BugList/BugRow.tsx",
+        "src/features/bug-tracker/pages/BugListPage.tsx",
+        "src/features/global-configuration/components/AnnounceChangesModal.tsx",
+        "src/features/global-configuration/components/ConfigurationFormModal.tsx",
+        "src/features/global-configuration/components/ScheduleChangeModal.tsx",
+        "src/features/global-configuration/hooks/useConfigurationList.tsx",
+        "src/features/global-configuration/pages/ConfigurationListPage.tsx",
+        "src/features/microservices/components/MicroServiceConfigModal.tsx",
+        "src/features/microservices/components/MicroServiceList/MicroserviceRow.tsx",
+        "src/features/notifications-admin/pages/NotificationsAdminPage.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveCognitiveComplexity": {
+              "level": "info",
+              "options": {
+                "maxAllowedComplexity": 15
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/features/auth/components/TimeZoneSetting/index.tsx",
+        "src/features/auth/components/TwoFactorCard/index.tsx",
+        "src/features/auth/pages/LoginPage/index.tsx",
+        "src/features/auth/pages/MyAccountPage.tsx",
+        "src/features/bug-tracker/components/BugApprovalModal/index.tsx",
+        "src/features/bug-tracker/components/BugFormModal/index.tsx",
+        "src/features/bug-tracker/components/BugSearchForm/index.tsx",
+        "src/features/bug-tracker/hooks/useBugList.tsx",
+        "src/features/bug-tracker/pages/BugListPage.tsx",
+        "src/features/global-configuration/components/AnnounceChangesModal.tsx",
+        "src/features/global-configuration/components/ConfigurationFormModal.tsx",
+        "src/features/global-configuration/components/ScheduleChangeModal.tsx",
+        "src/features/global-configuration/hooks/useConfigurationList.tsx",
+        "src/features/global-configuration/pages/ConfigurationListPage.tsx",
+        "src/features/language-management/components/LanguageList/LanguageRow.tsx",
+        "src/features/language-management/hooks/useLanguageList.tsx",
+        "src/features/language-management/pages/LanguageListPage/index.tsx",
+        "src/features/microservices/components/MicroServiceConfigModal.tsx",
+        "src/features/microservices/components/MicroServiceList/MicroserviceRow.tsx",
+        "src/features/microservices/hooks/useMicroServiceList.tsx",
+        "src/features/microservices/pages/MicroServiceListPage/index.tsx",
+        "src/features/model-management/components/ModelFormModal/index.tsx",
+        "src/features/model-management/components/ModelList/ModelRow.tsx",
+        "src/features/model-management/components/ModelSearchForm/index.tsx",
+        "src/features/model-management/hooks/useModelList.tsx",
+        "src/features/model-management/pages/ModelListPage/index.tsx",
+        "src/features/notifications-admin/components/UserRecipientPicker/index.tsx",
+        "src/features/notifications-admin/pages/NotificationsAdminPage.tsx",
+        "src/features/permission-management/hooks/usePermissionList.tsx",
+        "src/features/project-management/hooks/useProjectsList.tsx",
+        "src/features/role-management/hooks/useRoleList.tsx",
+        "src/features/role-management/pages/RoleDetails.tsx",
+        "src/features/user-management/hooks/useUserList.tsx",
+        "src/features/user-management/pages/UserDetails.tsx",
+        "src/features/user-management/pages/UserList/index.tsx",
+        "src/shared/components/About/index.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveLinesPerFunction": {
+              "level": "info",
+              "options": {
+                "maxLines": 80,
+                "skipBlankLines": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/features/auth/components/PasswordUpdateForm/PasswordUpdateForm.test.tsx",
+        "src/features/bug-tracker/api/BugRepository.ts",
+        "src/features/bug-tracker/hooks/useBugList.tsx",
+        "src/features/model-management/domain/Entity/ModelFilter.ts",
+        "src/features/permission-management/domain/Entity/PermissionsFilter.ts",
+        "src/features/project-management/domain/Entity/ProjectFilter.ts",
+        "src/features/role-management/domain/Entity/RolesFilter.ts",
+        "src/features/user-management/domain/Entity/UsersFilter.ts"
+      ],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "useMaxParams": {
+              "level": "info",
+              "options": {
+                "max": 4
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/features/bug-tracker/pages/BugListPage.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noExcessiveLinesPerFile": {
+              "level": "info",
+              "options": {
+                "maxLines": 400,
+                "skipBlankLines": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "playwright.config.ts",
+        "src/features/auth/components/TwoFactorCard/index.tsx",
+        "src/features/auth/pages/ResetPasswordPage/index.tsx",
+        "src/features/bug-tracker/components/BugFormModal/index.tsx",
+        "src/features/bug-tracker/pages/BugListPage.tsx",
+        "src/features/global-configuration/components/ConfigurationFormModal.tsx",
+        "src/features/global-configuration/components/ScheduleChangeModal.tsx",
+        "src/features/global-configuration/pages/ConfigurationListPage.tsx",
+        "src/features/metrics-dashboard/components/Chart/ChartDateFilterForm.tsx",
+        "src/features/microservices/components/MicroServiceConfigModal.tsx",
+        "src/features/user-management/components/UserDetails/index.tsx",
+        "src/features/user-management/components/UserList/UserRow.tsx",
+        "src/shared/components/SortableHeader/index.tsx",
+        "src/shared/hooks/useListQueryState.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNestedTernary": "info"
+          }
+        }
+      }
+    }
+  ]
 }

@@ -4,7 +4,7 @@ import { disconnect, login } from "../helpers/commands";
 
 test.describe("Admin - Password Reset Flow", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
   const targetUserEmail = `user-test-${suffix}@variamos-test.com`;
@@ -14,6 +14,10 @@ test.describe("Admin - Password Reset Flow", () => {
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should allow admin to generate recovery link, and user to reset password", async ({
@@ -390,9 +394,5 @@ test.describe("Admin - Password Reset Flow", () => {
         )
         .first(),
     ).toBeVisible();
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

@@ -4,13 +4,18 @@ import { login } from "../helpers/commands.js";
 
 test.describe("Model Management - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
     await dbHelper.seedTestModels(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestModels(suffix);
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should show seeded model, expand details, and edit the model name", async ({
@@ -67,10 +72,5 @@ test.describe("Model Management - Real E2E Flows", () => {
         .locator("tbody tr", { hasText: `Test Custom Model-${suffix} Edited` })
         .first(),
     ).toBeVisible();
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestModels(suffix);
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

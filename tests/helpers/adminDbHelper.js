@@ -35,7 +35,7 @@ if (fs.existsSync(envPath)) {
     host: envConfig.DB_HOST || dbConfig.host,
     database: envConfig.DB_DATABASE || dbConfig.database,
     password: envConfig.DB_PASSWORD || dbConfig.password,
-    port: parseInt(envConfig.DB_PORT || dbConfig.port, 10),
+    port: Number.parseInt(envConfig.DB_PORT || dbConfig.port, 10),
   };
 }
 

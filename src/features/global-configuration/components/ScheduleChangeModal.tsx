@@ -72,13 +72,15 @@ export interface ScheduleChangeModalProps {
  * (EV-115 lot B), or edits a planned one. The local time of the browser is
  * shown beside it; nothing changes before the date.
  */
+const currentDate = () => new Date();
+
 export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
   config,
   change,
   onClose,
   onSaved,
   timeZone = "UTC",
-  now = () => new Date(),
+  now = currentDate,
 }) => {
   const titleId = useId();
   const [value, setValue] = useState("");

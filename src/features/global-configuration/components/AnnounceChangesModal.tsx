@@ -46,7 +46,7 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   // The same message sent again after an error keeps its key, so that it
   // reaches each account once (EV-99); a changed message gets a new one
-  const sentKey = useRef<{ content: string; key: string } | null>(null);
+  const sentKeyRef = useRef<{ content: string; key: string } | null>(null);
 
   useEffect(() => {
     if (!announcement) return;
@@ -56,7 +56,7 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
     setSelectedRoles([]);
     setPending(null);
     setError(null);
-    sentKey.current = null;
+    sentKeyRef.current = null;
   }, [announcement]);
 
   const loadRoles = useCallback(async () => {
@@ -120,10 +120,10 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
 
   const keyOf = (request: DispatchNotificationRequest) => {
     const content = JSON.stringify(request);
-    if (sentKey.current?.content !== content) {
-      sentKey.current = { content, key: crypto.randomUUID() };
+    if (sentKeyRef.current?.content !== content) {
+      sentKeyRef.current = { content, key: crypto.randomUUID() };
     }
-    return sentKey.current.key;
+    return sentKeyRef.current.key;
   };
 
   const send = async () => {

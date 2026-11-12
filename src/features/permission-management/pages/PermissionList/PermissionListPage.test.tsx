@@ -3,6 +3,7 @@ import { HttpResponse, http } from "msw";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { server } from "@/shared/tests/mocks/server";
 import { renderPage } from "@/shared/tests/render";
+import { lastOf } from "../../../../shared/tests/lastOf";
 import { PermissionListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -45,7 +46,7 @@ vi.mock("@variamosple/variamos-components", async () => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
-            setData(response.data || []);
+            setData(response.data ?? []);
             setTotalPages(1);
           }
           setIsLoading(false);
@@ -123,7 +124,7 @@ describe("PermissionListPage Integration", () => {
     const submitBtns = screen.getAllByRole("button", {
       name: "Create permission",
     });
-    await user.click(submitBtns[submitBtns.length - 1]);
+    await user.click(lastOf(submitBtns));
 
     // Verify modal closes
     await waitFor(() => {
@@ -151,7 +152,7 @@ describe("PermissionListPage Integration", () => {
     const editRoleButtons = screen.getAllByRole("button", {
       name: /edit permission/i,
     });
-    await user.click(editRoleButtons[editRoleButtons.length - 1]);
+    await user.click(lastOf(editRoleButtons));
 
     // Verify modal closes
     await waitFor(() => {

@@ -51,6 +51,7 @@
     "dist/**",
     "coverage/**",
     "package-lock.json",
-    "cypress/**"
+    "cypress/**",
+    "biome.shared.jsonc"
   ]
 }

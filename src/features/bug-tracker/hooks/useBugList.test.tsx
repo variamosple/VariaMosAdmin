@@ -126,7 +126,9 @@ describe("useBugList Hook", () => {
           let body = {};
           try {
             body = (await request.json()) as UpdateStatusBody;
-          } catch (_e) {}
+          } catch {
+            // No body: the update below keeps its defaults
+          }
           updateBugStatusBody = {
             bugId: params.bugId as string,
             ...body,
@@ -253,7 +255,7 @@ describe("useBugList Hook", () => {
       });
     });
 
-    expect(queryBugsParams[queryBugsParams.length - 1]).toEqual({
+    expect(queryBugsParams.at(-1)).toEqual({
       repo: "repo-a",
       status: "open",
       priority: "high",
@@ -477,7 +479,9 @@ describe("useBugList Hook", () => {
 
       await waitFor(() => expect(queryBugsParams).toHaveLength(1));
       // A second load would come after the first one
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
       expect(queryBugsParams).toHaveLength(1);
     });
 

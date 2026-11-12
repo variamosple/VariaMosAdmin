@@ -24,7 +24,7 @@ export const totp = (secret: string, steps = 0): string => {
   const hmac = createHmac("sha1", base32Decode(secret))
     .update(counter)
     .digest();
-  const offset = (hmac[hmac.length - 1] as number) & 0x0f;
+  const offset = hmac.readUInt8(hmac.length - 1) & 0x0f;
   const binary = hmac.readUInt32BE(offset) & 0x7fffffff;
   return String(binary % 1_000_000).padStart(6, "0");
 };

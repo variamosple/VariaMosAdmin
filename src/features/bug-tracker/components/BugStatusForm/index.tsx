@@ -1,4 +1,4 @@
-import { type FC, type FormEvent, useState } from "react";
+import { type FC, type SubmitEvent, useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
 import {
   githubEffect,
@@ -24,7 +24,7 @@ export const BugStatusForm: FC<BugStatusFormProps> = ({
 
   if (options.length === 0) return null;
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSaving(true);
     setError(null);

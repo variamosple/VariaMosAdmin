@@ -7,7 +7,7 @@ test.describe("Role & Permission Management - Real E2E Flows", () => {
   const suffix = Math.random()
     .toString(36)
     .replace(/[^a-z]/g, "")
-    .substring(0, 6);
+    .slice(0, 6);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
   const customRoleName = `Test custom role ${suffix}`;
@@ -15,6 +15,11 @@ test.describe("Role & Permission Management - Real E2E Flows", () => {
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
     await dbHelper.cleanTestRoles();
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestRoles();
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should create a new role, assign two permissions, and verify they persist on reload", async ({
@@ -88,10 +93,5 @@ test.describe("Role & Permission Management - Real E2E Flows", () => {
     await expect(
       page.locator("td", { hasText: "users::update" }),
     ).toBeVisible();
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestRoles();
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

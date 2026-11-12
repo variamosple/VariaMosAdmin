@@ -35,7 +35,7 @@ export const ResetPasswordPage: FC = () => {
         } else {
           setIsTokenValid(true);
         }
-      } catch (_err) {
+      } catch {
         setIsTokenValid(false);
       } finally {
         setIsVerifyingToken(false);

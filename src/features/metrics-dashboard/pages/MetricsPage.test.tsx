@@ -47,7 +47,9 @@ describe("MetricsPage", () => {
   it("renders the spinner while metrics are loading, then displays chart components", async () => {
     server.use(
       http.get("*/v1/metrics", async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 10);
+        });
         return HttpResponse.json({
           data: [
             { title: "Metric One", type: "line" },

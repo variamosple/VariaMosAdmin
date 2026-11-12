@@ -36,9 +36,9 @@ const countryNames = (code: string): string[] => {
     (locale) => new Intl.DisplayNames([locale], { type: "region" }),
   );
   const names = displayNames
-    .map((names) => {
+    .map((displayName) => {
       try {
-        return names.of(code);
+        return displayName.of(code);
       } catch {
         return undefined;
       }

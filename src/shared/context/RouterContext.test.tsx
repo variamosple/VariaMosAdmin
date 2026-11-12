@@ -217,7 +217,7 @@ describe("RouterContext & RouterProvider", () => {
       mockNavigateListeners.forEach((cb) => {
         try {
           cb({ detail: "/somewhere-else" });
-        } catch (_err) {
+        } catch {
           // ignore or handle
         }
       });

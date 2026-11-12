@@ -34,7 +34,9 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
   const owner = useMemo(() => {
     if (!language.owners) return null;
 
-    return language.owners?.find((owner) => owner.accessLevel === "OWNER");
+    return language.owners?.find(
+      (candidate) => candidate.accessLevel === "OWNER",
+    );
   }, [language.owners]);
 
   const isActive =

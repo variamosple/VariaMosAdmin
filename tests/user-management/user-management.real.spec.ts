@@ -4,13 +4,17 @@ import { login } from "../helpers/commands.js";
 
 test.describe("User Management - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
   const targetUserEmail = `user-test-${suffix}@variamos-test.com`;
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should toggle active/disabled states for a test user, verifying UI updates and database persistence", async ({
@@ -54,9 +58,5 @@ test.describe("User Management - Real E2E Flows", () => {
 
     const dbStateEnabled = await dbHelper.getUserState(targetUserEmail);
     expect(dbStateEnabled.isenabled).toBeTruthy();
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

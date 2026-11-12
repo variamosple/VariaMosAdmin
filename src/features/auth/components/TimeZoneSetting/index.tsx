@@ -30,9 +30,11 @@ const describeZone = (zone: string, now: Date) => {
  * found by country, city or name. Unset, it is the browser's; the country
  * and the language of the site are other settings.
  */
+const currentDate = () => new Date();
+
 export const TimeZoneSetting: FC<TimeZoneSettingProps> = ({
   countryCode,
-  now = () => new Date(),
+  now = currentDate,
 }) => {
   const searchId = useId();
   const { chosen, setChosen } = useTimeZone();
