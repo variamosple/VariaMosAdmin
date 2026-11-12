@@ -12,6 +12,7 @@ import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFil
 import { queryProjects } from "@/features/project-management/api/ProjectRepository";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import { useListChange } from "@/shared/hooks/useListChange";
 import {
   readBooleanParam,
   readPage,
@@ -31,43 +32,55 @@ const modelsFromParams = (params: URLSearchParams) =>
     pageNumber: readPage(params),
   });
 
-export const useModelList = () => {
+// The dialogs of the page, and the model each one is about
+const useModelDialogs = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-
   const [toEditModel, setToEditModel] = useState<Model>();
   const [toDeleteModel, setToDeleteModel] = useState<Model>();
+
+  const onModelEdit = (model: Model) => {
+    setToEditModel(model);
+    setShowEdit(true);
+  };
+  const onModelDelete = (model: Model) => {
+    setToDeleteModel(model);
+    setShowDelete(true);
+  };
+
+  return {
+    showEdit,
+    setShowEdit,
+    showCreate,
+    setShowCreate,
+    showDelete,
+    setShowDelete,
+    isEditing,
+    setIsEditing,
+    isCreating,
+    setIsCreating,
+    toEditModel,
+    toDeleteModel,
+    setToDeleteModel,
+    onModelEdit,
+    onModelDelete,
+  };
+};
+
+type ModelDialogs = ReturnType<typeof useModelDialogs>;
+
+// The projects and languages offered by the model form: the first page,
+// then those whose name matches what is typed, searched on the server so
+// that one beyond the first page can be chosen (EV-96)
+const useModelChoices = () => {
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [languages, setLanguages] = useState<{ id: number; name: string }[]>(
     [],
   );
-  const { pushToast } = useToast();
 
-  const {
-    data: models,
-    currentPage,
-    loadData,
-    filter,
-    isLoading,
-    totalPages,
-    onPageChange,
-    listState,
-  } = usePagedList<ModelsFilter, Model>({
-    queryFunction: queryModels,
-    initialFilter: new ModelsFilter(),
-  });
-
-  const { restoredFilter, restoreKey } = useListQueryState(
-    { filter, currentPage, loadData },
-    modelsFromParams,
-  );
-
-  // The projects and languages offered by the model form: the first page,
-  // then those whose name matches what is typed, searched on the server so
-  // that one beyond the first page can be chosen (EV-96)
   const searchProjects = useCallback((name?: string) => {
     void queryProjects(
       new ProjectsFilter({
@@ -97,97 +110,113 @@ export const useModelList = () => {
     searchLanguages();
   }, [searchProjects, searchLanguages]);
 
-  const onModelEdit = (model: Model) => {
-    setToEditModel(model);
-    setShowEdit(true);
+  return { projects, languages, searchProjects, searchLanguages };
+};
+
+const levelName = (level: string) =>
+  level === "application" ? "Application Model" : "Domain Model";
+
+// The level and the visibility change at once, from the row
+const useModelToggles = (refresh: () => void) => {
+  const run = useListChange(refresh);
+
+  const onModelToggleLevel = (model: Model) => {
+    const nextLevel =
+      model.modelLevel === "application" ? "domain" : "application";
+    return run({
+      request: () => updateModel({ ...model, modelLevel: nextLevel }),
+      messages: {
+        title: "Model level updated",
+        success: `Model level successfully updated to ${levelName(nextLevel)}.`,
+        failureTitle: "Model level update failed",
+      },
+    });
   };
 
-  const performEditModel = (model: Model) => {
-    setIsEditing(true);
-    return updateModel(model)
-      .then((response) => {
-        if (!response.errorCode) {
-          onPageChange(currentPage);
-          setShowEdit(false);
-
-          pushToast({
-            title: "Model edit",
-            message: "Model updated successfully",
-            variant: "success",
-          });
-        } else {
-          pushToast({
-            title: "Model edit",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-
-        return response;
-      })
-      .finally(() => {
-        setIsEditing(false);
-      });
+  const onModelToggleVisibility = (model: Model) => {
+    const nextVisibility = !model.isPublic;
+    return run({
+      request: () => updateModel({ ...model, isPublic: nextVisibility }),
+      messages: {
+        title: "Model visibility updated",
+        success: `Model visibility successfully updated to ${nextVisibility ? "Public" : "Private"}.`,
+        failureTitle: "Model visibility update failed",
+      },
+    });
   };
 
-  const performCreateModel = (model: Model) => {
-    setIsCreating(true);
-    return createModel(model)
-      .then((response) => {
-        if (!response.errorCode) {
-          onPageChange(currentPage);
-          setShowCreate(false);
+  return { onModelToggleLevel, onModelToggleVisibility };
+};
 
-          pushToast({
-            title: "Model create",
-            message: "Model created successfully",
-            variant: "success",
-          });
-        } else {
-          pushToast({
-            title: "Model create",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
+const useModelChanges = (dialogs: ModelDialogs, refresh: () => void) => {
+  const { pushToast } = useToast();
+  const run = useListChange(refresh);
 
-        return response;
-      })
-      .finally(() => {
-        setIsCreating(false);
-      });
-  };
-
-  const performDeleteModel = (model: Model) => {
-    pushToast({
-      title: "Model delete",
-      message: "Deleting model...",
+  const performEditModel = (model: Model) =>
+    run({
+      request: () => updateModel(model),
+      messages: { title: "Model edit", success: "Model updated successfully" },
+      onSuccess: () => dialogs.setShowEdit(false),
+      setBusy: dialogs.setIsEditing,
     });
 
-    if (model.id !== undefined) {
-      void deleteModel(model.id).then((response) => {
-        if (response.errorCode) {
-          pushToast({
-            title: "Model delete",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        } else {
-          pushToast({
-            title: "Model delete",
-            message: "Model deleted successfully",
-            variant: "success",
-          });
-          onPageChange(currentPage);
-        }
-      });
-    }
+  const performCreateModel = (model: Model) =>
+    run({
+      request: () => createModel(model),
+      messages: {
+        title: "Model create",
+        success: "Model created successfully",
+      },
+      onSuccess: () => dialogs.setShowCreate(false),
+      setBusy: dialogs.setIsCreating,
+    });
+
+  const performDeleteModel = (model: Model) => {
+    pushToast({ title: "Model delete", message: "Deleting model..." });
+    const { id } = model;
+    if (id === undefined) return;
+    void run({
+      request: () => deleteModel(id),
+      messages: {
+        title: "Model delete",
+        success: "Model deleted successfully",
+      },
+    });
   };
 
-  const onModelDelete = (model: Model) => {
-    setToDeleteModel(model);
-    setShowDelete(true);
+  return {
+    performEditModel,
+    performCreateModel,
+    performDeleteModel,
+    ...useModelToggles(refresh),
   };
+};
+
+export const useModelList = () => {
+  const {
+    data: models,
+    currentPage,
+    loadData,
+    filter,
+    isLoading,
+    totalPages,
+    onPageChange,
+    listState,
+  } = usePagedList<ModelsFilter, Model>({
+    queryFunction: queryModels,
+    initialFilter: new ModelsFilter(),
+  });
+
+  const { restoredFilter, restoreKey } = useListQueryState(
+    { filter, currentPage, loadData },
+    modelsFromParams,
+  );
+
+  const { setIsEditing, setIsCreating, ...dialogs } = useModelDialogs();
+  const changes = useModelChanges(
+    { ...dialogs, setIsEditing, setIsCreating },
+    () => onPageChange(currentPage),
+  );
 
   const onSearchReset = () => {
     void loadData(new ModelsFilter());
@@ -205,83 +234,19 @@ export const useModelList = () => {
     );
   };
 
-  const performToggleModelLevel = (model: Model) => {
-    const nextLevel =
-      model.modelLevel === "application" ? "domain" : "application";
-    const updatedModel = { ...model, modelLevel: nextLevel };
-    return updateModel(updatedModel).then((response) => {
-      if (!response.errorCode) {
-        onPageChange(currentPage);
-        pushToast({
-          title: "Model level updated",
-          message: `Model level successfully updated to ${nextLevel === "application" ? "Application Model" : "Domain Model"}.`,
-          variant: "success",
-        });
-      } else {
-        pushToast({
-          title: "Model level update failed",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-      return response;
-    });
-  };
-
-  const performToggleModelVisibility = (model: Model) => {
-    const nextVisibility = !model.isPublic;
-    const updatedModel = { ...model, isPublic: nextVisibility };
-    return updateModel(updatedModel).then((response) => {
-      if (!response.errorCode) {
-        onPageChange(currentPage);
-        pushToast({
-          title: "Model visibility updated",
-          message: `Model visibility successfully updated to ${nextVisibility ? "Public" : "Private"}.`,
-          variant: "success",
-        });
-      } else {
-        pushToast({
-          title: "Model visibility update failed",
-          message: response.message ?? "An error occurred",
-          variant: "danger",
-        });
-      }
-      return response;
-    });
-  };
-
   return {
     restoredFilter,
     restoreKey,
     listState,
-    showEdit,
-    setShowEdit,
-    showCreate,
-    setShowCreate,
-    showDelete,
-    setShowDelete,
-    isEditing,
-    isCreating,
-    toEditModel,
-    toDeleteModel,
-    setToDeleteModel,
+    ...dialogs,
     models,
     currentPage,
     isLoading,
     totalPages,
     onPageChange,
-    onModelEdit,
-    performEditModel,
-    performCreateModel,
-    performDeleteModel,
-    onModelDelete,
-    onModelToggleLevel: performToggleModelLevel,
-    onModelToggleVisibility: performToggleModelVisibility,
+    ...changes,
     onSearchReset,
     onSearchSubmit,
-    projects,
-    languages,
-    searchProjects,
-    searchLanguages,
+    ...useModelChoices(),
   };
 };

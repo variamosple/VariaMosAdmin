@@ -29,6 +29,33 @@ export const sortFields = <Field extends string>(
   sortOrder: sort.order === "asc" ? undefined : sort.order,
 });
 
+/** The sort fields of a list filter. */
+export interface SortedFilter<Field extends string> {
+  sortBy?: Field;
+  sortOrder?: SortOrder;
+}
+
+/** The sort a list shows: the one of its filter, ascending by default */
+export const shownSort = <Field extends string>(
+  filter: SortedFilter<Field> | null | undefined,
+  byDefault: Field,
+): ListSort<Field> => ({
+  by: filter?.sortBy ?? byDefault,
+  order: filter?.sortOrder ?? "asc",
+});
+
+/**
+ * The sort of a new load: the one asked for, or else the one of the filter,
+ * so that a search keeps the sort
+ */
+export const keptSort = <Field extends string>(
+  filter: SortedFilter<Field> | null | undefined,
+  wanted?: ListSort<Field>,
+): SortedFilter<Field> =>
+  wanted
+    ? sortFields(wanted)
+    : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
+
 /** The sort written in the address; an unknown column or order is ignored */
 export const readSort = <Field extends string>(
   params: URLSearchParams,

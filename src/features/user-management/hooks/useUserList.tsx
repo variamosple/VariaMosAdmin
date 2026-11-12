@@ -1,3 +1,4 @@
+import type { ResponseModel } from "@variamosple/variamos-components";
 import { useState } from "react";
 import {
   deleteUser,
@@ -13,11 +14,13 @@ import {
 } from "@/features/user-management/domain/Entity/UsersFilter";
 import { useToast } from "@/shared/context/ToastContext";
 import {
+  keptSort,
   type ListSort,
   nextSort,
   readSort,
-  sortFields,
+  shownSort,
 } from "@/shared/domain/Entity/ListSort";
+import { useListChange } from "@/shared/hooks/useListChange";
 import {
   readPage,
   readParam,
@@ -36,15 +39,122 @@ const usersFromParams = (params: URLSearchParams) => {
   });
 };
 
-export const useUserList = () => {
+// The dialogs of the page, all about the selected user
+const useUserDialogs = () => {
   const [showResetLink, setShowResetLink] = useState(false);
   const [showEnable, setShowEnable] = useState(false);
   const [showDisable, setShowDisable] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-
   const [selectedUser, setSelectedUser] = useState<User>();
-  const { pushToast } = useToast();
 
+  const opening = (setShow: (show: boolean) => void) => (user: User) => {
+    setSelectedUser(user);
+    setShow(true);
+  };
+
+  return {
+    showResetLink,
+    setShowResetLink,
+    showEnable,
+    setShowEnable,
+    showDisable,
+    setShowDisable,
+    showDelete,
+    setShowDelete,
+    selectedUser,
+    setSelectedUser,
+    onUserResetLink: opening(setShowResetLink),
+    onUserEnable: opening(setShowEnable),
+    onUserDisable: opening(setShowDisable),
+    onUserDelete: opening(setShowDelete),
+  };
+};
+
+type UserDialogs = ReturnType<typeof useUserDialogs>;
+
+interface AccountChange {
+  title: string;
+  // Shown while the request runs
+  pending?: string;
+  success: string;
+  failure: string;
+  request: (userId: string) => Promise<ResponseModel<void>>;
+  close: () => void;
+}
+
+const useUserChanges = (dialogs: UserDialogs, refresh: () => void) => {
+  const { pushToast } = useToast();
+  const run = useListChange(refresh);
+
+  const change = (user: User, account: AccountChange) => {
+    const { id } = user;
+    const { title } = account;
+    if (!id) {
+      pushToast({ title, message: "User ID is missing", variant: "danger" });
+      return Promise.reject(new Error("User ID is missing"));
+    }
+    if (account.pending) pushToast({ title, message: account.pending });
+    return run({
+      request: () => account.request(id),
+      messages: { title, success: account.success, failure: account.failure },
+      onSuccess: account.close,
+    });
+  };
+
+  return {
+    performDisableUser: (user: User) =>
+      change(user, {
+        title: "User disable",
+        pending: "Disabling user...",
+        success: "User disabled successfully",
+        failure: "Failed to disable user",
+        request: disableUser,
+        close: () => dialogs.setShowDisable(false),
+      }),
+    performEnableUser: (user: User) =>
+      change(user, {
+        title: "User enable",
+        pending: "Enabling user...",
+        success: "User enabled successfully",
+        failure: "Failed to enable user",
+        request: enableUser,
+        close: () => dialogs.setShowEnable(false),
+      }),
+    performDeleteUser: (user: User) =>
+      change(user, {
+        title: "User delete",
+        success: "User deleted successfully",
+        failure: "Failed to delete user",
+        request: deleteUser,
+        close: () => dialogs.setShowDelete(false),
+      }),
+  };
+};
+
+// The search keeps the sort, and the sort keeps the search
+const useUserSearch = (
+  filter: UsersFilter | null,
+  loadData: (filter: UsersFilter) => Promise<ResponseModel<User[]>>,
+) => {
+  const usersFilter = (search?: string, wantedSort?: ListSort<UserSortField>) =>
+    new UsersFilter({ search, ...keptSort(filter, wantedSort) });
+
+  const sort = shownSort(filter, "name");
+  return {
+    sort,
+    onSort: (field: UserSortField) => {
+      void loadData(usersFilter(filter?.search, nextSort(sort, field)));
+    },
+    onSearchReset: () => {
+      void loadData(usersFilter());
+    },
+    onSearchSubmit: (search?: string) => {
+      void loadData(usersFilter(search));
+    },
+  };
+};
+
+export const useUserList = () => {
   const {
     data: users,
     currentPage,
@@ -64,159 +174,8 @@ export const useUserList = () => {
     usersFromParams,
   );
 
-  const onUserResetLink = (user: User) => {
-    setSelectedUser(user);
-    setShowResetLink(true);
-  };
-
-  const onUserDisable = (user: User) => {
-    setSelectedUser(user);
-    setShowDisable(true);
-  };
-
-  const performDisableUser = (user: User) => {
-    if (!user.id) {
-      pushToast({
-        title: "User disable",
-        message: "User ID is missing",
-        variant: "danger",
-      });
-      return Promise.reject(new Error("User ID is missing"));
-    }
-
-    pushToast({
-      title: "User disable",
-      message: "Disabling user...",
-    });
-
-    return disableUser(user.id).then((response) => {
-      if (!response.errorCode) {
-        onPageChange(currentPage);
-        setShowDisable(false);
-        pushToast({
-          title: "User disable",
-          message: "User disabled successfully",
-          variant: "success",
-        });
-      } else {
-        pushToast({
-          title: "User disable",
-          message: response.message || "Failed to disable user",
-          variant: "danger",
-        });
-      }
-
-      return response;
-    });
-  };
-
-  const onUserEnable = (user: User) => {
-    setSelectedUser(user);
-    setShowEnable(true);
-  };
-
-  const performEnableUser = (user: User) => {
-    if (!user.id) {
-      pushToast({
-        title: "User enable",
-        message: "User ID is missing",
-        variant: "danger",
-      });
-      return Promise.reject(new Error("User ID is missing"));
-    }
-
-    pushToast({
-      title: "User enable",
-      message: "Enabling user...",
-    });
-
-    return enableUser(user.id).then((response) => {
-      if (!response.errorCode) {
-        onPageChange(currentPage);
-        setShowEnable(false);
-        pushToast({
-          title: "User enable",
-          message: "User enabled successfully",
-          variant: "success",
-        });
-      } else {
-        pushToast({
-          title: "User enable",
-          message: response.message || "Failed to enable user",
-          variant: "danger",
-        });
-      }
-
-      return response;
-    });
-  };
-
-  const onUserDelete = (user: User) => {
-    setSelectedUser(user);
-    setShowDelete(true);
-  };
-
-  const performDeleteUser = (user: User) => {
-    if (!user.id) {
-      pushToast({
-        title: "User delete",
-        message: "User ID is missing",
-        variant: "danger",
-      });
-      return Promise.reject(new Error("User ID is missing"));
-    }
-
-    return deleteUser(user.id).then((response) => {
-      if (!response.errorCode) {
-        onPageChange(currentPage);
-        setShowDelete(false);
-        pushToast({
-          title: "User delete",
-          message: "User deleted successfully",
-          variant: "success",
-        });
-      } else {
-        pushToast({
-          title: "User delete",
-          message: response.message || "Failed to delete user",
-          variant: "danger",
-        });
-      }
-
-      return response;
-    });
-  };
-
-  // The search keeps the sort, and the sort keeps the search
-  const usersFilter = (
-    search?: string,
-    wantedSort?: ListSort<UserSortField>,
-  ) => {
-    const chosen = wantedSort
-      ? sortFields(wantedSort)
-      : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
-    return new UsersFilter({
-      search,
-      sortBy: chosen.sortBy,
-      sortOrder: chosen.sortOrder,
-    });
-  };
-
-  const onSearchReset = () => {
-    void loadData(usersFilter());
-  };
-
-  const onSearchSubmit = (search?: string) => {
-    void loadData(usersFilter(search));
-  };
-
-  const sort: ListSort<UserSortField> = {
-    by: filter?.sortBy ?? "name",
-    order: filter?.sortOrder ?? "asc",
-  };
-  const onSort = (field: UserSortField) => {
-    void loadData(usersFilter(filter?.search, nextSort(sort, field)));
-  };
+  const dialogs = useUserDialogs();
+  const changes = useUserChanges(dialogs, () => onPageChange(currentPage));
 
   return {
     restoredFilter,
@@ -224,29 +183,11 @@ export const useUserList = () => {
     listState,
     currentPage,
     onPageChange,
-    showResetLink,
-    setShowResetLink,
-    showEnable,
-    setShowEnable,
-    showDisable,
-    setShowDisable,
-    showDelete,
-    setShowDelete,
-    selectedUser,
-    setSelectedUser,
+    ...dialogs,
     users,
     totalPages,
     isLoading,
-    onUserResetLink,
-    onUserDisable,
-    performDisableUser,
-    onUserEnable,
-    performEnableUser,
-    onUserDelete,
-    performDeleteUser,
-    onSearchReset,
-    sort,
-    onSort,
-    onSearchSubmit,
+    ...changes,
+    ...useUserSearch(filter, loadData),
   };
 };
