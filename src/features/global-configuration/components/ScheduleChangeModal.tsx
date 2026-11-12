@@ -74,6 +74,10 @@ export interface ScheduleChangeModalProps {
  */
 const currentDate = () => new Date();
 
+// A planned change is saved again; a new one is scheduled
+const submitLabelOf = (planned: boolean) =>
+  planned ? "Save the planned change" : "Schedule";
+
 export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
   config,
   change,
@@ -262,10 +266,8 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
           <Button type="submit" variant="primary" disabled={busy}>
             {busy ? (
               <Spinner size="sm" animation="border" />
-            ) : change ? (
-              "Save the planned change"
             ) : (
-              "Schedule"
+              submitLabelOf(change !== undefined)
             )}
           </Button>
         </Modal.Footer>

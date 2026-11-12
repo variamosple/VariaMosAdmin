@@ -3,7 +3,11 @@ import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { Trash, Upload } from "react-bootstrap-icons";
 import { useForm } from "react-hook-form";
 import { attachmentUrl } from "../../api/attachmentUrl";
-import { deleteAttachment, uploadAttachment } from "../../api/BugRepository";
+import {
+  type BugStatusChange,
+  deleteAttachment,
+  uploadAttachment,
+} from "../../api/BugRepository";
 import type { Bug, BugAttachment } from "../../domain/Bug";
 import {
   BUG_COMPONENT_LABELS,
@@ -29,17 +33,7 @@ interface BugApprovalModalProps {
   show: boolean;
   bug: Bug | null;
   onHide: () => void;
-  onConfirmApprove: (
-    id: string,
-    status: string,
-    comment?: string,
-    title?: string,
-    description?: string,
-    priority?: string,
-    category?: string,
-    githubRepo?: string,
-    component?: string,
-  ) => Promise<void>;
+  onConfirmApprove: (id: string, change: BugStatusChange) => Promise<void>;
   repos: string[];
   categories: string[];
 }
@@ -117,17 +111,16 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
     setIsApproving(true);
     setModalError(null);
     try {
-      await onConfirmApprove(
-        bug.id,
-        "open",
-        data.comment,
-        data.title,
-        data.description,
-        data.priority,
-        data.category,
-        data.githubRepo,
-        data.component,
-      );
+      await onConfirmApprove(bug.id, {
+        status: "open",
+        comment: data.comment,
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        category: data.category,
+        githubRepo: data.githubRepo,
+        component: data.component,
+      });
       onHide();
     } catch (err) {
       setModalError(

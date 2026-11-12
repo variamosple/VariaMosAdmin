@@ -10,7 +10,12 @@ import type { SelectOptionProps } from "@/shared/components/InfiniteSelect/index
 import { useSearchableOptions } from "@/shared/hooks/useSearchableOptions";
 
 const searchPermissions = (search: string, page: number) =>
-  queryPermissions(new PermissionsFilter(search, page));
+  queryPermissions(
+    new PermissionsFilter({
+      name: search,
+      pageNumber: page,
+    }),
+  );
 
 const toOption = ({ id, name }: Permission): SelectOptionProps<number> => ({
   label: name,

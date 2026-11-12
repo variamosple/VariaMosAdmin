@@ -24,6 +24,13 @@ interface ChartPeriodFormValues {
   year: string;
 }
 
+// The period of the chosen mode: a month, a year, or two dates
+const periodOf = (data: ChartPeriodFormValues) => {
+  if (data.mode === "month") return monthPeriod(data.month);
+  if (data.mode === "year") return yearPeriod(data.year);
+  return { fromDate: data.fromDate, toDate: data.toDate };
+};
+
 export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
   onFilterSubmit,
 }) => {
@@ -45,12 +52,7 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
   const mode = watch("mode");
 
   const onSubmit: SubmitHandler<ChartPeriodFormValues> = (data) => {
-    const period =
-      data.mode === "month"
-        ? monthPeriod(data.month)
-        : data.mode === "year"
-          ? yearPeriod(data.year)
-          : { fromDate: data.fromDate, toDate: data.toDate };
+    const period = periodOf(data);
     if (period) onFilterSubmit(period);
   };
 

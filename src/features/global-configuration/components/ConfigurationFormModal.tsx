@@ -1,9 +1,10 @@
 import { type FC, useEffect, useId, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
-import type {
-  AcceptedValues,
-  Configuration,
-  ConfigurationValue,
+import {
+  type AcceptedValues,
+  type Configuration,
+  type ConfigurationValue,
+  valueKindOf,
 } from "../domain/Entity/Configuration";
 
 /** A whole number within the bounds the server sent; true without bounds. */
@@ -13,6 +14,18 @@ const isWithinAccepted = (value: number, accepts?: AcceptedValues) =>
   (Number.isInteger(value) && value >= accepts.min && value <= accepts.max);
 
 /** Time zones the browser knows, offered while typing one. */
+// A secret is typed hidden; a number in a number field
+const inputTypeOf = (config: Configuration) => {
+  if (config.isSecret) return "password";
+  return config.type === "number" ? "number" : "text";
+};
+
+// A secret is never shown back: the field asks for a new value
+const placeholderOf = (config: Configuration) => {
+  if (config.isSecret) return "New value";
+  return config.accepts?.format === "timeSpan" ? "20:00-07:00" : "Enter value";
+};
+
 const knownTimeZones = (): string[] => {
   try {
     return Intl.supportedValuesOf("timeZone");
@@ -116,6 +129,7 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
   };
 
   if (!config) return null;
+  const valueKind = valueKindOf(config.type);
 
   return (
     <Modal aria-labelledby={titleId} show={showModal} onHide={onClose}>
@@ -174,7 +188,7 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
 
           <Form.Group controlId="configValue">
             <Form.Label className="fw-bold">Value</Form.Label>
-            {config.type === "boolean" ? (
+            {valueKind === "switch" && (
               <Form.Check
                 type="switch"
                 id={booleanSwitchId}
@@ -183,7 +197,8 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
                 disabled={config.isReadOnly}
                 onChange={(e) => setBoolValue(e.target.checked)}
               />
-            ) : config.type === "object" || config.type === "array" ? (
+            )}
+            {valueKind === "json" && (
               <Form.Control
                 as="textarea"
                 rows={6}
@@ -197,26 +212,15 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
                 }
                 style={{ fontFamily: "monospace" }}
               />
-            ) : (
+            )}
+            {valueKind === "field" && (
               <Form.Control
-                type={
-                  config.isSecret
-                    ? "password"
-                    : config.type === "number"
-                      ? "number"
-                      : "text"
-                }
+                type={inputTypeOf(config)}
                 value={inputValue}
                 disabled={config.isReadOnly}
                 autoComplete={config.isSecret ? "new-password" : "off"}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder={
-                  config.isSecret
-                    ? "New value"
-                    : config.accepts?.format === "timeSpan"
-                      ? "20:00-07:00"
-                      : "Enter value"
-                }
+                placeholder={placeholderOf(config)}
                 min={config.accepts?.min}
                 max={config.accepts?.max}
                 step={config.accepts?.min === undefined ? undefined : 1}

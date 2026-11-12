@@ -87,7 +87,12 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
       }
 
       onSubmit(
-        new ProjectsFilter(data?.name, template, deleted, includeDeleted),
+        new ProjectsFilter({
+          name: data?.name,
+          isTemplate: template,
+          isDeleted: deleted,
+          includeDeleted,
+        }),
       );
       reset(data);
     },

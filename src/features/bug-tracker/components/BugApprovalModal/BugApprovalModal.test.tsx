@@ -217,17 +217,16 @@ describe("BugApprovalModal Component", () => {
     await user.click(publishBtn);
 
     await waitFor(() => {
-      expect(mockOnConfirmApprove).toHaveBeenCalledWith(
-        "bug-123",
-        "open",
-        "Review note",
-        "Approved Title",
-        "Old Description",
-        "critical",
-        "UI",
-        "repo1",
-        "model",
-      );
+      expect(mockOnConfirmApprove).toHaveBeenCalledWith("bug-123", {
+        status: "open",
+        comment: "Review note",
+        title: "Approved Title",
+        description: "Old Description",
+        priority: "critical",
+        category: "UI",
+        githubRepo: "repo1",
+        component: "model",
+      });
     });
 
     await waitFor(() => {

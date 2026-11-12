@@ -79,7 +79,8 @@ export const readParam = (params: URLSearchParams, name: string) =>
 
 export const readBooleanParam = (params: URLSearchParams, name: string) => {
   const value = params.get(name);
-  return value === "true" ? true : value === "false" ? false : undefined;
+  if (value !== "true" && value !== "false") return undefined;
+  return value === "true";
 };
 
 export const readPage = (params: URLSearchParams) => {

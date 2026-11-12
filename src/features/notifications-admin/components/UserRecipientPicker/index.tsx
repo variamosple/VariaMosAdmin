@@ -58,13 +58,11 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
     const request = ++latestRef.current;
     setSearch({ status: "loading" });
     void queryUsers(
-      new UsersFilter(
-        undefined,
-        undefined,
-        term.trim() || undefined,
-        1,
-        RECIPIENT_PAGE_SIZE,
-      ),
+      new UsersFilter({
+        search: term.trim() || undefined,
+        pageNumber: 1,
+        pageSize: RECIPIENT_PAGE_SIZE,
+      }),
     ).then((response) => {
       if (request !== latestRef.current) return;
       if (response.errorCode) {

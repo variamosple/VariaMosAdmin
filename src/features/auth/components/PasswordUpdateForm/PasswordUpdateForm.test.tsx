@@ -13,18 +13,11 @@ vi.mock("@variamosple/variamos-components", async () => ({
     totalCount?: number;
     data?: T;
 
-    constructor(
-      transactionId?: string,
-      errorCode?: number,
-      message?: string,
-      totalCount?: number,
-      data?: T,
-    ) {
+    // The three first arguments of the library model, the ones the tests pass
+    constructor(transactionId?: string, errorCode?: number, message?: string) {
       this.transactionId = transactionId;
       this.errorCode = errorCode;
       this.message = message;
-      this.totalCount = totalCount;
-      this.data = data;
     }
   },
 }));

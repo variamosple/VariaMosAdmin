@@ -25,6 +25,12 @@ import type {
 // The API never sends a secret value: only this mask is shown
 const SECRET_MASK = "********";
 
+// A restart stands out, a scale change is marked, the rest is informative
+const actionBadgeOf = (actionType: string) => {
+  if (actionType === "RESTART") return "warning";
+  return actionType === "SCALE_CHANGE" ? "primary" : "info";
+};
+
 export interface MicroServiceConfigModalProps {
   show: boolean;
   serviceName: string;
@@ -186,7 +192,6 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                 {showAddForm ? "Cancel" : "Add parameter"}
               </Button>
             </div>
-
             {showAddForm ? (
               <div className="bg-light p-3 rounded mb-3 border">
                 <h6 className="fw-bold mb-2">Add new configuration key</h6>
@@ -220,18 +225,19 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                 </div>
               </div>
             ) : null}
-
             {loading ? (
               <div className="text-center my-4">
                 <Spinner animation="border" variant="primary" />
               </div>
-            ) : configs.length === 0 ? (
+            ) : null}{" "}
+            {!loading && configs.length === 0 && (
               <div className="text-muted text-center my-4">
                 No custom configuration parameters found for this service. Click{" "}
                 <strong>Add parameter</strong> above to configure environment
                 overrides.
               </div>
-            ) : (
+            )}{" "}
+            {!loading && configs.length > 0 && (
               <Table responsive hover size="sm" className="align-middle">
                 <thead>
                   <tr>
@@ -323,11 +329,13 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
               <div className="text-center my-4">
                 <Spinner animation="border" variant="primary" />
               </div>
-            ) : auditLogs.length === 0 ? (
+            ) : null}{" "}
+            {!loading && auditLogs.length === 0 && (
               <div className="text-muted text-center my-4">
                 No modification history recorded yet.
               </div>
-            ) : (
+            )}{" "}
+            {!loading && auditLogs.length > 0 && (
               <Table responsive hover size="sm" className="align-middle">
                 <thead>
                   <tr>
@@ -344,15 +352,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                         <DateTime value={log.createdAt} />
                       </td>
                       <td>
-                        <Badge
-                          bg={
-                            log.actionType === "RESTART"
-                              ? "warning"
-                              : log.actionType === "SCALE_CHANGE"
-                                ? "primary"
-                                : "info"
-                          }
-                        >
+                        <Badge bg={actionBadgeOf(log.actionType)}>
                           {log.actionType}
                         </Badge>
                       </td>

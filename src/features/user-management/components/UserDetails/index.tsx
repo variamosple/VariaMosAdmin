@@ -1,6 +1,9 @@
 import type { FC } from "react";
 import { Col, Row } from "react-bootstrap";
-import type { User } from "@/features/user-management/domain/Entity/User";
+import {
+  accountStatus,
+  type User,
+} from "@/features/user-management/domain/Entity/User";
 import { DateTime } from "@/shared/components/DateTime";
 
 export interface RoleListParameters {
@@ -46,12 +49,7 @@ export const UserDetails: FC<RoleListParameters> = ({ user }) => {
         </Col>
 
         <Col className="col-12 col-md-6">
-          <span className="fw-bold">Status: </span>{" "}
-          {user?.isDeleted
-            ? "deleted"
-            : user?.isEnabled
-              ? "active"
-              : "disabled"}
+          <span className="fw-bold">Status: </span> {accountStatus(user)}
         </Col>
       </Row>
     </div>

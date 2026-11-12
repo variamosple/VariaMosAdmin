@@ -10,3 +10,9 @@ export interface User {
   createdAt: Date;
   lastLogin?: Date | null;
 }
+
+/** The state of an account as the lists show it. */
+export const accountStatus = (user?: Pick<User, "isDeleted" | "isEnabled">) => {
+  if (user?.isDeleted) return "deleted";
+  return user?.isEnabled ? "active" : "disabled";
+};
