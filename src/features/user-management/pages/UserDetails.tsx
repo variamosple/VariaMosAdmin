@@ -188,19 +188,19 @@ const UserDetailsPageComponent: FC = () => {
 
       <hr />
 
-      {problem && userIdParam && (
+      {problem && userIdParam ? (
         <LoadProblem
           problem={problem}
           item="user"
           onRetry={() => queryUser(userIdParam)}
         />
-      )}
+      ) : null}
 
-      {!!user && <UserDetails user={user} />}
+      {user ? <UserDetails user={user} /> : null}
 
-      {!!user && !!userIdParam && <AccountMfaSection userId={userIdParam} />}
+      {user && userIdParam ? <AccountMfaSection userId={userIdParam} /> : null}
 
-      {!!user && (
+      {user ? (
         <>
           <h2 className="mt-3">User roles</h2>
 
@@ -221,7 +221,7 @@ const UserDetailsPageComponent: FC = () => {
             onRoleDelete={onUserRoleDelete}
           />
         </>
-      )}
+      ) : null}
 
       <ConfirmationModal
         show={showDelete}

@@ -188,9 +188,9 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
               />
-              {config.accepts?.text && (
+              {config.accepts?.text ? (
                 <Form.Text>Accepts {config.accepts.text}.</Form.Text>
-              )}
+              ) : null}
             </Form.Group>
           )}
           <Form.Group controlId={`${titleId}-due`}>
@@ -249,11 +249,11 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
               Applied within a minute of this time.
             </Form.Text>
           </Form.Group>
-          {error && (
+          {error ? (
             <Alert variant="danger" className="mb-0 py-2">
               {error}
             </Alert>
-          )}
+          ) : null}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={onClose} disabled={busy}>

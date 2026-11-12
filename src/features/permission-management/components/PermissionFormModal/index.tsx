@@ -83,7 +83,7 @@ export const PermissionFormModal: FC<PermissionFormModalProps> = ({
                     "Use 'resource::action' or 'module::resource::action': lowercase letters, digits and hyphens (e.g. 'users::query').",
                 },
               })}
-              isInvalid={!!errors.name}
+              isInvalid={Boolean(errors.name)}
             />
             <Form.Control.Feedback type="invalid">
               {errors.name?.message}

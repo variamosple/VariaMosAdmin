@@ -1,4 +1,11 @@
-import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type FC,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import {
   countNotificationRecipients,
@@ -30,6 +37,9 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
   announcement,
   onClose,
 }) => {
+  const titleId = useId();
+  const broadcastId = useId();
+  const roleAudienceId = useId();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [audience, setAudience] = useState<"broadcast" | "role">("broadcast");
@@ -146,11 +156,11 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
     <Modal
       show={announcement !== null}
       onHide={busy ? undefined : onClose}
-      aria-labelledby="announce-changes-title"
+      aria-labelledby={titleId}
       centered
     >
       <Modal.Header closeButton={!busy}>
-        <Modal.Title id="announce-changes-title" as="h2" className="fs-5">
+        <Modal.Title id={titleId} as="h2" className="fs-5">
           Announce this change?
         </Modal.Title>
       </Modal.Header>
@@ -171,7 +181,7 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
               <div className="d-flex gap-3">
                 <Form.Check
                   type="radio"
-                  id="announce-audience-broadcast"
+                  id={broadcastId}
                   name="announce-audience"
                   label="Whole site"
                   checked={audience === "broadcast"}
@@ -179,7 +189,7 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
                 />
                 <Form.Check
                   type="radio"
-                  id="announce-audience-role"
+                  id={roleAudienceId}
                   name="announce-audience"
                   label="Some roles"
                   checked={audience === "role"}
@@ -220,11 +230,11 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = ({
             </Form.Group>
           </>
         )}
-        {error && (
+        {error ? (
           <Alert variant="danger" className="mt-3 mb-0 py-2">
             {error}
           </Alert>
-        )}
+        ) : null}
       </Modal.Body>
       <Modal.Footer>
         {pending ? (

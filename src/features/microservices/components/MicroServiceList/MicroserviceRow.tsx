@@ -80,8 +80,8 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
     ? FOLLOW_UP_BADGES[followUp.step]
     : (STATUS_BADGES[status] ?? STATUS_BADGES.DOWN);
   // No second action on a service while one is under way
-  const isBusy = !!followUp && followUp.step !== "failed";
-  const hasUptime = !!microService.uptimeSummary?.history?.length;
+  const isBusy = followUp !== undefined && followUp.step !== "failed";
+  const hasUptime = Boolean(microService.uptimeSummary?.history?.length);
 
   let port = "—";
   if (microService.targetUrl) {
@@ -175,9 +175,9 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
             text={badge.text}
             className="text-uppercase d-inline-flex align-items-center gap-1"
           >
-            {isBusy && (
+            {isBusy ? (
               <Spinner animation="border" size="sm" aria-hidden="true" />
-            )}
+            ) : null}
             {badge.label}
           </Badge>
         </td>
@@ -232,7 +232,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
               />
             )}
 
-            {isRunning && (
+            {isRunning ? (
               <>
                 <IconButton
                   variant="warning"
@@ -250,7 +250,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
                   icon={<StopFill />}
                 />
               </>
-            )}
+            ) : null}
 
             <IconButton
               variant="outline-secondary"
@@ -270,7 +270,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         </td>
       </tr>
 
-      {show && isLoading && (
+      {show && isLoading ? (
         <tr>
           <td colSpan={7}>
             <div className="w-100 text-center my-3">
@@ -278,7 +278,7 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
             </div>
           </td>
         </tr>
-      )}
+      ) : null}
 
       {show && !isLoading && (
         <tr>

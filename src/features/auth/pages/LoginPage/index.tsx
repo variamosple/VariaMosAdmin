@@ -127,7 +127,7 @@ export const LoginPage: FC = () => {
       <Alert
         className="w-100 m-0"
         variant="danger"
-        show={!!errorMessage}
+        show={Boolean(errorMessage)}
         dismissible
         onClose={() => setErrorMessage(undefined)}
       >

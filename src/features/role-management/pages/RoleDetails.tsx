@@ -195,15 +195,15 @@ const RoleDetailsPageComponent: FC = () => {
 
       <hr />
 
-      {problem && roleIdParam && (
+      {problem && roleIdParam ? (
         <LoadProblem
           problem={problem}
           item="role"
           onRetry={() => queryRole(Number.parseInt(roleIdParam, 10))}
         />
-      )}
+      ) : null}
 
-      {!!role && (
+      {Boolean(role) && (
         <>
           <RolePermissionForm
             isLoading={isCreating}

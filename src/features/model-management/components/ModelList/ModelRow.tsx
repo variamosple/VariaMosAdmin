@@ -162,7 +162,7 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
         </td>
       </tr>
 
-      {show && (
+      {show ? (
         <tr>
           <td colSpan={10}>
             <ModelDetails
@@ -171,9 +171,9 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
             />
           </td>
         </tr>
-      )}
+      ) : null}
 
-      {showContactModal && (
+      {showContactModal ? (
         <ContactOwnerModal
           show={showContactModal}
           onClose={() => setShowContactModal(false)}
@@ -181,7 +181,7 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
           entityName={model.name || ""}
           entityType="Model"
         />
-      )}
+      ) : null}
 
       <ConfirmationModal
         show={showLevelConfirm}

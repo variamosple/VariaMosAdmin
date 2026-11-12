@@ -71,14 +71,14 @@ export const ModelList: FC<ModelListProps> = ({
               onModelToggleVisibility={onModelToggleVisibility}
             />
           ))}
-          {state && (
+          {state ? (
             <TableStateRow
               state={state}
               isEmpty={!items?.length}
               colSpan={10}
               items="models"
             />
-          )}
+          ) : null}
         </tbody>
       </Table>
 

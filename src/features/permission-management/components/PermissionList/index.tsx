@@ -81,14 +81,14 @@ export const PermissionList: FC<PermissionListParameters> = ({
               </td>
             </tr>
           ))}
-          {state && (
+          {state ? (
             <TableStateRow
               state={state}
               isEmpty={!items?.length}
               colSpan={3}
               items="permissions"
             />
-          )}
+          ) : null}
         </tbody>
       </Table>
 

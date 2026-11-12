@@ -157,11 +157,11 @@ export const TimeZoneSetting: FC<TimeZoneSettingProps> = ({
           country or city.
         </Form.Text>
       )}
-      {error && (
+      {error ? (
         <Alert variant="danger" className="mb-0 py-2">
           {error}
         </Alert>
-      )}
+      ) : null}
       <div className="d-flex gap-2">
         <Button size="sm" onClick={save} disabled={busy}>
           {busy ? <Spinner size="sm" animation="border" /> : "Save"}

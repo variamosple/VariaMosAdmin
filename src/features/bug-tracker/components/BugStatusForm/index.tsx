@@ -40,7 +40,7 @@ export const BugStatusForm: FC<BugStatusFormProps> = ({
   return (
     <Form onSubmit={handleSubmit} className="border rounded p-3 mb-3">
       <h6 className="mb-2">Change status</h6>
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error ? <Alert variant="danger">{error}</Alert> : null}
       <Form.Group className="mb-2" controlId="bugNewStatus">
         <Form.Label>New status</Form.Label>
         <Form.Select

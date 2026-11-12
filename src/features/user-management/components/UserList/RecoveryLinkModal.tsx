@@ -94,14 +94,14 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
           </div>
         )}
 
-        {loading && (
+        {loading ? (
           <div className="text-center my-3">
             <Spinner animation="border" variant="primary" size="sm" />
             <p className="text-secondary mt-2 small">Generating link...</p>
           </div>
-        )}
+        ) : null}
 
-        {recoveryUrl && (
+        {recoveryUrl ? (
           <Form.Group className="mt-3">
             <Form.Label className="form-label align-self-start m-0">
               Copy this link:
@@ -120,11 +120,11 @@ export const RecoveryLinkModal: FC<RecoveryLinkModalProps> = ({
                 icon={copied ? <ClipboardCheck /> : <Clipboard />}
               />
             </InputGroup>
-            {copied && (
+            {copied ? (
               <p className="text-success small mt-1">Copied to clipboard!</p>
-            )}
+            ) : null}
           </Form.Group>
-        )}
+        ) : null}
       </Modal.Body>
 
       <Modal.Footer>

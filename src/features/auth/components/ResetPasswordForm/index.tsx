@@ -59,7 +59,7 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
             required: "New password is required",
             validate: passwordPolicy.validate,
           })}
-          isInvalid={!!errors.new_password}
+          isInvalid={Boolean(errors.new_password)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.new_password?.message}
@@ -81,7 +81,7 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
             required: "Confirm password is required",
             validate: validatePasswordConfirmation,
           })}
-          isInvalid={!!errors.confirm_password}
+          isInvalid={Boolean(errors.confirm_password)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.confirm_password?.message}
@@ -93,7 +93,9 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
         variant="primary"
         type="submit"
         disabled={
-          !!errors.new_password || !!errors.confirm_password || isLoading
+          Boolean(errors.new_password) ||
+          Boolean(errors.confirm_password) ||
+          isLoading
         }
       >
         {isLoading ? (

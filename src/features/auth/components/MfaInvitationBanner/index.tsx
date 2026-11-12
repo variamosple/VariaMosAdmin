@@ -51,7 +51,7 @@ export const MfaInvitationBanner: FC = () => {
   const [show, setShow] = useState(false);
 
   const userId = user?.id;
-  const invited = !!userId && managesOthers(user?.permissions);
+  const invited = Boolean(userId) && managesOthers(user?.permissions);
 
   // Read again on each page, so that the banner goes once the factor is on
   useEffect(() => {
@@ -65,7 +65,7 @@ export const MfaInvitationBanner: FC = () => {
       if (current) {
         setShow(
           !response.errorCode &&
-            !!response.data?.available &&
+            response.data?.available === true &&
             !response.data.enabled,
         );
       }

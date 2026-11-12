@@ -65,14 +65,14 @@ export const LanguageList: FC<LanguageListProps> = ({
               onLanguageDeactivate={onLanguageDeactivate}
             />
           ))}
-          {state && (
+          {state ? (
             <TableStateRow
               state={state}
               isEmpty={!items?.length}
               colSpan={7}
               items="languages"
             />
-          )}
+          ) : null}
         </tbody>
       </Table>
 

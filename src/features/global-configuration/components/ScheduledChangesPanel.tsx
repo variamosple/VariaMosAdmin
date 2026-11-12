@@ -75,7 +75,7 @@ export const ScheduledChangesPanel: FC<ScheduledChangesPanelProps> = ({
                 Planned by {authorOf(change, userId)}
               </div>
             </div>
-            {canUpdate && (
+            {canUpdate ? (
               <div className="d-flex gap-2">
                 <Button
                   size="sm"
@@ -94,7 +94,7 @@ export const ScheduledChangesPanel: FC<ScheduledChangesPanelProps> = ({
                   Cancel
                 </Button>
               </div>
-            )}
+            ) : null}
           </ListGroup.Item>
         ))}
         {resolved.length > 0 && (
@@ -115,9 +115,9 @@ export const ScheduledChangesPanel: FC<ScheduledChangesPanelProps> = ({
                 {formatUtc(change.dueAt)}
               </span>
             </div>
-            {change.reason && (
+            {change.reason ? (
               <div className="text-muted mt-1">{change.reason}</div>
-            )}
+            ) : null}
           </ListGroup.Item>
         ))}
       </ListGroup>

@@ -39,7 +39,7 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
           className="form-control"
           placeholder="name@example.com"
           {...register("email", { required: "Email is required" })}
-          isInvalid={!!errors.email}
+          isInvalid={Boolean(errors.email)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.email?.message}
@@ -55,7 +55,7 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
           className="form-control"
           placeholder="Type your password"
           {...register("password", { required: "Password is required" })}
-          isInvalid={!!errors.password}
+          isInvalid={Boolean(errors.password)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.password?.message}

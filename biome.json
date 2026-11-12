@@ -76,6 +76,16 @@
       }
     },
     {
+      "includes": ["src/shared/components/About/index.tsx"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noUnsafeIframeSandbox": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": [
         "src/features/auth/components/TwoFactorCard/index.tsx",
         "src/features/bug-tracker/components/BugList/BugRow.tsx",

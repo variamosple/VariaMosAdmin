@@ -1,8 +1,9 @@
 /* cspell:disable */
-import type { FC } from "react";
+import { type FC, useId } from "react";
 import { Col, Container, Nav, Row, Tab, Tabs } from "react-bootstrap";
 
 export const About: FC = () => {
+  const categoriesId = useId();
   return (
     <section className="p-2 p-md-5">
       <article>
@@ -867,7 +868,7 @@ fd_labeling(L).`}
         </Tab>
         <Tab eventKey="VIDEOS" title="Video tutorials">
           <Container>
-            <Tab.Container id="video-category-sidebar" defaultActiveKey="MDE">
+            <Tab.Container id={categoriesId} defaultActiveKey="MDE">
               <Row>
                 <Col md={3} className="border-end mb-4">
                   <Nav variant="pills" className="flex-column">
@@ -896,6 +897,12 @@ fd_labeling(L).`}
                             title="VariaMos Language Definition"
                             src="https://drive.google.com/file/d/1oC-HvJy9aAnMnBzVkZGAFohtlOslGzRc/preview"
                             allow="autoplay"
+                            // The Drive player needs its scripts and its own
+                            // origin (blank without allow-same-origin). The
+                            // video comes from another origin, so the frame
+                            // cannot lift its own sandbox: noUnsafeIframeSandbox
+                            // is off for this file in biome.json
+                            sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
                             allowFullScreen={true}
                           />
                         </div>
@@ -912,6 +919,12 @@ fd_labeling(L).`}
                             title="Collaborative Project Creation"
                             src="https://drive.google.com/file/d/1Q8lwzOfPucU8r-Z6dNKK-g6T6kIo7bkR/preview"
                             allow="autoplay"
+                            // The Drive player needs its scripts and its own
+                            // origin (blank without allow-same-origin). The
+                            // video comes from another origin, so the frame
+                            // cannot lift its own sandbox: noUnsafeIframeSandbox
+                            // is off for this file in biome.json
+                            sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
                             allowFullScreen={true}
                           />
                         </div>
@@ -927,6 +940,12 @@ fd_labeling(L).`}
                             title="Collaborative Project Creation with GenAI"
                             src="https://drive.google.com/file/d/1j8BGIKWBbEnOGGR2zMV7uwUdGW6-t8vF/preview"
                             allow="autoplay"
+                            // The Drive player needs its scripts and its own
+                            // origin (blank without allow-same-origin). The
+                            // video comes from another origin, so the frame
+                            // cannot lift its own sandbox: noUnsafeIframeSandbox
+                            // is off for this file in biome.json
+                            sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
                             allowFullScreen={true}
                           />
                         </div>
@@ -941,6 +960,12 @@ fd_labeling(L).`}
                             title="Generating the scope of a product line"
                             src="https://drive.google.com/file/d/1Jj00ZAyh0nbsX4boykkhjCipgrokTTDj/preview"
                             allow="autoplay"
+                            // The Drive player needs its scripts and its own
+                            // origin (blank without allow-same-origin). The
+                            // video comes from another origin, so the frame
+                            // cannot lift its own sandbox: noUnsafeIframeSandbox
+                            // is off for this file in biome.json
+                            sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
                             allowFullScreen={true}
                           />
                         </div>

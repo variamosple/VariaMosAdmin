@@ -1,4 +1,4 @@
-import { type FC, useEffect } from "react";
+import { type FC, useEffect, useRef } from "react";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 
 interface GoogleLoginProps {
@@ -6,12 +6,14 @@ interface GoogleLoginProps {
 }
 
 export const GoogleLogin: FC<GoogleLoginProps> = ({ text = "signin_with" }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const initializeGoogleSignIn = () => {
       const google = window.google;
       if (!google) return;
 
-      const element = document.getElementById("g_id_signin");
+      const element = containerRef.current;
       if (!element) return;
 
       google.accounts.id.initialize({
@@ -50,7 +52,7 @@ export const GoogleLogin: FC<GoogleLoginProps> = ({ text = "signin_with" }) => {
   }, [text]);
   return (
     <div
-      id="g_id_signin"
+      ref={containerRef}
       data-testid="google-signin-container"
       className="g_id_signin"
       data-locale="en"

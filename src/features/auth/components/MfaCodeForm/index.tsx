@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { type FC, useId } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
@@ -22,6 +22,7 @@ export const MfaCodeForm: FC<MfaCodeFormProps> = ({
   isLoading,
   trustedDeviceDays = 0,
 }) => {
+  const rememberDeviceId = useId();
   const {
     register,
     handleSubmit,
@@ -52,7 +53,7 @@ export const MfaCodeForm: FC<MfaCodeFormProps> = ({
           placeholder="123456"
           maxLength={32}
           {...register("code", { required: "The code is required" })}
-          isInvalid={!!errors.code}
+          isInvalid={Boolean(errors.code)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.code?.message}
@@ -64,7 +65,7 @@ export const MfaCodeForm: FC<MfaCodeFormProps> = ({
 
       {trustedDeviceDays > 0 && (
         <Form.Check
-          id="mfa-remember-device"
+          id={rememberDeviceId}
           type="checkbox"
           label={`Don't ask for a code on this browser for ${trustedDeviceDays} day${trustedDeviceDays > 1 ? "s" : ""}`}
           {...register("rememberDevice")}

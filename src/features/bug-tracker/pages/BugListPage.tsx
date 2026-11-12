@@ -208,7 +208,7 @@ const BugListPageComponent: FC = () => {
           >
             <Plus size={20} className="me-1" /> Report a Bug
           </Button>
-          {canUpdate && (
+          {canUpdate ? (
             <Button
               variant="success"
               onClick={() => setShowAdminCreateModal(true)}
@@ -217,16 +217,16 @@ const BugListPageComponent: FC = () => {
             >
               <Github size={16} className="me-1" /> Create GitHub issue
             </Button>
-          )}
+          ) : null}
         </Col>
       </Row>
       <hr />
 
-      {error && (
+      {error ? (
         <Alert variant="danger" dismissible>
           {error}
         </Alert>
-      )}
+      ) : null}
 
       <BugSearchForm
         // A new form when the address changes by itself (UX-26)
@@ -281,7 +281,7 @@ const BugListPageComponent: FC = () => {
       />
 
       <ConfirmationModal
-        show={!!bugToReject}
+        show={Boolean(bugToReject)}
         title="Reject bug"
         message={`Move "${bugToReject?.title ?? "this bug"}" to the Trash Bin? It can be restored for 7 days, then it is deleted.`}
         confirmLabel="Reject bug"
@@ -295,7 +295,7 @@ const BugListPageComponent: FC = () => {
       />
 
       <BugApprovalModal
-        show={!!bugToApprove}
+        show={Boolean(bugToApprove)}
         bug={bugToApprove}
         onHide={() => setBugToApprove(null)}
         onConfirmApprove={handleApprove}
@@ -305,7 +305,7 @@ const BugListPageComponent: FC = () => {
 
       <Modal
         aria-labelledby={titleId}
-        show={!!selectedBugForDetails}
+        show={Boolean(selectedBugForDetails)}
         onHide={() => setSelectedBugForDetails(null)}
         size="lg"
         centered
@@ -320,7 +320,7 @@ const BugListPageComponent: FC = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {selectedBugForDetails && (
+          {selectedBugForDetails ? (
             <div>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h4 className="mb-0">{selectedBugForDetails.title}</h4>
@@ -328,14 +328,14 @@ const BugListPageComponent: FC = () => {
                   <Badge bg="dark" className="text-light">
                     {selectedBugForDetails.githubRepo || "Local"}
                   </Badge>
-                  {selectedBugForDetails.priority && (
+                  {selectedBugForDetails.priority ? (
                     <BugPriorityBadge
                       priority={selectedBugForDetails.priority}
                     />
-                  )}
-                  {selectedBugForDetails.status && (
+                  ) : null}
+                  {selectedBugForDetails.status ? (
                     <BugStatusBadge status={selectedBugForDetails.status} />
-                  )}
+                  ) : null}
                 </div>
               </div>
 
@@ -394,23 +394,23 @@ const BugListPageComponent: FC = () => {
               </Row>
 
               {selectedBugForDetails.githubRepo &&
-                selectedBugForDetails.gitIssueNumber && (
-                  <div
-                    className="mb-3 bg-light p-2 rounded"
-                    style={{ border: "1px dashed #ced4da" }}
+              selectedBugForDetails.gitIssueNumber ? (
+                <div
+                  className="mb-3 bg-light p-2 rounded"
+                  style={{ border: "1px dashed #ced4da" }}
+                >
+                  <strong>GitHub Link: </strong>
+                  <a
+                    href={`https://github.com/${selectedBugForDetails.githubRepo}/issues/${selectedBugForDetails.gitIssueNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-decoration-none ms-1 font-monospace"
                   >
-                    <strong>GitHub Link: </strong>
-                    <a
-                      href={`https://github.com/${selectedBugForDetails.githubRepo}/issues/${selectedBugForDetails.gitIssueNumber}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-decoration-none ms-1 font-monospace"
-                    >
-                      {selectedBugForDetails.githubRepo}#
-                      {selectedBugForDetails.gitIssueNumber}
-                    </a>
-                  </div>
-                )}
+                    {selectedBugForDetails.githubRepo}#
+                    {selectedBugForDetails.gitIssueNumber}
+                  </a>
+                </div>
+              ) : null}
 
               {selectedBugForDetails.attachments &&
                 selectedBugForDetails.attachments.length > 0 && (
@@ -436,7 +436,7 @@ const BugListPageComponent: FC = () => {
                   </div>
                 )}
 
-              {canUpdate && selectedBugForDetails.id && (
+              {canUpdate && selectedBugForDetails.id ? (
                 <BugAssigneesForm
                   key={(selectedBugForDetails.assignedAdmins ?? [])
                     .map((user) => user.id)
@@ -456,33 +456,33 @@ const BugListPageComponent: FC = () => {
                     return null;
                   }}
                 />
-              )}
+              ) : null}
 
               {canUpdate &&
-                selectedBugForDetails.id &&
-                selectedBugForDetails.gitIssueNumber &&
-                selectedBugForDetails.status && (
-                  <BugStatusForm
-                    key={selectedBugForDetails.status}
-                    status={selectedBugForDetails.status}
-                    onChangeStatus={async (status, comment) => {
-                      const bugId = selectedBugForDetails.id as string;
-                      const failure = await handleChangeStatus(
-                        bugId,
+              selectedBugForDetails.id &&
+              selectedBugForDetails.gitIssueNumber &&
+              selectedBugForDetails.status ? (
+                <BugStatusForm
+                  key={selectedBugForDetails.status}
+                  status={selectedBugForDetails.status}
+                  onChangeStatus={async (status, comment) => {
+                    const bugId = selectedBugForDetails.id as string;
+                    const failure = await handleChangeStatus(
+                      bugId,
+                      status,
+                      comment,
+                    );
+                    if (!failure) {
+                      setSelectedBugForDetails({
+                        ...selectedBugForDetails,
                         status,
-                        comment,
-                      );
-                      if (!failure) {
-                        setSelectedBugForDetails({
-                          ...selectedBugForDetails,
-                          status,
-                        });
-                        void fetchNotes(bugId);
-                      }
-                      return failure;
-                    }}
-                  />
-                )}
+                      });
+                      void fetchNotes(bugId);
+                    }
+                    return failure;
+                  }}
+                />
+              ) : null}
 
               <hr />
               <div className="mb-3">
@@ -654,11 +654,11 @@ const BugListPageComponent: FC = () => {
                         disabled={isSubmittingNote}
                       />
                     </Form.Group>
-                    {noteError && (
+                    {noteError ? (
                       <Alert variant="danger" className="py-2 small">
                         {noteError}
                       </Alert>
-                    )}
+                    ) : null}
                     <div className="text-end">
                       <Button
                         type="submit"
@@ -673,7 +673,7 @@ const BugListPageComponent: FC = () => {
                 ) : null}
               </div>
             </div>
-          )}
+          ) : null}
         </Modal.Body>
         <Modal.Footer>
           <Button

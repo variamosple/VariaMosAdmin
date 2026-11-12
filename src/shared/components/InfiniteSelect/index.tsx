@@ -86,7 +86,7 @@ export const InfiniteSelect = <ValueType,>({
         )}
       </button>
 
-      {isDropdownOpen && (
+      {isDropdownOpen ? (
         <div
           className="dropdown-menu w-100 overflow-auto d-flex flex-column p-1"
           style={{ maxHeight: "200px" }}
@@ -98,7 +98,7 @@ export const InfiniteSelect = <ValueType,>({
             <Spinner animation="border" role="status" />
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

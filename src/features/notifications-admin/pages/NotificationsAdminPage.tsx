@@ -1,5 +1,12 @@
 import { withPageVisit } from "@variamosple/variamos-components";
-import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type FC,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import {
   Alert,
   Button,
@@ -30,6 +37,9 @@ const ROLE_PAGE_SIZE = 100;
 const accounts = (count: number) => `${count} account${count === 1 ? "" : "s"}`;
 
 const NotificationsAdminPageComponent: FC = () => {
+  const broadcastId = useId();
+  const roleAudienceId = useId();
+  const usersAudienceId = useId();
   usePageTitle("Notifications");
   const [audience, setAudience] = useState<"broadcast" | "role" | "users">(
     "broadcast",
@@ -231,7 +241,7 @@ const NotificationsAdminPageComponent: FC = () => {
                   <div className="d-flex gap-3 flex-wrap">
                     <Form.Check
                       type="radio"
-                      id="audience-broadcast"
+                      id={broadcastId}
                       label={
                         <span className="d-flex align-items-center gap-1">
                           <Megaphone size={16} /> Broadcast (All Users)
@@ -244,7 +254,7 @@ const NotificationsAdminPageComponent: FC = () => {
                     />
                     <Form.Check
                       type="radio"
-                      id="audience-role"
+                      id={roleAudienceId}
                       label={
                         <span className="d-flex align-items-center gap-1">
                           <People size={16} /> By Role
@@ -257,7 +267,7 @@ const NotificationsAdminPageComponent: FC = () => {
                     />
                     <Form.Check
                       type="radio"
-                      id="audience-users"
+                      id={usersAudienceId}
                       label={
                         <span className="d-flex align-items-center gap-1">
                           <Person size={16} /> Specific Users
@@ -328,7 +338,7 @@ const NotificationsAdminPageComponent: FC = () => {
                 </Form.Group>
 
                 {/* Next to the button, where the eye is after a click (UX-21) */}
-                {feedback && (
+                {feedback ? (
                   <Alert
                     variant={feedback.type}
                     dismissible
@@ -336,7 +346,7 @@ const NotificationsAdminPageComponent: FC = () => {
                   >
                     {feedback.message}
                   </Alert>
-                )}
+                ) : null}
 
                 <div className="d-grid justify-content-end">
                   <Button

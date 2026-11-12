@@ -17,8 +17,10 @@ export interface ListState {
 
 const PAGING_KEYS = new Set(["pageNumber", "pageSize"]);
 
-const isFilterApplied = (filter: object | null) =>
-  !!filter &&
+// No filter yet is undefined at the first render, null after a reset
+const isFilterApplied = (filter: object | null | undefined) =>
+  filter !== null &&
+  filter !== undefined &&
   Object.entries(filter).some(
     ([key, value]) =>
       !PAGING_KEYS.has(key) &&

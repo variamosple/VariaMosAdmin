@@ -79,7 +79,7 @@ export const SearchForm: FC<SearchFormProps> = ({
                 className="form-control"
                 placeholder={placeholder}
                 {...register("search")}
-                isInvalid={!!errors.search}
+                isInvalid={Boolean(errors.search)}
               />
               <IconButton
                 label="Clear results"

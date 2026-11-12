@@ -130,11 +130,11 @@ export const ResetPasswordPage: FC = () => {
               Enter your new password to reset your account credentials.
             </p>
           </div>
-          {error && (
+          {error ? (
             <Alert variant="danger" className="w-100 small">
               {error}
             </Alert>
-          )}
+          ) : null}
           <ResetPasswordForm
             onSubmitPassword={handleSubmit}
             isLoading={isLoading}

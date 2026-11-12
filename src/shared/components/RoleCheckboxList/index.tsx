@@ -31,12 +31,12 @@ export const RoleCheckboxList: FC<RoleCheckboxListProps> = ({
   idPrefix = "role",
 }) => (
   <>
-    {loading && (
+    {loading ? (
       <div className="text-muted d-flex align-items-center gap-2">
         <Spinner animation="border" size="sm" /> Loading roles...
       </div>
-    )}
-    {error && (
+    ) : null}
+    {error ? (
       <Alert variant="danger" className="py-2 d-flex align-items-center gap-2">
         <span>{error}</span>
         <Button
@@ -48,7 +48,7 @@ export const RoleCheckboxList: FC<RoleCheckboxListProps> = ({
           Retry
         </Button>
       </Alert>
-    )}
+    ) : null}
     {total > roles.length && (
       <p className="small text-muted">
         Only the first {roles.length} of {total} roles are listed.
