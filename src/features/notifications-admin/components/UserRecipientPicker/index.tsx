@@ -138,7 +138,9 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
                 variant="link"
                 className="p-0 text-white border-0 d-flex align-items-center"
                 aria-label={`Remove ${label(user)}`}
-                onClick={() => onRemove(user.id as string)}
+                onClick={() => {
+                  if (user.id) onRemove(user.id);
+                }}
                 style={{ lineHeight: 1, boxShadow: "none" }}
               >
                 &times;

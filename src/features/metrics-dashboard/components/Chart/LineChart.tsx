@@ -42,7 +42,7 @@ const LineChartComponent: FC = () => {
             item.date = String(val);
           }
         } else {
-          item[key] = val as string | number;
+          item[key] = val instanceof Date ? String(val) : val;
         }
       });
       return item;

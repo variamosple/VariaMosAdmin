@@ -1,5 +1,6 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isOneOf } from "@/shared/domain/Value/isOneOf";
 import { readPage, useListParams } from "@/shared/hooks/useListQueryState";
 import {
   addBugNote,
@@ -21,8 +22,8 @@ import type { BugPriority } from "../domain/BugPriority";
 
 const BUG_PAGE_SIZE = 20;
 
-export type BugTab = "github" | "local" | "trash";
-const BUG_TABS: readonly string[] = ["github", "local", "trash"];
+export type BugTab = (typeof BUG_TABS)[number];
+export const BUG_TABS = ["github", "local", "trash"] as const;
 const FILTER_KEYS = [
   "repo",
   "status",
@@ -35,7 +36,7 @@ const FILTER_KEYS = [
 // The tab, the filters and the page live in the address (UX-26)
 const tabOf = (params: URLSearchParams): BugTab => {
   const tab = params.get("tab") ?? "";
-  return BUG_TABS.includes(tab) ? (tab as BugTab) : "github";
+  return isOneOf(BUG_TABS, tab) ? tab : "github";
 };
 
 const filterOf = (params: URLSearchParams): BugFilter => {

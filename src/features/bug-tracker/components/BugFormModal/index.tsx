@@ -115,7 +115,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
             />
             {errors.title ? (
               <Form.Control.Feedback type="invalid">
-                {errors.title.message as string}
+                {errors.title.message}
               </Form.Control.Feedback>
             ) : null}
           </Form.Group>
@@ -133,7 +133,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
             />
             {errors.description ? (
               <Form.Control.Feedback type="invalid">
-                {errors.description.message as string}
+                {errors.description.message}
               </Form.Control.Feedback>
             ) : null}
           </Form.Group>
@@ -156,7 +156,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
               </Form.Select>
               {errors.githubRepo ? (
                 <Form.Control.Feedback type="invalid">
-                  {errors.githubRepo.message as string}
+                  {errors.githubRepo.message}
                 </Form.Control.Feedback>
               ) : null}
             </Form.Group>

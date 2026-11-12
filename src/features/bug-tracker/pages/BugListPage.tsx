@@ -16,6 +16,7 @@ import {
 import { ArrowRepeat, Github, Plus } from "react-bootstrap-icons";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { DateTime } from "@/shared/components/DateTime";
+import { isOneOf } from "@/shared/domain/Value/isOneOf";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { attachmentUrl } from "../api/attachmentUrl";
 import { BugApprovalModal } from "../components/BugApprovalModal";
@@ -31,7 +32,7 @@ import { componentLabel } from "../domain/BugComponent";
 import type { BugFilter } from "../domain/BugFilter";
 import { keyedLines } from "../domain/keyedLines";
 import { useAssignableUsers } from "../hooks/useAssignableUsers";
-import { useBugList } from "../hooks/useBugList";
+import { BUG_TABS, useBugList } from "../hooks/useBugList";
 import { useBugPermissions } from "../hooks/useBugPermissions";
 
 const BugListPageComponent: FC = () => {
@@ -181,6 +182,9 @@ const BugListPageComponent: FC = () => {
 
   const titleId = useId();
 
+  // Kept apart, so that the forms below see it set
+  const selectedBugId = selectedBugForDetails?.id;
+
   return (
     <Container fluid="sm" className="my-2">
       <Row className="align-items-center mb-3">
@@ -243,7 +247,7 @@ const BugListPageComponent: FC = () => {
       <Tabs
         activeKey={activeTab}
         onSelect={(k) => {
-          if (k) setActiveTab(k as "github" | "local" | "trash");
+          if (k && isOneOf(BUG_TABS, k)) setActiveTab(k);
         }}
         className="mb-3"
       >
@@ -436,7 +440,7 @@ const BugListPageComponent: FC = () => {
                   </div>
                 )}
 
-              {canUpdate && selectedBugForDetails.id ? (
+              {canUpdate && selectedBugId ? (
                 <BugAssigneesForm
                   key={(selectedBugForDetails.assignedAdmins ?? [])
                     .map((user) => user.id)
@@ -444,7 +448,7 @@ const BugListPageComponent: FC = () => {
                   assignees={selectedBugForDetails.assignedAdmins ?? []}
                   candidates={assignableUsers}
                   onSave={async (userIds) => {
-                    const bugId = selectedBugForDetails.id as string;
+                    const bugId = selectedBugId;
                     const result = await handleSetAssignees(bugId, userIds);
                     if ("error" in result) return result.error;
                     setSelectedBugForDetails({
@@ -459,14 +463,14 @@ const BugListPageComponent: FC = () => {
               ) : null}
 
               {canUpdate &&
-              selectedBugForDetails.id &&
+              selectedBugId &&
               selectedBugForDetails.gitIssueNumber &&
               selectedBugForDetails.status ? (
                 <BugStatusForm
                   key={selectedBugForDetails.status}
                   status={selectedBugForDetails.status}
                   onChangeStatus={async (status, comment) => {
-                    const bugId = selectedBugForDetails.id as string;
+                    const bugId = selectedBugId;
                     const failure = await handleChangeStatus(
                       bugId,
                       status,

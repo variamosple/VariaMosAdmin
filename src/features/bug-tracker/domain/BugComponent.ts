@@ -1,3 +1,5 @@
+import { isOneOf } from "@/shared/domain/Value/isOneOf";
+
 // Part of VariaMos a bug concerns (EV-84 lot 5); the API checks the list
 export const BUG_COMPONENTS = [
   "language",
@@ -16,7 +18,9 @@ export const BUG_COMPONENT_LABELS: Record<BugComponent, string> = {
   other: "Other",
 };
 
-export const componentLabel = (component?: string): string =>
-  component
-    ? (BUG_COMPONENT_LABELS[component as BugComponent] ?? component)
-    : "Not specified";
+export const componentLabel = (component?: string): string => {
+  if (!component) return "Not specified";
+  return isOneOf(BUG_COMPONENTS, component)
+    ? BUG_COMPONENT_LABELS[component]
+    : component;
+};

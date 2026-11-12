@@ -57,7 +57,7 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
         ...defaultValue,
         ...data,
         template,
-      } as Project;
+      };
 
       void onProjectSubmit(updatedProject).then((response) => {
         if (!response.errorCode) {

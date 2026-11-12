@@ -1,7 +1,9 @@
 import type { FC } from "react";
 import { Badge } from "react-bootstrap";
 import { ExclamationOctagonFill } from "react-bootstrap-icons";
+import { isOneOf } from "@/shared/domain/Value/isOneOf";
 import {
+  BUG_PRIORITIES,
   BUG_PRIORITY_LABELS,
   type BugPriority,
 } from "../../domain/BugPriority";
@@ -14,8 +16,8 @@ const STYLES: Record<BugPriority, { bg: string; text?: "dark" }> = {
 };
 
 export const BugPriorityBadge: FC<{ priority?: string }> = ({ priority }) => {
-  const known = priority?.toLowerCase() as BugPriority | undefined;
-  if (!known || !(known in STYLES)) {
+  const known = priority?.toLowerCase();
+  if (!known || !isOneOf(BUG_PRIORITIES, known)) {
     return <Badge bg="secondary">{priority || "None"}</Badge>;
   }
   const { bg, text } = STYLES[known];
