@@ -10,37 +10,8 @@ import { useUserList } from "../../hooks/useUserList";
 
 const UserListPageComponent: FC = () => {
   usePageTitle("Users");
-  const {
-    restoredFilter,
-    restoreKey,
-    showResetLink,
-    setShowResetLink,
-    showEnable,
-    setShowEnable,
-    showDisable,
-    setShowDisable,
-    showDelete,
-    setShowDelete,
-    selectedUser,
-    setSelectedUser,
-    users,
-    totalPages,
-    isLoading,
-    onUserResetLink,
-    onUserDisable,
-    performDisableUser,
-    onUserEnable,
-    performEnableUser,
-    onUserDelete,
-    performDeleteUser,
-    onSearchReset,
-    onSearchSubmit,
-    sort,
-    onSort,
-    currentPage,
-    onPageChange,
-    listState,
-  } = useUserList();
+  const list = useUserList();
+  const { selectedUser } = list;
 
   return (
     <Container fluid="sm" className="my-2">
@@ -49,84 +20,84 @@ const UserListPageComponent: FC = () => {
 
       <SearchForm
         // A new form when the address changes by itself (UX-26)
-        key={restoreKey}
-        defaultSearch={restoredFilter?.search}
-        isLoading={isLoading}
-        onSearchReset={onSearchReset}
-        onSubmit={onSearchSubmit}
+        key={list.restoreKey}
+        defaultSearch={list.restoredFilter?.search}
+        isLoading={list.isLoading}
+        onSearchReset={list.onSearchReset}
+        onSubmit={list.onSearchSubmit}
         placeholder="Search by user name or email"
       />
 
       <UserList
-        items={users}
-        state={listState}
-        totalPages={totalPages}
-        currentPage={currentPage}
-        onPageChange={onPageChange}
-        sort={sort}
-        onSort={onSort}
-        onUserResetLink={onUserResetLink}
-        onUserDisable={onUserDisable}
-        onUserEnable={onUserEnable}
-        onUserDelete={onUserDelete}
+        items={list.users}
+        state={list.listState}
+        totalPages={list.totalPages}
+        currentPage={list.currentPage}
+        onPageChange={list.onPageChange}
+        sort={list.sort}
+        onSort={list.onSort}
+        onUserResetLink={list.onUserResetLink}
+        onUserDisable={list.onUserDisable}
+        onUserEnable={list.onUserEnable}
+        onUserDelete={list.onUserDelete}
       />
 
       <RecoveryLinkModal
-        show={showResetLink}
-        onHide={() => setShowResetLink(false)}
+        show={list.showResetLink}
+        onHide={() => list.setShowResetLink(false)}
         user={selectedUser}
       />
 
       <ConfirmationModal
-        show={showDisable}
+        show={list.showDisable}
         title="Disable user"
         message={`Disable the account of "${selectedUser?.name ?? ""}"? The user can no longer sign in.`}
         confirmLabel="Disable user"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (selectedUser) {
-            void performDisableUser(selectedUser);
+            void list.performDisableUser(selectedUser);
           }
-          setShowDisable(false);
+          list.setShowDisable(false);
         }}
         onCancel={() => {
-          setSelectedUser(undefined);
-          setShowDisable(false);
+          list.setSelectedUser(undefined);
+          list.setShowDisable(false);
         }}
       />
 
       <ConfirmationModal
-        show={showEnable}
+        show={list.showEnable}
         title="Enable user"
         message={`Enable the account of "${selectedUser?.name ?? ""}"?`}
         confirmLabel="Enable user"
         onConfirm={() => {
           if (selectedUser) {
-            void performEnableUser(selectedUser);
+            void list.performEnableUser(selectedUser);
           }
-          setShowEnable(false);
+          list.setShowEnable(false);
         }}
         onCancel={() => {
-          setSelectedUser(undefined);
-          setShowEnable(false);
+          list.setSelectedUser(undefined);
+          list.setShowEnable(false);
         }}
       />
 
       <ConfirmationModal
-        show={showDelete}
+        show={list.showDelete}
         title="Delete user"
         message={`Delete the account of "${selectedUser?.name ?? ""}"?`}
         confirmLabel="Delete user"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (selectedUser) {
-            void performDeleteUser(selectedUser);
+            void list.performDeleteUser(selectedUser);
           }
-          setShowDelete(false);
+          list.setShowDelete(false);
         }}
         onCancel={() => {
-          setSelectedUser(undefined);
-          setShowDelete(false);
+          list.setSelectedUser(undefined);
+          list.setShowDelete(false);
         }}
       />
     </Container>

@@ -1,8 +1,14 @@
-import { type FC, useCallback, useEffect, useRef } from "react";
-import { Col, Form, InputGroup, Row } from "react-bootstrap";
+import { type FC, useCallback, useMemo } from "react";
+import { Col, type ColProps, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import {
+  type FieldErrors,
+  type SubmitHandler,
+  type UseFormRegister,
+  useForm,
+} from "react-hook-form";
 import { IconButton } from "@/shared/components/IconButton";
+import { useSearchAsTyped } from "@/shared/hooks/useSearchAsTyped";
 import type { BugUserRef } from "../../domain/Bug";
 import {
   BUG_COMPONENT_LABELS,
@@ -26,6 +32,122 @@ export interface BugSearchFormProps {
 const NO_ASSIGNEES: NonNullable<BugSearchFormProps["assignees"]> = [];
 const NO_FILTER: NonNullable<BugSearchFormProps["defaultFilter"]> = {};
 
+const EMPTY_FILTER: BugFilter = {
+  repo: "",
+  status: "",
+  priority: "",
+  search: "",
+  assignee: "",
+  component: "",
+};
+
+const formValuesOf = (filter: BugFilter): BugFilter => ({
+  repo: filter.repo ?? "",
+  status: filter.status ?? "",
+  priority: filter.priority ?? "",
+  search: filter.search ?? "",
+  assignee: filter.assignee ?? "",
+  component: filter.component ?? "",
+});
+
+/** What every field of the form uses. */
+interface FilterForm {
+  register: UseFormRegister<BugFilter>;
+  errors: FieldErrors<BugFilter>;
+  // Empties the field and searches again at once
+  clearField: (fieldName: keyof BugFilter) => void;
+  isLoading: boolean;
+}
+
+interface FilterSelectProps {
+  form: FilterForm;
+  field: "repo" | "status" | "priority" | "component" | "assignee";
+  label: string;
+  // What the clear button names: "Clear <noun> filter"
+  noun: string;
+  options: { value: string; label: string }[];
+  anyLabel?: string;
+  layout: Pick<ColProps, "sm" | "lg" | "className">;
+}
+
+const FilterSelect: FC<FilterSelectProps> = (props) => {
+  const { form, field, label, layout } = props;
+  return (
+    <Col xs={12} {...layout}>
+      <Form.Group className="w-100" controlId={field}>
+        <Form.Label>{label}</Form.Label>
+        <InputGroup>
+          <Form.Select
+            className="form-select"
+            aria-label={label}
+            {...form.register(field)}
+            isInvalid={Boolean(form.errors[field])}
+          >
+            <option value="">{props.anyLabel ?? "All"}</option>
+            {props.options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Form.Select>
+          <IconButton
+            label={`Clear ${props.noun} filter`}
+            variant="outline-secondary"
+            onClick={() => form.clearField(field)}
+            className="fw-bold"
+            disabled={form.isLoading}
+            icon={<Trash />}
+          />
+        </InputGroup>
+      </Form.Group>
+    </Col>
+  );
+};
+
+const NameFilter: FC<{ form: FilterForm; isGitHub: boolean }> = ({
+  form,
+  isGitHub,
+}) => (
+  <Col xs={12} sm={isGitHub ? 6 : 12} lg={isGitHub ? 3 : 6}>
+    <Form.Group className="w-100" controlId="name">
+      <Form.Label>Name</Form.Label>
+      <InputGroup>
+        <Form.Control
+          type="text"
+          className="form-control"
+          placeholder="Search by name"
+          {...form.register("search")}
+          isInvalid={Boolean(form.errors.search)}
+        />
+        <IconButton
+          label="Clear name filter"
+          variant="outline-secondary"
+          onClick={() => form.clearField("search")}
+          className="fw-bold"
+          disabled={form.isLoading}
+          icon={<Trash />}
+        />
+      </InputGroup>
+    </Form.Group>
+  </Col>
+);
+
+const REPO_LAYOUT = { sm: 6, lg: 3 };
+const SECOND_ROW_LAYOUT = { sm: 6, lg: 3, className: "mt-2" };
+const STATUS_OPTIONS = GITHUB_BUG_STATUSES.map((status) => ({
+  value: status,
+  label: statusLabel(status),
+}));
+const PRIORITY_OPTIONS = BUG_PRIORITIES.map((priority) => ({
+  value: priority,
+  label: BUG_PRIORITY_LABELS[priority],
+}));
+const COMPONENT_OPTIONS = BUG_COMPONENTS.map((component) => ({
+  value: component,
+  label: BUG_COMPONENT_LABELS[component],
+}));
+
+// Searches half a second after the last change of a field
 export const BugSearchForm: FC<BugSearchFormProps> = ({
   onSubmit,
   isLoading,
@@ -35,7 +157,6 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
   assignees = NO_ASSIGNEES,
   defaultFilter = NO_FILTER,
 }) => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
     register,
     handleSubmit,
@@ -43,30 +164,9 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
     formState: { errors, isDirty },
     watch,
     setValue,
-  } = useForm<BugFilter>({
-    defaultValues: {
-      repo: defaultFilter.repo ?? "",
-      status: defaultFilter.status ?? "",
-      priority: defaultFilter.priority ?? "",
-      search: defaultFilter.search ?? "",
-      assignee: defaultFilter.assignee ?? "",
-      component: defaultFilter.component ?? "",
-    },
-  });
+  } = useForm<BugFilter>({ defaultValues: formValuesOf(defaultFilter) });
 
   const _values = watch();
-
-  const onReset = () => {
-    reset({
-      repo: "",
-      status: "",
-      priority: "",
-      search: "",
-      assignee: "",
-      component: "",
-    });
-    onSearchReset();
-  };
 
   const submit: SubmitHandler<BugFilter> = useCallback(
     (data) => {
@@ -75,217 +175,82 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
     },
     [onSubmit, reset],
   );
+  const search = useMemo(() => handleSubmit(submit), [handleSubmit, submit]);
+  useSearchAsTyped(isDirty, search);
 
-  const clearField = (fieldName: keyof BugFilter) => {
-    setValue(fieldName, "");
-    // Submit the form immediately to refresh results
-    void handleSubmit(submit)();
+  const form: FilterForm = {
+    register,
+    errors,
+    clearField: (fieldName) => {
+      setValue(fieldName, "");
+      // Submit the form immediately to refresh results
+      void search();
+    },
+    isLoading,
   };
-
-  useEffect(() => {
-    if (!isDirty) return;
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      void handleSubmit(submit)();
-    }, 500);
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [isDirty, handleSubmit, submit]);
-
   const isGitHub = activeTab === "github";
+  const wide = isGitHub ? { sm: 6, lg: 3 } : { sm: 12, lg: 6 };
 
   return (
     <Form
       data-testid="bug-search-form"
-      onSubmit={handleSubmit(submit)}
-      onReset={onReset}
+      onSubmit={search}
+      onReset={() => {
+        reset(EMPTY_FILTER);
+        onSearchReset();
+      }}
     >
       <Row className="d-flex align-items-end mb-3">
-        <Col xs={12} sm={isGitHub ? 6 : 12} lg={isGitHub ? 3 : 6}>
-          <Form.Group className="w-100" controlId="name">
-            <Form.Label>Name</Form.Label>
-            <InputGroup>
-              <Form.Control
-                type="text"
-                className="form-control"
-                placeholder="Search by name"
-                {...register("search")}
-                isInvalid={Boolean(errors.search)}
-              />
-              <IconButton
-                label="Clear name filter"
-                variant="outline-secondary"
-                onClick={() => clearField("search")}
-                className="fw-bold"
-                disabled={isLoading}
-                icon={<Trash />}
-              />
-            </InputGroup>
-          </Form.Group>
-        </Col>
-
+        <NameFilter form={form} isGitHub={isGitHub} />
         {isGitHub && (
-          <Col xs={12} sm={6} lg={3}>
-            <Form.Group className="w-100" controlId="repo">
-              <Form.Label>Repository</Form.Label>
-              <InputGroup>
-                <Form.Select
-                  className="form-select"
-                  aria-label="Repository"
-                  {...register("repo")}
-                  isInvalid={Boolean(errors.repo)}
-                >
-                  <option value="">All</option>
-                  {repos.map((repoName: string) => (
-                    <option key={repoName} value={repoName}>
-                      {repoName}
-                    </option>
-                  ))}
-                </Form.Select>
-                <IconButton
-                  label="Clear repository filter"
-                  variant="outline-secondary"
-                  onClick={() => clearField("repo")}
-                  className="fw-bold"
-                  disabled={isLoading}
-                  icon={<Trash />}
-                />
-              </InputGroup>
-            </Form.Group>
-          </Col>
+          <FilterSelect
+            form={form}
+            field="repo"
+            label="Repository"
+            noun="repository"
+            options={repos.map((repo) => ({ value: repo, label: repo }))}
+            layout={REPO_LAYOUT}
+          />
         )}
-
         {isGitHub && (
-          <Col xs={12} sm={6} lg={3} className="mt-2 mt-sm-0">
-            <Form.Group className="w-100" controlId="status">
-              <Form.Label>Status</Form.Label>
-              <InputGroup>
-                <Form.Select
-                  className="form-select"
-                  aria-label="Status"
-                  {...register("status")}
-                  isInvalid={Boolean(errors.status)}
-                >
-                  <option value="">All</option>
-                  {GITHUB_BUG_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {statusLabel(status)}
-                    </option>
-                  ))}
-                </Form.Select>
-
-                <IconButton
-                  label="Clear status filter"
-                  variant="outline-secondary"
-                  onClick={() => clearField("status")}
-                  className="fw-bold"
-                  disabled={isLoading}
-                  icon={<Trash />}
-                />
-              </InputGroup>
-            </Form.Group>
-          </Col>
+          <FilterSelect
+            form={form}
+            field="status"
+            label="Status"
+            noun="status"
+            options={STATUS_OPTIONS}
+            layout={{ ...REPO_LAYOUT, className: "mt-2 mt-sm-0" }}
+          />
         )}
-
-        <Col
-          xs={12}
-          sm={isGitHub ? 6 : 12}
-          lg={isGitHub ? 3 : 6}
-          className="mt-2 mt-sm-0"
-        >
-          <Form.Group className="w-100" controlId="priority">
-            <Form.Label>Priority</Form.Label>
-            <InputGroup>
-              <Form.Select
-                className="form-select"
-                aria-label="Priority"
-                {...register("priority")}
-                isInvalid={Boolean(errors.priority)}
-              >
-                <option value="">All</option>
-                {BUG_PRIORITIES.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {BUG_PRIORITY_LABELS[priority]}
-                  </option>
-                ))}
-              </Form.Select>
-
-              <IconButton
-                label="Clear priority filter"
-                variant="outline-secondary"
-                onClick={() => clearField("priority")}
-                className="fw-bold"
-                disabled={isLoading}
-                icon={<Trash />}
-              />
-            </InputGroup>
-          </Form.Group>
-        </Col>
-
-        <Col xs={12} sm={6} lg={3} className="mt-2">
-          <Form.Group className="w-100" controlId="component">
-            <Form.Label>Component</Form.Label>
-            <InputGroup>
-              <Form.Select
-                className="form-select"
-                aria-label="Component"
-                {...register("component")}
-              >
-                <option value="">All</option>
-                {BUG_COMPONENTS.map((component) => (
-                  <option key={component} value={component}>
-                    {BUG_COMPONENT_LABELS[component]}
-                  </option>
-                ))}
-              </Form.Select>
-              <IconButton
-                label="Clear component filter"
-                variant="outline-secondary"
-                onClick={() => clearField("component")}
-                className="fw-bold"
-                disabled={isLoading}
-                icon={<Trash />}
-              />
-            </InputGroup>
-          </Form.Group>
-        </Col>
-
+        <FilterSelect
+          form={form}
+          field="priority"
+          label="Priority"
+          noun="priority"
+          options={PRIORITY_OPTIONS}
+          layout={{ ...wide, className: "mt-2 mt-sm-0" }}
+        />
+        <FilterSelect
+          form={form}
+          field="component"
+          label="Component"
+          noun="component"
+          options={COMPONENT_OPTIONS}
+          layout={SECOND_ROW_LAYOUT}
+        />
         {isGitHub && assignees.length > 0 && (
-          <Col xs={12} sm={6} lg={3} className="mt-2">
-            <Form.Group className="w-100" controlId="assignee">
-              <Form.Label>Assigned to</Form.Label>
-              <InputGroup>
-                <Form.Select
-                  className="form-select"
-                  aria-label="Assigned to"
-                  {...register("assignee")}
-                >
-                  <option value="">Anyone</option>
-                  {assignees.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name}
-                    </option>
-                  ))}
-                </Form.Select>
-                <IconButton
-                  label="Clear assignee filter"
-                  variant="outline-secondary"
-                  onClick={() => clearField("assignee")}
-                  className="fw-bold"
-                  disabled={isLoading}
-                  icon={<Trash />}
-                />
-              </InputGroup>
-            </Form.Group>
-          </Col>
+          <FilterSelect
+            form={form}
+            field="assignee"
+            label="Assigned to"
+            noun="assignee"
+            anyLabel="Anyone"
+            options={assignees.map((user) => ({
+              value: user.id,
+              label: user.name,
+            }))}
+            layout={SECOND_ROW_LAYOUT}
+          />
         )}
       </Row>
     </Form>

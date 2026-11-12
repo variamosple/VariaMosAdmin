@@ -1,3 +1,4 @@
+import type { ResponseModel } from "@variamosple/variamos-components";
 import { useState } from "react";
 import {
   createRole,
@@ -13,11 +14,13 @@ import {
 } from "@/features/role-management/domain/Entity/RolesFilter";
 import { useToast } from "@/shared/context/ToastContext";
 import {
+  keptSort,
   type ListSort,
   nextSort,
   readSort,
-  sortFields,
+  shownSort,
 } from "@/shared/domain/Entity/ListSort";
+import { useListChange } from "@/shared/hooks/useListChange";
 import {
   readPage,
   readParam,
@@ -36,18 +39,119 @@ const rolesFromParams = (params: URLSearchParams) => {
   });
 };
 
-export const useRoleList = () => {
+// The dialogs of the page, and the role each one is about
+const useRoleDialogs = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
   const [toEditRole, setToEditRole] = useState<Role>();
   const [toDeleteRole, setToDeleteRole] = useState<Role>();
 
-  const { pushToast, removeToast } = useToast();
+  const onRoleEdit = (role: Role) => {
+    setToEditRole(role);
+    setShowEdit(true);
+  };
+  const onRoleDelete = (role: Role) => {
+    setToDeleteRole(role);
+    setShowDelete(true);
+  };
 
+  return {
+    showCreate,
+    setShowCreate,
+    showEdit,
+    setShowEdit,
+    showDelete,
+    setShowDelete,
+    isCreating,
+    setIsCreating,
+    isEditing,
+    setIsEditing,
+    toEditRole,
+    toDeleteRole,
+    setToDeleteRole,
+    onRoleEdit,
+    onRoleDelete,
+  };
+};
+
+type RoleDialogs = ReturnType<typeof useRoleDialogs>;
+
+const useRoleChanges = (dialogs: RoleDialogs, refresh: () => void) => {
+  const { pushToast, removeToast } = useToast();
+  const run = useListChange(refresh);
+
+  const onRoleCreate = (role: Role) =>
+    run({
+      request: () => createRole(role),
+      messages: { title: "Role create", success: "Role created successfully" },
+      onSuccess: () => dialogs.setShowCreate(false),
+      setBusy: dialogs.setIsCreating,
+    });
+
+  const performEditRole = (role: Role) => {
+    const toastId = pushToast({
+      title: "Role edit",
+      message: "Updating role...",
+    });
+    return run({
+      request: () =>
+        updateRole(role).then((response) => {
+          removeToast(toastId);
+          return response;
+        }),
+      messages: { title: "Role edit", success: "Role updated successfully" },
+      onSuccess: () => dialogs.setShowEdit(false),
+      setBusy: dialogs.setIsEditing,
+    });
+  };
+
+  const performDeleteRole = (role: Role) => {
+    const toastId = pushToast({
+      title: "Role delete",
+      message: "Deleting role...",
+    });
+    const { id } = role;
+    if (id === undefined) return;
+    void run({
+      request: () =>
+        deleteRole(id).then((response) => {
+          removeToast(toastId);
+          return response;
+        }),
+      messages: { title: "Role delete", success: "Role deleted successfully" },
+    });
+  };
+
+  return { onRoleCreate, performEditRole, performDeleteRole };
+};
+
+// The search keeps the sort, and the sort keeps the search
+const useRoleSearch = (
+  filter: RolesFilter | null,
+  loadData: (filter: RolesFilter) => Promise<ResponseModel<Role[]>>,
+) => {
+  const rolesFilter = (name?: string, wantedSort?: ListSort<RoleSortField>) =>
+    new RolesFilter({ name, ...keptSort(filter, wantedSort) });
+
+  const sort = shownSort(filter, "name");
+  return {
+    sort,
+    onSort: (field: RoleSortField) => {
+      void loadData(rolesFilter(filter?.name, nextSort(sort, field)));
+    },
+    onSearchReset: () => {
+      void loadData(rolesFilter());
+    },
+    onSearchSubmit: (search?: string) => {
+      void loadData(rolesFilter(search));
+    },
+  };
+};
+
+export const useRoleList = () => {
   const {
     data: roles,
     currentPage,
@@ -67,162 +171,23 @@ export const useRoleList = () => {
     rolesFromParams,
   );
 
-  const onRoleCreate = (role: Role) => {
-    setIsCreating(true);
-    return createRole(role)
-      .then((response) => {
-        if (!response.errorCode) {
-          onPageChange(currentPage);
-          setShowCreate(false);
-          pushToast({
-            title: "Role create",
-            message: "Role created successfully",
-            variant: "success",
-          });
-        } else {
-          pushToast({
-            title: "Role create",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-
-        return response;
-      })
-      .finally(() => {
-        setIsCreating(false);
-      });
-  };
-
-  const onRoleEdit = (role: Role) => {
-    setToEditRole(role);
-    setShowEdit(true);
-  };
-
-  const performEditRole = (role: Role) => {
-    setIsEditing(true);
-    const toastId = pushToast({
-      title: "Role edit",
-      message: "Updating role...",
-    });
-
-    return updateRole(role)
-      .then((response) => {
-        removeToast(toastId);
-
-        if (!response.errorCode) {
-          onPageChange(currentPage);
-          setShowEdit(false);
-
-          pushToast({
-            title: "Role edit",
-            message: "Role updated successfully",
-            variant: "success",
-          });
-        } else {
-          pushToast({
-            title: "Role edit",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-
-        return response;
-      })
-      .finally(() => {
-        setIsEditing(false);
-      });
-  };
-
-  const performDeleteRole = (role: Role) => {
-    const toastId = pushToast({
-      title: "Role delete",
-      message: "Deleting role...",
-    });
-
-    if (role.id !== undefined) {
-      void deleteRole(role.id).then((response) => {
-        removeToast(toastId);
-
-        if (response.errorCode) {
-          pushToast({
-            title: "Role delete",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        } else {
-          pushToast({
-            title: "Role delete",
-            message: "Role deleted successfully",
-            variant: "success",
-          });
-          onPageChange(currentPage);
-        }
-      });
-    }
-  };
-
-  const onRoleDelete = (role: Role) => {
-    setToDeleteRole(role);
-    setShowDelete(true);
-  };
-
-  // The search keeps the sort, and the sort keeps the search
-  const rolesFilter = (name?: string, wantedSort?: ListSort<RoleSortField>) => {
-    const chosen = wantedSort
-      ? sortFields(wantedSort)
-      : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
-    return new RolesFilter({
-      name,
-      sortBy: chosen.sortBy,
-      sortOrder: chosen.sortOrder,
-    });
-  };
-
-  const onSearchReset = () => {
-    void loadData(rolesFilter());
-  };
-
-  const onSearchSubmit = (search?: string) => {
-    void loadData(rolesFilter(search));
-  };
-
-  const sort: ListSort<RoleSortField> = {
-    by: filter?.sortBy ?? "name",
-    order: filter?.sortOrder ?? "asc",
-  };
-  const onSort = (field: RoleSortField) => {
-    void loadData(rolesFilter(filter?.name, nextSort(sort, field)));
-  };
+  const { setIsCreating, setIsEditing, ...dialogs } = useRoleDialogs();
+  const changes = useRoleChanges(
+    { ...dialogs, setIsCreating, setIsEditing },
+    () => onPageChange(currentPage),
+  );
 
   return {
     restoredFilter,
     restoreKey,
     listState,
-    showCreate,
-    setShowCreate,
-    showEdit,
-    setShowEdit,
-    showDelete,
-    setShowDelete,
-    isCreating,
-    isEditing,
-    toEditRole,
-    toDeleteRole,
-    setToDeleteRole,
+    ...dialogs,
     roles,
     currentPage,
     totalPages,
     isLoading,
     onPageChange,
-    onRoleCreate,
-    onRoleEdit,
-    performEditRole,
-    performDeleteRole,
-    onRoleDelete,
-    onSearchReset,
-    sort,
-    onSort,
-    onSearchSubmit,
+    ...changes,
+    ...useRoleSearch(filter, loadData),
   };
 };

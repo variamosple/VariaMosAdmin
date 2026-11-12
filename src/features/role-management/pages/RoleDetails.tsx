@@ -21,35 +21,17 @@ import {
 } from "@/shared/components/LoadProblem";
 import { SearchForm } from "@/shared/components/SearchForm";
 import { useToast } from "@/shared/context/ToastContext";
+import { resultToastOf } from "@/shared/hooks/useListChange";
 import { usePagedList } from "@/shared/hooks/usePagedList";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { RolePermissionForm } from "../components/RolePermissionForm";
 import { RolePermissionList } from "../components/RolePermissionList";
 
-const RoleDetailsPageComponent: FC = () => {
-  const { pushToast, removeToast } = useToast();
-  const { navigate } = useRouter();
-  const { roleId: roleIdParam } = useParams();
+// The role named by the address, read again on a retry
+const useRole = (roleIdParam?: string) => {
   const [role, setRole] = useState<Role>();
-  usePageTitle(role ? `Role ${role.name}` : "Role");
   const [problem, setProblem] = useState<LoadProblemKind | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
-  const [toDeletePermission, setToDeletePermission] = useState<Permission>();
-
-  const {
-    data: rolePermissions,
-    currentPage: currentRolePermissionsPage,
-    loadData: loadRolePermissions,
-    totalPages: rolePermissionTotalPages,
-    filter: rolePermissionsFilter,
-    onPageChange: onRolePermissionsPageChange,
-    listState: rolePermissionsState,
-  } = usePagedList<RolePermissionFilter, Permission>({
-    queryFunction: queryRolePermissions,
-    initialFilter: new RolePermissionFilter(),
-  });
 
   const queryRole = useCallback((roleId: number) => {
     setIsLoading(true);
@@ -61,99 +43,32 @@ const RoleDetailsPageComponent: FC = () => {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const onRolePermissionCreate = (rolePermission: RolePermission) => {
-    setIsCreating(true);
-
-    const toastId = pushToast({
-      title: "Permission assignment",
-      message: "Assigning permission...",
-      variant: "info",
-    });
-
-    if (roleIdParam) {
-      void createRolePermission({
-        ...rolePermission,
-        roleId: Number.parseInt(roleIdParam, 10),
-      })
-        .then((response) => {
-          removeToast(toastId);
-
-          if (response.errorCode) {
-            pushToast({
-              title: "Permission assignment",
-              message: response.message || "Failed to assign permission",
-              variant: "danger",
-            });
-          } else {
-            if (rolePermissionsFilter) {
-              void loadRolePermissions(rolePermissionsFilter);
-            }
-
-            pushToast({
-              title: "Permission assignment",
-              message: "Permission assigned successfully",
-              variant: "success",
-            });
-          }
-        })
-        .finally(() => {
-          setIsCreating(false);
-        });
-    } else {
-      removeToast(toastId);
-      setIsCreating(false);
-    }
-  };
-
-  const onRolePermissionDelete = (permission: Permission) => {
-    setToDeletePermission(permission);
-    setShowDelete(true);
-  };
-
-  const performDeleteRolePermission = (permission: Permission) => {
-    const toastId = pushToast({
-      title: "Permission removal",
-      message: "Removing permission...",
-      variant: "info",
-    });
-
-    if (roleIdParam && permission.id !== undefined) {
-      void deleteRolePermission(
-        new RolePermission(Number.parseInt(roleIdParam, 10), permission.id),
-      ).then((response) => {
-        removeToast(toastId);
-
-        if (response.errorCode) {
-          pushToast({
-            title: "Permission removal",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        } else {
-          pushToast({
-            title: "Permission removal",
-            message: "Permission removed successfully",
-            variant: "success",
-          });
-          onRolePermissionsPageChange(currentRolePermissionsPage);
-        }
-      });
-    } else {
-      removeToast(toastId);
-    }
-  };
-
   useEffect(() => {
     if (roleIdParam) {
       queryRole(Number.parseInt(roleIdParam, 10));
     }
   }, [roleIdParam, queryRole]);
 
-  // The permissions of the role, all of them or those matching a search
+  return { role, problem, isLoading, queryRole };
+};
+
+const usePermissionsOfRole = () =>
+  usePagedList<RolePermissionFilter, Permission>({
+    queryFunction: queryRolePermissions,
+    initialFilter: new RolePermissionFilter(),
+  });
+
+type PermissionsOfRole = ReturnType<typeof usePermissionsOfRole>;
+
+// The permissions of the role, all of them or those matching a search
+const usePermissionSearch = (
+  roleIdParam: string | undefined,
+  loadData: PermissionsOfRole["loadData"],
+) => {
   const searchRolePermissions = useCallback(
     (search?: string) => {
       if (roleIdParam) {
-        void loadRolePermissions(
+        void loadData(
           new RolePermissionFilter(
             Number.parseInt(roleIdParam, 10),
             undefined,
@@ -163,22 +78,110 @@ const RoleDetailsPageComponent: FC = () => {
         );
       }
     },
-    [roleIdParam, loadRolePermissions],
+    [roleIdParam, loadData],
   );
 
   useEffect(() => {
     searchRolePermissions();
   }, [searchRolePermissions]);
 
-  if (isLoading) {
-    return (
-      <Container fluid="sm" className="my-2">
-        <div className="w-100 text-center my-3">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      </Container>
-    );
-  }
+  return searchRolePermissions;
+};
+
+// Assigning a permission to the role, and removing one
+const usePermissionChanges = (
+  roleIdParam: string | undefined,
+  permissions: PermissionsOfRole,
+) => {
+  const { pushToast, removeToast } = useToast();
+  const [isCreating, setIsCreating] = useState(false);
+
+  const onRolePermissionCreate = (rolePermission: RolePermission) => {
+    setIsCreating(true);
+    const toastId = pushToast({
+      title: "Permission assignment",
+      message: "Assigning permission...",
+      variant: "info",
+    });
+    if (!roleIdParam) {
+      removeToast(toastId);
+      setIsCreating(false);
+      return;
+    }
+    void createRolePermission({
+      ...rolePermission,
+      roleId: Number.parseInt(roleIdParam, 10),
+    })
+      .then((response) => {
+        removeToast(toastId);
+        if (!response.errorCode && permissions.filter) {
+          void permissions.loadData(permissions.filter);
+        }
+        pushToast(
+          resultToastOf(response, {
+            title: "Permission assignment",
+            success: "Permission assigned successfully",
+            failure: "Failed to assign permission",
+          }),
+        );
+      })
+      .finally(() => {
+        setIsCreating(false);
+      });
+  };
+
+  const performDeleteRolePermission = (permission: Permission) => {
+    const toastId = pushToast({
+      title: "Permission removal",
+      message: "Removing permission...",
+      variant: "info",
+    });
+    if (!roleIdParam || permission.id === undefined) {
+      removeToast(toastId);
+      return;
+    }
+    void deleteRolePermission(
+      new RolePermission(Number.parseInt(roleIdParam, 10), permission.id),
+    ).then((response) => {
+      removeToast(toastId);
+      pushToast(
+        resultToastOf(response, {
+          title: "Permission removal",
+          success: "Permission removed successfully",
+        }),
+      );
+      if (!response.errorCode) {
+        permissions.onPageChange(permissions.currentPage);
+      }
+    });
+  };
+
+  return { isCreating, onRolePermissionCreate, performDeleteRolePermission };
+};
+
+const LoadingPage: FC = () => (
+  <Container fluid="sm" className="my-2">
+    <div className="w-100 text-center my-3">
+      <Spinner animation="border" variant="primary" />
+    </div>
+  </Container>
+);
+
+const RoleDetailsPageComponent: FC = () => {
+  const { navigate } = useRouter();
+  const { roleId: roleIdParam } = useParams();
+  const permissions = usePermissionsOfRole();
+  const { role, problem, isLoading, queryRole } = useRole(roleIdParam);
+  usePageTitle(role ? `Role ${role.name}` : "Role");
+  const searchRolePermissions = usePermissionSearch(
+    roleIdParam,
+    permissions.loadData,
+  );
+  const changes = usePermissionChanges(roleIdParam, permissions);
+  const [showDelete, setShowDelete] = useState(false);
+  const [toDeletePermission, setToDeletePermission] = useState<Permission>();
+
+  if (isLoading) return <LoadingPage />;
 
   return (
     <Container fluid="sm" className="my-2">
@@ -206,24 +209,27 @@ const RoleDetailsPageComponent: FC = () => {
       {Boolean(role) && (
         <>
           <RolePermissionForm
-            isLoading={isCreating}
-            onRolePermissionSubmit={onRolePermissionCreate}
+            isLoading={changes.isCreating}
+            onRolePermissionSubmit={changes.onRolePermissionCreate}
           />
 
           <SearchForm
-            isLoading={rolePermissionsState.isLoading}
+            isLoading={permissions.listState.isLoading}
             onSearchReset={() => searchRolePermissions()}
             onSubmit={searchRolePermissions}
             placeholder="Search the role's permissions by name or id"
           />
 
           <RolePermissionList
-            items={rolePermissions}
-            state={rolePermissionsState}
-            totalPages={rolePermissionTotalPages}
-            currentPage={currentRolePermissionsPage}
-            onPageChange={onRolePermissionsPageChange}
-            onPermissionDelete={onRolePermissionDelete}
+            items={permissions.data}
+            state={permissions.listState}
+            totalPages={permissions.totalPages}
+            currentPage={permissions.currentPage}
+            onPageChange={permissions.onPageChange}
+            onPermissionDelete={(permission) => {
+              setToDeletePermission(permission);
+              setShowDelete(true);
+            }}
           />
         </>
       )}
@@ -236,7 +242,7 @@ const RoleDetailsPageComponent: FC = () => {
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeletePermission) {
-            performDeleteRolePermission(toDeletePermission);
+            changes.performDeleteRolePermission(toDeletePermission);
           }
           setShowDelete(false);
         }}

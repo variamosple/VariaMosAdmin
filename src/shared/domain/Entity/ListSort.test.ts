@@ -1,4 +1,10 @@
-import { nextSort, readSort, sortFields } from "./ListSort";
+import {
+  keptSort,
+  nextSort,
+  readSort,
+  shownSort,
+  sortFields,
+} from "./ListSort";
 
 describe("ListSort", () => {
   it("turns the order of the sorted column, and sorts another column ascending", () => {
@@ -36,5 +42,27 @@ describe("ListSort", () => {
     expect(
       readSort(new URLSearchParams("sortBy=password&sortOrder=up"), fields),
     ).toEqual({ sortBy: undefined, sortOrder: undefined });
+  });
+
+  it("shows the sort of the filter, or the default column ascending", () => {
+    expect(shownSort(null, "name")).toEqual({ by: "name", order: "asc" });
+    expect(shownSort({ sortBy: "email", sortOrder: "desc" }, "name")).toEqual({
+      by: "email",
+      order: "desc",
+    });
+  });
+
+  it("keeps the sort of the filter unless another one is asked for", () => {
+    const filter = { sortBy: "email", sortOrder: "desc" } as const;
+
+    expect(keptSort(filter)).toEqual({ sortBy: "email", sortOrder: "desc" });
+    expect(keptSort(undefined)).toEqual({
+      sortBy: undefined,
+      sortOrder: undefined,
+    });
+    expect(keptSort(filter, { by: "id", order: "asc" })).toEqual({
+      sortBy: "id",
+      sortOrder: undefined,
+    });
   });
 });

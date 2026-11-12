@@ -22,35 +22,17 @@ import {
   loadProblemOf,
 } from "@/shared/components/LoadProblem";
 import { useToast } from "@/shared/context/ToastContext";
+import { resultToastOf } from "@/shared/hooks/useListChange";
 import { usePagedList } from "@/shared/hooks/usePagedList";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { UserRoleForm } from "../components/UserRoleForm";
 import { UserRoleList } from "../components/UserRoleList";
 
-const UserDetailsPageComponent: FC = () => {
-  const { pushToast, removeToast } = useToast();
-  const { navigate } = useRouter();
-  const { userId: userIdParam } = useParams();
+// The account named by the address, read again on a retry
+const useUser = (userIdParam?: string) => {
   const [user, setUser] = useState<User>();
-  usePageTitle(user ? `User ${user.name}` : "User");
   const [problem, setProblem] = useState<LoadProblemKind | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
-  const [toDeleteRole, setToDeleteRole] = useState<Role>();
-
-  const {
-    data: userRoles,
-    currentPage: currentUserRolePage,
-    loadData: loadUserRoles,
-    totalPages: userRoleTotalPages,
-    filter: userRolesFilter,
-    onPageChange: onUserRolesPageChange,
-    listState: userRolesState,
-  } = usePagedList<UserRoleFilter, Role>({
-    queryFunction: queryUserRoles,
-    initialFilter: new UserRoleFilter(),
-  });
 
   const queryUser = useCallback((userId: string) => {
     setIsLoading(true);
@@ -61,6 +43,50 @@ const UserDetailsPageComponent: FC = () => {
       })
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (userIdParam) {
+      queryUser(userIdParam);
+    }
+  }, [userIdParam, queryUser]);
+
+  return { user, problem, isLoading, queryUser };
+};
+
+const useRolesOfUser = () =>
+  usePagedList<UserRoleFilter, Role>({
+    queryFunction: queryUserRoles,
+    initialFilter: new UserRoleFilter(),
+  });
+
+type RolesOfUser = ReturnType<typeof useRolesOfUser>;
+
+// The roles of the account, read again when it changes
+const useUserRolesLoad = (
+  userIdParam: string | undefined,
+  roles: RolesOfUser,
+) => {
+  const { loadData, filter } = roles;
+  useEffect(() => {
+    if (userIdParam) {
+      const updated = filter
+        ? Object.assign(filter, {
+            userId: userIdParam,
+          })
+        : new UserRoleFilter(userIdParam);
+
+      void loadData(updated);
+    }
+  }, [userIdParam, loadData, filter]);
+};
+
+// Assigning a role to the account, and removing one
+const useRoleChanges = (
+  userIdParam: string | undefined,
+  roles: RolesOfUser,
+) => {
+  const { pushToast, removeToast } = useToast();
+  const [isCreating, setIsCreating] = useState(false);
 
   const onUserRoleCreate = (userRole: UserRole) => {
     if (!userIdParam) {
@@ -78,37 +104,23 @@ const UserDetailsPageComponent: FC = () => {
       message: "Assigning role...",
     });
 
-    void createUserRole({
-      ...userRole,
-      userId: userIdParam,
-    })
+    void createUserRole({ ...userRole, userId: userIdParam })
       .then((response) => {
         removeToast(toastId);
-        if (response.errorCode) {
-          pushToast({
-            title: "Role assignment",
-            message: response.message || "Failed to assign role",
-            variant: "danger",
-          });
-        } else {
-          if (userRolesFilter) {
-            void loadUserRoles(userRolesFilter);
-          }
-          pushToast({
-            title: "Role assignment",
-            message: "Role assigned successfully",
-            variant: "success",
-          });
+        if (!response.errorCode && roles.filter) {
+          void roles.loadData(roles.filter);
         }
+        pushToast(
+          resultToastOf(response, {
+            title: "Role assignment",
+            success: "Role assigned successfully",
+            failure: "Failed to assign role",
+          }),
+        );
       })
       .finally(() => {
         setIsCreating(false);
       });
-  };
-
-  const onUserRoleDelete = (role: Role) => {
-    setToDeleteRole(role);
-    setShowDelete(true);
   };
 
   const performDeleteUserRole = (role: Role) => {
@@ -128,51 +140,40 @@ const UserDetailsPageComponent: FC = () => {
 
     void deleteUserRole(new UserRole(userIdParam, role.id)).then((response) => {
       removeToast(toastId);
-
-      if (response.errorCode) {
-        pushToast({
+      pushToast(
+        resultToastOf(response, {
           title: "Role removal",
-          message: response.message || "Failed to delete role",
-          variant: "danger",
-        });
-      } else {
-        pushToast({
-          title: "Role removal",
-          message: "Role removed successfully",
-          variant: "success",
-        });
-      }
-      onUserRolesPageChange(currentUserRolePage);
+          success: "Role removed successfully",
+          failure: "Failed to delete role",
+        }),
+      );
+      roles.onPageChange(roles.currentPage);
     });
   };
 
-  useEffect(() => {
-    if (userIdParam) {
-      queryUser(userIdParam);
-    }
-  }, [userIdParam, queryUser]);
+  return { isCreating, onUserRoleCreate, performDeleteUserRole };
+};
 
-  useEffect(() => {
-    if (userIdParam) {
-      const updated = !userRolesFilter
-        ? new UserRoleFilter(userIdParam)
-        : Object.assign(userRolesFilter, {
-            userId: userIdParam,
-          });
+const LoadingPage: FC = () => (
+  <Container fluid="sm" className="my-2">
+    <div className="w-100 text-center my-3">
+      <Spinner animation="border" variant="primary" />
+    </div>
+  </Container>
+);
 
-      void loadUserRoles(updated);
-    }
-  }, [userIdParam, loadUserRoles, userRolesFilter]);
+const UserDetailsPageComponent: FC = () => {
+  const { navigate } = useRouter();
+  const { userId: userIdParam } = useParams();
+  const roles = useRolesOfUser();
+  const { user, problem, isLoading, queryUser } = useUser(userIdParam);
+  usePageTitle(user ? `User ${user.name}` : "User");
+  useUserRolesLoad(userIdParam, roles);
+  const changes = useRoleChanges(userIdParam, roles);
+  const [showDelete, setShowDelete] = useState(false);
+  const [toDeleteRole, setToDeleteRole] = useState<Role>();
 
-  if (isLoading) {
-    return (
-      <Container fluid="sm" className="my-2">
-        <div className="w-100 text-center my-3">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      </Container>
-    );
-  }
+  if (isLoading) return <LoadingPage />;
 
   return (
     <Container fluid="sm" className="my-2">
@@ -207,18 +208,21 @@ const UserDetailsPageComponent: FC = () => {
           <hr />
 
           <UserRoleForm
-            isLoading={isCreating}
-            onUserRoleSubmit={onUserRoleCreate}
+            isLoading={changes.isCreating}
+            onUserRoleSubmit={changes.onUserRoleCreate}
             submitText="Assign role"
           />
 
           <UserRoleList
-            items={userRoles}
-            state={userRolesState}
-            totalPages={userRoleTotalPages}
-            currentPage={currentUserRolePage}
-            onPageChange={onUserRolesPageChange}
-            onRoleDelete={onUserRoleDelete}
+            items={roles.data}
+            state={roles.listState}
+            totalPages={roles.totalPages}
+            currentPage={roles.currentPage}
+            onPageChange={roles.onPageChange}
+            onRoleDelete={(role) => {
+              setToDeleteRole(role);
+              setShowDelete(true);
+            }}
           />
         </>
       ) : null}
@@ -231,7 +235,7 @@ const UserDetailsPageComponent: FC = () => {
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteRole) {
-            performDeleteUserRole(toDeleteRole);
+            changes.performDeleteUserRole(toDeleteRole);
           }
           setShowDelete(false);
         }}

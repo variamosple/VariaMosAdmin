@@ -1,3 +1,4 @@
+import type { ResponseModel } from "@variamosple/variamos-components";
 import { useState } from "react";
 import {
   createPermission,
@@ -13,11 +14,13 @@ import {
 } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { useToast } from "@/shared/context/ToastContext";
 import {
+  keptSort,
   type ListSort,
   nextSort,
   readSort,
-  sortFields,
+  shownSort,
 } from "@/shared/domain/Entity/ListSort";
+import { useListChange } from "@/shared/hooks/useListChange";
 import {
   readPage,
   readParam,
@@ -36,17 +39,120 @@ const permissionsFromParams = (params: URLSearchParams) => {
   });
 };
 
-export const usePermissionList = () => {
+// The dialogs of the page, and the permission each one is about
+const usePermissionDialogs = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
   const [toEditPermission, setToEditPermission] = useState<Permission>();
   const [toDeletePermission, setToDeletePermission] = useState<Permission>();
-  const { pushToast } = useToast();
 
+  const onPermissionEdit = (permission: Permission) => {
+    setToEditPermission(permission);
+    setShowEdit(true);
+  };
+  const onPermissionDelete = (permission: Permission) => {
+    setToDeletePermission(permission);
+    setShowDelete(true);
+  };
+
+  return {
+    showCreate,
+    setShowCreate,
+    showEdit,
+    setShowEdit,
+    showDelete,
+    setShowDelete,
+    isCreating,
+    setIsCreating,
+    isEditing,
+    setIsEditing,
+    toEditPermission,
+    toDeletePermission,
+    setToDeletePermission,
+    onPermissionEdit,
+    onPermissionDelete,
+  };
+};
+
+type PermissionDialogs = ReturnType<typeof usePermissionDialogs>;
+
+const usePermissionChanges = (
+  dialogs: PermissionDialogs,
+  refresh: () => void,
+) => {
+  const { pushToast } = useToast();
+  const run = useListChange(refresh);
+
+  const onPermissionCreate = (permission: Permission) =>
+    run({
+      request: () => createPermission(permission),
+      messages: {
+        title: "Permission create",
+        success: "Permission created successfully",
+      },
+      onSuccess: () => dialogs.setShowCreate(false),
+      setBusy: dialogs.setIsCreating,
+    });
+
+  const performEditPermission = (permission: Permission) =>
+    run({
+      request: () => updatePermission(permission),
+      messages: {
+        title: "Permission edit",
+        success: "Permission updated successfully",
+      },
+      onSuccess: () => dialogs.setShowEdit(false),
+      setBusy: dialogs.setIsEditing,
+    });
+
+  const performDeletePermission = (permission: Permission) => {
+    pushToast({
+      title: "Permission delete",
+      message: "Deleting permission...",
+    });
+    const { id } = permission;
+    if (id === undefined) return;
+    void run({
+      request: () => deletePermission(id),
+      messages: {
+        title: "Permission delete",
+        success: "Permission deleted successfully",
+      },
+    });
+  };
+
+  return { onPermissionCreate, performEditPermission, performDeletePermission };
+};
+
+// The search keeps the sort, and the sort keeps the search
+const usePermissionSearch = (
+  filter: PermissionsFilter | null,
+  loadData: (filter: PermissionsFilter) => Promise<ResponseModel<Permission[]>>,
+) => {
+  const permissionsFilter = (
+    name?: string,
+    wantedSort?: ListSort<PermissionSortField>,
+  ) => new PermissionsFilter({ name, ...keptSort(filter, wantedSort) });
+
+  const sort = shownSort(filter, "name");
+  return {
+    sort,
+    onSort: (field: PermissionSortField) => {
+      void loadData(permissionsFilter(filter?.name, nextSort(sort, field)));
+    },
+    onSearchReset: () => {
+      void loadData(permissionsFilter());
+    },
+    onSearchSubmit: (search?: string) => {
+      void loadData(permissionsFilter(search));
+    },
+  };
+};
+
+export const usePermissionList = () => {
   const {
     data: permissions,
     currentPage,
@@ -66,162 +172,23 @@ export const usePermissionList = () => {
     permissionsFromParams,
   );
 
-  const onPermissionCreate = (permission: Permission) => {
-    setIsCreating(true);
-    return createPermission(permission)
-      .then((response) => {
-        if (!response.errorCode) {
-          onPageChange(currentPage);
-          setShowCreate(false);
-          pushToast({
-            title: "Permission create",
-            message: "Permission created successfully",
-            variant: "success",
-          });
-        } else {
-          pushToast({
-            title: "Permission create",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-
-        return response;
-      })
-      .finally(() => {
-        setIsCreating(false);
-      });
-  };
-
-  const onPermissionEdit = (permission: Permission) => {
-    setToEditPermission(permission);
-    setShowEdit(true);
-  };
-
-  const performEditPermission = (permission: Permission) => {
-    setIsEditing(true);
-    return updatePermission(permission)
-      .then((response) => {
-        if (!response.errorCode) {
-          onPageChange(currentPage);
-          setShowEdit(false);
-
-          pushToast({
-            title: "Permission edit",
-            message: "Permission updated successfully",
-            variant: "success",
-          });
-        } else {
-          pushToast({
-            title: "Permission edit",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-
-        return response;
-      })
-      .finally(() => {
-        setIsEditing(false);
-      });
-  };
-
-  const performDeletePermission = (permission: Permission) => {
-    pushToast({
-      title: "Permission delete",
-      message: "Deleting permission...",
-    });
-
-    if (permission.id !== undefined) {
-      void deletePermission(permission.id).then((response) => {
-        // alertify.dismissAll();
-
-        if (response.errorCode) {
-          pushToast({
-            title: "Permission delete",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        } else {
-          pushToast({
-            title: "Permission delete",
-            message: "Permission deleted successfully",
-            variant: "success",
-          });
-          onPageChange(currentPage);
-        }
-      });
-    }
-  };
-
-  const onPermissionDelete = (permission: Permission) => {
-    setToDeletePermission(permission);
-    setShowDelete(true);
-  };
-
-  // The search keeps the sort, and the sort keeps the search
-  const onSearchReset = () => {
-    void loadData(
-      new PermissionsFilter({
-        sortBy: filter?.sortBy,
-        sortOrder: filter?.sortOrder,
-      }),
-    );
-  };
-
-  const onSearchSubmit = (search?: string) => {
-    void loadData(
-      new PermissionsFilter({
-        name: search,
-        sortBy: filter?.sortBy,
-        sortOrder: filter?.sortOrder,
-      }),
-    );
-  };
-
-  const sort: ListSort<PermissionSortField> = {
-    by: filter?.sortBy ?? "name",
-    order: filter?.sortOrder ?? "asc",
-  };
-  const onSort = (field: PermissionSortField) => {
-    const { sortBy, sortOrder } = sortFields(nextSort(sort, field));
-    void loadData(
-      new PermissionsFilter({
-        name: filter?.name,
-        sortBy,
-        sortOrder,
-      }),
-    );
-  };
+  const { setIsCreating, setIsEditing, ...dialogs } = usePermissionDialogs();
+  const changes = usePermissionChanges(
+    { ...dialogs, setIsCreating, setIsEditing },
+    () => onPageChange(currentPage),
+  );
 
   return {
     restoredFilter,
     restoreKey,
     listState,
-    showCreate,
-    setShowCreate,
-    showEdit,
-    setShowEdit,
-    showDelete,
-    setShowDelete,
-    isCreating,
-    isEditing,
-    toEditPermission,
-    toDeletePermission,
-    setToDeletePermission,
+    ...dialogs,
     permissions,
     currentPage,
     isLoading,
     totalPages,
     onPageChange,
-    onPermissionCreate,
-    onPermissionEdit,
-    performEditPermission,
-    performDeletePermission,
-    onPermissionDelete,
-    onSearchReset,
-    onSearchSubmit,
-    sort,
-    onSort,
+    ...changes,
+    ...usePermissionSearch(filter, loadData),
   };
 };

@@ -23,142 +23,146 @@ export interface ModelRowProps {
   onModelToggleVisibility: (model: Model) => void;
 }
 
-export const ModelRowComponent: FC<ModelRowProps> = ({
-  model,
-  onModelEdit,
-  onModelDelete,
-  onModelToggleLevel,
-  onModelToggleVisibility,
-}) => {
+const levelLabel = (model: Model) =>
+  model.modelLevel === "application" ? "Application Model" : "Domain Model";
+
+// A long text on one line, whole in its tooltip
+const TruncatedCell: FC<{ text?: string }> = ({ text }) => (
+  <td
+    title={text}
+    aria-label={text}
+    style={{
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      maxWidth: "150px",
+    }}
+  >
+    {text}
+  </td>
+);
+
+interface ModelActionsProps extends ModelRowProps {
+  showDetails: boolean;
+  onToggleDetails: () => void;
+  onAskLevel: () => void;
+  onAskVisibility: () => void;
+}
+
+const ModelActions: FC<ModelActionsProps> = (props) => {
+  const { model } = props;
+  return (
+    <ButtonGroup size="sm">
+      <IconButton
+        variant="primary"
+        onClick={() => props.onModelEdit(model)}
+        label="Edit model"
+        icon={<PencilFill />}
+      />
+
+      <IconButton
+        variant="danger"
+        onClick={() => props.onModelDelete(model)}
+        label="Delete model"
+        icon={<TrashFill />}
+      />
+
+      {model.isDeleted ? null : (
+        <>
+          <IconButton
+            variant="warning"
+            onClick={props.onAskLevel}
+            label="Toggle model level (Domain/Application)"
+            icon={<ArrowRepeat />}
+          />
+
+          <IconButton
+            variant="secondary"
+            onClick={props.onAskVisibility}
+            label="Toggle model visibility (Public/Private)"
+            icon={<LockFill />}
+          />
+        </>
+      )}
+
+      <IconButton
+        size="sm"
+        variant="info"
+        onClick={props.onToggleDetails}
+        label="Show/Hide model details"
+        icon={props.showDetails ? <DashCircle /> : <PlusCircle />}
+      />
+    </ButtonGroup>
+  );
+};
+
+type Asked = "level" | "visibility" | null;
+
+interface ToggleConfirmationsProps extends ModelRowProps {
+  asked: Asked;
+  setAsked: (asked: Asked) => void;
+}
+
+// The level and the visibility change once confirmed
+const ToggleConfirmations: FC<ToggleConfirmationsProps> = (props) => {
+  const { model, asked, setAsked } = props;
+  return (
+    <>
+      <ConfirmationModal
+        show={asked === "level"}
+        title="Change model level"
+        message={`Change the level of the model "${model.name}" to ${model.modelLevel === "application" ? "Domain Model" : "Application Model"}?`}
+        confirmLabel="Change level"
+        confirmButtonVariant="warning"
+        onConfirm={() => {
+          props.onModelToggleLevel(model);
+          setAsked(null);
+        }}
+        onCancel={() => setAsked(null)}
+      />
+
+      <ConfirmationModal
+        show={asked === "visibility"}
+        title="Change model visibility"
+        message={`Make the model "${model.name}" ${model.isPublic ? "private" : "public"}?`}
+        confirmLabel={model.isPublic ? "Make private" : "Make public"}
+        confirmButtonVariant="secondary"
+        onConfirm={() => {
+          props.onModelToggleVisibility(model);
+          setAsked(null);
+        }}
+        onCancel={() => setAsked(null)}
+      />
+    </>
+  );
+};
+
+export const ModelRowComponent: FC<ModelRowProps> = (props) => {
+  const { model } = props;
   const [show, setShow] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
-  const [showLevelConfirm, setShowLevelConfirm] = useState(false);
-  const [showVisibilityConfirm, setShowVisibilityConfirm] = useState(false);
-
-  const isActive = !model.isDeleted;
+  const [asked, setAsked] = useState<Asked>(null);
 
   return (
     <>
       <tr>
         <td style={{ whiteSpace: "wrap" }}>{model.name}</td>
-
-        <td
-          title={model.description}
-          aria-label={model.description}
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-          }}
-        >
-          {model.description}
-        </td>
-
-        <td
-          title={model.author}
-          aria-label={model.author}
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-          }}
-        >
-          {model.author}
-        </td>
-
-        <td
-          title={model.source}
-          aria-label={model.source}
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-          }}
-        >
-          {model.source}
-        </td>
-
-        <td
-          title={model.engineeringType}
-          aria-label={model.engineeringType}
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-          }}
-        >
-          {model.engineeringType}
-        </td>
-
-        <td
-          title={model.projectName}
-          aria-label={model.projectName}
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-          }}
-        >
-          {model.projectName}
-        </td>
-
+        <TruncatedCell text={model.description} />
+        <TruncatedCell text={model.author} />
+        <TruncatedCell text={model.source} />
+        <TruncatedCell text={model.engineeringType} />
+        <TruncatedCell text={model.projectName} />
         <td>{formatBoolean(model.isPublic, "Public", "Private")}</td>
-
-        <td>
-          {model.modelLevel === "application"
-            ? "Application Model"
-            : "Domain Model"}
-        </td>
-
+        <td>{levelLabel(model)}</td>
         <td>{model.isDeleted ? "Deleted" : "Active"}</td>
-
         <td>
-          <ButtonGroup size="sm">
-            <IconButton
-              variant="primary"
-              onClick={() => onModelEdit(model)}
-              label="Edit model"
-              icon={<PencilFill />}
-            />
-
-            <IconButton
-              variant="danger"
-              onClick={() => onModelDelete(model)}
-              label="Delete model"
-              icon={<TrashFill />}
-            />
-
-            {isActive && (
-              <>
-                <IconButton
-                  variant="warning"
-                  onClick={() => setShowLevelConfirm(true)}
-                  label="Toggle model level (Domain/Application)"
-                  icon={<ArrowRepeat />}
-                />
-
-                <IconButton
-                  variant="secondary"
-                  onClick={() => setShowVisibilityConfirm(true)}
-                  label="Toggle model visibility (Public/Private)"
-                  icon={<LockFill />}
-                />
-              </>
-            )}
-
-            <IconButton
-              size="sm"
-              variant="info"
-              onClick={() => setShow((isShown) => !isShown)}
-              label="Show/Hide model details"
-              icon={!show ? <PlusCircle /> : <DashCircle />}
-            />
-          </ButtonGroup>
+          <ModelActions
+            {...props}
+            showDetails={show}
+            onToggleDetails={() => setShow((isShown) => !isShown)}
+            onAskLevel={() => setAsked("level")}
+            onAskVisibility={() => setAsked("visibility")}
+          />
         </td>
       </tr>
 
@@ -183,31 +187,7 @@ export const ModelRowComponent: FC<ModelRowProps> = ({
         />
       ) : null}
 
-      <ConfirmationModal
-        show={showLevelConfirm}
-        title="Change model level"
-        message={`Change the level of the model "${model.name}" to ${model.modelLevel === "application" ? "Domain Model" : "Application Model"}?`}
-        confirmLabel="Change level"
-        confirmButtonVariant="warning"
-        onConfirm={() => {
-          onModelToggleLevel(model);
-          setShowLevelConfirm(false);
-        }}
-        onCancel={() => setShowLevelConfirm(false)}
-      />
-
-      <ConfirmationModal
-        show={showVisibilityConfirm}
-        title="Change model visibility"
-        message={`Make the model "${model.name}" ${model.isPublic ? "private" : "public"}?`}
-        confirmLabel={model.isPublic ? "Make private" : "Make public"}
-        confirmButtonVariant="secondary"
-        onConfirm={() => {
-          onModelToggleVisibility(model);
-          setShowVisibilityConfirm(false);
-        }}
-        onCancel={() => setShowVisibilityConfirm(false)}
-      />
+      <ToggleConfirmations {...props} asked={asked} setAsked={setAsked} />
     </>
   );
 };
@@ -232,11 +212,7 @@ const ModelDetails: FC<ModelDetailsProps> = ({ model, onContactClick }) => {
           Level
         </Col>
 
-        <Col xs={10}>
-          {model.modelLevel === "application"
-            ? "Application Model"
-            : "Domain Model"}
-        </Col>
+        <Col xs={10}>{levelLabel(model)}</Col>
       </Row>
       <Row className="mb-2">
         <Col xs={2} className="fw-bold">

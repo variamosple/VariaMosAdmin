@@ -8,6 +8,7 @@ import {
 import type { Project } from "@/features/project-management/domain/Entity/Project";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
 import { useToast } from "@/shared/context/ToastContext";
+import { useListChange } from "@/shared/hooks/useListChange";
 import {
   readBooleanParam,
   readPage,
@@ -26,17 +27,89 @@ const projectsFromParams = (params: URLSearchParams) =>
     pageNumber: readPage(params),
   });
 
-export const useProjectList = () => {
+// The dialogs of the page, and the project each one is about
+const useProjectDialogs = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-
   const [toEditProject, setToEditProject] = useState<Project>();
   const [toDeleteProject, setToDeleteProject] = useState<Project>();
-  const { pushToast } = useToast();
 
+  const onProjectEdit = (project: Project) => {
+    setToEditProject(project);
+    setShowEdit(true);
+  };
+  const onProjectDelete = (project: Project) => {
+    setToDeleteProject(project);
+    setShowDelete(true);
+  };
+
+  return {
+    showEdit,
+    setShowEdit,
+    showCreate,
+    setShowCreate,
+    showDelete,
+    setShowDelete,
+    isEditing,
+    setIsEditing,
+    isCreating,
+    setIsCreating,
+    toEditProject,
+    toDeleteProject,
+    setToDeleteProject,
+    onProjectEdit,
+    onProjectDelete,
+  };
+};
+
+type ProjectDialogs = ReturnType<typeof useProjectDialogs>;
+
+const useProjectChanges = (dialogs: ProjectDialogs, refresh: () => void) => {
+  const { pushToast } = useToast();
+  const run = useListChange(refresh);
+
+  const performEditProject = (project: Project) =>
+    run({
+      request: () => updateProject(project),
+      messages: {
+        title: "Project edit",
+        success: "Project updated successfully",
+      },
+      onSuccess: () => dialogs.setShowEdit(false),
+      setBusy: dialogs.setIsEditing,
+    });
+
+  const performCreateProject = (project: Project) =>
+    run({
+      request: () => createProject(project),
+      messages: {
+        title: "Project create",
+        success: "Project created successfully",
+      },
+      onSuccess: () => dialogs.setShowCreate(false),
+      setBusy: dialogs.setIsCreating,
+    });
+
+  const performDeleteProject = (project: Project) => {
+    pushToast({ title: "Project delete", message: "Deleting project..." });
+    const { id } = project;
+    if (id === undefined) return;
+    void run({
+      request: () => deleteProject(id),
+      messages: {
+        title: "Project delete",
+        success: "Project deleted successfully",
+      },
+    });
+  };
+
+  return { performEditProject, performCreateProject, performDeleteProject };
+};
+
+export const useProjectList = () => {
   const {
     data: projects,
     currentPage,
@@ -56,97 +129,11 @@ export const useProjectList = () => {
     projectsFromParams,
   );
 
-  const onProjectEdit = (project: Project) => {
-    setToEditProject(project);
-    setShowEdit(true);
-  };
-
-  const performEditProject = (project: Project) => {
-    setIsEditing(true);
-    return updateProject(project)
-      .then((response) => {
-        if (!response.errorCode) {
-          onPageChange(currentPage);
-          setShowEdit(false);
-
-          pushToast({
-            title: "Project edit",
-            message: "Project updated successfully",
-            variant: "success",
-          });
-        } else {
-          pushToast({
-            title: "Project edit",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-
-        return response;
-      })
-      .finally(() => {
-        setIsEditing(false);
-      });
-  };
-
-  const performCreateProject = (project: Project) => {
-    setIsCreating(true);
-    return createProject(project)
-      .then((response) => {
-        if (!response.errorCode) {
-          onPageChange(currentPage);
-          setShowCreate(false);
-
-          pushToast({
-            title: "Project create",
-            message: "Project created successfully",
-            variant: "success",
-          });
-        } else {
-          pushToast({
-            title: "Project create",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        }
-
-        return response;
-      })
-      .finally(() => {
-        setIsCreating(false);
-      });
-  };
-
-  const performDeleteProject = (project: Project) => {
-    pushToast({
-      title: "Project delete",
-      message: "Deleting project...",
-    });
-
-    if (project.id !== undefined) {
-      void deleteProject(project.id).then((response) => {
-        if (response.errorCode) {
-          pushToast({
-            title: "Project delete",
-            message: response.message ?? "An error occurred",
-            variant: "danger",
-          });
-        } else {
-          pushToast({
-            title: "Project delete",
-            message: "Project deleted successfully",
-            variant: "success",
-          });
-          onPageChange(currentPage);
-        }
-      });
-    }
-  };
-
-  const onProjectDelete = (project: Project) => {
-    setToDeleteProject(project);
-    setShowDelete(true);
-  };
+  const { setIsEditing, setIsCreating, ...dialogs } = useProjectDialogs();
+  const changes = useProjectChanges(
+    { ...dialogs, setIsEditing, setIsCreating },
+    () => onPageChange(currentPage),
+  );
 
   const onSearchReset = () => {
     void loadData(new ProjectsFilter());
@@ -167,27 +154,13 @@ export const useProjectList = () => {
     restoredFilter,
     restoreKey,
     listState,
-    showEdit,
-    setShowEdit,
-    showCreate,
-    setShowCreate,
-    showDelete,
-    setShowDelete,
-    isEditing,
-    isCreating,
-    toEditProject,
-    toDeleteProject,
-    setToDeleteProject,
+    ...dialogs,
     projects,
     currentPage,
     isLoading,
     totalPages,
     onPageChange,
-    onProjectEdit,
-    performEditProject,
-    performCreateProject,
-    performDeleteProject,
-    onProjectDelete,
+    ...changes,
     onSearchReset,
     onSearchSubmit,
   };

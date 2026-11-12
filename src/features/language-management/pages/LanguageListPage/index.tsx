@@ -10,38 +10,8 @@ import { useLanguageList } from "../../hooks/useLanguageList";
 
 const LanguageListPageComponent: FC = () => {
   usePageTitle("Languages");
-  const {
-    restoredFilter,
-    restoreKey,
-    languages,
-    totalPages,
-    currentPage,
-    isLoading,
-    onPageChange,
-    onSearchReset,
-    onSearchSubmit,
-    onLanguageEdit,
-    toEditLanguage,
-    showEdit,
-    setShowEdit,
-    performEditLanguage,
-    isEditing,
-    onLanguageDelete,
-    toDeleteLanguage,
-    setToDeleteLanguage,
-    showDelete,
-    setShowDelete,
-    showActivateConfirm,
-    setShowActivateConfirm,
-    showDeactivateConfirm,
-    setShowDeactivateConfirm,
-    toToggleLanguage,
-    setToToggleLanguage,
-    onLanguageActivateClick,
-    onLanguageDeactivateClick,
-    performDeleteLanguage,
-    listState,
-  } = useLanguageList();
+  const list = useLanguageList();
+  const { toDeleteLanguage, toToggleLanguage } = list;
 
   return (
     <Container fluid="sm" className="my-2">
@@ -49,95 +19,95 @@ const LanguageListPageComponent: FC = () => {
       <hr />
 
       <LanguageFormModal
-        defaultValue={toEditLanguage}
+        defaultValue={list.toEditLanguage}
         modalTitle="Edit a Language"
-        showModal={showEdit}
-        onClose={() => setShowEdit(false)}
-        onLanguageSubmit={performEditLanguage}
+        showModal={list.showEdit}
+        onClose={() => list.setShowEdit(false)}
+        onLanguageSubmit={list.performEditLanguage}
         submitText="Edit language"
-        isLoading={isEditing}
+        isLoading={list.isEditing}
       />
 
       <LanguageSearchForm
         // A new form when the address changes by itself (UX-26)
-        key={restoreKey}
-        defaultFilter={restoredFilter ?? undefined}
-        isLoading={isLoading}
-        onSearchReset={onSearchReset}
-        onSubmit={onSearchSubmit}
+        key={list.restoreKey}
+        defaultFilter={list.restoredFilter ?? undefined}
+        isLoading={list.isLoading}
+        onSearchReset={list.onSearchReset}
+        onSubmit={list.onSearchSubmit}
       />
 
       <LanguageList
-        items={languages}
-        state={listState}
-        totalPages={totalPages}
-        currentPage={currentPage}
-        onPageChange={onPageChange}
-        onLanguageEdit={onLanguageEdit}
-        onLanguageDelete={onLanguageDelete}
-        onLanguageActivate={onLanguageActivateClick}
-        onLanguageDeactivate={onLanguageDeactivateClick}
+        items={list.languages}
+        state={list.listState}
+        totalPages={list.totalPages}
+        currentPage={list.currentPage}
+        onPageChange={list.onPageChange}
+        onLanguageEdit={list.onLanguageEdit}
+        onLanguageDelete={list.onLanguageDelete}
+        onLanguageActivate={list.onLanguageActivateClick}
+        onLanguageDeactivate={list.onLanguageDeactivateClick}
       />
 
       <ConfirmationModal
-        show={showDelete}
+        show={list.showDelete}
         title="Delete language"
         message={`Delete the language "${toDeleteLanguage?.name ?? ""}"?`}
         confirmLabel="Delete language"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteLanguage) {
-            performDeleteLanguage(toDeleteLanguage);
+            list.performDeleteLanguage(toDeleteLanguage);
           }
-          setShowDelete(false);
+          list.setShowDelete(false);
         }}
         onCancel={() => {
-          setToDeleteLanguage(undefined);
-          setShowDelete(false);
+          list.setToDeleteLanguage(undefined);
+          list.setShowDelete(false);
         }}
       />
 
       <ConfirmationModal
-        show={showActivateConfirm}
+        show={list.showActivateConfirm}
         title="Activate language"
         message={`Activate the language "${toToggleLanguage?.name ?? ""}"?`}
         confirmLabel="Activate language"
         confirmButtonVariant="success"
         onConfirm={() => {
           if (toToggleLanguage) {
-            void performEditLanguage({
+            void list.performEditLanguage({
               ...toToggleLanguage,
               stateAccept: "ACTIVE",
             });
           }
-          setShowActivateConfirm(false);
-          setToToggleLanguage(undefined);
+          list.setShowActivateConfirm(false);
+          list.setToToggleLanguage(undefined);
         }}
         onCancel={() => {
-          setToToggleLanguage(undefined);
-          setShowActivateConfirm(false);
+          list.setToToggleLanguage(undefined);
+          list.setShowActivateConfirm(false);
         }}
       />
 
       <ConfirmationModal
-        show={showDeactivateConfirm}
+        show={list.showDeactivateConfirm}
         title="Deactivate language"
         message={`Deactivate the language "${toToggleLanguage?.name ?? ""}"?`}
         confirmLabel="Deactivate language"
         confirmButtonVariant="warning"
         onConfirm={() => {
           if (toToggleLanguage) {
-            void performEditLanguage({
+            void list.performEditLanguage({
               ...toToggleLanguage,
               stateAccept: "PENDING",
             });
           }
-          setShowDeactivateConfirm(false);
-          setToToggleLanguage(undefined);
+          list.setShowDeactivateConfirm(false);
+          list.setToToggleLanguage(undefined);
         }}
         onCancel={() => {
-          setToToggleLanguage(undefined);
-          setShowDeactivateConfirm(false);
+          list.setToToggleLanguage(undefined);
+          list.setShowDeactivateConfirm(false);
         }}
       />
     </Container>

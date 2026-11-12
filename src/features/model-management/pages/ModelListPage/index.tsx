@@ -11,40 +11,8 @@ import { useModelList } from "../../hooks/useModelList";
 
 const ModelListPageComponent: FC = () => {
   usePageTitle("Models");
-  const {
-    restoredFilter,
-    restoreKey,
-    models,
-    totalPages,
-    currentPage,
-    isLoading,
-    onPageChange,
-    onSearchReset,
-    onSearchSubmit,
-    onModelEdit,
-    toEditModel,
-    showEdit,
-    setShowEdit,
-    showCreate,
-    setShowCreate,
-    performCreateModel,
-    isCreating,
-    performEditModel,
-    isEditing,
-    onModelDelete,
-    toDeleteModel,
-    setToDeleteModel,
-    showDelete,
-    setShowDelete,
-    performDeleteModel,
-    onModelToggleLevel,
-    onModelToggleVisibility,
-    projects,
-    languages,
-    searchProjects,
-    searchLanguages,
-    listState,
-  } = useModelList();
+  const list = useModelList();
+  const { toDeleteModel } = list;
   return (
     <Container fluid="sm" className="my-2">
       <Row className="align-items-center">
@@ -52,7 +20,7 @@ const ModelListPageComponent: FC = () => {
           <h1 className="mb-0">Models list</h1>
         </Col>
         <Col className="text-end">
-          <Button variant="primary" onClick={() => setShowCreate(true)}>
+          <Button variant="primary" onClick={() => list.setShowCreate(true)}>
             <Plus className="me-1" /> Create model
           </Button>
         </Col>
@@ -60,68 +28,68 @@ const ModelListPageComponent: FC = () => {
       <hr />
 
       <ModelFormModal
-        defaultValue={toEditModel}
+        defaultValue={list.toEditModel}
         modalTitle="Edit a Model"
-        showModal={showEdit}
-        onClose={() => setShowEdit(false)}
-        onModelSubmit={performEditModel}
+        showModal={list.showEdit}
+        onClose={() => list.setShowEdit(false)}
+        onModelSubmit={list.performEditModel}
         submitText="Edit model"
-        isLoading={isEditing}
-        projects={projects}
-        languages={languages}
-        onProjectSearch={searchProjects}
-        onLanguageSearch={searchLanguages}
+        isLoading={list.isEditing}
+        projects={list.projects}
+        languages={list.languages}
+        onProjectSearch={list.searchProjects}
+        onLanguageSearch={list.searchLanguages}
       />
 
       <ModelFormModal
         modalTitle="New model"
-        showModal={showCreate}
-        onClose={() => setShowCreate(false)}
-        onModelSubmit={performCreateModel}
+        showModal={list.showCreate}
+        onClose={() => list.setShowCreate(false)}
+        onModelSubmit={list.performCreateModel}
         submitText="Create model"
-        isLoading={isCreating}
-        projects={projects}
-        languages={languages}
-        onProjectSearch={searchProjects}
-        onLanguageSearch={searchLanguages}
+        isLoading={list.isCreating}
+        projects={list.projects}
+        languages={list.languages}
+        onProjectSearch={list.searchProjects}
+        onLanguageSearch={list.searchLanguages}
       />
 
       <ModelSearchForm
         // A new form when the address changes by itself (UX-26)
-        key={restoreKey}
-        defaultFilter={restoredFilter ?? undefined}
-        isLoading={isLoading}
-        onSearchReset={onSearchReset}
-        onSubmit={onSearchSubmit}
+        key={list.restoreKey}
+        defaultFilter={list.restoredFilter ?? undefined}
+        isLoading={list.isLoading}
+        onSearchReset={list.onSearchReset}
+        onSubmit={list.onSearchSubmit}
       />
 
       <ModelList
-        items={models}
-        state={listState}
-        totalPages={totalPages}
-        currentPage={currentPage}
-        onPageChange={onPageChange}
-        onModelEdit={onModelEdit}
-        onModelDelete={onModelDelete}
-        onModelToggleLevel={onModelToggleLevel}
-        onModelToggleVisibility={onModelToggleVisibility}
+        items={list.models}
+        state={list.listState}
+        totalPages={list.totalPages}
+        currentPage={list.currentPage}
+        onPageChange={list.onPageChange}
+        onModelEdit={list.onModelEdit}
+        onModelDelete={list.onModelDelete}
+        onModelToggleLevel={list.onModelToggleLevel}
+        onModelToggleVisibility={list.onModelToggleVisibility}
       />
 
       <ConfirmationModal
-        show={showDelete}
+        show={list.showDelete}
         title="Delete model"
         message={`Delete the model "${toDeleteModel?.name ?? ""}"?`}
         confirmLabel="Delete model"
         confirmButtonVariant="danger"
         onConfirm={() => {
           if (toDeleteModel) {
-            performDeleteModel(toDeleteModel);
+            list.performDeleteModel(toDeleteModel);
           }
-          setShowDelete(false);
+          list.setShowDelete(false);
         }}
         onCancel={() => {
-          setToDeleteModel(undefined);
-          setShowDelete(false);
+          list.setToDeleteModel(undefined);
+          list.setShowDelete(false);
         }}
       />
     </Container>
