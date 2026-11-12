@@ -14,8 +14,8 @@ import { LoginForm } from "../../components/LoginForm";
 import { MfaCodeForm } from "../../components/MfaCodeForm";
 import { safeRedirectOf } from "../../domain/Redirect";
 
-export const LoginPage: FC = () => {
-  usePageTitle("Sign in");
+// The sign-in steps: password, second factor, or guest
+const useSignInSteps = () => {
   const { queryParams, navigate } = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isMfaStep, setIsMfaStep] = useState(false);
@@ -99,6 +99,57 @@ export const LoginPage: FC = () => {
     }
   }, [queryParams]);
 
+  return {
+    errorMessage,
+    setErrorMessage,
+    isMfaStep,
+    setIsMfaStep,
+    isCheckingCode,
+    trustedDeviceDays,
+    isLoading,
+    onSignIn,
+    onSubmitCode,
+    onSignInAsGuest,
+  };
+};
+
+interface OtherWaysProps {
+  isLoading: boolean;
+  onSignInAsGuest: () => void;
+}
+
+// Google, guest access and sign-up, offered beside the password
+const OtherWays: FC<OtherWaysProps> = ({ isLoading, onSignInAsGuest }) => (
+  <>
+    <GoogleLogin />
+
+    <Button
+      variant="link"
+      className="text-decoration-none text-decoration-underline-hover p-0"
+      onClick={onSignInAsGuest}
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <Spinner animation="border" variant="light" size="sm" />
+      ) : (
+        " Continue as a Guest"
+      )}
+    </Button>
+
+    <div className="d-flex gap-1">
+      <span>Don't have an account?</span>
+      <Link className="text-decoration-none  fw-bold" to="/sign-up">
+        Sign up here
+      </Link>
+    </div>
+  </>
+);
+
+export const LoginPage: FC = () => {
+  usePageTitle("Sign in");
+  const steps = useSignInSteps();
+  const { errorMessage, setErrorMessage, isMfaStep } = steps;
+
   return (
     <div
       className="d-flex flex-column align-items-center gap-3 p-4 rounded-2 dark-container"
@@ -115,16 +166,16 @@ export const LoginPage: FC = () => {
 
       {isMfaStep ? (
         <MfaCodeForm
-          onSubmitCode={onSubmitCode}
+          onSubmitCode={steps.onSubmitCode}
           onCancel={() => {
-            setIsMfaStep(false);
+            steps.setIsMfaStep(false);
             setErrorMessage(undefined);
           }}
-          isLoading={isCheckingCode}
-          trustedDeviceDays={trustedDeviceDays}
+          isLoading={steps.isCheckingCode}
+          trustedDeviceDays={steps.trustedDeviceDays}
         />
       ) : (
-        <LoginForm onSignIn={onSignIn} />
+        <LoginForm onSignIn={steps.onSignIn} />
       )}
 
       <Alert
@@ -138,29 +189,10 @@ export const LoginPage: FC = () => {
       </Alert>
 
       {!isMfaStep && (
-        <>
-          <GoogleLogin />
-
-          <Button
-            variant="link"
-            className="text-decoration-none text-decoration-underline-hover p-0"
-            onClick={onSignInAsGuest}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Spinner animation="border" variant="light" size="sm" />
-            ) : (
-              " Continue as a Guest"
-            )}
-          </Button>
-
-          <div className="d-flex gap-1">
-            <span>Don't have an account?</span>
-            <Link className="text-decoration-none  fw-bold" to="/sign-up">
-              Sign up here
-            </Link>
-          </div>
-        </>
+        <OtherWays
+          isLoading={steps.isLoading}
+          onSignInAsGuest={steps.onSignInAsGuest}
+        />
       )}
     </div>
   );

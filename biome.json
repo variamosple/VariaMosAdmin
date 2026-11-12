@@ -87,49 +87,6 @@
     },
     {
       "includes": [
-        "src/features/auth/components/TimeZoneSetting/index.tsx",
-        "src/features/auth/pages/LoginPage/index.tsx",
-        "src/features/auth/pages/MyAccountPage.tsx",
-        "src/features/bug-tracker/components/BugApprovalModal/index.tsx",
-        "src/features/bug-tracker/components/BugFormModal/index.tsx",
-        "src/features/bug-tracker/components/BugSearchForm/index.tsx",
-        "src/features/bug-tracker/hooks/useBugList.tsx",
-        "src/features/language-management/components/LanguageList/LanguageRow.tsx",
-        "src/features/language-management/hooks/useLanguageList.tsx",
-        "src/features/language-management/pages/LanguageListPage/index.tsx",
-        "src/features/microservices/hooks/useMicroServiceList.tsx",
-        "src/features/microservices/pages/MicroServiceListPage/index.tsx",
-        "src/features/model-management/components/ModelFormModal/index.tsx",
-        "src/features/model-management/components/ModelList/ModelRow.tsx",
-        "src/features/model-management/components/ModelSearchForm/index.tsx",
-        "src/features/model-management/hooks/useModelList.tsx",
-        "src/features/model-management/pages/ModelListPage/index.tsx",
-        "src/features/notifications-admin/components/UserRecipientPicker/index.tsx",
-        "src/features/permission-management/hooks/usePermissionList.tsx",
-        "src/features/project-management/hooks/useProjectsList.tsx",
-        "src/features/role-management/hooks/useRoleList.tsx",
-        "src/features/role-management/pages/RoleDetails.tsx",
-        "src/features/user-management/hooks/useUserList.tsx",
-        "src/features/user-management/pages/UserDetails.tsx",
-        "src/features/user-management/pages/UserList/index.tsx",
-        "src/shared/components/About/index.tsx"
-      ],
-      "linter": {
-        "rules": {
-          "complexity": {
-            "noExcessiveLinesPerFunction": {
-              "level": "info",
-              "options": {
-                "maxLines": 80,
-                "skipBlankLines": true
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "includes": [
         "src/features/auth/api/AuthRepository.ts",
         "src/features/metrics-dashboard/components/Chart/GeoChart.tsx",
         "src/features/metrics-dashboard/context/ChartContext.tsx",

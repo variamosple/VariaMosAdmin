@@ -30,29 +30,11 @@ type Search =
   | { status: "error"; message: string }
   | { status: "done"; users: User[] };
 
-/**
- * Searches the users on the server, so that every account can be found
- * (UX-03), and follows the WAI-ARIA combobox pattern: arrows move, Enter
- * adds, Escape and an outside click close the list (UX-04).
- */
-export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
-  selected,
-  onAdd,
-  onRemove,
-}) => {
-  const listId = useId();
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
+// The users matching what is typed, searched once the typing pauses
+const useUserSearch = (open: boolean, query: string) => {
   const [search, setSearch] = useState<Search>({ status: "loading" });
-  const [active, setActive] = useState(-1);
   // Only the answer to the latest search is shown
   const latestRef = useRef(0);
-
-  const close = useCallback(() => {
-    setOpen(false);
-    setActive(-1);
-  }, []);
-  const { elementRef } = useListenOutsideClicks<HTMLDivElement>(close);
 
   const fetchUsers = useCallback((term: string) => {
     const request = ++latestRef.current;
@@ -81,6 +63,150 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
     const timer = setTimeout(() => fetchUsers(query), SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
   }, [open, query, fetchUsers]);
+
+  return { search, fetchUsers };
+};
+
+const SelectedUsers: FC<Omit<UserRecipientPickerProps, "onAdd">> = ({
+  selected,
+  onRemove,
+}) => (
+  <div className="d-flex flex-wrap gap-2 mb-3">
+    {selected.map((user) => (
+      <Badge
+        key={user.id}
+        bg="primary"
+        className="d-flex align-items-center gap-2 p-2"
+        style={{ borderRadius: "20px" }}
+      >
+        <span>
+          {label(user)} ({detail(user)})
+        </span>
+        <Button
+          variant="link"
+          className="p-0 text-white border-0 d-flex align-items-center"
+          aria-label={`Remove ${label(user)}`}
+          onClick={() => {
+            if (user.id) onRemove(user.id);
+          }}
+          style={{ lineHeight: 1, boxShadow: "none" }}
+        >
+          &times;
+        </Button>
+      </Badge>
+    ))}
+  </div>
+);
+
+interface ResultsProps {
+  listId: string;
+  search: Search;
+  options: User[];
+  active: number;
+  setActive: (index: number) => void;
+  onAdd: (user: User) => void;
+  onRetry: () => void;
+}
+
+const optionIdOf = (listId: string, index: number) =>
+  `${listId}-option-${index}`;
+
+const SearchStatus: FC<
+  Pick<ResultsProps, "search" | "options" | "onRetry">
+> = ({ search, options, onRetry }) => (
+  <>
+    {search.status === "loading" && (
+      <div className="p-2 text-muted d-flex align-items-center gap-2">
+        <Spinner animation="border" size="sm" /> Searching users...
+      </div>
+    )}
+    {search.status === "error" && (
+      <Alert
+        variant="danger"
+        className="m-2 py-2 d-flex align-items-center gap-2"
+      >
+        <span>{search.message}</span>
+        <Button
+          size="sm"
+          variant="outline-danger"
+          className="ms-auto"
+          onClick={onRetry}
+        >
+          Retry
+        </Button>
+      </Alert>
+    )}
+    {search.status === "done" && options.length === 0 && (
+      <div className="p-2 text-muted text-center">No matching users found</div>
+    )}
+  </>
+);
+
+const SearchResults: FC<ResultsProps> = (props) => {
+  const { listId, search, options, active } = props;
+  return (
+    <div
+      className="position-absolute w-100 bg-white border rounded shadow-lg mt-1"
+      style={{ zIndex: 1000, maxHeight: "220px", overflowY: "auto" }}
+    >
+      <SearchStatus search={search} options={options} onRetry={props.onRetry} />
+      <div id={listId} role="listbox" aria-label="Users">
+        {options.map((user, index) => (
+          <div
+            key={user.id}
+            id={optionIdOf(listId, index)}
+            role="option"
+            // Focus stays in the field (aria-activedescendant)
+            tabIndex={-1}
+            aria-selected={index === active}
+            className={`p-2 border-bottom text-dark ${
+              index === active ? "bg-light" : ""
+            }`}
+            style={{ cursor: "pointer" }}
+            // Mouse down keeps the focus in the field
+            onMouseDown={(event) => {
+              event.preventDefault();
+              props.onAdd(user);
+            }}
+            onMouseEnter={() => props.setActive(index)}
+          >
+            <strong>{label(user)}</strong>{" "}
+            <span className="text-muted">({detail(user)})</span>
+          </div>
+        ))}
+      </div>
+      {search.status === "done" &&
+        search.users.length === RECIPIENT_PAGE_SIZE && (
+          <div className="p-2 small text-muted">
+            First {RECIPIENT_PAGE_SIZE} results: type more of the name or email
+            to narrow them.
+          </div>
+        )}
+    </div>
+  );
+};
+
+/**
+ * Searches the users on the server, so that every account can be found
+ * (UX-03), and follows the WAI-ARIA combobox pattern: arrows move, Enter
+ * adds, Escape and an outside click close the list (UX-04).
+ */
+export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
+  selected,
+  onAdd,
+  onRemove,
+}) => {
+  const listId = useId();
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(-1);
+
+  const close = useCallback(() => {
+    setOpen(false);
+    setActive(-1);
+  }, []);
+  const { elementRef } = useListenOutsideClicks<HTMLDivElement>(close);
+  const { search, fetchUsers } = useUserSearch(open, query);
 
   const selectedIds = new Set(selected.map((user) => user.id));
   // Disabled and deleted accounts receive nothing: they are not offered
@@ -116,36 +242,10 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
     }
   };
 
-  const optionId = (index: number) => `${listId}-option-${index}`;
-
   return (
     <div>
       {selected.length > 0 && (
-        <div className="d-flex flex-wrap gap-2 mb-3">
-          {selected.map((user) => (
-            <Badge
-              key={user.id}
-              bg="primary"
-              className="d-flex align-items-center gap-2 p-2"
-              style={{ borderRadius: "20px" }}
-            >
-              <span>
-                {label(user)} ({detail(user)})
-              </span>
-              <Button
-                variant="link"
-                className="p-0 text-white border-0 d-flex align-items-center"
-                aria-label={`Remove ${label(user)}`}
-                onClick={() => {
-                  if (user.id) onRemove(user.id);
-                }}
-                style={{ lineHeight: 1, boxShadow: "none" }}
-              >
-                &times;
-              </Button>
-            </Badge>
-          ))}
-        </div>
+        <SelectedUsers selected={selected} onRemove={onRemove} />
       )}
 
       <div className="position-relative" ref={elementRef}>
@@ -157,7 +257,7 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
           aria-expanded={open}
           aria-controls={listId}
           aria-activedescendant={
-            open && options[active] ? optionId(active) : undefined
+            open && options[active] ? optionIdOf(listId, active) : undefined
           }
           placeholder="Search user by name or email..."
           value={query}
@@ -171,69 +271,15 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
         />
 
         {open ? (
-          <div
-            className="position-absolute w-100 bg-white border rounded shadow-lg mt-1"
-            style={{ zIndex: 1000, maxHeight: "220px", overflowY: "auto" }}
-          >
-            {search.status === "loading" && (
-              <div className="p-2 text-muted d-flex align-items-center gap-2">
-                <Spinner animation="border" size="sm" /> Searching users...
-              </div>
-            )}
-            {search.status === "error" && (
-              <Alert
-                variant="danger"
-                className="m-2 py-2 d-flex align-items-center gap-2"
-              >
-                <span>{search.message}</span>
-                <Button
-                  size="sm"
-                  variant="outline-danger"
-                  className="ms-auto"
-                  onClick={() => fetchUsers(query)}
-                >
-                  Retry
-                </Button>
-              </Alert>
-            )}
-            {search.status === "done" && options.length === 0 && (
-              <div className="p-2 text-muted text-center">
-                No matching users found
-              </div>
-            )}
-            <div id={listId} role="listbox" aria-label="Users">
-              {options.map((user, index) => (
-                <div
-                  key={user.id}
-                  id={optionId(index)}
-                  role="option"
-                  // Focus stays in the field (aria-activedescendant)
-                  tabIndex={-1}
-                  aria-selected={index === active}
-                  className={`p-2 border-bottom text-dark ${
-                    index === active ? "bg-light" : ""
-                  }`}
-                  style={{ cursor: "pointer" }}
-                  // Mouse down keeps the focus in the field
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    add(user);
-                  }}
-                  onMouseEnter={() => setActive(index)}
-                >
-                  <strong>{label(user)}</strong>{" "}
-                  <span className="text-muted">({detail(user)})</span>
-                </div>
-              ))}
-            </div>
-            {search.status === "done" &&
-              search.users.length === RECIPIENT_PAGE_SIZE && (
-                <div className="p-2 small text-muted">
-                  First {RECIPIENT_PAGE_SIZE} results: type more of the name or
-                  email to narrow them.
-                </div>
-              )}
-          </div>
+          <SearchResults
+            listId={listId}
+            search={search}
+            options={options}
+            active={active}
+            setActive={setActive}
+            onAdd={add}
+            onRetry={() => fetchUsers(query)}
+          />
         ) : null}
         <div className="visually-hidden" aria-live="polite">
           {open && search.status === "done"

@@ -22,23 +22,8 @@ export interface LanguageRowProps {
   onLanguageDeactivate: (language: Language) => void;
 }
 
-export const LanguageRowComponent: FC<LanguageRowProps> = ({
-  language,
-  onLanguageEdit,
-  onLanguageDelete,
-  onLanguageActivate,
-  onLanguageDeactivate,
-}) => {
-  const [show, setShow] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
-  const owner = useMemo(() => {
-    if (!language.owners) return null;
-
-    return language.owners?.find(
-      (candidate) => candidate.accessLevel === "OWNER",
-    );
-  }, [language.owners]);
-
+// What can be done with a language, from its state
+const actionsOf = (language: Language) => {
   const isActive =
     language.stateAccept === LanguageStatus.ACTIVE ||
     language.stateAccept === LanguageStatus.APPROVED;
@@ -51,47 +36,101 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
 
   const isDeleted = language.stateAccept === LanguageStatus.DELETED;
 
+  return {
+    canDeactivate: isActive,
+    canActivate: isDisabledOrPending,
+    canDelete: !isActive && !isDeleted,
+  };
+};
+
+const TruncatedCell: FC<{ text?: string }> = ({ text }) => (
+  <td
+    title={text}
+    aria-label={text}
+    style={{
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      maxWidth: "150px",
+    }}
+  >
+    {text}
+  </td>
+);
+
+interface LanguageActionsProps extends LanguageRowProps {
+  show: boolean;
+  onToggleDetails: () => void;
+}
+
+const LanguageActions: FC<LanguageActionsProps> = (props) => {
+  const { language, show } = props;
+  const { canDeactivate, canActivate, canDelete } = actionsOf(language);
+  return (
+    <ButtonGroup size="sm">
+      <IconButton
+        variant="primary"
+        onClick={() => props.onLanguageEdit(language)}
+        label="Edit language"
+        icon={<PencilFill />}
+      />
+
+      {canDeactivate ? (
+        <IconButton
+          variant="warning"
+          onClick={() => props.onLanguageDeactivate(language)}
+          label="Deactivate language"
+          icon={<StopFill />}
+        />
+      ) : null}
+
+      {canActivate ? (
+        <IconButton
+          variant="success"
+          onClick={() => props.onLanguageActivate(language)}
+          label="Activate language"
+          icon={<PlayFill />}
+        />
+      ) : null}
+
+      {canDelete ? (
+        <IconButton
+          variant="danger"
+          onClick={() => props.onLanguageDelete(language)}
+          label="Delete language"
+          icon={<TrashFill />}
+        />
+      ) : null}
+
+      <IconButton
+        size="sm"
+        variant="info"
+        onClick={props.onToggleDetails}
+        label="Show/Hide language details"
+        icon={!show ? <PlusCircle /> : <DashCircle />}
+      />
+    </ButtonGroup>
+  );
+};
+
+export const LanguageRowComponent: FC<LanguageRowProps> = (props) => {
+  const { language } = props;
+  const [show, setShow] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const owner = useMemo(() => {
+    if (!language.owners) return null;
+
+    return language.owners?.find(
+      (candidate) => candidate.accessLevel === "OWNER",
+    );
+  }, [language.owners]);
+
   return (
     <>
       <tr>
-        <td
-          title={language.name}
-          aria-label={language.name}
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-          }}
-        >
-          {language.name}
-        </td>
-
-        <td
-          title={language.type}
-          aria-label={language.type}
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-          }}
-        >
-          {language.type}
-        </td>
-
-        <td
-          title={language.stateAccept}
-          aria-label={language.stateAccept}
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-          }}
-        >
-          {language.stateAccept}
-        </td>
+        <TruncatedCell text={language.name} />
+        <TruncatedCell text={language.type} />
+        <TruncatedCell text={language.stateAccept} />
 
         <td>{owner?.name}</td>
 
@@ -104,49 +143,11 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
         </td>
 
         <td>
-          <ButtonGroup size="sm">
-            <IconButton
-              variant="primary"
-              onClick={() => onLanguageEdit(language)}
-              label="Edit language"
-              icon={<PencilFill />}
-            />
-
-            {isActive ? (
-              <IconButton
-                variant="warning"
-                onClick={() => onLanguageDeactivate(language)}
-                label="Deactivate language"
-                icon={<StopFill />}
-              />
-            ) : null}
-
-            {isDisabledOrPending ? (
-              <IconButton
-                variant="success"
-                onClick={() => onLanguageActivate(language)}
-                label="Activate language"
-                icon={<PlayFill />}
-              />
-            ) : null}
-
-            {!isActive && !isDeleted && (
-              <IconButton
-                variant="danger"
-                onClick={() => onLanguageDelete(language)}
-                label="Delete language"
-                icon={<TrashFill />}
-              />
-            )}
-
-            <IconButton
-              size="sm"
-              variant="info"
-              onClick={() => setShow((isShown) => !isShown)}
-              label="Show/Hide language details"
-              icon={!show ? <PlusCircle /> : <DashCircle />}
-            />
-          </ButtonGroup>
+          <LanguageActions
+            {...props}
+            show={show}
+            onToggleDetails={() => setShow((isShown) => !isShown)}
+          />
         </td>
       </tr>
 
