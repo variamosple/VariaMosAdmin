@@ -69,7 +69,7 @@ npm run playwright:run:real     # end-to-end tests, real services (Docker)
   ```bash
   npm run check-arch
   ```
-- **Dead code** (knip):
+- **Dead code** (knip; the CI fails on any unused file, export or dependency):
   ```bash
   npm run find-deadcode
   ```
