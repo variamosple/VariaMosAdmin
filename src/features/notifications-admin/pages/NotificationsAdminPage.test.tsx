@@ -256,6 +256,37 @@ describe("NotificationsAdminPage Component Tests", () => {
     ).not.toBeInTheDocument();
   });
 
+  it.each([
+    [
+      "the message of an error",
+      new Error("Connection reset"),
+      "Connection reset",
+    ],
+    [
+      "a fallback text for another value",
+      "not an error",
+      "An unexpected error occurred.",
+    ],
+  ])("shows %s when the dispatch throws", async (_, thrown, shown) => {
+    vi.mocked(dispatchNotification).mockRejectedValue(thrown);
+    render(<NotificationsAdminPage />);
+
+    await userEvent.type(
+      await screen.findByLabelText("Notification Title"),
+      "Maintenance",
+    );
+    await userEvent.type(
+      screen.getByLabelText("Message Body"),
+      "Platform offline tonight.",
+    );
+    await userEvent.click(screen.getByRole("button", { name: /Dispatch/i }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Send to 2 accounts" }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(shown);
+  });
+
   describe("key of the message (EV-99)", () => {
     const failed = () =>
       new ResponseModel<void>("dispatchNotification").withError(

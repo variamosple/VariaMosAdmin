@@ -208,10 +208,12 @@ const NotificationsAdminPageComponent: FC = () => {
         });
       }
     } catch (error) {
-      const err = error as Error;
       setFeedback({
         type: "danger",
-        message: err.message || "An unexpected error occurred.",
+        message:
+          error instanceof Error && error.message !== ""
+            ? error.message
+            : "An unexpected error occurred.",
       });
     } finally {
       setSubmitting(false);

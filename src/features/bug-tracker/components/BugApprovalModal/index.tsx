@@ -130,8 +130,11 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
       );
       onHide();
     } catch (err) {
-      const error = err as Error;
-      setModalError(error.message || "Failed to approve bug");
+      setModalError(
+        err instanceof Error && err.message !== ""
+          ? err.message
+          : "Failed to approve bug",
+      );
       setPendingApproval(null);
     } finally {
       setIsApproving(false);
@@ -152,8 +155,11 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
         setAttachments((prev) => [...prev, data]);
       }
     } catch (err) {
-      const error = err as Error;
-      setModalError(error.message || "Upload error");
+      setModalError(
+        err instanceof Error && err.message !== ""
+          ? err.message
+          : "Upload error",
+      );
     } finally {
       setIsUploading(false);
       e.target.value = ""; // reset file input
@@ -171,8 +177,11 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
         setAttachments((prev) => prev.filter((att) => att.id !== attachmentId));
       }
     } catch (err) {
-      const error = err as Error;
-      setModalError(error.message || "Deletion error");
+      setModalError(
+        err instanceof Error && err.message !== ""
+          ? err.message
+          : "Deletion error",
+      );
     }
   };
 

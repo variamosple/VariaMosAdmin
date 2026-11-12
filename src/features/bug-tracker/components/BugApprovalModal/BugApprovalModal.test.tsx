@@ -4,6 +4,7 @@ import "@testing-library/jest-dom/vitest";
 import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { server } from "@/shared/tests/mocks/server";
+import * as BugRepository from "../../api/BugRepository";
 import type { Bug } from "../../domain/Bug";
 import { BugApprovalModal } from "./index";
 
@@ -358,5 +359,84 @@ describe("BugApprovalModal Component", () => {
     ).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
+  });
+
+  it("shows the message of an approval that threw", async () => {
+    mockOnConfirmApprove.mockRejectedValueOnce(new Error("Approval refused"));
+
+    render(
+      <BugApprovalModal
+        show={true}
+        bug={sampleBug}
+        onHide={mockOnHide}
+        onConfirmApprove={mockOnConfirmApprove}
+        repos={sampleRepos}
+        categories={sampleCategories}
+      />,
+    );
+
+    fireEvent.submit(
+      screen.getByRole("button", { name: "Approve & Send to GitHub" }),
+    );
+    const user = userEvent.setup();
+    await user.click(
+      await screen.findByRole("button", { name: "Publish to GitHub" }),
+    );
+
+    expect(await screen.findByText("Approval refused")).toBeInTheDocument();
+    expect(mockOnHide).not.toHaveBeenCalled();
+  });
+
+  it("shows a fallback text when an upload throws something else than an error", async () => {
+    const uploadSpy = vi
+      .spyOn(BugRepository, "uploadAttachment")
+      .mockRejectedValueOnce("not an error");
+
+    render(
+      <BugApprovalModal
+        show={true}
+        bug={sampleBug}
+        onHide={mockOnHide}
+        onConfirmApprove={mockOnConfirmApprove}
+        repos={sampleRepos}
+        categories={sampleCategories}
+      />,
+    );
+
+    const file = new File(["foo"], "att2.png", { type: "image/png" });
+    const user = userEvent.setup();
+    await user.upload(screen.getByLabelText(/Add attachment/i), file);
+
+    expect(await screen.findByText("Upload error")).toBeInTheDocument();
+    uploadSpy.mockRestore();
+  });
+
+  it("shows the message of a deletion that threw", async () => {
+    const deleteSpy = vi
+      .spyOn(BugRepository, "deleteAttachment")
+      .mockRejectedValueOnce(new Error("Disk full"));
+
+    render(
+      <BugApprovalModal
+        show={true}
+        bug={sampleBug}
+        onHide={mockOnHide}
+        onConfirmApprove={mockOnConfirmApprove}
+        repos={sampleRepos}
+        categories={sampleCategories}
+      />,
+    );
+
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: "Delete attachment att1.jpg" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /^Delete attachment$/ }),
+    );
+
+    expect(await screen.findByText("Disk full")).toBeInTheDocument();
+    expect(screen.getByText("att1.jpg (image/jpeg)")).toBeInTheDocument();
+    deleteSpy.mockRestore();
   });
 });
