@@ -14,6 +14,69 @@ import type {
   ConfigurationValue,
 } from "../domain/Entity/Configuration";
 
+/** What a save did: the keys saved, those refused and why. */
+interface SaveOutcome {
+  saved: string[];
+  savedAnnouncements: {
+    key: string;
+    announcement?: ConfigurationAnnouncement;
+  }[];
+  failures: Record<string, string>;
+  /** The refused edits, kept on screen over the values loaded again. */
+  keptEdits: Record<string, ConfigurationValue>;
+}
+
+// One request per key, in order; a refusal does not stop the others
+const saveEach = async (configs: Configuration[]): Promise<SaveOutcome> => {
+  const outcome: SaveOutcome = {
+    saved: [],
+    savedAnnouncements: [],
+    failures: {},
+    keptEdits: {},
+  };
+  for (const { key, value } of configs) {
+    try {
+      const response = await updateConfiguration(key, value);
+      if (response.errorCode) {
+        outcome.failures[key] =
+          response.message ?? `Failed to update configuration '${key}'.`;
+      } else {
+        outcome.saved.push(key);
+        outcome.savedAnnouncements.push({
+          key,
+          announcement: response.data?.announcement,
+        });
+      }
+    } catch (err) {
+      outcome.failures[key] = err instanceof Error ? err.message : "";
+    }
+    if (key in outcome.failures) outcome.keptEdits[key] = value;
+  }
+  return outcome;
+};
+
+const saveToastOf = ({ saved, failures }: SaveOutcome) => {
+  const refused = Object.keys(failures);
+  if (refused.length === 0) {
+    return {
+      title: "Configurations saved",
+      message: `Successfully saved ${saved.length} configuration(s).`,
+      variant: "success" as const,
+    };
+  }
+  const refusalText = (key: string) => `${key} (${failures[key]})`;
+  return {
+    title: `${refused.length} of ${saved.length + refused.length} configuration(s) not saved`,
+    message: [
+      saved.length > 0 ? `Saved: ${saved.join(", ")}.` : "",
+      `Not saved: ${refused.map(refusalText).join(", ")}.`,
+    ]
+      .filter(Boolean)
+      .join(" "),
+    variant: "danger" as const,
+  };
+};
+
 export const useConfigurationList = () => {
   const [originalConfigs, setOriginalConfigs] = useState<Configuration[]>([]);
   const [localConfigs, setLocalConfigs] = useState<Configuration[]>([]);
@@ -104,63 +167,16 @@ export const useConfigurationList = () => {
   const saveChanges = async (): Promise<ChangeAnnouncement | null> => {
     if (modifiedKeys.length === 0) return null;
     setIsUpdating(true);
-
-    const saved: string[] = [];
-    const savedAnnouncements: {
-      key: string;
-      announcement?: ConfigurationAnnouncement;
-    }[] = [];
-    const failures: Record<string, string> = {};
-    const keptEdits: Record<string, ConfigurationValue> = {};
-
-    for (const key of modifiedKeys) {
-      const localConfig = localConfigs.find((c) => c.key === key);
-      if (!localConfig) continue;
-
-      try {
-        const response = await updateConfiguration(key, localConfig.value);
-        if (!response.errorCode) {
-          saved.push(key);
-          savedAnnouncements.push({
-            key,
-            announcement: response.data?.announcement,
-          });
-        } else {
-          failures[key] =
-            response.message ?? `Failed to update configuration '${key}'.`;
-        }
-      } catch (err) {
-        failures[key] = err instanceof Error ? err.message : "";
-      }
-      if (key in failures) keptEdits[key] = localConfig.value;
-    }
-
+    const modified = modifiedKeys.flatMap((key) =>
+      localConfigs.filter((c) => c.key === key).slice(0, 1),
+    );
+    const outcome = await saveEach(modified);
     setIsUpdating(false);
-    setSaveFailures(failures);
-
-    const refused = Object.keys(failures);
-    const refusalText = (key: string) => `${key} (${failures[key]})`;
-    if (refused.length > 0) {
-      pushToast({
-        title: `${refused.length} of ${saved.length + refused.length} configuration(s) not saved`,
-        message: [
-          saved.length > 0 ? `Saved: ${saved.join(", ")}.` : "",
-          `Not saved: ${refused.map(refusalText).join(", ")}.`,
-        ]
-          .filter(Boolean)
-          .join(" "),
-        variant: "danger",
-      });
-    } else {
-      pushToast({
-        title: "Configurations saved",
-        message: `Successfully saved ${saved.length} configuration(s).`,
-        variant: "success",
-      });
-    }
+    setSaveFailures(outcome.failures);
+    pushToast(saveToastOf(outcome));
     // What the server now holds, with the refused edits kept on top
-    await loadData(keptEdits);
-    return announcementOfChanges(savedAnnouncements);
+    await loadData(outcome.keptEdits);
+    return announcementOfChanges(outcome.savedAnnouncements);
   };
 
   return {
