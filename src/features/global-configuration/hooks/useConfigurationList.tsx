@@ -131,7 +131,7 @@ export const useConfigurationList = () => {
             response.message ?? `Failed to update configuration '${key}'.`;
         }
       } catch (err) {
-        failures[key] = (err as Error).message;
+        failures[key] = err instanceof Error ? err.message : "";
       }
       if (key in failures) keptEdits[key] = localConfig.value;
     }

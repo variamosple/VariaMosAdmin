@@ -229,6 +229,41 @@
           }
         }
       }
+    },
+    {
+      "includes": [
+        "src/features/auth/api/AuthRepository.ts",
+        "src/features/auth/domain/PasswordPolicy.ts",
+        "src/features/auth/pages/LoginPage/index.tsx",
+        "src/features/bug-tracker/components/BugFormModal/index.tsx",
+        "src/features/bug-tracker/components/BugPriorityBadge/index.tsx",
+        "src/features/bug-tracker/domain/BugComponent.ts",
+        "src/features/bug-tracker/hooks/useBugList.tsx",
+        "src/features/bug-tracker/pages/BugListPage.tsx",
+        "src/features/metrics-dashboard/components/Chart/GeoChart.tsx",
+        "src/features/metrics-dashboard/components/Chart/LineChart.tsx",
+        "src/features/metrics-dashboard/context/ChartContext.tsx",
+        "src/features/metrics-dashboard/hooks/useChart.ts",
+        "src/features/metrics-dashboard/hooks/useGeoChartData.ts",
+        "src/features/metrics-dashboard/hooks/useLineChartData.ts",
+        "src/features/model-management/components/ModelFormModal/index.tsx",
+        "src/features/notifications-admin/components/UserRecipientPicker/index.tsx",
+        "src/features/notifications-admin/pages/NotificationsAdminPage.tsx",
+        "src/features/project-management/components/ProjectFormModal/index.tsx",
+        "src/index.tsx",
+        "src/shared/api/errorMessages.ts",
+        "src/shared/components/LoadProblem/index.tsx",
+        "src/shared/hoc/WithPagination.tsx",
+        "src/shared/hooks/useListenOutsideClicks.tsx",
+        "src/shared/infrastructure/StaleFilesReload.ts"
+      ],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noUnsafeTypeAssertion": "info"
+          }
+        }
+      }
     }
   ]
 }
