@@ -227,6 +227,37 @@ describe("useConfigurationList Hook Tests", () => {
     expect(result.current.configurations[0].value).toBe("New Site Name");
   });
 
+  it("keeps the edits whose save threw, with the message of the error", async () => {
+    const { result } = renderHook(() => useConfigurationList());
+
+    await waitFor(() => {
+      expect(result.current.configurations).toHaveLength(2);
+    });
+
+    act(() => {
+      result.current.setLocalValue("general.site_name", "New Site Name");
+      result.current.setLocalValue("security.password.min_length", 16);
+    });
+
+    updateConfigurationSpy
+      .mockRejectedValueOnce(new Error("Network down"))
+      .mockRejectedValueOnce("not an error");
+
+    await act(async () => {
+      await result.current.saveChanges();
+    });
+
+    // A thrown value that is not an Error leaves an empty reason
+    expect(result.current.saveFailures).toEqual({
+      "general.site_name": "Network down",
+      "security.password.min_length": "",
+    });
+    expect(result.current.modifiedKeys).toEqual([
+      "general.site_name",
+      "security.password.min_length",
+    ]);
+  });
+
   it("forgets the refusals on discard", async () => {
     const { result } = renderHook(() => useConfigurationList());
     await waitFor(() => {
