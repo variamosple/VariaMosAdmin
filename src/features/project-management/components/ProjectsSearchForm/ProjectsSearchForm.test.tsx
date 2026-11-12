@@ -57,14 +57,12 @@ describe("ProjectSearchForm Component", () => {
     vi.advanceTimersByTime(500);
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalled();
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "My Project",
+        }),
+      );
     });
-
-    expect(mockOnSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: "My Project",
-      }),
-    );
   });
 
   it("handles dropdown change and triggers onSubmit", async () => {
@@ -86,14 +84,12 @@ describe("ProjectSearchForm Component", () => {
     vi.advanceTimersByTime(500);
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalled();
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isTemplate: true,
+        }),
+      );
     });
-
-    expect(mockOnSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isTemplate: true,
-      }),
-    );
   });
 
   it("calls onSearchReset and resets fields when reset button is clicked", async () => {

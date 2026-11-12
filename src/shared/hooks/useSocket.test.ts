@@ -79,7 +79,9 @@ describe("useSocket Hook", () => {
 
     expect(conn).toBeUndefined();
     expect(result.current.socket).toBeNull();
-    expect(spyConsole).toHaveBeenCalled();
+    expect(spyConsole).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Socket connection failed" }),
+    );
     spyConsole.mockRestore();
   });
 });

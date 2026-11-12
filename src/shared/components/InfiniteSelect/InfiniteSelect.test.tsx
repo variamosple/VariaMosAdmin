@@ -153,6 +153,6 @@ describe("InfiniteSelect Component", () => {
     const trigger = screen.getByRole("button");
     await user.click(trigger);
 
-    expect(mockLastOptionRef).toHaveBeenCalled();
+    expect(mockLastOptionRef).toHaveBeenCalledWith(expect.any(HTMLElement));
   });
 });

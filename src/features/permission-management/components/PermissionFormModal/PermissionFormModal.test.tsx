@@ -122,7 +122,7 @@ describe("PermissionFormModal Component", () => {
     const cancelBtn = screen.getByRole("button", { name: /cancel/i });
     await user.click(cancelBtn);
 
-    expect(mockOnClose).toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalledOnce();
   });
 
   it("refuses a name outside 'resource::action', under the field (EV-32)", async () => {

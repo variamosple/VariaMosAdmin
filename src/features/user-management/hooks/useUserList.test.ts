@@ -110,7 +110,9 @@ describe("useUserList Hook", () => {
     expect(result.current.currentPage).toBe(1);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.totalPages).toBe(1);
-    expect(mockLoadData).toHaveBeenCalled();
+    expect(mockLoadData).toHaveBeenCalledWith(
+      expect.objectContaining({ pageNumber: 1 }),
+    );
   });
 
   it("should handle onUserResetLink", () => {

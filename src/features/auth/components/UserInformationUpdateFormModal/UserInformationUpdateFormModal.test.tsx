@@ -176,7 +176,7 @@ describe("PersonalInformationUpdateForModal Component", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /cancel/i }));
-    expect(mockOnClose).toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalledOnce();
   });
 
   it("shows spinner on submit button when isLoading is true", () => {

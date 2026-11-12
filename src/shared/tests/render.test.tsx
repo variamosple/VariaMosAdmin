@@ -63,7 +63,7 @@ describe("renderWithUser", () => {
       await user.click(screen.getByRole("button"));
 
       expect(screen.getByRole("button")).toHaveTextContent("Clicked 1 times");
-      expect(advanceTimers).toHaveBeenCalled();
+      expect(advanceTimers).toHaveBeenCalledWith(expect.any(Number));
     } finally {
       vi.useRealTimers();
     }

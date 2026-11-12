@@ -149,7 +149,7 @@ describe("ModelFormModal Component", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /cancel/i }));
-    expect(mockOnClose).toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalledOnce();
   });
 
   it("disables buttons and renders spinner when isLoading is true", () => {

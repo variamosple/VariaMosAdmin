@@ -482,6 +482,6 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     const closeButtons = screen.getAllByRole("button", { name: /Close/i });
     await user.click(itemAt(closeButtons, 0));
 
-    expect(onHideMock).toHaveBeenCalled();
+    expect(onHideMock).toHaveBeenCalledOnce();
   });
 });

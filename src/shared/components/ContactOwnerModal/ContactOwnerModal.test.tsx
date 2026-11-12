@@ -116,6 +116,6 @@ describe("ContactOwnerModal - Behavior & Anti-Fragile Tests", () => {
     const cancelBtn = screen.getByRole("button", { name: /Cancel/i });
     await user.click(cancelBtn);
 
-    expect(onCloseMock).toHaveBeenCalled();
+    expect(onCloseMock).toHaveBeenCalledOnce();
   });
 });
