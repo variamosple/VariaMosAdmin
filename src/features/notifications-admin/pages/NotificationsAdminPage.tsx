@@ -1,6 +1,8 @@
 import { withPageVisit } from "@variamosple/variamos-components";
 import {
   type FC,
+  type ReactNode,
+  type SubmitEvent,
   useCallback,
   useEffect,
   useId,
@@ -36,48 +38,21 @@ const ROLE_PAGE_SIZE = 100;
 
 const accounts = (count: number) => `${count} account${count === 1 ? "" : "s"}`;
 
-const NotificationsAdminPageComponent: FC = () => {
-  const broadcastId = useId();
-  const roleAudienceId = useId();
-  const usersAudienceId = useId();
-  usePageTitle("Notifications");
-  const [audience, setAudience] = useState<"broadcast" | "role" | "users">(
-    "broadcast",
-  );
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+type Audience = "broadcast" | "role" | "users";
 
+type Feedback = { type: "success" | "danger"; message: string };
+
+// Users are searched on the server by the picker (UX-03); roles are few,
+// they are loaded once
+const useRoleOptions = () => {
   const [roles, setRoles] = useState<Role[]>([]);
-  const [rolesTotal, setRolesTotal] = useState(0);
-  const [loadingRoles, setLoadingRoles] = useState(false);
-  const [rolesError, setRolesError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Submission state
-  const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{
-    type: "success" | "danger";
-    message: string;
-  } | null>(null);
-  // The dispatch waiting for its confirmation, with the number it reaches
-  const [pending, setPending] = useState<{
-    request: DispatchNotificationRequest;
-    count: number;
-  } | null>(null);
-
-  // The key of the last message whose dispatch failed (EV-99). Sent again
-  // unchanged, the message keeps it: the accounts it already reached get
-  // nothing twice. A changed message is a new one, with a new key.
-  const failedDispatchRef = useRef<{ content: string; key: string } | null>(
-    null,
-  );
-
-  // Users are searched on the server by the picker (UX-03); roles are
-  // few, they are loaded once
-  const loadRoles = useCallback(async () => {
-    setLoadingRoles(true);
-    setRolesError(null);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     const response = await queryRoles(
       new RolesFilter({
         pageNumber: 1,
@@ -85,74 +60,113 @@ const NotificationsAdminPageComponent: FC = () => {
       }),
     );
     if (response.errorCode) {
-      setRolesError(response.message || "The roles could not be loaded.");
+      setError(response.message || "The roles could not be loaded.");
     } else {
       setRoles(response.data ?? []);
-      setRolesTotal(response.totalCount ?? response.data?.length ?? 0);
+      setTotal(response.totalCount ?? response.data?.length ?? 0);
     }
-    setLoadingRoles(false);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-    void loadRoles();
-  }, [loadRoles]);
+    void load();
+  }, [load]);
 
-  const handleRoleToggle = (roleName: string) => {
+  return { roles, total, loading, error, load };
+};
+
+// The notification being written: its audience, recipients and text
+const useNotificationDraft = () => {
+  const [audience, setAudience] = useState<Audience>("broadcast");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+
+  const toggleRole = (roleName: string) => {
     setSelectedRoles((prev) =>
       prev.includes(roleName)
         ? prev.filter((r) => r !== roleName)
         : [...prev, roleName],
     );
   };
-
   const addUser = (user: User) => {
     setSelectedUsers((prev) =>
       prev.some((selected) => selected.id === user.id) ? prev : [...prev, user],
     );
   };
-
   const removeUser = (userId: string) => {
     setSelectedUsers((prev) => prev.filter((user) => user.id !== userId));
   };
+  // The form is emptied once the notification is sent
+  const clear = () => {
+    setTitle("");
+    setBody("");
+    setSelectedRoles([]);
+    setSelectedUsers([]);
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  return {
+    audience,
+    setAudience,
+    text: { title, setTitle, body, setBody },
+    selectedRoles,
+    toggleRole,
+    selectedUsers,
+    addUser,
+    removeUser,
+    clear,
+  };
+};
+
+type Draft = ReturnType<typeof useNotificationDraft>;
+
+const invalidDraft = (draft: Draft): string | null => {
+  if (!draft.text.title.trim() || !draft.text.body.trim()) {
+    return "Please provide both title and message body.";
+  }
+  if (draft.audience === "role" && draft.selectedRoles.length === 0) {
+    return "Please select at least one role.";
+  }
+  if (draft.audience === "users" && draft.selectedUsers.length === 0) {
+    return "Please select at least one user.";
+  }
+  return null;
+};
+
+const requestOf = (draft: Draft): DispatchNotificationRequest => ({
+  audience: draft.audience,
+  title: draft.text.title,
+  body: draft.text.body,
+  roles: draft.audience === "role" ? draft.selectedRoles : undefined,
+  userIds:
+    draft.audience === "users"
+      ? draft.selectedUsers.flatMap((user) => (user.id ? [user.id] : []))
+      : undefined,
+});
+
+// Counting the recipients, then sending once confirmed
+const useDispatch = (draft: Draft) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  // The dispatch waiting for its confirmation, with the number it reaches
+  const [pending, setPending] = useState<{
+    request: DispatchNotificationRequest;
+    count: number;
+  } | null>(null);
+  // The key of the last message whose dispatch failed (EV-99). Sent again
+  // unchanged, the message keeps it: the accounts it already reached get
+  // nothing twice. A changed message is a new one, with a new key.
+  const failedDispatchRef = useRef<{ content: string; key: string } | null>(
+    null,
+  );
+
+  const review = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setFeedback(null);
-
-    if (!title.trim() || !body.trim()) {
-      setFeedback({
-        type: "danger",
-        message: "Please provide both title and message body.",
-      });
-      return;
-    }
-
-    if (audience === "role" && selectedRoles.length === 0) {
-      setFeedback({
-        type: "danger",
-        message: "Please select at least one role.",
-      });
-      return;
-    }
-
-    if (audience === "users" && selectedUsers.length === 0) {
-      setFeedback({
-        type: "danger",
-        message: "Please select at least one user.",
-      });
-      return;
-    }
-
-    const request: DispatchNotificationRequest = {
-      audience,
-      title,
-      body,
-      roles: audience === "role" ? selectedRoles : undefined,
-      userIds:
-        audience === "users"
-          ? selectedUsers.flatMap((user) => (user.id ? [user.id] : []))
-          : undefined,
-    };
+    const invalid = invalidDraft(draft);
+    setFeedback(invalid ? { type: "danger", message: invalid } : null);
+    if (invalid) return;
+    const request = requestOf(draft);
     // Nothing is sent before the confirmation shows how many accounts
     // the notification reaches (UX-02)
     setSubmitting(true);
@@ -163,16 +177,14 @@ const NotificationsAdminPageComponent: FC = () => {
         type: "danger",
         message: counted.message || "Failed to count the recipients.",
       });
-      return;
-    }
-    if (counted.data.count === 0) {
+    } else if (counted.data.count === 0) {
       setFeedback({
         type: "danger",
         message: "No active account matches this audience.",
       });
-      return;
+    } else {
+      setPending({ request, count: counted.data.count });
     }
-    setPending({ request, count: counted.data.count });
   };
 
   const keyOf = (request: DispatchNotificationRequest) => {
@@ -191,24 +203,19 @@ const NotificationsAdminPageComponent: FC = () => {
         ...request,
         eventId: keyOf(request),
       });
-
       // Success has no error code; older servers answered errorCode 0
-      if (!response.errorCode) {
+      if (response.errorCode) {
+        setFeedback({
+          type: "danger",
+          message: response.message || "Failed to dispatch notifications.",
+        });
+      } else {
         failedDispatchRef.current = null;
         setFeedback({
           type: "success",
           message: "Notifications dispatched successfully!",
         });
-        // Reset form inputs
-        setTitle("");
-        setBody("");
-        setSelectedRoles([]);
-        setSelectedUsers([]);
-      } else {
-        setFeedback({
-          type: "danger",
-          message: response.message || "Failed to dispatch notifications.",
-        });
+        draft.clear();
       }
     } catch (error) {
       setFeedback({
@@ -222,6 +229,150 @@ const NotificationsAdminPageComponent: FC = () => {
       setSubmitting(false);
     }
   };
+
+  return {
+    submitting,
+    feedback,
+    setFeedback,
+    pending,
+    setPending,
+    review,
+    send,
+  };
+};
+
+const AUDIENCE_CHOICES: { value: Audience; icon: ReactNode; label: string }[] =
+  [
+    {
+      value: "broadcast",
+      icon: <Megaphone size={16} />,
+      label: "Broadcast (All Users)",
+    },
+    { value: "role", icon: <People size={16} />, label: "By Role" },
+    { value: "users", icon: <Person size={16} />, label: "Specific Users" },
+  ];
+
+const AudienceChoice: FC<{ draft: Draft }> = ({ draft }) => {
+  const audienceId = useId();
+  return (
+    <Form.Group className="mb-4">
+      <Form.Label className="fw-semibold">Audience Selection</Form.Label>
+      <div className="d-flex gap-3 flex-wrap">
+        {AUDIENCE_CHOICES.map(({ value, icon, label }) => (
+          <Form.Check
+            key={value}
+            type="radio"
+            id={`${audienceId}-${value}`}
+            label={
+              <span className="d-flex align-items-center gap-1">
+                {icon} {label}
+              </span>
+            }
+            name="audience"
+            checked={draft.audience === value}
+            onChange={() => draft.setAudience(value)}
+            className="border rounded p-2 px-3 bg-light"
+          />
+        ))}
+      </div>
+    </Form.Group>
+  );
+};
+
+const AudienceTargets: FC<{
+  draft: Draft;
+  roles: ReturnType<typeof useRoleOptions>;
+}> = ({ draft, roles }) => (
+  <>
+    {draft.audience === "role" && (
+      <Card className="mb-4 bg-light border-light">
+        <Card.Body>
+          <h6 className="fw-bold mb-2">Select Roles</h6>
+          <RoleCheckboxList
+            roles={roles.roles}
+            total={roles.total}
+            loading={roles.loading}
+            error={roles.error}
+            onRetry={roles.load}
+            selected={draft.selectedRoles}
+            onToggle={draft.toggleRole}
+          />
+        </Card.Body>
+      </Card>
+    )}
+
+    {draft.audience === "users" && (
+      <Card className="mb-4 bg-light border-light">
+        <Card.Body>
+          <h6 className="fw-bold mb-2">Select Target Users</h6>
+          <UserRecipientPicker
+            selected={draft.selectedUsers}
+            onAdd={draft.addUser}
+            onRemove={draft.removeUser}
+          />
+        </Card.Body>
+      </Card>
+    )}
+  </>
+);
+
+const MessageFields: FC<{ draft: Draft }> = ({ draft }) => {
+  const { title, setTitle, body, setBody } = draft.text;
+  return (
+    <>
+      <Form.Group className="mb-3" controlId="notification-title">
+        <Form.Label className="fw-semibold">Notification Title</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="e.g., Scheduled Maintenance Alert"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+      </Form.Group>
+
+      <Form.Group className="mb-4" controlId="notification-body">
+        <Form.Label className="fw-semibold">Message Body</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={4}
+          placeholder="Enter the notification message here..."
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          required
+        />
+      </Form.Group>
+    </>
+  );
+};
+
+const SubmitButton: FC<{ submitting: boolean }> = ({ submitting }) => (
+  <div className="d-grid justify-content-end">
+    <Button
+      type="submit"
+      variant="primary"
+      disabled={submitting}
+      className="px-4 py-2 fw-semibold d-flex align-items-center gap-2"
+    >
+      {submitting ? (
+        <>
+          <Spinner size="sm" animation="border" /> Sending...
+        </>
+      ) : (
+        <>
+          <Send size={16} /> Dispatch Notification
+        </>
+      )}
+    </Button>
+  </div>
+);
+
+const NotificationsAdminPageComponent: FC = () => {
+  usePageTitle("Notifications");
+  const draft = useNotificationDraft();
+  const roles = useRoleOptions();
+  const dispatch = useDispatch(draft);
+  const { feedback, pending } = dispatch;
 
   return (
     <Container className="py-4">
@@ -238,139 +389,26 @@ const NotificationsAdminPageComponent: FC = () => {
                 VariaMos platform.
               </p>
 
-              <Form onSubmit={handleSubmit} noValidate>
-                <Form.Group className="mb-4">
-                  <Form.Label className="fw-semibold">
-                    Audience Selection
-                  </Form.Label>
-                  <div className="d-flex gap-3 flex-wrap">
-                    <Form.Check
-                      type="radio"
-                      id={broadcastId}
-                      label={
-                        <span className="d-flex align-items-center gap-1">
-                          <Megaphone size={16} /> Broadcast (All Users)
-                        </span>
-                      }
-                      name="audience"
-                      checked={audience === "broadcast"}
-                      onChange={() => setAudience("broadcast")}
-                      className="border rounded p-2 px-3 bg-light"
-                    />
-                    <Form.Check
-                      type="radio"
-                      id={roleAudienceId}
-                      label={
-                        <span className="d-flex align-items-center gap-1">
-                          <People size={16} /> By Role
-                        </span>
-                      }
-                      name="audience"
-                      checked={audience === "role"}
-                      onChange={() => setAudience("role")}
-                      className="border rounded p-2 px-3 bg-light"
-                    />
-                    <Form.Check
-                      type="radio"
-                      id={usersAudienceId}
-                      label={
-                        <span className="d-flex align-items-center gap-1">
-                          <Person size={16} /> Specific Users
-                        </span>
-                      }
-                      name="audience"
-                      checked={audience === "users"}
-                      onChange={() => setAudience("users")}
-                      className="border rounded p-2 px-3 bg-light"
-                    />
-                  </div>
-                </Form.Group>
+              <Form onSubmit={dispatch.review} noValidate>
+                <AudienceChoice draft={draft} />
 
                 {/* Target Audience Selectors */}
-                {audience === "role" && (
-                  <Card className="mb-4 bg-light border-light">
-                    <Card.Body>
-                      <h6 className="fw-bold mb-2">Select Roles</h6>
-                      <RoleCheckboxList
-                        roles={roles}
-                        total={rolesTotal}
-                        loading={loadingRoles}
-                        error={rolesError}
-                        onRetry={loadRoles}
-                        selected={selectedRoles}
-                        onToggle={handleRoleToggle}
-                      />
-                    </Card.Body>
-                  </Card>
-                )}
+                <AudienceTargets draft={draft} roles={roles} />
 
-                {audience === "users" && (
-                  <Card className="mb-4 bg-light border-light">
-                    <Card.Body>
-                      <h6 className="fw-bold mb-2">Select Target Users</h6>
-                      <UserRecipientPicker
-                        selected={selectedUsers}
-                        onAdd={addUser}
-                        onRemove={removeUser}
-                      />
-                    </Card.Body>
-                  </Card>
-                )}
-
-                <Form.Group className="mb-3" controlId="notification-title">
-                  <Form.Label className="fw-semibold">
-                    Notification Title
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="e.g., Scheduled Maintenance Alert"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-4" controlId="notification-body">
-                  <Form.Label className="fw-semibold">Message Body</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={4}
-                    placeholder="Enter the notification message here..."
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    required
-                  />
-                </Form.Group>
+                <MessageFields draft={draft} />
 
                 {/* Next to the button, where the eye is after a click (UX-21) */}
                 {feedback ? (
                   <Alert
                     variant={feedback.type}
                     dismissible
-                    onClose={() => setFeedback(null)}
+                    onClose={() => dispatch.setFeedback(null)}
                   >
                     {feedback.message}
                   </Alert>
                 ) : null}
 
-                <div className="d-grid justify-content-end">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={submitting}
-                    className="px-4 py-2 fw-semibold d-flex align-items-center gap-2"
-                  >
-                    {submitting ? (
-                      <>
-                        <Spinner size="sm" animation="border" /> Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send size={16} /> Dispatch Notification
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <SubmitButton submitting={dispatch.submitting} />
               </Form>
             </Card.Body>
           </Card>
@@ -385,8 +423,8 @@ const NotificationsAdminPageComponent: FC = () => {
             : ""
         }
         confirmLabel={pending ? `Send to ${accounts(pending.count)}` : "Send"}
-        onConfirm={() => pending && send(pending.request)}
-        onCancel={() => setPending(null)}
+        onConfirm={() => pending && dispatch.send(pending.request)}
+        onCancel={() => dispatch.setPending(null)}
       />
     </Container>
   );

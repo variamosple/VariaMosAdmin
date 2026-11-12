@@ -1,6 +1,13 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
 import { QRCodeSVG } from "qrcode.react";
-import { type FC, useCallback, useEffect, useId, useState } from "react";
+import {
+  type FC,
+  type SubmitEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import {
   Alert,
   Badge,
@@ -67,23 +74,10 @@ const downloadCodes = (codes: string[]) => {
   URL.revokeObjectURL(link.href);
 };
 
-/**
- * Two-factor authentication of one's own account (SPC-2026-10-17-001):
- * turn it on with an authenticator app, keep the recovery codes, turn it
- * off with the password and a code.
- */
-export const TwoFactorCard: FC = () => {
-  const titleId = useId();
-  const stepFormId = useId();
+// The two-factor state of the account, read again after each change
+const useMfaStatus = () => {
   const [status, setStatus] = useState<MfaStatus | null>(null);
   const [load, setLoad] = useState<Load>("loading");
-  const [step, setStep] = useState<Step>({ name: "closed" });
-  const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
-  const [error, setError] = useState<string>();
-  const [isBusy, setIsBusy] = useState(false);
-  const [isForgetting, setIsForgetting] = useState(false);
-  const [forgetMessage, setForgetMessage] = useState<string>();
 
   const refresh = useCallback(() => {
     void getMfaStatus().then((response) => {
@@ -105,6 +99,17 @@ export const TwoFactorCard: FC = () => {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  return { status, load, refresh, retry };
+};
+
+// The dialog: its step, what is typed, and the request under way
+const useMfaSteps = (refresh: () => void) => {
+  const [step, setStep] = useState<Step>({ name: "closed" });
+  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState<string>();
+  const [isBusy, setIsBusy] = useState(false);
 
   const open = (next: Step) => {
     setPassword("");
@@ -135,26 +140,47 @@ export const TwoFactorCard: FC = () => {
       .finally(() => setIsBusy(false));
   };
 
-  const onStart = (event: React.FormEvent) => {
+  const onStart = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     run(startMfaEnrollment(password), (enrollment) => {
       if (enrollment) open({ name: "scan", enrollment });
     });
   };
 
-  const onConfirm = (event: React.FormEvent) => {
+  const onConfirm = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     run(confirmMfaEnrollment(code.trim()), (result) => {
       open({ name: "codes", recoveryCodes: result?.recoveryCodes ?? [] });
     });
   };
 
-  const onDisable = (event: React.FormEvent) => {
+  const onDisable = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     run(disableMfa(password, code.trim()), () => close());
   };
 
-  const onForgetBrowsers = () => {
+  const fields = { password, setPassword, code, setCode };
+  return {
+    step,
+    fields,
+    error,
+    isBusy,
+    open,
+    close,
+    onStart,
+    onConfirm,
+    onDisable,
+  };
+};
+
+type MfaSteps = ReturnType<typeof useMfaSteps>;
+
+// Every browser that skips the code asks for it again
+const useForgetBrowsers = () => {
+  const [isForgetting, setIsForgetting] = useState(false);
+  const [forgetMessage, setForgetMessage] = useState<string>();
+
+  const forget = () => {
     setIsForgetting(true);
     void forgetTrustedDevices()
       .then((response) =>
@@ -167,69 +193,245 @@ export const TwoFactorCard: FC = () => {
       .finally(() => setIsForgetting(false));
   };
 
-  if (load === "refused") return null;
+  return { isForgetting, forgetMessage, forget };
+};
+
+interface MfaSummaryProps {
+  mfa: ReturnType<typeof useMfaStatus>;
+  steps: MfaSteps;
+}
+
+const MfaSummary: FC<MfaSummaryProps> = ({ mfa, steps }) => {
+  const { status, load } = mfa;
+  return (
+    <div className="d-flex justify-content-between align-items-center gap-2">
+      <div>
+        <Card.Title className="mb-1">
+          Two-factor authentication{" "}
+          {status ? (
+            <Badge bg={status.enabled ? "success" : "secondary"}>
+              {status.enabled ? "On" : "Off"}
+            </Badge>
+          ) : null}
+        </Card.Title>
+        <Card.Text className="text-muted mb-0">
+          {statusText(status, load)}
+        </Card.Text>
+      </div>
+      {load === "failed" && (
+        <Button variant="outline-secondary" size="sm" onClick={mfa.retry}>
+          Try again
+        </Button>
+      )}
+      {status?.available && status.enabled ? (
+        <Button
+          variant="outline-danger"
+          size="sm"
+          onClick={() => steps.open({ name: "disable" })}
+        >
+          Turn off
+        </Button>
+      ) : null}
+      {status?.available && !status.enabled ? (
+        <Button size="sm" onClick={() => steps.open({ name: "password" })}>
+          Turn on
+        </Button>
+      ) : null}
+    </div>
+  );
+};
+
+const ForgetBrowsers: FC = () => {
+  const { isForgetting, forgetMessage, forget } = useForgetBrowsers();
+  return (
+    <div className="mt-2 d-flex flex-wrap align-items-center gap-2">
+      <Button
+        variant="link"
+        size="sm"
+        className="p-0"
+        onClick={forget}
+        disabled={isForgetting}
+      >
+        Ask for the code again on all my browsers
+      </Button>
+      {forgetMessage ? (
+        <span className="small text-muted" role="status">
+          {forgetMessage}
+        </span>
+      ) : null}
+    </div>
+  );
+};
+
+interface StepProps {
+  formId: string;
+  steps: MfaSteps;
+}
+
+const PasswordStep: FC<StepProps> = ({ formId, steps }) => (
+  <Form id={formId} onSubmit={steps.onStart}>
+    <Form.Group controlId="mfa-password">
+      <Form.Label>Confirm your password</Form.Label>
+      <Form.Control
+        type="password"
+        autoComplete="current-password"
+        value={steps.fields.password}
+        onChange={(e) => steps.fields.setPassword(e.target.value)}
+        required
+      />
+    </Form.Group>
+  </Form>
+);
+
+const ScanStep: FC<StepProps & { enrollment: MfaEnrollment }> = ({
+  formId,
+  steps,
+  enrollment,
+}) => (
+  <Form id={formId} onSubmit={steps.onConfirm}>
+    <p>
+      Scan this QR code with an authenticator app (Google Authenticator,
+      Microsoft Authenticator, Aegis, 2FAS…), then type the code it shows.
+    </p>
+    <div className="d-flex justify-content-center bg-white p-3 mb-2">
+      <QRCodeSVG
+        value={enrollment.otpauthUri}
+        size={192}
+        title="QR code of the authenticator app"
+      />
+    </div>
+    <p className="small text-muted text-break">
+      Cannot scan it? Type this key in the app:{" "}
+      <code data-testid="mfa-secret">{enrollment.secret}</code>
+    </p>
+    <Form.Group controlId="mfa-code">
+      <Form.Label>Code from the app</Form.Label>
+      <Form.Control
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        maxLength={6}
+        value={steps.fields.code}
+        onChange={(e) => steps.fields.setCode(e.target.value)}
+        required
+      />
+    </Form.Group>
+  </Form>
+);
+
+const CodesStep: FC<{ recoveryCodes: string[] }> = ({ recoveryCodes }) => (
+  <>
+    <Alert variant="warning">
+      Two-factor authentication is on. Save these recovery codes now: they will
+      not be shown again. Each one lets you sign in once if you lose your phone.
+    </Alert>
+    <ul
+      className="list-unstyled font-monospace row row-cols-2 mb-3"
+      data-testid="recovery-codes"
+    >
+      {recoveryCodes.map((recoveryCode) => (
+        <li key={recoveryCode} className="col">
+          {recoveryCode}
+        </li>
+      ))}
+    </ul>
+    <Button
+      variant="outline-primary"
+      onClick={() => downloadCodes(recoveryCodes)}
+    >
+      Download
+    </Button>
+  </>
+);
+
+const DisableStep: FC<StepProps> = ({ formId, steps }) => (
+  <Form id={formId} onSubmit={steps.onDisable}>
+    <Form.Group controlId="mfa-disable-password" className="mb-2">
+      <Form.Label>Password</Form.Label>
+      <Form.Control
+        type="password"
+        autoComplete="current-password"
+        value={steps.fields.password}
+        onChange={(e) => steps.fields.setPassword(e.target.value)}
+        required
+      />
+    </Form.Group>
+    <Form.Group controlId="mfa-disable-code">
+      <Form.Label>Code from the app, or a recovery code</Form.Label>
+      <Form.Control
+        autoComplete="one-time-code"
+        maxLength={32}
+        value={steps.fields.code}
+        onChange={(e) => steps.fields.setCode(e.target.value)}
+        required
+      />
+    </Form.Group>
+  </Form>
+);
+
+const StepBody: FC<StepProps> = ({ formId, steps }) => {
+  const { step } = steps;
+  switch (step.name) {
+    case "password":
+      return <PasswordStep formId={formId} steps={steps} />;
+    case "scan":
+      return (
+        <ScanStep formId={formId} steps={steps} enrollment={step.enrollment} />
+      );
+    case "codes":
+      return <CodesStep recoveryCodes={step.recoveryCodes} />;
+    case "disable":
+      return <DisableStep formId={formId} steps={steps} />;
+    default:
+      return null;
+  }
+};
+
+const StepButton: FC<StepProps> = ({ formId, steps }) => {
+  const { step, isBusy } = steps;
+  if (step.name === "codes") {
+    return <Button onClick={steps.close}>I have saved them</Button>;
+  }
+  return (
+    <Button
+      type="submit"
+      form={formId}
+      variant={step.name === "disable" ? "danger" : "primary"}
+      disabled={isBusy}
+    >
+      {isBusy ? (
+        <Spinner animation="border" size="sm" />
+      ) : (
+        submitLabelOf(step.name)
+      )}
+    </Button>
+  );
+};
+
+/**
+ * Two-factor authentication of one's own account (SPC-2026-10-17-001):
+ * turn it on with an authenticator app, keep the recovery codes, turn it
+ * off with the password and a code.
+ */
+export const TwoFactorCard: FC = () => {
+  const titleId = useId();
+  const stepFormId = useId();
+  const mfa = useMfaStatus();
+  const steps = useMfaSteps(mfa.refresh);
+  const { step } = steps;
+
+  if (mfa.load === "refused") return null;
 
   return (
     <Card className="mt-3">
       <Card.Body>
-        <div className="d-flex justify-content-between align-items-center gap-2">
-          <div>
-            <Card.Title className="mb-1">
-              Two-factor authentication{" "}
-              {status ? (
-                <Badge bg={status.enabled ? "success" : "secondary"}>
-                  {status.enabled ? "On" : "Off"}
-                </Badge>
-              ) : null}
-            </Card.Title>
-            <Card.Text className="text-muted mb-0">
-              {statusText(status, load)}
-            </Card.Text>
-          </div>
-          {load === "failed" && (
-            <Button variant="outline-secondary" size="sm" onClick={retry}>
-              Try again
-            </Button>
-          )}
-          {status?.available && status.enabled ? (
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={() => open({ name: "disable" })}
-            >
-              Turn off
-            </Button>
-          ) : null}
-          {status?.available && !status.enabled ? (
-            <Button size="sm" onClick={() => open({ name: "password" })}>
-              Turn on
-            </Button>
-          ) : null}
-        </div>
-        {status?.enabled ? (
-          <div className="mt-2 d-flex flex-wrap align-items-center gap-2">
-            <Button
-              variant="link"
-              size="sm"
-              className="p-0"
-              onClick={onForgetBrowsers}
-              disabled={isForgetting}
-            >
-              Ask for the code again on all my browsers
-            </Button>
-            {forgetMessage ? (
-              <span className="small text-muted" role="status">
-                {forgetMessage}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
+        <MfaSummary mfa={mfa} steps={steps} />
+        {mfa.status?.enabled ? <ForgetBrowsers /> : null}
       </Card.Body>
 
       <Modal
         aria-labelledby={titleId}
         show={step.name !== "closed"}
-        onHide={step.name === "codes" ? undefined : close}
+        onHide={step.name === "codes" ? undefined : steps.close}
         backdrop={step.name === "codes" ? "static" : true}
         centered
       >
@@ -237,127 +439,16 @@ export const TwoFactorCard: FC = () => {
           <Modal.Title id={titleId}>Two-factor authentication</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {step.name === "password" && (
-            <Form id={stepFormId} onSubmit={onStart}>
-              <Form.Group controlId="mfa-password">
-                <Form.Label>Confirm your password</Form.Label>
-                <Form.Control
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </Form.Group>
-            </Form>
-          )}
+          <StepBody formId={stepFormId} steps={steps} />
 
-          {step.name === "scan" && (
-            <Form id={stepFormId} onSubmit={onConfirm}>
-              <p>
-                Scan this QR code with an authenticator app (Google
-                Authenticator, Microsoft Authenticator, Aegis, 2FAS…), then type
-                the code it shows.
-              </p>
-              <div className="d-flex justify-content-center bg-white p-3 mb-2">
-                <QRCodeSVG
-                  value={step.enrollment.otpauthUri}
-                  size={192}
-                  title="QR code of the authenticator app"
-                />
-              </div>
-              <p className="small text-muted text-break">
-                Cannot scan it? Type this key in the app:{" "}
-                <code data-testid="mfa-secret">{step.enrollment.secret}</code>
-              </p>
-              <Form.Group controlId="mfa-code">
-                <Form.Label>Code from the app</Form.Label>
-                <Form.Control
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={6}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  required
-                />
-              </Form.Group>
-            </Form>
-          )}
-
-          {step.name === "codes" && (
-            <>
-              <Alert variant="warning">
-                Two-factor authentication is on. Save these recovery codes now:
-                they will not be shown again. Each one lets you sign in once if
-                you lose your phone.
-              </Alert>
-              <ul
-                className="list-unstyled font-monospace row row-cols-2 mb-3"
-                data-testid="recovery-codes"
-              >
-                {step.recoveryCodes.map((recoveryCode) => (
-                  <li key={recoveryCode} className="col">
-                    {recoveryCode}
-                  </li>
-                ))}
-              </ul>
-              <Button
-                variant="outline-primary"
-                onClick={() => downloadCodes(step.recoveryCodes)}
-              >
-                Download
-              </Button>
-            </>
-          )}
-
-          {step.name === "disable" && (
-            <Form id={stepFormId} onSubmit={onDisable}>
-              <Form.Group controlId="mfa-disable-password" className="mb-2">
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </Form.Group>
-              <Form.Group controlId="mfa-disable-code">
-                <Form.Label>Code from the app, or a recovery code</Form.Label>
-                <Form.Control
-                  autoComplete="one-time-code"
-                  maxLength={32}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  required
-                />
-              </Form.Group>
-            </Form>
-          )}
-
-          {error ? (
+          {steps.error ? (
             <Alert variant="danger" className="mt-3 mb-0">
-              {error}
+              {steps.error}
             </Alert>
           ) : null}
         </Modal.Body>
         <Modal.Footer>
-          {step.name === "codes" ? (
-            <Button onClick={close}>I have saved them</Button>
-          ) : (
-            <Button
-              type="submit"
-              form={stepFormId}
-              variant={step.name === "disable" ? "danger" : "primary"}
-              disabled={isBusy}
-            >
-              {isBusy ? (
-                <Spinner animation="border" size="sm" />
-              ) : (
-                submitLabelOf(step.name)
-              )}
-            </Button>
-          )}
+          <StepButton formId={stepFormId} steps={steps} />
         </Modal.Footer>
       </Modal>
     </Card>

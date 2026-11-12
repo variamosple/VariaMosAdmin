@@ -87,52 +87,16 @@
     },
     {
       "includes": [
-        "src/features/auth/components/TwoFactorCard/index.tsx",
-        "src/features/bug-tracker/components/BugList/BugRow.tsx",
-        "src/features/bug-tracker/pages/BugListPage.tsx",
-        "src/features/global-configuration/components/AnnounceChangesModal.tsx",
-        "src/features/global-configuration/components/ConfigurationFormModal.tsx",
-        "src/features/global-configuration/components/ScheduleChangeModal.tsx",
-        "src/features/global-configuration/hooks/useConfigurationList.tsx",
-        "src/features/global-configuration/pages/ConfigurationListPage.tsx",
-        "src/features/microservices/components/MicroServiceConfigModal.tsx",
-        "src/features/microservices/components/MicroServiceList/MicroserviceRow.tsx",
-        "src/features/notifications-admin/pages/NotificationsAdminPage.tsx"
-      ],
-      "linter": {
-        "rules": {
-          "complexity": {
-            "noExcessiveCognitiveComplexity": {
-              "level": "info",
-              "options": {
-                "maxAllowedComplexity": 15
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "includes": [
         "src/features/auth/components/TimeZoneSetting/index.tsx",
-        "src/features/auth/components/TwoFactorCard/index.tsx",
         "src/features/auth/pages/LoginPage/index.tsx",
         "src/features/auth/pages/MyAccountPage.tsx",
         "src/features/bug-tracker/components/BugApprovalModal/index.tsx",
         "src/features/bug-tracker/components/BugFormModal/index.tsx",
         "src/features/bug-tracker/components/BugSearchForm/index.tsx",
         "src/features/bug-tracker/hooks/useBugList.tsx",
-        "src/features/bug-tracker/pages/BugListPage.tsx",
-        "src/features/global-configuration/components/AnnounceChangesModal.tsx",
-        "src/features/global-configuration/components/ConfigurationFormModal.tsx",
-        "src/features/global-configuration/components/ScheduleChangeModal.tsx",
-        "src/features/global-configuration/hooks/useConfigurationList.tsx",
-        "src/features/global-configuration/pages/ConfigurationListPage.tsx",
         "src/features/language-management/components/LanguageList/LanguageRow.tsx",
         "src/features/language-management/hooks/useLanguageList.tsx",
         "src/features/language-management/pages/LanguageListPage/index.tsx",
-        "src/features/microservices/components/MicroServiceConfigModal.tsx",
-        "src/features/microservices/components/MicroServiceList/MicroserviceRow.tsx",
         "src/features/microservices/hooks/useMicroServiceList.tsx",
         "src/features/microservices/pages/MicroServiceListPage/index.tsx",
         "src/features/model-management/components/ModelFormModal/index.tsx",
@@ -141,7 +105,6 @@
         "src/features/model-management/hooks/useModelList.tsx",
         "src/features/model-management/pages/ModelListPage/index.tsx",
         "src/features/notifications-admin/components/UserRecipientPicker/index.tsx",
-        "src/features/notifications-admin/pages/NotificationsAdminPage.tsx",
         "src/features/permission-management/hooks/usePermissionList.tsx",
         "src/features/project-management/hooks/useProjectsList.tsx",
         "src/features/role-management/hooks/useRoleList.tsx",
@@ -158,22 +121,6 @@
               "level": "info",
               "options": {
                 "maxLines": 80,
-                "skipBlankLines": true
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "includes": ["src/features/bug-tracker/pages/BugListPage.tsx"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noExcessiveLinesPerFile": {
-              "level": "info",
-              "options": {
-                "maxLines": 400,
                 "skipBlankLines": true
               }
             }

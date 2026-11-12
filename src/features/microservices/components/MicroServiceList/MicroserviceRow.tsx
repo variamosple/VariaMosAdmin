@@ -52,49 +52,38 @@ const FOLLOW_UP_BADGES: Record<
   failed: { bg: "danger", label: "NOT BACK" },
 };
 
-export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
-  microService,
-  onMicroServiceStart,
-  onMicroServiceRestart,
-  onMicroServiceStop,
-  onMicroServiceConfigure,
-  followUp,
-}) => {
-  const [show, setShow] = useState(false);
+// The health check, or the container state when there is none
+const statusOf = (microService: MicroService): HealthStatus =>
+  microService.health?.status ||
+  (microService.state === "running" ? "UP" : "DOWN");
+
+// Actions follow the container, not the health check: a running service
+// that answers badly, or was never checked, can be restarted or stopped
+const isRunningOf = (microService: MicroService, isUp: boolean) =>
+  microService.containers?.length
+    ? microService.containers.some((c) => c.state === "running")
+    : microService.state === "running" || isUp;
+
+const portOf = (targetUrl?: string): string => {
+  if (!targetUrl) return "—";
+  try {
+    return new URL(targetUrl).port || "80";
+  } catch {
+    return "—";
+  }
+};
+
+const containerCountOf = (microService: MicroService, isRunning: boolean) =>
+  microService.replicasCount ??
+  (microService.containers?.length || (isRunning ? 1 : 0));
+
+// The logs of the service, followed while they are shown
+const useServiceLogs = (microService: MicroService, show: boolean) => {
   const { buffer: logs, addToBuffer: addToLogsBuffer } = useLineBuffer(40960);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   const { connect, socket } = useSocket(watchMicroserviceLogs, false);
-
-  const status =
-    microService.health?.status ||
-    (microService.state === "running" ? "UP" : "DOWN");
-  const isUp = status === "UP";
-  // Actions follow the container, not the health check: a running service
-  // that answers badly, or was never checked, can be restarted or stopped
-  const isRunning = microService.containers?.length
-    ? microService.containers.some((c) => c.state === "running")
-    : microService.state === "running" || isUp;
-  const badge = followUp
-    ? FOLLOW_UP_BADGES[followUp.step]
-    : (STATUS_BADGES[status] ?? STATUS_BADGES.DOWN);
-  // No second action on a service while one is under way
-  const isBusy = followUp !== undefined && followUp.step !== "failed";
-  const hasUptime = Boolean(microService.uptimeSummary?.history?.length);
-
-  let port = "—";
-  if (microService.targetUrl) {
-    try {
-      port = new URL(microService.targetUrl).port || "80";
-    } catch {
-      port = "—";
-    }
-  }
-
-  const containerCount =
-    microService.replicasCount ??
-    (microService.containers?.length || (isRunning ? 1 : 0));
 
   useEffect(() => {
     if (!show) {
@@ -155,19 +144,145 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
     }
   }, [show, socket]);
 
+  return { logs, isLoading };
+};
+
+type ServiceActionsProps = Omit<MicroServiceRowProps, "followUp"> & {
+  isRunning: boolean;
+  isBusy: boolean;
+  showLogs: boolean;
+  onToggleLogs: () => void;
+};
+
+const ServiceActions: FC<ServiceActionsProps> = (props) => {
+  const { microService, isRunning, isBusy, showLogs } = props;
+  return (
+    <ButtonGroup size="sm">
+      {!isRunning && (
+        <IconButton
+          variant="success"
+          onClick={() => props.onMicroServiceStart(microService)}
+          label="Start Service"
+          disabled={isBusy}
+          icon={<PlayFill />}
+        />
+      )}
+
+      {isRunning ? (
+        <>
+          <IconButton
+            variant="warning"
+            onClick={() => props.onMicroServiceRestart(microService)}
+            label="Restart Service"
+            disabled={isBusy}
+            icon={<ArrowClockwise />}
+          />
+
+          <IconButton
+            variant="danger"
+            onClick={() => props.onMicroServiceStop(microService)}
+            label="Stop Service"
+            disabled={isBusy}
+            icon={<StopFill />}
+          />
+        </>
+      ) : null}
+
+      <IconButton
+        variant="outline-secondary"
+        onClick={() => props.onMicroServiceConfigure?.(microService)}
+        label="Configure service parameters"
+        icon={<Sliders size={14} />}
+      />
+
+      <IconButton
+        variant="outline-secondary"
+        size="sm"
+        onClick={props.onToggleLogs}
+        label="Show/Hide logs"
+        icon={showLogs ? <DashCircle size={14} /> : <Search size={14} />}
+      />
+    </ButtonGroup>
+  );
+};
+
+const ServiceName: FC<{ microService: MicroService }> = ({ microService }) => (
+  <td>
+    <div className="fw-semibold">
+      {microService.displayName || microService.serviceName}
+    </div>
+    {microService.serviceName &&
+      microService.displayName &&
+      microService.serviceName !== microService.displayName && (
+        <small className="text-muted">{microService.serviceName}</small>
+      )}
+  </td>
+);
+
+const UptimeCell: FC<{ microService: MicroService }> = ({ microService }) => {
+  const hasUptime = Boolean(microService.uptimeSummary?.history?.length);
+  return (
+    <td style={{ minWidth: "120px" }}>
+      <div className="small fw-semibold mb-1">
+        {hasUptime && microService.uptimeSummary
+          ? `${microService.uptimeSummary.uptime30dPercentage.toFixed(1)}%`
+          : "—"}
+      </div>
+      <UptimeBar
+        compact
+        history={microService.uptimeSummary?.history}
+        uptimePercentage={
+          microService.uptimeSummary?.uptime30dPercentage ?? 100
+        }
+        days={30}
+      />
+    </td>
+  );
+};
+
+// The logs under the row: a spinner until the first line comes
+const LogsRow: FC<{ isLoading: boolean; logs: string }> = ({
+  isLoading,
+  logs,
+}) =>
+  isLoading ? (
+    <tr>
+      <td colSpan={7}>
+        <div className="w-100 text-center my-3">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      </td>
+    </tr>
+  ) : (
+    <tr>
+      <td colSpan={7} className="p-0">
+        <div className="p-2 bg-dark">
+          <MicroServiceLogs isLoading={isLoading} logs={logs} />
+        </div>
+      </td>
+    </tr>
+  );
+
+export const MicroServiceRowComponent: FC<MicroServiceRowProps> = (props) => {
+  const { microService, followUp } = props;
+  const [show, setShow] = useState(false);
+  const { logs, isLoading } = useServiceLogs(microService, show);
+
+  const status = statusOf(microService);
+  const isUp = status === "UP";
+  const isRunning = isRunningOf(microService, isUp);
+  const badge = followUp
+    ? FOLLOW_UP_BADGES[followUp.step]
+    : (STATUS_BADGES[status] ?? STATUS_BADGES.DOWN);
+  // No second action on a service while one is under way
+  const isBusy = followUp !== undefined && followUp.step !== "failed";
+  const port = portOf(microService.targetUrl);
+  const containerCount = containerCountOf(microService, isRunning);
+
   return (
     <>
       <tr>
-        <td>
-          <div className="fw-semibold">
-            {microService.displayName || microService.serviceName}
-          </div>
-          {microService.serviceName &&
-            microService.displayName &&
-            microService.serviceName !== microService.displayName && (
-              <small className="text-muted">{microService.serviceName}</small>
-            )}
-        </td>
+        <ServiceName microService={microService} />
 
         <td>
           <Badge
@@ -190,27 +305,13 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
             : "—"}
         </td>
 
-        <td style={{ minWidth: "120px" }}>
-          <div className="small fw-semibold mb-1">
-            {hasUptime && microService.uptimeSummary
-              ? `${microService.uptimeSummary.uptime30dPercentage.toFixed(1)}%`
-              : "—"}
-          </div>
-          <UptimeBar
-            compact
-            history={microService.uptimeSummary?.history}
-            uptimePercentage={
-              microService.uptimeSummary?.uptime30dPercentage ?? 100
-            }
-            days={30}
-          />
-        </td>
+        <UptimeCell microService={microService} />
 
         <td>
-          {port !== "—" ? (
-            <code>{port}</code>
-          ) : (
+          {port === "—" ? (
             <span className="text-muted">—</span>
+          ) : (
+            <code>{port}</code>
           )}
         </td>
 
@@ -221,74 +322,17 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = ({
         </td>
 
         <td className="text-center">
-          <ButtonGroup size="sm">
-            {!isRunning && (
-              <IconButton
-                variant="success"
-                onClick={() => onMicroServiceStart(microService)}
-                label="Start Service"
-                disabled={isBusy}
-                icon={<PlayFill />}
-              />
-            )}
-
-            {isRunning ? (
-              <>
-                <IconButton
-                  variant="warning"
-                  onClick={() => onMicroServiceRestart(microService)}
-                  label="Restart Service"
-                  disabled={isBusy}
-                  icon={<ArrowClockwise />}
-                />
-
-                <IconButton
-                  variant="danger"
-                  onClick={() => onMicroServiceStop(microService)}
-                  label="Stop Service"
-                  disabled={isBusy}
-                  icon={<StopFill />}
-                />
-              </>
-            ) : null}
-
-            <IconButton
-              variant="outline-secondary"
-              onClick={() => onMicroServiceConfigure?.(microService)}
-              label="Configure service parameters"
-              icon={<Sliders size={14} />}
-            />
-
-            <IconButton
-              variant="outline-secondary"
-              size="sm"
-              onClick={() => setShow((isShown) => !isShown)}
-              label="Show/Hide logs"
-              icon={!show ? <Search size={14} /> : <DashCircle size={14} />}
-            />
-          </ButtonGroup>
+          <ServiceActions
+            {...props}
+            isRunning={isRunning}
+            isBusy={isBusy}
+            showLogs={show}
+            onToggleLogs={() => setShow((isShown) => !isShown)}
+          />
         </td>
       </tr>
 
-      {show && isLoading ? (
-        <tr>
-          <td colSpan={7}>
-            <div className="w-100 text-center my-3">
-              <Spinner animation="border" variant="primary" />
-            </div>
-          </td>
-        </tr>
-      ) : null}
-
-      {show && !isLoading && (
-        <tr>
-          <td colSpan={7} className="p-0">
-            <div className="p-2 bg-dark">
-              <MicroServiceLogs isLoading={isLoading} logs={logs} />
-            </div>
-          </td>
-        </tr>
-      )}
+      {show ? <LogsRow isLoading={isLoading} logs={logs} /> : null}
     </>
   );
 };
