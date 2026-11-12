@@ -5,7 +5,7 @@ export const useGeoChartData = (metric: Metric) => {
   const [activeFilter, setFilter] = useState(metric.defaultFilter);
 
   const filterOptions: string[] = useMemo(
-    () => Object.keys(metric.data || {}) || [],
+    () => Object.keys(metric.data ?? {}),
     [metric.data],
   );
 

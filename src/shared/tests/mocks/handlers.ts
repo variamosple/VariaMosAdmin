@@ -371,7 +371,7 @@ export const handlers = [
       const body = (await request.json()) as LanguageRequestBody;
       return HttpResponse.json({
         data: {
-          id: body.id || 1,
+          id: body.id ?? 1,
           name: body.name || "English",
           type: body.type || "DSL",
           stateAccept: body.stateAccept || "ACTIVE",

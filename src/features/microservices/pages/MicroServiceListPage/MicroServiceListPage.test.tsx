@@ -47,7 +47,7 @@ vi.mock("@variamosple/variamos-components", async () => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
-            setData(response.data || []);
+            setData(response.data ?? []);
             setTotalPages(1);
           }
           setIsLoading(false);

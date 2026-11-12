@@ -64,7 +64,7 @@ export const useLineChartData = (metric: Metric) => {
       (acc: Map<string, Record<string, number>>, item) => {
         const key = String(item[activeFilter]);
 
-        const element = acc.get(key) || {};
+        const element = acc.get(key) ?? {};
         element[String(item[labelKey])] = item.count;
 
         acc.set(key, element);
