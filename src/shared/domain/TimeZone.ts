@@ -126,8 +126,14 @@ export type TypedTime =
 export const instantsOfInput = (input: string, zone: string): TypedTime => {
   const match = INPUT.exec(input);
   if (!match) return { kind: "invalid" };
-  const [year, month, day, hour, minute] = match.slice(1).map(Number);
-  const wall = { year, month, day, hour, minute };
+  // The pattern has the five groups, so none of them is undefined
+  const wall = {
+    year: Number(match[1]),
+    month: Number(match[2]),
+    day: Number(match[3]),
+    hour: Number(match[4]),
+    minute: Number(match[5]),
+  };
   const wallMs = asUtcMs(wall);
   // Date.UTC rolls 31 February over: such a day does not exist
   if (inputOf(new Date(wallMs), "UTC") !== input) return { kind: "invalid" };
@@ -141,7 +147,9 @@ export const instantsOfInput = (input: string, zone: string): TypedTime => {
     .map((offset) => new Date(wallMs - offset * MINUTE_MS))
     .filter((instant) => inputOf(instant, zone) === input)
     .sort((a, b) => a.getTime() - b.getTime());
-  if (instants.length === 0) return { kind: "gap" };
-  if (instants.length === 1) return { kind: "single", instant: instants[0] };
-  return { kind: "ambiguous", instants: [instants[0], instants[1]] };
+  // Two offsets at most, so two instants at most
+  const [first, second] = instants;
+  if (!first) return { kind: "gap" };
+  if (!second) return { kind: "single", instant: first };
+  return { kind: "ambiguous", instants: [first, second] };
 };

@@ -84,7 +84,7 @@ describe("AxiosConfig Interceptors", () => {
 
     await expect(testClient.get("/secure")).rejects.toThrow();
     // The server text is not put in the address, the current page is
-    const target = navigateMock.mock.calls[0][0] as string;
+    const target = navigateMock.mock.calls[0]?.[0] as string;
     expect(target).not.toContain("Token expired");
     const params = new URLSearchParams(target.split("?")[1]);
     expect(params.get("reason")).toBe("session-expired");

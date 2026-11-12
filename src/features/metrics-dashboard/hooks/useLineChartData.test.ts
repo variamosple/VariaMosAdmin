@@ -35,13 +35,13 @@ describe("useLineChartData hook", () => {
     expect(rows).toHaveLength(2); // Two unique dates
 
     // Verify first row: Date and count values for Linux, Windows
-    expect(rows[0][0]).toBeInstanceOf(Date);
-    expect(rows[0][1]).toBe(10); // Linux count on 2026-01-01
-    expect(rows[0][2]).toBe(5); // Windows count on 2026-01-01
+    expect(rows[0]?.[0]).toBeInstanceOf(Date);
+    expect(rows[0]?.[1]).toBe(10); // Linux count on 2026-01-01
+    expect(rows[0]?.[2]).toBe(5); // Windows count on 2026-01-01
 
     // Verify second row
-    expect(rows[1][1]).toBe(8); // Linux count on 2026-01-02
-    expect(rows[1][2]).toBe(0); // Windows count on 2026-01-02 (no record)
+    expect(rows[1]?.[1]).toBe(8); // Linux count on 2026-01-02
+    expect(rows[1]?.[2]).toBe(0); // Windows count on 2026-01-02 (no record)
   });
 
   it("should update data mapping when filter is changed", () => {

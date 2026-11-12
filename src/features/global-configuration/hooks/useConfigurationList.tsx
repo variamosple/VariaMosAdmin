@@ -41,11 +41,10 @@ export const useConfigurationList = () => {
               JSON.stringify(response.data),
             );
             setLocalConfigs(
-              local.map((config) =>
-                config.key in keptEdits
-                  ? { ...config, value: keptEdits[config.key] }
-                  : config,
-              ),
+              local.map((config) => {
+                const kept = keptEdits[config.key];
+                return kept === undefined ? config : { ...config, value: kept };
+              }),
             );
           } else {
             pushToast({

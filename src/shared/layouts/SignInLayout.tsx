@@ -13,13 +13,12 @@ export const SignInLayout: FC<SignInLayoutProps> = ({ children }) => {
   const { navigate } = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      const timeout = setTimeout(() => navigate(AppConfig.HOME_PAGE), 300);
+    if (!isAuthenticated) return;
+    const timeout = setTimeout(() => navigate(AppConfig.HOME_PAGE), 300);
 
-      return () => {
-        clearTimeout(timeout);
-      };
-    }
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [isAuthenticated, navigate]);
 
   return (

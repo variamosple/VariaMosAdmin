@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
+import { itemAt } from "@/shared/tests/itemAt";
 import { server } from "@/shared/tests/mocks/server";
 import { renderPage } from "@/shared/tests/render";
 import { lastOf } from "../../../../shared/tests/lastOf";
@@ -127,7 +128,7 @@ describe("ProjectListPage Integration", () => {
 
     // Click edit on the first project
     const editButtons = screen.getAllByTitle("Edit project");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     // Modal should be visible
     expect(screen.getByText("Edit a Project")).toBeInTheDocument();
@@ -157,7 +158,7 @@ describe("ProjectListPage Integration", () => {
 
     // Click delete on the second project
     const deleteButtons = screen.getAllByTitle("Delete project");
-    await user.click(deleteButtons[1]);
+    await user.click(itemAt(deleteButtons, 1));
 
     // Delete confirmation modal should be visible
     expect(screen.getByTestId("delete-confirm-modal")).toBeInTheDocument();

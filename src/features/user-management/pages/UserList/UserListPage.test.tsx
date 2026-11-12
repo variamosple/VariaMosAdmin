@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
+import { itemAt } from "@/shared/tests/itemAt";
 import { server } from "@/shared/tests/mocks/server";
 import { renderPage } from "@/shared/tests/render";
 import { UserListPage } from "./index";
@@ -210,7 +211,7 @@ describe("UserListPage Integration", () => {
     const resetKeyButtons = screen.getAllByTitle(
       "Generate password reset link",
     );
-    await user.click(resetKeyButtons[0]);
+    await user.click(itemAt(resetKeyButtons, 0));
 
     // Modal should show
     expect(screen.getByText("Generate Recovery Link")).toBeInTheDocument();
@@ -243,7 +244,7 @@ describe("UserListPage Integration", () => {
 
     // Click disable button (Ban icon)
     const disableButtons = screen.getAllByTitle("Disable user");
-    await user.click(disableButtons[0]);
+    await user.click(itemAt(disableButtons, 0));
 
     const dialog = screen.getByRole("dialog", { name: "Disable user" });
 
@@ -264,7 +265,7 @@ describe("UserListPage Integration", () => {
 
     // Click enable button (CheckCircle icon - only available on disabled users)
     const enableButtons = screen.getAllByTitle("Enable user");
-    await user.click(enableButtons[0]);
+    await user.click(itemAt(enableButtons, 0));
 
     const dialog = screen.getByRole("dialog", { name: "Enable user" });
 
@@ -285,7 +286,7 @@ describe("UserListPage Integration", () => {
 
     // Click delete user button (Trash icon)
     const deleteButtons = screen.getAllByTitle("Delete user");
-    await user.click(deleteButtons[0]);
+    await user.click(itemAt(deleteButtons, 0));
 
     const dialog = screen.getByRole("dialog", { name: "Delete user" });
 

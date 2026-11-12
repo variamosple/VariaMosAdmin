@@ -25,8 +25,7 @@ const LineChartComponent: FC = () => {
   // [ { date: "10/12", Series1: val1, Series2: val2 } ]
   const chartData = (() => {
     if (!rawData || rawData.length <= 1) return [];
-    const headers = rawData[0]; // ["Date", ...seriesKeys]
-    const rows = rawData.slice(1);
+    const [headers = [], ...rows] = rawData; // ["Date", ...seriesKeys]
     return rows.map((row) => {
       const item: Record<string, string | number> = {};
       row.forEach((val, idx) => {
@@ -49,10 +48,7 @@ const LineChartComponent: FC = () => {
     });
   })();
 
-  const seriesKeys = (() => {
-    if (!rawData || rawData.length === 0) return [];
-    return rawData[0].filter((h) => h !== "Date");
-  })();
+  const seriesKeys = (rawData?.[0] ?? []).filter((h) => h !== "Date");
 
   // Use a nice color list for different lines
   const colors = [

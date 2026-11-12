@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createUserMock } from "@/shared/tests/factories";
+import { itemAt } from "@/shared/tests/itemAt";
 import type { User } from "../../domain/Entity/User";
 import { UserList } from "./index";
 
@@ -97,7 +98,7 @@ describe("UserList Component", () => {
     );
 
     const detailButtons = screen.getAllByTitle("See user details");
-    await user.click(detailButtons[0]);
+    await user.click(itemAt(detailButtons, 0));
 
     expect(mockNavigate).toHaveBeenCalledWith("/users/1");
   });
@@ -160,7 +161,7 @@ describe("UserList Component", () => {
     );
 
     const deleteButtons = screen.getAllByTitle("Delete user");
-    await user.click(deleteButtons[0]);
+    await user.click(itemAt(deleteButtons, 0));
 
     expect(mockOnUserDelete).toHaveBeenCalledWith(mockUsers[0]);
   });

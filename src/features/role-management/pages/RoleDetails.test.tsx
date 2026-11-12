@@ -4,6 +4,7 @@ import "@testing-library/jest-dom/vitest";
 import { usePaginatedQuery } from "@variamosple/variamos-components";
 import { HttpResponse, http } from "msw";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { itemAt } from "@/shared/tests/itemAt";
 import { server } from "@/shared/tests/mocks/server";
 import { RoleDetailsPage } from "./RoleDetails";
 
@@ -264,7 +265,7 @@ describe("RoleDetailsPage Component", () => {
     expect(await screen.findByText("Admin Role")).toBeInTheDocument();
 
     // Trigger delete action for the first permission "READ_PRIVILEGES"
-    const deleteBtn = screen.getAllByTitle("Delete role permission")[0];
+    const deleteBtn = itemAt(screen.getAllByTitle("Delete role permission"), 0);
     await user.click(deleteBtn);
 
     // Confirmation modal should be visible

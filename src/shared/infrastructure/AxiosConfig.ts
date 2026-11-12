@@ -46,8 +46,10 @@ const PUBLIC_PATHS = new Set([
 ]);
 
 // The path of the hash route, without its query: "#/login?x=1" gives "/login"
-const currentRoutePath = () =>
-  window.location.hash.replace(/^#/, "").split("?")[0];
+const currentRoutePath = () => {
+  const [path = ""] = window.location.hash.replace(/^#/, "").split("?");
+  return path;
+};
 
 export const setupAxiosInterceptors = (
   axiosInstance: AxiosInstance,

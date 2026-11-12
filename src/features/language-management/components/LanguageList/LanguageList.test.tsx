@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { itemAt } from "@/shared/tests/itemAt";
 import type { Language } from "../../domain/Entity/Language";
 import { LanguageList } from "./index";
 
@@ -73,7 +74,7 @@ describe("LanguageList Component", () => {
     );
 
     const editButtons = screen.getAllByTitle("Edit language");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     expect(mockOnLanguageEdit).toHaveBeenCalledTimes(1);
     expect(mockOnLanguageEdit).toHaveBeenCalledWith(mockLanguages[0]);

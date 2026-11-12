@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
+import { itemAt } from "@/shared/tests/itemAt";
 import { UserRoleList } from "./index";
 
 vi.mock("@variamosple/variamos-components", async () => {
@@ -49,7 +50,7 @@ describe("UserRoleList Component", () => {
     );
 
     const deleteButtons = screen.getAllByTitle("Delete user role");
-    await user.click(deleteButtons[0]);
+    await user.click(itemAt(deleteButtons, 0));
 
     expect(mockOnRoleDelete).toHaveBeenCalledWith(mockRoles[0]);
   });

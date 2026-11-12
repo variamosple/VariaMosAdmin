@@ -142,12 +142,12 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0 || !bug.id) return;
+    const file = e.target.files?.[0];
+    if (!file || !bug.id) return;
     setIsUploading(true);
     setModalError(null);
     try {
-      const response = await uploadAttachment(bug.id, files[0]);
+      const response = await uploadAttachment(bug.id, file);
       if (response.errorCode) {
         setModalError(response.message || "Failed to upload attachment");
       } else if (response.data !== undefined) {

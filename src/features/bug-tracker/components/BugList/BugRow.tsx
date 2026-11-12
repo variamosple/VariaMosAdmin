@@ -31,6 +31,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
     bug.githubRepo && bug.gitIssueNumber
       ? `https://github.com/${bug.githubRepo}/issues/${bug.gitIssueNumber}`
       : undefined;
+  const firstAttachment = bug.attachments?.[0];
 
   return (
     <tr key={bug.id}>
@@ -110,9 +111,9 @@ export const BugRowComponent: FC<BugRowProps> = ({
 
       {activeTab !== "github" && (
         <td className="align-middle">
-          {bug.attachments && bug.attachments.length > 0 ? (
+          {firstAttachment ? (
             <a
-              href={attachmentUrl(bug.attachments[0].filePath)}
+              href={attachmentUrl(firstAttachment.filePath)}
               target="_blank"
               rel="noopener noreferrer"
             >

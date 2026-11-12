@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
+import { itemAt } from "@/shared/tests/itemAt";
 import { server } from "@/shared/tests/mocks/server";
 import type { AccessEntry, ActivityEntry } from "../domain/JournalEntry";
 import { JournalPage } from "./JournalPage";
@@ -102,7 +103,7 @@ describe("Journal page (T-24 lot 3)", () => {
     expect(screen.getByText("1 entry, newest first")).toBeInTheDocument();
     expect(requests.map((request) => request.route)).toEqual(["activity"]);
     // First page of fifty; no empty filter is sent
-    expect(Object.fromEntries(requests[0].params)).toEqual({
+    expect(Object.fromEntries(itemAt(requests, 0).params)).toEqual({
       pageNumber: "1",
       pageSize: "50",
     });
@@ -145,7 +146,7 @@ describe("Journal page (T-24 lot 3)", () => {
     await user.click(screen.getByRole("button", { name: "Search" }));
 
     await waitFor(() => expect(requests).toHaveLength(2));
-    expect(Object.fromEntries(requests[1].params)).toEqual({
+    expect(Object.fromEntries(itemAt(requests, 1).params)).toEqual({
       pageNumber: "1",
       pageSize: "50",
       user: "ana",
@@ -169,8 +170,8 @@ describe("Journal page (T-24 lot 3)", () => {
     await user.click(screen.getByRole("button", { name: "Search" }));
 
     await waitFor(() => expect(requests).toHaveLength(2));
-    expect(requests[1].params.get("action")).toBe("bug.attachment.delete");
-    expect(requests[1].params.get("entityType")).toBe("bug");
+    expect(requests[1]?.params.get("action")).toBe("bug.attachment.delete");
+    expect(requests[1]?.params.get("entityType")).toBe("bug");
   });
 
   it("sends the period as ISO dates", async () => {
@@ -183,7 +184,7 @@ describe("Journal page (T-24 lot 3)", () => {
     await user.click(screen.getByRole("button", { name: "Search" }));
 
     await waitFor(() => expect(requests).toHaveLength(2));
-    expect(requests[1].params.get("from")).toBe(
+    expect(requests[1]?.params.get("from")).toBe(
       new Date("2026-10-01T08:30").toISOString(),
     );
   });
@@ -197,7 +198,7 @@ describe("Journal page (T-24 lot 3)", () => {
     await user.click(screen.getByText("2"));
 
     await waitFor(() => expect(requests).toHaveLength(2));
-    expect(requests[1].params.get("pageNumber")).toBe("2");
+    expect(requests[1]?.params.get("pageNumber")).toBe("2");
   });
 
   it("reads the access journal when its tab is opened", async () => {
