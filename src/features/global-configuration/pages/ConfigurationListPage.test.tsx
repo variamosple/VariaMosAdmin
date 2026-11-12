@@ -124,7 +124,10 @@ describe("ConfigurationListPage (UX-14)", () => {
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     await waitFor(() =>
-      expect(ConfigurationRepository.updateConfiguration).toHaveBeenCalled(),
+      expect(ConfigurationRepository.updateConfiguration).toHaveBeenCalledWith(
+        "general.show_banner",
+        false,
+      ),
     );
   });
 

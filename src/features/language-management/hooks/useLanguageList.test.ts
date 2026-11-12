@@ -167,7 +167,9 @@ describe("useLanguageList Hook", () => {
     renderHook(() => useLanguageList(), { wrapper: MemoryRouter });
 
     await waitFor(() => {
-      expect(mockLoadData).toHaveBeenCalled();
+      expect(mockLoadData).toHaveBeenCalledWith(
+        expect.objectContaining({ pageNumber: 1 }),
+      );
     });
     expect(mockPushToast).not.toHaveBeenCalled();
   });

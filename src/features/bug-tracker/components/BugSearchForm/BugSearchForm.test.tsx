@@ -107,7 +107,9 @@ describe("BugSearchForm Component", () => {
 
     expect(nameInput).toHaveValue("");
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalled();
+      expect(mockOnSubmit).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search: "" }),
+      );
     });
   });
 

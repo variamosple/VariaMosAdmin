@@ -33,7 +33,7 @@ const GROUPS_BY_CATEGORY = new Map([
   ["env", "Environment Settings"],
 ]);
 
-export const groupNameOf = (config: Configuration): string =>
+const groupNameOf = (config: Configuration): string =>
   GROUPS_BY_PREFIX.find(([prefix]) => config.key.startsWith(prefix))?.[1] ??
   GROUPS_BY_CATEGORY.get(config.category) ??
   `${categoryLabel(config.category)} Settings`;

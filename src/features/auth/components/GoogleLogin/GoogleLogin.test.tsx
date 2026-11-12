@@ -78,8 +78,13 @@ describe("GoogleLogin Component", () => {
     // Fast-forward interval timer
     vi.advanceTimersByTime(100);
 
-    expect(mockInitialize).toHaveBeenCalled();
-    expect(mockRenderButton).toHaveBeenCalled();
+    expect(mockInitialize).toHaveBeenCalledWith(
+      expect.objectContaining({ client_id: AppConfig.GOOGLE.CLIENT_ID }),
+    );
+    expect(mockRenderButton).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      expect.objectContaining({ text: "signin_with" }),
+    );
   });
 
   it("stops waiting for the Google script when the page is left", () => {

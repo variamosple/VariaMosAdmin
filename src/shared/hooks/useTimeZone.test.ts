@@ -43,7 +43,7 @@ describe("useTimeZone (EV-115 lot C)", () => {
 
     const { result } = renderHook(() => useTimeZone());
 
-    await waitFor(() => expect(read).toHaveBeenCalled());
+    await waitFor(() => expect(read).toHaveBeenCalledOnce());
     expect(result.current.timeZone).toBe(browserTimeZone());
     expect(result.current.chosen).toBeNull();
   });

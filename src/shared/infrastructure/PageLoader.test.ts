@@ -28,7 +28,7 @@ describe("pageLoader", () => {
     pageLoader.load("https://app.example/variamos_admin/#/home");
 
     expect(location.hash).toBe("#/home");
-    expect(location.reload).toHaveBeenCalled();
+    expect(location.reload).toHaveBeenCalledOnce();
     expect(location.assign).not.toHaveBeenCalled();
   });
 

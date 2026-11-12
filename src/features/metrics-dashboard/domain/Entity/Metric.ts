@@ -3,7 +3,7 @@ export interface ChartDataItem {
   [key: string]: string | number;
 }
 
-export type GeoChartData = Record<string, [string, number][]>;
+type GeoChartData = Record<string, [string, number][]>;
 
 export type MetricData = ChartDataItem[] | GeoChartData;
 

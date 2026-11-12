@@ -91,6 +91,6 @@ describe("MfaCodeForm", () => {
 
     await user.click(screen.getByRole("button", { name: "Back to sign in" }));
 
-    expect(onCancel).toHaveBeenCalled();
+    expect(onCancel).toHaveBeenCalledOnce();
   });
 });

@@ -59,7 +59,7 @@ describe("AnnounceChangesModal (EV-115 lot A)", () => {
       screen.getByRole("button", { name: "Send to 230 accounts" }),
     );
 
-    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
     expect(dispatch).toHaveBeenCalledWith({
       audience: "broadcast",
       roles: undefined,

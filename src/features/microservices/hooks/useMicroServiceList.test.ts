@@ -99,6 +99,8 @@ describe("useMicroServiceList Hook", () => {
     const { result } = renderHook(() => useMicroServiceList(), {
       wrapper: MemoryRouter,
     });
+    // The reload, not the load of the first render
+    mockLoadData.mockClear();
 
     await act(async () => {
       await result.current.performMicroSerViceStart({
@@ -116,13 +118,17 @@ describe("useMicroServiceList Hook", () => {
     });
 
     expect(startMicroserviceSpy).toHaveBeenCalledWith("service-1");
-    expect(mockLoadData).toHaveBeenCalled();
+    expect(mockLoadData).toHaveBeenCalledWith(
+      expect.objectContaining({ pageNumber: 1 }),
+    );
   });
 
   it("should handle restartMicroservice successfully", async () => {
     const { result } = renderHook(() => useMicroServiceList(), {
       wrapper: MemoryRouter,
     });
+    // The reload, not the load of the first render
+    mockLoadData.mockClear();
 
     await act(async () => {
       await result.current.performMicroSerViceRestart({
@@ -140,13 +146,17 @@ describe("useMicroServiceList Hook", () => {
     });
 
     expect(restartMicroserviceSpy).toHaveBeenCalledWith("service-1");
-    expect(mockLoadData).toHaveBeenCalled();
+    expect(mockLoadData).toHaveBeenCalledWith(
+      expect.objectContaining({ pageNumber: 1 }),
+    );
   });
 
   it("should handle stopMicroservice successfully", async () => {
     const { result } = renderHook(() => useMicroServiceList(), {
       wrapper: MemoryRouter,
     });
+    // The reload, not the load of the first render
+    mockLoadData.mockClear();
 
     await act(async () => {
       await result.current.performMicroSerViceStop({
@@ -164,7 +174,9 @@ describe("useMicroServiceList Hook", () => {
     });
 
     expect(stopMicroserviceSpy).toHaveBeenCalledWith("service-1");
-    expect(mockLoadData).toHaveBeenCalled();
+    expect(mockLoadData).toHaveBeenCalledWith(
+      expect.objectContaining({ pageNumber: 1 }),
+    );
   });
 
   it("should call triggerMicroServicesCheck when refreshList(true) is invoked", async () => {
@@ -175,13 +187,17 @@ describe("useMicroServiceList Hook", () => {
     const { result } = renderHook(() => useMicroServiceList(), {
       wrapper: MemoryRouter,
     });
+    // The reload, not the load of the first render
+    mockLoadData.mockClear();
 
     await act(async () => {
       await result.current.refreshList(true);
     });
 
     expect(triggerCheckSpy).toHaveBeenCalledTimes(1);
-    expect(mockLoadData).toHaveBeenCalled();
+    expect(mockLoadData).toHaveBeenCalledWith(
+      expect.objectContaining({ pageNumber: 1 }),
+    );
 
     triggerCheckSpy.mockRestore();
   });

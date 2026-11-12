@@ -130,7 +130,7 @@ describe("LoginPage Page Component", () => {
     await user.click(screen.getByText("Continue as a Guest"));
 
     await waitFor(() => {
-      expect(mockSignInAsGuest).toHaveBeenCalled();
+      expect(mockSignInAsGuest).toHaveBeenCalledOnce();
     });
     expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
   });

@@ -196,7 +196,7 @@ describe("PasswordUpdateForm Component", () => {
     await user.type(screen.getByLabelText(/current password/i), "oldPassword");
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-    expect(mockOnClose).toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalledOnce();
     expect(
       (screen.getByLabelText(/current password/i) as HTMLInputElement).value,
     ).toBe("");

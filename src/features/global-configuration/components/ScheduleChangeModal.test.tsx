@@ -83,7 +83,7 @@ describe("ScheduleChangeModal (EV-115 lot B)", () => {
     ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Schedule" }));
 
-    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(PLANNED));
     expect(schedule).toHaveBeenCalledWith(
       "security.password.min_length",
       14,
@@ -171,7 +171,7 @@ describe("ScheduleChangeModal (EV-115 lot B)", () => {
         screen.getByRole("button", { name: "Save the planned change" }),
       );
 
-      await waitFor(() => expect(onSaved).toHaveBeenCalled());
+      await waitFor(() => expect(onSaved).toHaveBeenCalledWith(PLANNED));
       expect(ScheduledChangeRepository.rescheduleChange).toHaveBeenCalledWith(
         4,
         12,
