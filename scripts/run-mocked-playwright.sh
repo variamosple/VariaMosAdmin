@@ -45,7 +45,8 @@ bash ./scripts/playwright-test.sh --grep .mocked. "$@" || status=$?
 echo "Cleaning up Docker container..."
 docker stop $CONTAINER_NAME || true
 docker rm $CONTAINER_NAME || true
-docker image prune -f || true
+# No image prune: on a workstation it would also remove the dangling images
+# of other projects, and a CI runner is thrown away after the job.
 
 # Exit with Playwright status
 exit $status
