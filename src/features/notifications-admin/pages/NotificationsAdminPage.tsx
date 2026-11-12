@@ -59,7 +59,9 @@ const NotificationsAdminPageComponent: FC = () => {
   // The key of the last message whose dispatch failed (EV-99). Sent again
   // unchanged, the message keeps it: the accounts it already reached get
   // nothing twice. A changed message is a new one, with a new key.
-  const failedDispatch = useRef<{ content: string; key: string } | null>(null);
+  const failedDispatchRef = useRef<{ content: string; key: string } | null>(
+    null,
+  );
 
   // Users are searched on the server by the picker (UX-03); roles are
   // few, they are loaded once
@@ -162,10 +164,10 @@ const NotificationsAdminPageComponent: FC = () => {
 
   const keyOf = (request: DispatchNotificationRequest) => {
     const content = JSON.stringify(request);
-    if (failedDispatch.current?.content !== content) {
-      failedDispatch.current = { content, key: crypto.randomUUID() };
+    if (failedDispatchRef.current?.content !== content) {
+      failedDispatchRef.current = { content, key: crypto.randomUUID() };
     }
-    return failedDispatch.current.key;
+    return failedDispatchRef.current.key;
   };
 
   const send = async (request: DispatchNotificationRequest) => {
@@ -179,7 +181,7 @@ const NotificationsAdminPageComponent: FC = () => {
 
       // Success has no error code; older servers answered errorCode 0
       if (!response.errorCode) {
-        failedDispatch.current = null;
+        failedDispatchRef.current = null;
         setFeedback({
           type: "success",
           message: "Notifications dispatched successfully!",

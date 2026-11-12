@@ -39,11 +39,10 @@ export function withPagination<T extends PaginationControlsProps>(
         | undefined;
     }
 
-    const combinedProps = Object.assign(
-      {},
-      rest as GenericPropObject as Omit<T, keyof PaginationControlsProps>,
-      paginationProps,
-    ) as T;
+    const combinedProps = {
+      ...(rest as GenericPropObject as Omit<T, keyof PaginationControlsProps>),
+      ...paginationProps,
+    } as T;
 
     return <WrappedComponent {...combinedProps} />;
   };

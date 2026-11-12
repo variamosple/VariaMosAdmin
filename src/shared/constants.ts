@@ -45,8 +45,8 @@ export const formatZonedDateTime = (date: Date): string =>
 
 export const formatBoolean = (
   value?: boolean,
-  yesValue: string = "Yes",
-  noValue: string = "No",
+  yesValue = "Yes",
+  noValue = "No",
   nullValue?: string,
 ) => {
   if (value === undefined || value === null) return nullValue || "";

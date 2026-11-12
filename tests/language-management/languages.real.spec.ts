@@ -4,13 +4,18 @@ import { login } from "../helpers/commands.js";
 
 test.describe("Language Management - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
     await dbHelper.seedTestLanguages(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestLanguages(suffix);
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should show seeded languages, update a language, and delete another", async ({
@@ -87,10 +92,5 @@ test.describe("Language Management - Real E2E Flows", () => {
     await expect(
       deletedRow.locator('button[title="Delete language"]'),
     ).not.toBeVisible();
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestLanguages(suffix);
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

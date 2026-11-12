@@ -25,16 +25,16 @@ export const useListParams = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const key = keyOf(searchParams);
   const params = useMemo(() => new URLSearchParams(key), [key]);
-  const written = useRef(key);
+  const writtenRef = useRef(key);
   const [restoreKey, setRestoreKey] = useState(0);
   // write() stays the same function: a list effect that depends on it must
   // not run again, with the old filter, when the address changes by itself
-  const latest = useRef({ params, setSearchParams });
-  latest.current = { params, setSearchParams };
+  const latestRef = useRef({ params, setSearchParams });
+  latestRef.current = { params, setSearchParams };
 
   useEffect(() => {
-    if (key !== written.current) {
-      written.current = key;
+    if (key !== writtenRef.current) {
+      writtenRef.current = key;
       setRestoreKey((count) => count + 1);
     }
   }, [key]);
@@ -44,10 +44,10 @@ export const useListParams = () => {
   const write = useCallback(
     (next: URLSearchParams, history?: "push" | "replace") => {
       const nextKey = keyOf(next);
-      if (nextKey === written.current) return;
-      const { params: current, setSearchParams: setParams } = latest.current;
+      if (nextKey === writtenRef.current) return;
+      const { params: current, setSearchParams: setParams } = latestRef.current;
       const pageOnly = withoutPage(next) === withoutPage(current);
-      written.current = nextKey;
+      writtenRef.current = nextKey;
       setParams(next, {
         replace: history ? history === "replace" : !pageOnly,
       });

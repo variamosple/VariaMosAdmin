@@ -3,7 +3,7 @@ language js
 `$unknown` where {
   $unknown == `unknown`,
   register_diagnostic(
-    message = "Avoid using the 'unknown' type. Use a specific type instead. If absolutely necessary, ignore this warning with a comment.",
+    message = "Avoid the 'unknown' type: name the type the value has.",
     span = $unknown
   )
 }

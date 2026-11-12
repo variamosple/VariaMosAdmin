@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import { renderPage } from "@/shared/tests/render";
+import { lastOf } from "../../../../shared/tests/lastOf";
 import { ModelListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -42,7 +43,7 @@ vi.mock("@variamosple/variamos-components", async () => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
-            setData(response.data || []);
+            setData(response.data ?? []);
             setTotalPages(1);
           }
           setIsLoading(false);
@@ -137,7 +138,7 @@ describe("ModelListPage Integration", () => {
     const editModelButtons = screen.getAllByRole("button", {
       name: /edit model/i,
     });
-    await user.click(editModelButtons[editModelButtons.length - 1]);
+    await user.click(lastOf(editModelButtons));
 
     // Verify modal closes
     await waitFor(() => {

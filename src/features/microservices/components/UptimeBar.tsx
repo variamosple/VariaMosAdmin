@@ -9,8 +9,10 @@ export interface UptimeBarProps {
   compact?: boolean;
 }
 
+const NO_HISTORY: NonNullable<UptimeBarProps["history"]> = [];
+
 export const UptimeBar: FC<UptimeBarProps> = ({
-  history = [],
+  history = NO_HISTORY,
   uptimePercentage = 100,
   days = 30,
   compact = false,

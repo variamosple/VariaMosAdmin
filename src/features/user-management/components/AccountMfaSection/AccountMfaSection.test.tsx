@@ -50,7 +50,9 @@ describe("AccountMfaSection", () => {
 
     const { container } = render(<AccountMfaSection userId="user-2" />);
 
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 20);
+    });
     expect(container).toBeEmptyDOMElement();
     expect(state.deletes).toBe(0);
   });
@@ -61,7 +63,9 @@ describe("AccountMfaSection", () => {
 
     const { container } = render(<AccountMfaSection userId="user-2" />);
 
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 20);
+    });
     expect(container).toBeEmptyDOMElement();
   });
 

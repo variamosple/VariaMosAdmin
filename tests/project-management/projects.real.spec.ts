@@ -4,13 +4,18 @@ import { login } from "../helpers/commands.js";
 
 test.describe("Project Management - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
     await dbHelper.seedTestModels(suffix);
+  });
+
+  test.afterAll(async () => {
+    await dbHelper.cleanTestModels(suffix);
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should show seeded project, update project name, and delete it", async ({
@@ -78,10 +83,5 @@ test.describe("Project Management - Real E2E Flows", () => {
     await expect(
       page.locator("tr", { hasText: `Test Custom Project-${suffix} Edited` }),
     ).not.toBeVisible();
-  });
-
-  test.afterAll(async () => {
-    await dbHelper.cleanTestModels(suffix);
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

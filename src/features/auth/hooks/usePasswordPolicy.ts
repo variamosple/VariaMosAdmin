@@ -20,7 +20,9 @@ export const usePasswordPolicy = () => {
           setPolicy(response.data);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // Without the policy, the form keeps its default rules
+      });
     return () => {
       active = false;
     };

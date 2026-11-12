@@ -4,7 +4,7 @@ export type SocketFunction = () => WebSocket;
 
 export const useSocket = (
   socketFunction: SocketFunction,
-  connectOnMount: boolean = false,
+  connectOnMount = false,
 ) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const socketRef = useRef<WebSocket | null>(null);

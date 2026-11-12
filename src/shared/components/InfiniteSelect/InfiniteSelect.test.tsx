@@ -134,7 +134,6 @@ describe("InfiniteSelect Component", () => {
     const input = screen.getByPlaceholderText("Select");
     expect((input as HTMLInputElement).value).toBe("test-query");
 
-    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(input, { target: { value: "new-query" } });
     expect(mockSetSearchInput).toHaveBeenCalledWith("new-query");
   });

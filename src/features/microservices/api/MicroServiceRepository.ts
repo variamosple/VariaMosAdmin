@@ -83,7 +83,7 @@ export const updateMicroServiceConfiguration = (
 
 export const getMicroServiceAuditLogs = (
   serviceName: string,
-  limit: number = 50,
+  limit = 50,
 ): Promise<
   ResponseModel<
     import("../domain/Entity/MicroService").MicroServiceAuditEntry[]

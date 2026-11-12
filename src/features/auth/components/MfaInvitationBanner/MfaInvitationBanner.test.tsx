@@ -39,7 +39,10 @@ function mfaServer(status: { available: boolean; enabled: boolean }) {
   return calls;
 }
 
-const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
+const settle = () =>
+  new Promise((resolve) => {
+    setTimeout(resolve, 20);
+  });
 
 describe("MfaInvitationBanner", () => {
   beforeEach(() => {

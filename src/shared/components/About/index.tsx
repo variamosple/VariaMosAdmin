@@ -897,7 +897,7 @@ fd_labeling(L).`}
                             src="https://drive.google.com/file/d/1oC-HvJy9aAnMnBzVkZGAFohtlOslGzRc/preview"
                             allow="autoplay"
                             allowFullScreen={true}
-                          ></iframe>
+                          />
                         </div>
                       </div>
                     </Tab.Pane>
@@ -913,7 +913,7 @@ fd_labeling(L).`}
                             src="https://drive.google.com/file/d/1Q8lwzOfPucU8r-Z6dNKK-g6T6kIo7bkR/preview"
                             allow="autoplay"
                             allowFullScreen={true}
-                          ></iframe>
+                          />
                         </div>
                       </div>
                       <hr className="my-4" />
@@ -928,7 +928,7 @@ fd_labeling(L).`}
                             src="https://drive.google.com/file/d/1j8BGIKWBbEnOGGR2zMV7uwUdGW6-t8vF/preview"
                             allow="autoplay"
                             allowFullScreen={true}
-                          ></iframe>
+                          />
                         </div>
                       </div>
                       <hr className="my-4" />
@@ -942,7 +942,7 @@ fd_labeling(L).`}
                             src="https://drive.google.com/file/d/1Jj00ZAyh0nbsX4boykkhjCipgrokTTDj/preview"
                             allow="autoplay"
                             allowFullScreen={true}
-                          ></iframe>
+                          />
                         </div>
                       </div>
                     </Tab.Pane>

@@ -1,6 +1,11 @@
+/** What a configuration holds: a JSON value. */
 export type ConfigurationValue =
-  // biome-ignore lint/suspicious/noExplicitAny: configuration value can be any JSON-serializable type
-  any;
+  | string
+  | number
+  | boolean
+  | null
+  | ConfigurationValue[]
+  | { [key: string]: ConfigurationValue };
 
 /**
  * What a key the code reads accepts, sent by the server (EV-18 lot C): a

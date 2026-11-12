@@ -5,7 +5,7 @@ import type { Metric } from "../domain/Entity/Metric";
 import type { MetricsFilter } from "../domain/Entity/MetricsFilter";
 
 export const queryMetrics = (): Promise<ResponseModel<Metric[]>> => {
-  return ADMIN_CLIENT.get(`/v1/metrics`)
+  return ADMIN_CLIENT.get("/v1/metrics")
     .then((response) => response.data)
     .catch((error) =>
       toErrorResponse(

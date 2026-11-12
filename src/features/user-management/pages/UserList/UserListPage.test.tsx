@@ -8,6 +8,7 @@ const mockNavigate = vi.fn();
 
 import type { ComponentType } from "react";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
+import { lastOf } from "../../../../shared/tests/lastOf";
 import type { User } from "../../domain/Entity/User";
 import type { UsersFilter } from "../../domain/Entity/UsersFilter";
 
@@ -54,7 +55,7 @@ vi.mock("@variamosple/variamos-components", async () => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
-            setData(response.data || []);
+            setData(response.data ?? []);
             setTotalPages(1);
           }
           setIsLoading(false);
@@ -98,7 +99,7 @@ vi.mock("@variamosple/variamos-components", async () => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
-            setData(response.data || []);
+            setData(response.data ?? []);
             setIsLoaded(true);
           }
           setIsLoading(false);
@@ -227,7 +228,7 @@ describe("UserListPage Integration", () => {
 
     // Close modal
     const closeButtons = screen.getAllByRole("button", { name: "Close" });
-    await user.click(closeButtons[closeButtons.length - 1]);
+    await user.click(lastOf(closeButtons));
 
     await waitFor(() => {
       expect(

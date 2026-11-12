@@ -45,7 +45,10 @@ export const parseResponse = <T>(
 ): ResponseModel<T> => {
   const envelope = errorEnvelope.safeParse(body);
   if (!envelope.success) return invalid(envelope.error, failureMessage);
-  if (envelope.data.errorCode != null) {
+  if (
+    envelope.data.errorCode !== null &&
+    envelope.data.errorCode !== undefined
+  ) {
     return Object.assign(new ResponseModel<T>(), envelope.data);
   }
 

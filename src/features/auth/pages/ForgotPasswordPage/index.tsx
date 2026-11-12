@@ -27,7 +27,7 @@ export const ForgotPasswordPage: FC = () => {
           "If an account with this email exists, a password reset link has been sent. Please check your inbox!",
         );
       }
-    } catch (_error) {
+    } catch {
       setError("Error sending reset link. Please try again.");
     } finally {
       setIsLoading(false);

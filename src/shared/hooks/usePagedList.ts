@@ -41,8 +41,8 @@ export const usePagedList = <Filter extends PagedModel, Item>({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const query = useCallback(
-    (filter: Filter) =>
-      queryFunction(filter).then((response) => {
+    (nextFilter: Filter) =>
+      queryFunction(nextFilter).then((response) => {
         setError(
           response.errorCode ? response.message || SYSTEM_ERROR_MESSAGE : null,
         );

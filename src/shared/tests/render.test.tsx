@@ -13,8 +13,8 @@ const Counter = () => {
   );
 };
 
-const Theme = createContext("light");
-const ThemeName = () => <p>{useContext(Theme)}</p>;
+const ThemeContext = createContext("light");
+const ThemeName = () => <p>{useContext(ThemeContext)}</p>;
 
 const Address = () => {
   const { pathname, search } = useLocation();
@@ -45,7 +45,7 @@ describe("renderWithUser", () => {
   it("passes the options of render through, the wrapper among them", () => {
     renderWithUser(<ThemeName />, {
       wrapper: ({ children }: { children: ReactNode }) => (
-        <Theme.Provider value="dark">{children}</Theme.Provider>
+        <ThemeContext.Provider value="dark">{children}</ThemeContext.Provider>
       ),
     });
 

@@ -49,12 +49,12 @@ export const ChartContextProvider: FC<ChartContextProviderProps> = ({
   });
 
   const filterChartData = useCallback(
-    (chartFilter: ChartDateFormProperties): Promise<ResponseModel<Metric>> => {
+    (nextFilter: ChartDateFormProperties): Promise<ResponseModel<Metric>> => {
       setIsLoading(true);
-      setChartFilter(chartFilter);
+      setChartFilter(nextFilter);
 
       return queryMetric(
-        new MetricsFilter(metric.id, chartFilter.fromDate, chartFilter.toDate),
+        new MetricsFilter(metric.id, nextFilter.fromDate, nextFilter.toDate),
       )
         .then((response) => {
           if (response.errorCode) {

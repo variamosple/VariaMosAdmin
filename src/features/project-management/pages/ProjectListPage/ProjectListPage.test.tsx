@@ -3,6 +3,7 @@ import { HttpResponse, http } from "msw";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { server } from "@/shared/tests/mocks/server";
 import { renderPage } from "@/shared/tests/render";
+import { lastOf } from "../../../../shared/tests/lastOf";
 import { ProjectListPage } from "./index";
 
 // Mock @variamosple/variamos-components to avoid ESM import errors
@@ -45,7 +46,7 @@ vi.mock("@variamosple/variamos-components", async () => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
-            setData(response.data || []);
+            setData(response.data ?? []);
             setTotalPages(1);
           }
           setIsLoading(false);
@@ -133,7 +134,7 @@ describe("ProjectListPage Integration", () => {
 
     // Modify project name
     const inputs = screen.getAllByPlaceholderText("Project name");
-    const input = inputs[inputs.length - 1];
+    const input = lastOf(inputs);
     await user.clear(input);
     await user.type(input, "Project One Edited");
 
@@ -141,7 +142,7 @@ describe("ProjectListPage Integration", () => {
     const editProjectButtons = screen.getAllByRole("button", {
       name: /edit project/i,
     });
-    await user.click(editProjectButtons[editProjectButtons.length - 1]);
+    await user.click(lastOf(editProjectButtons));
 
     // Verify modal closes
     await waitFor(() => {

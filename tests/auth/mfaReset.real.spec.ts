@@ -9,7 +9,7 @@ const HOME = /^http:\/\/localhost:3000\/variamos_admin\/(#\/?)?$/;
 
 test.describe("Two-factor reset by an administrator - Real E2E", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const userEmail = `user-test-${suffix}@variamos-test.com`;
   const password = "Password123!";

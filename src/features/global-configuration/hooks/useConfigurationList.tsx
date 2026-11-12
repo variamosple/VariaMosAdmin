@@ -84,10 +84,11 @@ export const useConfigurationList = () => {
     const keys: string[] = [];
     for (const local of localConfigs) {
       const original = originalConfigs.find((o) => o.key === local.key);
-      if (original) {
-        if (JSON.stringify(original.value) !== JSON.stringify(local.value)) {
-          keys.push(local.key);
-        }
+      if (
+        original &&
+        JSON.stringify(original.value) !== JSON.stringify(local.value)
+      ) {
+        keys.push(local.key);
       }
     }
     return keys;
@@ -139,12 +140,13 @@ export const useConfigurationList = () => {
     setSaveFailures(failures);
 
     const refused = Object.keys(failures);
+    const refusalText = (key: string) => `${key} (${failures[key]})`;
     if (refused.length > 0) {
       pushToast({
         title: `${refused.length} of ${saved.length + refused.length} configuration(s) not saved`,
         message: [
           saved.length > 0 ? `Saved: ${saved.join(", ")}.` : "",
-          `Not saved: ${refused.map((key) => `${key} (${failures[key]})`).join(", ")}.`,
+          `Not saved: ${refused.map(refusalText).join(", ")}.`,
         ]
           .filter(Boolean)
           .join(" "),

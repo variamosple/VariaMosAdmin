@@ -62,7 +62,7 @@ const UserDetailsPageComponent: FC = () => {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const onUserRoleCreate = (UserRole: UserRole) => {
+  const onUserRoleCreate = (userRole: UserRole) => {
     if (!userIdParam) {
       pushToast({
         title: "Role assignment",
@@ -79,7 +79,7 @@ const UserDetailsPageComponent: FC = () => {
     });
 
     void createUserRole({
-      ...UserRole,
+      ...userRole,
       userId: userIdParam,
     })
       .then((response) => {

@@ -175,7 +175,7 @@ const ProjectDetails: FC<ProjectDetailsProps> = ({
         </Col>
       </Row>
 
-      {!productLines.length ? (
+      {productLines.length === 0 ? (
         <div>No product lines registered</div>
       ) : (
         <Accordion alwaysOpen flush>

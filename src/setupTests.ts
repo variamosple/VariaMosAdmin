@@ -163,7 +163,7 @@ vi.mock("@variamosple/variamos-components", () => {
   class ResponseModel<T = Record<string, never>> {
     status: string;
     errorCode: number | null = null;
-    message: string = "";
+    message = "";
     data: T | null = null;
     constructor(status = "success") {
       this.status = status;

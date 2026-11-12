@@ -87,16 +87,16 @@ export const useSearchableOptions = <Item, Value>({
 
   const isFetching = !sameRequest(shown, request);
   // Read by the observer, which outlives the render that made it
-  const shownNow = useRef(shown);
-  shownNow.current = shown;
+  const shownNowRef = useRef(shown);
+  shownNowRef.current = shown;
 
-  const observer = useRef<IntersectionObserver | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const lastOptionRef = useCallback((node: Element | null) => {
-    observer.current?.disconnect();
+    observerRef.current?.disconnect();
     if (!node) return;
-    observer.current = new IntersectionObserver((entries) => {
+    observerRef.current = new IntersectionObserver((entries) => {
       if (!entries[0]?.isIntersecting) return;
-      const last = shownNow.current;
+      const last = shownNowRef.current;
       // The next page only of the list on screen, and only if it has one:
       // a page asked meanwhile, or a new search, comes first
       setRequest((current) =>
@@ -105,10 +105,10 @@ export const useSearchableOptions = <Item, Value>({
           : current,
       );
     });
-    observer.current.observe(node);
+    observerRef.current.observe(node);
   }, []);
 
-  useEffect(() => () => observer.current?.disconnect(), []);
+  useEffect(() => () => observerRef.current?.disconnect(), []);
 
   const onSearchChange = useCallback((text: string) => {
     setSearchInput(text);

@@ -123,7 +123,7 @@ export const useBugList = () => {
       setBugs([]);
       setLoadError(response.message || "Failed to load bugs");
     } else {
-      const data = response.data || [];
+      const data = response.data ?? [];
       // A server without paging sends every bug and no count
       const count = response.totalCount ?? data.length;
       setBugs(data);
@@ -150,7 +150,7 @@ export const useBugList = () => {
     if (response.errorCode) {
       setError(response.message || "Failed to load bug notes");
     } else {
-      const mapped = (response.data || []).map((n: RawBugNote) => ({
+      const mapped = (response.data ?? []).map((n: RawBugNote) => ({
         id: n.id,
         status: "",
         comment: n.body || "",
@@ -303,9 +303,8 @@ export const useBugList = () => {
     if (response.errorCode) {
       setError(response.message || "Failed to approve bug");
       throw new Error(response.message || "Failed to approve bug");
-    } else {
-      await fetchBugs();
     }
+    await fetchBugs();
   };
 
   return {

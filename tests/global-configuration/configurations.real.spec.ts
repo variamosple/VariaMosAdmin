@@ -4,12 +4,16 @@ import { login } from "../helpers/commands.js";
 
 test.describe("Global Configurations - Real E2E Flows", () => {
   test.describe.configure({ mode: "serial" });
-  const suffix = Math.random().toString(36).substring(2, 8);
+  const suffix = Math.random().toString(36).slice(2, 8);
   const adminEmail = `admin-${suffix}@variamos-test.com`;
   const adminPassword = "Password123!";
 
   test.beforeEach(async () => {
     await dbHelper.seedTestUsers(suffix);
+  });
+
+  test.afterEach(async () => {
+    await dbHelper.cleanTestUsers(suffix);
   });
 
   test("should load configurations, modify in sandbox, and persist successfully", async ({
@@ -77,9 +81,5 @@ test.describe("Global Configurations - Real E2E Flows", () => {
       .locator(".alert-warning button", { hasText: "Save Changes" })
       .click();
     await cleanupPromise;
-  });
-
-  test.afterEach(async () => {
-    await dbHelper.cleanTestUsers(suffix);
   });
 });

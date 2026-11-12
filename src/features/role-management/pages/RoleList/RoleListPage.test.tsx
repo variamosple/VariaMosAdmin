@@ -3,6 +3,7 @@ import { HttpResponse, http } from "msw";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { server } from "@/shared/tests/mocks/server";
 import { renderPage } from "@/shared/tests/render";
+import { lastOf } from "../../../../shared/tests/lastOf";
 import { RoleListPage } from "./index";
 
 const mockNavigate = vi.fn();
@@ -50,7 +51,7 @@ vi.mock("@variamosple/variamos-components", async () => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
-            setData(response.data || []);
+            setData(response.data ?? []);
             setTotalPages(1);
           }
           setIsLoading(false);
@@ -147,7 +148,7 @@ describe("RoleListPage", () => {
     const editRoleButtons = screen.getAllByRole("button", {
       name: /edit role/i,
     });
-    await user.click(editRoleButtons[editRoleButtons.length - 1]);
+    await user.click(lastOf(editRoleButtons));
 
     // Verify modal closes
     await waitFor(() => {

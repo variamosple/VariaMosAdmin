@@ -29,6 +29,7 @@ import { BugStatusForm } from "../components/BugStatusForm";
 import type { Bug, BugAttachment, BugStatusLog } from "../domain/Bug";
 import { componentLabel } from "../domain/BugComponent";
 import type { BugFilter } from "../domain/BugFilter";
+import { keyedLines } from "../domain/keyedLines";
 import { useAssignableUsers } from "../hooks/useAssignableUsers";
 import { useBugList } from "../hooks/useBugList";
 import { useBugPermissions } from "../hooks/useBugPermissions";
@@ -539,81 +540,75 @@ const BugListPageComponent: FC = () => {
                               className="font-monospace text-secondary mt-1"
                               style={{ fontSize: "0.8rem", lineHeight: "1.5" }}
                             >
-                              {cleanComment
-                                .split("\n")
-                                .map((line: string, idx: number) => {
-                                  if (line.startsWith("* ")) {
-                                    const content = line.substring(2);
-                                    if (content.includes(" -> ")) {
-                                      const [left, right] =
-                                        content.split(" -> ");
-                                      const colonIndex = left.indexOf(":");
-                                      if (colonIndex !== -1) {
-                                        const label = left.substring(
-                                          0,
-                                          colonIndex + 1,
-                                        );
-                                        const oldValue = left
-                                          .substring(colonIndex + 1)
-                                          .trim();
-                                        return (
-                                          <div
-                                            // biome-ignore lint/suspicious/noArrayIndexKey: split lines of static system log note
-                                            key={idx}
-                                            className="my-1 ps-2 border-start border-2 border-secondary-subtle d-flex flex-wrap align-items-center gap-1"
+                              {keyedLines(cleanComment).map(({ key, line }) => {
+                                if (line.startsWith("* ")) {
+                                  const content = line.slice(2);
+                                  if (content.includes(" -> ")) {
+                                    const [left, right] = content.split(" -> ");
+                                    const colonIndex = left.indexOf(":");
+                                    if (colonIndex !== -1) {
+                                      const label = left.slice(
+                                        0,
+                                        colonIndex + 1,
+                                      );
+                                      const oldValue = left
+                                        .slice(colonIndex + 1)
+                                        .trim();
+                                      return (
+                                        <div
+                                          key={key}
+                                          className="my-1 ps-2 border-start border-2 border-secondary-subtle d-flex flex-wrap align-items-center gap-1"
+                                        >
+                                          <strong className="text-dark-emphasis me-1">
+                                            {label}
+                                          </strong>
+                                          <span
+                                            className="text-danger bg-danger-subtle px-1 rounded"
+                                            style={{ fontSize: "0.75rem" }}
                                           >
-                                            <strong className="text-dark-emphasis me-1">
-                                              {label}
-                                            </strong>
-                                            <span
-                                              className="text-danger bg-danger-subtle px-1 rounded"
-                                              style={{ fontSize: "0.75rem" }}
-                                            >
-                                              {oldValue}
-                                            </span>
-                                            <span
-                                              className="text-secondary fw-bold"
-                                              style={{
-                                                fontSize: "1.1rem",
-                                                margin: "0 0.2rem",
-                                              }}
-                                            >
-                                              →
-                                            </span>
-                                            <span
-                                              className="text-success bg-success-subtle px-1 rounded fw-bold"
-                                              style={{ fontSize: "0.75rem" }}
-                                            >
-                                              {right}
-                                            </span>
-                                          </div>
-                                        );
-                                      }
+                                            {oldValue}
+                                          </span>
+                                          <span
+                                            className="text-secondary fw-bold"
+                                            style={{
+                                              fontSize: "1.1rem",
+                                              margin: "0 0.2rem",
+                                            }}
+                                          >
+                                            →
+                                          </span>
+                                          <span
+                                            className="text-success bg-success-subtle px-1 rounded fw-bold"
+                                            style={{ fontSize: "0.75rem" }}
+                                          >
+                                            {right}
+                                          </span>
+                                        </div>
+                                      );
                                     }
                                   }
-                                  if (line.startsWith("Admin Comment:")) {
-                                    return (
-                                      <div
-                                        // biome-ignore lint/suspicious/noArrayIndexKey: split lines of static system log note
-                                        key={idx}
-                                        className="mt-2 pt-1 border-top text-dark-emphasis fw-semibold"
-                                        style={{ fontSize: "0.85rem" }}
-                                      >
-                                        {line}
-                                      </div>
-                                    );
-                                  }
+                                }
+                                if (line.startsWith("Admin Comment:")) {
                                   return (
                                     <div
-                                      // biome-ignore lint/suspicious/noArrayIndexKey: split lines of static system log note
-                                      key={idx}
-                                      style={{ whiteSpace: "pre-wrap" }}
-                                      className="my-1"
+                                      key={key}
+                                      className="mt-2 pt-1 border-top text-dark-emphasis fw-semibold"
+                                      style={{ fontSize: "0.85rem" }}
                                     >
                                       {line}
                                     </div>
                                   );
-                                })}
+                                }
+                                return (
+                                  <div
+                                    key={key}
+                                    style={{ whiteSpace: "pre-wrap" }}
+                                    className="my-1"
+                                  >
+                                    {line}
+                                  </div>
+                                );
+                              })}
                             </div>
                           </Alert>
                         );

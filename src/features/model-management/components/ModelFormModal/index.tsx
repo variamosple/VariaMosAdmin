@@ -36,16 +36,19 @@ const useServerSearch = (
   term: string,
   search: ((name: string) => void) | undefined,
 ) => {
-  const lastSearched = useRef("");
+  const lastSearchedRef = useRef("");
   useEffect(() => {
-    if (!search || term === lastSearched.current) return;
+    if (!search || term === lastSearchedRef.current) return;
     const timer = setTimeout(() => {
-      lastSearched.current = term;
+      lastSearchedRef.current = term;
       search(term);
     }, SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
   }, [term, search]);
 };
+
+const NO_PROJECTS: NonNullable<ModelFormModalProps["projects"]> = [];
+const NO_LANGUAGES: NonNullable<ModelFormModalProps["languages"]> = [];
 
 export const ModelFormModal: FC<ModelFormModalProps> = ({
   modalTitle,
@@ -55,8 +58,8 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
   onModelSubmit,
   isLoading,
   submitText = "Edit Model",
-  projects = [],
-  languages = [],
+  projects = NO_PROJECTS,
+  languages = NO_LANGUAGES,
   onProjectSearch,
   onLanguageSearch,
 }) => {

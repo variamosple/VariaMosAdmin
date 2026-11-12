@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { renderPage } from "@/shared/tests/render";
+import { lastOf } from "../../../../shared/tests/lastOf";
 import { LanguageListPage } from "./index";
 
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
@@ -45,7 +46,7 @@ vi.mock("@variamosple/variamos-components", async () => {
           setIsLoading(true);
           const response = await queryFunction(filter);
           if (!response.errorCode) {
-            setData(response.data || []);
+            setData(response.data ?? []);
             setTotalPages(1);
           }
           setIsLoading(false);
@@ -141,7 +142,7 @@ describe("LanguageListPage", () => {
     const editLangButtons = screen.getAllByRole("button", {
       name: /edit language/i,
     });
-    await user.click(editLangButtons[editLangButtons.length - 1]);
+    await user.click(lastOf(editLangButtons));
 
     // Verify modal closes
     await waitFor(() => {
