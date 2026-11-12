@@ -84,21 +84,6 @@
           }
         }
       }
-    },
-    {
-      "includes": [
-        "src/features/auth/api/AuthRepository.ts",
-        "src/features/metrics-dashboard/components/Chart/GeoChart.tsx",
-        "src/features/metrics-dashboard/context/ChartContext.tsx",
-        "src/shared/hoc/WithPagination.tsx"
-      ],
-      "linter": {
-        "rules": {
-          "nursery": {
-            "noUnsafeTypeAssertion": "info"
-          }
-        }
-      }
     }
   ]
 }

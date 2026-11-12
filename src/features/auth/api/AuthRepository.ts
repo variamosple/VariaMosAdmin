@@ -15,6 +15,7 @@ import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { PasswordPolicy } from "../domain/PasswordPolicy";
 import {
   passwordPolicySchema,
+  type SignInResult,
   signedInSchema,
   signInSchema,
 } from "./authSchemas";
@@ -48,14 +49,13 @@ export const requestLogout = (): Promise<ResponseModel<void>> => {
     );
 };
 
-/** The sign-in answer; `mfaRequired` when the code is still expected. */
-export type SignInResult = singInResponse & { mfaRequired?: boolean };
-
 /**
  * Set on a sign-in that waits for the second factor: without a session yet,
  * an error code stops the session library before it asks for one.
  */
 export const MFA_REQUIRED_CODE = 428;
+
+export type { SignInResult } from "./authSchemas";
 
 export const requestSignIn = (
   request: Credentials,
@@ -64,12 +64,12 @@ export const requestSignIn = (
   return ADMIN_CLIENT.post("/auth/sign-in", request)
     .then((response) => {
       const result = parseResponse(signInSchema, response.data, failure);
-      if (result.data && "mfaRequired" in result.data) {
+      // The answer that waits for the code travels as an error the login
+      // page reads
+      if (result.data?.mfaRequired) {
         result.errorCode = MFA_REQUIRED_CODE;
       }
-      // Checked by the schema; the answer that waits for the code has no
-      // redirect, and travels as an error the login page reads
-      return result as ResponseModel<SignInResult>;
+      return result;
     })
     .catch((error) => toErrorResponse(error, failure));
 };

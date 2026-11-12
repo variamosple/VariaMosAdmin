@@ -3,11 +3,15 @@ import type { Metric } from "../../domain/Entity/Metric";
 import { ChartComponent } from "./index";
 
 // Mock recharts and react-svg-worldmap to prevent errors during rendering in test environment
-vi.mock("react-svg-worldmap", async () => {
-  return {
-    WorldMap: () => <div data-testid="mock-world-map">Mock World Map</div>,
-  };
-});
+// The real list of countries, and a map that shows the data it receives
+vi.mock("react-svg-worldmap", async () => ({
+  ...(await vi.importActual("react-svg-worldmap")),
+  WorldMap: ({ data }: { data: { country: string; value: number }[] }) => (
+    <div data-testid="mock-world-map">
+      {data.map(({ country, value }) => `${country}:${value}`).join(",")}
+    </div>
+  ),
+}));
 
 vi.mock("recharts", async () => {
   const OriginalModule = await vi.importActual("recharts");
@@ -58,6 +62,30 @@ describe("ChartComponent Component", () => {
 
     render(<ChartComponent metric={geoMetric} />);
     expect(screen.getByTestId("mock-world-map")).toBeInTheDocument();
+  });
+
+  it("gives the map only the countries it can draw", () => {
+    const geoMetric: Metric = {
+      id: "geo-metric",
+      title: "Geo Metric",
+      chartType: "geo",
+      defaultFilter: "all",
+      labelKey: "country",
+      data: {
+        all: [
+          [" US ", 10],
+          ["fr", 4],
+          ["ZZ", 3],
+          ["USA", 2],
+          ["", 1],
+        ],
+      },
+    };
+
+    render(<ChartComponent metric={geoMetric} />);
+    expect(screen.getByTestId("mock-world-map")).toHaveTextContent(
+      /^us:10,fr:4$/,
+    );
   });
 
   it("renders PieChart when chartType is pie", () => {

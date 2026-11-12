@@ -1,8 +1,14 @@
 import type { FC } from "react";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
-import { type ISOCode, WorldMap } from "react-svg-worldmap";
+import { type ISOCode, regions, WorldMap } from "react-svg-worldmap";
 import type { Metric } from "../../domain/Entity/Metric";
 import { useGeoChartData } from "../../hooks/useGeoChartData";
+
+// The countries the map can draw
+const MAP_CODES = new Set(regions.map((region) => region.code.toLowerCase()));
+
+const isMapCode = (code: string): code is Lowercase<ISOCode> =>
+  MAP_CODES.has(code);
 
 export interface GeoChartProps {
   metric: Metric;
@@ -26,12 +32,9 @@ export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
     for (const row of rawData.slice(1)) {
       const rawCountry = row[0];
       if (rawCountry !== null && rawCountry !== undefined) {
-        const countryInput = String(rawCountry).trim();
-        if (countryInput.length === 2) {
-          resultList.push({
-            country: countryInput.toLowerCase() as ISOCode,
-            value: Number(row[1]),
-          });
+        const country = String(rawCountry).trim().toLowerCase();
+        if (isMapCode(country)) {
+          resultList.push({ country, value: Number(row[1]) });
         }
       }
     }
