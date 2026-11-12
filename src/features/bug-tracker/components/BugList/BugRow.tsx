@@ -19,6 +19,94 @@ interface BugRowProps {
   onApprove?: (bug: Bug) => void;
 }
 
+// The GitHub issue of the bug, or the start of its id when it has none
+const BugReference: FC<{ bug: Bug }> = ({ bug }) => {
+  const githubUrl =
+    bug.githubRepo && bug.gitIssueNumber
+      ? `https://github.com/${bug.githubRepo}/issues/${bug.gitIssueNumber}`
+      : undefined;
+  return githubUrl ? (
+    <a
+      href={githubUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-decoration-none font-monospace"
+    >
+      #{bug.gitIssueNumber}
+    </a>
+  ) : (
+    <span className="text-muted font-monospace">
+      {bug.id ? `#${bug.id.slice(0, 8)}...` : "N/A"}
+    </span>
+  );
+};
+
+const reporterOf = (bug: Bug): string =>
+  bug.githubCreator
+    ? `@${bug.githubCreator}`
+    : bug.createdBy?.name || bug.reporterEmail || "Guest";
+
+// What the operator may do with the bug in the tab shown
+type BugRowActionsProps = Omit<BugRowProps, "activeTab"> & {
+  activeTab: NonNullable<BugRowProps["activeTab"]>;
+};
+
+const BugRowActions: FC<BugRowActionsProps> = ({
+  bug,
+  onViewDetails,
+  activeTab,
+  onReject,
+  onRestore,
+  onApprove,
+}) => (
+  <div className="d-flex justify-content-center gap-2">
+    <Button
+      variant="outline-primary"
+      size="sm"
+      onClick={() => onViewDetails(bug)}
+      title="View details"
+      style={{ minWidth: "85px" }}
+    >
+      <Eye size={16} className="me-1" /> Details
+    </Button>
+
+    {activeTab === "local" && onApprove && (
+      <Button
+        variant="success"
+        size="sm"
+        onClick={() => onApprove?.(bug)}
+        title="Approve"
+        style={{ minWidth: "80px" }}
+      >
+        Approve
+      </Button>
+    )}
+    {activeTab === "local" && onReject && (
+      <Button
+        variant="danger"
+        size="sm"
+        onClick={() => bug.id && onReject?.(bug.id)}
+        title="Reject"
+        style={{ minWidth: "80px" }}
+      >
+        Reject
+      </Button>
+    )}
+
+    {activeTab === "trash" && onRestore && (
+      <Button
+        variant="warning"
+        size="sm"
+        onClick={() => bug.id && onRestore?.(bug.id)}
+        title="Restore"
+        style={{ minWidth: "80px" }}
+      >
+        Restore
+      </Button>
+    )}
+  </div>
+);
+
 export const BugRowComponent: FC<BugRowProps> = ({
   bug,
   onViewDetails,
@@ -27,29 +115,12 @@ export const BugRowComponent: FC<BugRowProps> = ({
   onRestore,
   onApprove,
 }) => {
-  const githubUrl =
-    bug.githubRepo && bug.gitIssueNumber
-      ? `https://github.com/${bug.githubRepo}/issues/${bug.gitIssueNumber}`
-      : undefined;
   const firstAttachment = bug.attachments?.[0];
 
   return (
     <tr key={bug.id}>
       <td className="align-middle">
-        {githubUrl ? (
-          <a
-            href={githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-decoration-none font-monospace"
-          >
-            #{bug.gitIssueNumber}
-          </a>
-        ) : (
-          <span className="text-muted font-monospace">
-            {bug.id ? `#${bug.id.slice(0, 8)}...` : "N/A"}
-          </span>
-        )}
+        <BugReference bug={bug} />
       </td>
 
       <td
@@ -89,11 +160,7 @@ export const BugRowComponent: FC<BugRowProps> = ({
       </td>
 
       <td className="align-middle small">
-        <div>
-          {bug.githubCreator
-            ? `@${bug.githubCreator}`
-            : bug.createdBy?.name || bug.reporterEmail || "Guest"}
-        </div>
+        <div>{reporterOf(bug)}</div>
         <div className="text-muted" style={{ fontSize: "0.75rem" }}>
           <DateTime value={bug.createdAt} dateOnly />
         </div>
@@ -126,52 +193,14 @@ export const BugRowComponent: FC<BugRowProps> = ({
       )}
 
       <td className="align-middle text-center">
-        <div className="d-flex justify-content-center gap-2">
-          <Button
-            variant="outline-primary"
-            size="sm"
-            onClick={() => onViewDetails(bug)}
-            title="View details"
-            style={{ minWidth: "85px" }}
-          >
-            <Eye size={16} className="me-1" /> Details
-          </Button>
-
-          {activeTab === "local" && onApprove && (
-            <Button
-              variant="success"
-              size="sm"
-              onClick={() => onApprove?.(bug)}
-              title="Approve"
-              style={{ minWidth: "80px" }}
-            >
-              Approve
-            </Button>
-          )}
-          {activeTab === "local" && onReject && (
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => bug.id && onReject?.(bug.id)}
-              title="Reject"
-              style={{ minWidth: "80px" }}
-            >
-              Reject
-            </Button>
-          )}
-
-          {activeTab === "trash" && onRestore && (
-            <Button
-              variant="warning"
-              size="sm"
-              onClick={() => bug.id && onRestore?.(bug.id)}
-              title="Restore"
-              style={{ minWidth: "80px" }}
-            >
-              Restore
-            </Button>
-          )}
-        </div>
+        <BugRowActions
+          bug={bug}
+          onViewDetails={onViewDetails}
+          activeTab={activeTab}
+          onReject={onReject}
+          onRestore={onRestore}
+          onApprove={onApprove}
+        />
       </td>
     </tr>
   );
