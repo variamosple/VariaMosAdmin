@@ -135,8 +135,10 @@ afterEach(() => server.resetHandlers());
 const reactWarnings: string[] = [];
 const logError = console.error;
 console.error = (...args: Parameters<typeof console.error>) => {
-  if (typeof args[0] === "string" && args[0].includes("%s")) {
-    reactWarnings.push(args[0].split("\n")[0]);
+  const [message] = args;
+  if (typeof message === "string" && message.includes("%s")) {
+    const [firstLine = message] = message.split("\n");
+    reactWarnings.push(firstLine);
   }
   logError(...args);
 };

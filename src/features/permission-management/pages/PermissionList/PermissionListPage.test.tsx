@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
+import { itemAt } from "@/shared/tests/itemAt";
 import { server } from "@/shared/tests/mocks/server";
 import { renderPage } from "@/shared/tests/render";
 import { lastOf } from "../../../../shared/tests/lastOf";
@@ -138,7 +139,7 @@ describe("PermissionListPage Integration", () => {
 
     // Click edit on the first permission row
     const editButtons = screen.getAllByTitle("Edit permission");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     // Modal should be visible
     expect(screen.getByText("Edit a Permission")).toBeInTheDocument();
@@ -166,7 +167,7 @@ describe("PermissionListPage Integration", () => {
 
     // Click delete on the second permission row
     const deleteButtons = screen.getAllByTitle("Delete permission");
-    await user.click(deleteButtons[1]);
+    await user.click(itemAt(deleteButtons, 1));
 
     // Confirmation modal should be visible
     const dialog = screen.getByRole("dialog", { name: "Delete permission" });

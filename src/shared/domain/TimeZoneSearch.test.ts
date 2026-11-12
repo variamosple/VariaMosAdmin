@@ -1,4 +1,5 @@
 // cspell:ignore Kolkata Calcutta Alemania
+import { itemAt } from "@/shared/tests/itemAt";
 import {
   choiceOf,
   countryName,
@@ -47,11 +48,11 @@ describe("TimeZoneSearch (EV-115)", () => {
   });
 
   it("says the country, the city, the offset and the current time", () => {
-    const bogota = searchTimeZones("Colombia")[0];
+    const bogota = itemAt(searchTimeZones("Colombia"), 0);
     expect(describeChoice(bogota, NOW)).toBe(
       "Colombia · Bogota · UTC−5 · 08:00",
     );
-    const denver = searchTimeZones("denver")[0];
+    const denver = itemAt(searchTimeZones("denver"), 0);
     expect(describeChoice(denver, NOW)).toBe(
       "United States · Denver · Mountain (most areas) · UTC−7 · 06:00",
     );

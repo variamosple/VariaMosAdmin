@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { itemAt } from "@/shared/tests/itemAt";
 import type { Permission } from "../../domain/Entity/Permission";
 import { PermissionList } from "./index";
 
@@ -57,7 +58,7 @@ describe("PermissionList Component", () => {
 
     // Find and click the edit button for the first permission
     const editButtons = screen.getAllByTitle("Edit permission");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     expect(mockOnPermissionEdit).toHaveBeenCalledTimes(1);
     expect(mockOnPermissionEdit).toHaveBeenCalledWith(mockPermissions[0]);
@@ -78,7 +79,7 @@ describe("PermissionList Component", () => {
 
     // Find and click the delete button for the second permission
     const deleteButtons = screen.getAllByTitle("Delete permission");
-    await user.click(deleteButtons[1]);
+    await user.click(itemAt(deleteButtons, 1));
 
     expect(mockOnPermissionDelete).toHaveBeenCalledTimes(1);
     expect(mockOnPermissionDelete).toHaveBeenCalledWith(mockPermissions[1]);

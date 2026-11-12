@@ -36,15 +36,16 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
     .filter((owner) => !hasEmail(owner))
     .map((owner) => owner.name || "Unnamed owner");
 
+  const generalInquiry = `Inquiry regarding ${entityType}: ${entityName}`;
   const subjects: Record<string, string> = {
-    GENERAL_INQUIRY: `Inquiry regarding ${entityType}: ${entityName}`,
+    GENERAL_INQUIRY: generalInquiry,
     BUG_REPORT: `Bug Report for ${entityType}: ${entityName}`,
     REQUEST_CHANGES: `Request Changes for ${entityType}: ${entityName}`,
     STATUS_UPDATE: `Status Update Request for ${entityType}: ${entityName}`,
   };
 
   const mailtoHref = `mailto:${emailList}?subject=${encodeURIComponent(
-    subjects[subjectKey] || subjects.GENERAL_INQUIRY,
+    subjects[subjectKey] || generalInquiry,
   )}&body=${encodeURIComponent(
     customBody ||
       `Hello,\n\nI am reaching out to you as the owner of the ${entityType.toLowerCase()} '${entityName}' registered on VariaMos Admin.\n\nBest regards,\nVariaMos Administration Team`,

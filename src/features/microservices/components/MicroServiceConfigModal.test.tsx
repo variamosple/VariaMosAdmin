@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { describe, expect, it, vi } from "vitest";
+import { itemAt } from "@/shared/tests/itemAt";
 import * as MicroServiceRepository from "../api/MicroServiceRepository";
 import type {
   MicroServiceAuditEntry,
@@ -320,7 +321,7 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     });
 
     const editButtons = screen.getAllByTitle("Edit parameter");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     const inlineInput = screen.getByDisplayValue("100");
     await user.clear(inlineInput);
@@ -358,7 +359,7 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     });
 
     const editButtons = screen.getAllByTitle("Edit parameter");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     const inlineInput = screen.getByDisplayValue("100");
     await user.clear(inlineInput);
@@ -401,7 +402,7 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     );
     await screen.findByText("MAX_CONNECTIONS");
 
-    await user.click(screen.getAllByTitle("Edit parameter")[0]);
+    await user.click(itemAt(screen.getAllByTitle("Edit parameter"), 0));
     const input = screen.getByDisplayValue("100");
     await user.clear(input);
     await user.type(input, "many");
@@ -479,7 +480,7 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
     );
 
     const closeButtons = screen.getAllByRole("button", { name: /Close/i });
-    await user.click(closeButtons[0]);
+    await user.click(itemAt(closeButtons, 0));
 
     expect(onHideMock).toHaveBeenCalled();
   });

@@ -71,13 +71,16 @@ export const timeZoneChoices = (): TimeZoneChoice[] => {
   if (choices) return choices;
   const rows = ZONE_COUNTRIES.trim()
     .split("\n")
-    .map((line) => line.split("|"));
+    .map((line) => {
+      const [code = "", name = "", region = ""] = line.split("|");
+      return { code, name, region };
+    });
   const zonesPerCountry = new Map<string, number>();
-  for (const [code] of rows) {
+  for (const { code } of rows) {
     zonesPerCountry.set(code, (zonesPerCountry.get(code) ?? 0) + 1);
   }
   const byZone = new Map<string, Omit<TimeZoneChoice, "zone">>();
-  for (const [code, name, region] of rows) {
+  for (const { code, name, region } of rows) {
     const zone = browserName(name);
     if (!zone || byZone.has(zone)) continue;
     byZone.set(zone, {

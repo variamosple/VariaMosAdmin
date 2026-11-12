@@ -130,7 +130,7 @@ test.describe("User Management - Mocked Flows", () => {
       });
     });
     await page.goto("http://localhost:3000/#/users/u1");
-    await expect(page).toHaveTitle(`User ${mockUsers[0].name} — VariaMos`);
+    await expect(page).toHaveTitle(`User ${mockUsers[0]?.name} — VariaMos`);
   });
 
   test("ends the tab title with the site name set on the configuration screen (EV-87 lot 2)", async ({

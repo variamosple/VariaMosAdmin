@@ -126,9 +126,9 @@ describe("useConfigurationList Hook Tests", () => {
 
     expect(result.current.isDirty).toBe(true);
     expect(result.current.modifiedKeys).toEqual(["general.site_name"]);
-    expect(result.current.configurations[0].value).toBe("New Site Name");
+    expect(result.current.configurations[0]?.value).toBe("New Site Name");
     // Ensure original state is untouched
-    expect(result.current.originalConfigs[0].value).toBe("VariaMos");
+    expect(result.current.originalConfigs[0]?.value).toBe("VariaMos");
   });
 
   it("should revert all unsaved local changes on discard", async () => {
@@ -149,7 +149,7 @@ describe("useConfigurationList Hook Tests", () => {
     });
 
     expect(result.current.isDirty).toBe(false);
-    expect(result.current.configurations[0].value).toBe("VariaMos");
+    expect(result.current.configurations[0]?.value).toBe("VariaMos");
   });
 
   it("should globally save all modified configurations and push a success toast", async () => {
@@ -224,7 +224,7 @@ describe("useConfigurationList Hook Tests", () => {
       "general.site_name": "Validation failed",
     });
     expect(result.current.modifiedKeys).toEqual(["general.site_name"]);
-    expect(result.current.configurations[0].value).toBe("New Site Name");
+    expect(result.current.configurations[0]?.value).toBe("New Site Name");
   });
 
   it("keeps the edits whose save threw, with the message of the error", async () => {

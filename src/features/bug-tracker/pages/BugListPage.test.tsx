@@ -5,6 +5,7 @@ import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router-dom";
 import { SYSTEM_ERROR_MESSAGE } from "@/shared/api/errorMessages";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import { itemAt } from "@/shared/tests/itemAt";
 import { server } from "@/shared/tests/mocks/server";
 import { BugListPage } from "./BugListPage";
 
@@ -223,9 +224,12 @@ describe("BugListPage Component", () => {
         <BugListPage />
       </MemoryRouter>,
     );
-    const [details] = await screen.findAllByRole("button", {
-      name: /details/i,
-    });
+    const details = itemAt(
+      await screen.findAllByRole("button", {
+        name: /details/i,
+      }),
+      0,
+    );
     await user.click(details);
 
     const modal = await screen.findByRole("dialog");
@@ -294,7 +298,10 @@ describe("BugListPage Component", () => {
     );
     // Each tab renders the list: the GitHub one comes first
     expect(await screen.findAllByText("Unassigned")).not.toHaveLength(0);
-    const [details] = screen.getAllByRole("button", { name: /details/i });
+    const details = itemAt(
+      screen.getAllByRole("button", { name: /details/i }),
+      0,
+    );
     await user.click(details);
 
     const modal = await screen.findByRole("dialog");
@@ -314,7 +321,7 @@ describe("BugListPage Component", () => {
         within(modal).getByText("Assigned to:").parentElement,
       ).toHaveTextContent("Assigned to: Ben");
     });
-    const [githubTable] = screen.getAllByRole("table");
+    const githubTable = itemAt(screen.getAllByRole("table"), 0);
     expect(within(githubTable).getByText("Ben")).toBeInTheDocument();
     expect(
       await within(modal).findByText("Assigned to: Ben (was: nobody)."),
@@ -352,9 +359,12 @@ describe("BugListPage Component", () => {
         <BugListPage />
       </MemoryRouter>,
     );
-    const [details] = await screen.findAllByRole("button", {
-      name: /details/i,
-    });
+    const details = itemAt(
+      await screen.findAllByRole("button", {
+        name: /details/i,
+      }),
+      0,
+    );
     await user.click(details);
 
     await screen.findByRole("dialog");
@@ -380,9 +390,12 @@ describe("BugListPage Component", () => {
     );
     await user.click(await screen.findByRole("tab", { name: /local inbox/i }));
 
-    const [rejectBtn] = await screen.findAllByRole("button", {
-      name: /^reject$/i,
-    });
+    const rejectBtn = itemAt(
+      await screen.findAllByRole("button", {
+        name: /^reject$/i,
+      }),
+      0,
+    );
     await user.click(rejectBtn);
     expect(
       screen.getByText(/move "local bug" to the trash bin/i),
@@ -519,7 +532,7 @@ describe("BugListPage Component", () => {
     await waitFor(() => {
       expect(post).toHaveBeenCalledWith("/bugs", expect.any(FormData));
     });
-    expect((post.mock.calls[0][1] as FormData).get("component")).toBe(
+    expect((itemAt(post.mock.calls, 0)[1] as FormData).get("component")).toBe(
       "language",
     );
     post.mockRestore();
@@ -617,7 +630,7 @@ describe("BugListPage Component", () => {
     const detailsButtons = await screen.findAllByRole("button", {
       name: /details/i,
     });
-    await user.click(detailsButtons[0]);
+    await user.click(itemAt(detailsButtons, 0));
 
     // Modal elements should be visible
     expect(await screen.findByText(/bug details/i)).toBeInTheDocument();
@@ -673,7 +686,7 @@ describe("BugListPage Component", () => {
     );
     await user.click(await screen.findByRole("tab", { name: /local inbox/i }));
     await user.click(
-      (await screen.findAllByRole("button", { name: /details/i }))[0],
+      itemAt(await screen.findAllByRole("button", { name: /details/i }), 0),
     );
 
     const dialog = await screen.findByRole("dialog");
@@ -701,7 +714,7 @@ describe("BugListPage Component", () => {
     expect(await screen.findAllByText("Bug One")).not.toHaveLength(0);
 
     const detailsButtons = screen.getAllByRole("button", { name: /details/i });
-    await user.click(detailsButtons[0]);
+    await user.click(itemAt(detailsButtons, 0));
 
     expect(await screen.findByText(/bug details/i)).toBeInTheDocument();
     expect(
@@ -730,7 +743,7 @@ describe("BugListPage Component", () => {
     const approveBtns = await screen.findAllByRole("button", {
       name: /approve/i,
     });
-    await user.click(approveBtns[0]);
+    await user.click(itemAt(approveBtns, 0));
 
     // Verify modal elements are populated
     expect(
@@ -797,7 +810,7 @@ describe("BugListPage Component", () => {
     const approveBtns = await screen.findAllByRole("button", {
       name: /approve/i,
     });
-    await user.click(approveBtns[0]);
+    await user.click(itemAt(approveBtns, 0));
 
     expect(
       screen.getByText("Review and Approve Local Bug"),
@@ -843,7 +856,7 @@ describe("BugListPage Component", () => {
     const approveBtns = await screen.findAllByRole("button", {
       name: /approve/i,
     });
-    await user.click(approveBtns[0]);
+    await user.click(itemAt(approveBtns, 0));
 
     // Fill required fields to submit
     await user.selectOptions(

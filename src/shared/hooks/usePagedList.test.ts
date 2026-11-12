@@ -56,7 +56,7 @@ describe("usePagedList", () => {
     });
     expect(result.current.data).toEqual(["a"]);
     // Retry reloads the same filter
-    expect(query).toHaveBeenLastCalledWith(query.mock.calls[0][0]);
+    expect(query).toHaveBeenLastCalledWith(query.mock.calls[0]?.[0]);
   });
 
   it("falls back to the system message when the API sent none", async () => {

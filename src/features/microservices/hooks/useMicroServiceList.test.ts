@@ -91,7 +91,7 @@ describe("useMicroServiceList Hook", () => {
     });
 
     expect(result.current.microServices).toHaveLength(1);
-    expect(result.current.microServices[0].serviceName).toBe("service-1");
+    expect(result.current.microServices[0]?.serviceName).toBe("service-1");
     expect(result.current.currentPage).toBe(1);
   });
 

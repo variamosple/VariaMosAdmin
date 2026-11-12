@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
+import { itemAt } from "@/shared/tests/itemAt";
 import { renderPage } from "@/shared/tests/render";
 import { lastOf } from "../../../../shared/tests/lastOf";
 import { ModelListPage } from "./index";
@@ -124,7 +125,7 @@ describe("ModelListPage Integration", () => {
 
     // Click edit on the first model
     const editButtons = screen.getAllByTitle("Edit model");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     // Modal should be visible
     expect(screen.getByText("Edit a Model")).toBeInTheDocument();

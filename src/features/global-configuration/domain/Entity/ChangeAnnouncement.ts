@@ -19,7 +19,8 @@ export const announcementOfChanges = (
     (item): item is { key: string; announcement: ConfigurationAnnouncement } =>
       item.announcement !== undefined,
   );
-  if (announced.length === 0) return null;
+  const [first] = announced;
+  if (!first) return null;
   const titles = new Set(announced.map((item) => item.announcement.title));
   const notes = [
     ...new Set(
@@ -30,8 +31,7 @@ export const announcementOfChanges = (
   ];
   return {
     keys: announced.map((item) => item.key),
-    title:
-      titles.size === 1 ? announced[0].announcement.title : "Settings updated",
+    title: titles.size === 1 ? first.announcement.title : "Settings updated",
     body: [...announced.map((item) => item.announcement.body), ...notes].join(
       " ",
     ),

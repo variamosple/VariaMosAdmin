@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
+import { itemAt } from "@/shared/tests/itemAt";
 import type { Bug } from "../../domain/Bug";
 import { BugList } from "./index";
 
@@ -85,7 +86,7 @@ describe("BugList Component", () => {
     expect(detailsButtons).toHaveLength(2);
 
     const user = userEvent.setup();
-    await user.click(detailsButtons[0]);
+    await user.click(itemAt(detailsButtons, 0));
     expect(mockOnViewDetails).toHaveBeenCalledTimes(1);
     expect(mockOnViewDetails).toHaveBeenCalledWith(mockBugs[0]);
   });
@@ -108,13 +109,13 @@ describe("BugList Component", () => {
     expect(rejectButtons).toHaveLength(2);
 
     const user = userEvent.setup();
-    await user.click(approveButtons[0]);
+    await user.click(itemAt(approveButtons, 0));
     expect(mockOnApprove).toHaveBeenCalledTimes(1);
     expect(mockOnApprove).toHaveBeenCalledWith(mockBugs[0]);
 
-    await user.click(rejectButtons[1]);
+    await user.click(itemAt(rejectButtons, 1));
     expect(mockOnReject).toHaveBeenCalledTimes(1);
-    expect(mockOnReject).toHaveBeenCalledWith(mockBugs[1].id);
+    expect(mockOnReject).toHaveBeenCalledWith(mockBugs[1]?.id);
   });
 
   it("renders Restore button and triggers handler on trash tab", async () => {
@@ -131,21 +132,21 @@ describe("BugList Component", () => {
     expect(restoreButtons).toHaveLength(2);
 
     const user = userEvent.setup();
-    await user.click(restoreButtons[0]);
+    await user.click(itemAt(restoreButtons, 0));
     expect(mockOnRestore).toHaveBeenCalledTimes(1);
-    expect(mockOnRestore).toHaveBeenCalledWith(mockBugs[0].id);
+    expect(mockOnRestore).toHaveBeenCalledWith(mockBugs[0]?.id);
   });
 
   it("shows who a GitHub bug is assigned to, and the attachment elsewhere", () => {
     const assigned: Bug[] = [
       {
-        ...mockBugs[0],
+        ...itemAt(mockBugs, 0),
         assignedAdmins: [
           { id: "admin-1", name: "Ana" },
           { id: "admin-2", name: "Ben" },
         ],
       },
-      mockBugs[1],
+      itemAt(mockBugs, 1),
     ];
     const { rerender } = render(
       <BugList
@@ -173,7 +174,10 @@ describe("BugList Component", () => {
   it("shows the component of each bug", () => {
     render(
       <BugList
-        items={[{ ...mockBugs[0], component: "admin" }, mockBugs[1]]}
+        items={[
+          { ...itemAt(mockBugs, 0), component: "admin" },
+          itemAt(mockBugs, 1),
+        ]}
         onViewDetails={mockOnViewDetails}
         activeTab="local"
       />,

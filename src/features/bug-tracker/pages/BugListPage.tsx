@@ -548,7 +548,8 @@ const BugListPageComponent: FC = () => {
                                 if (line.startsWith("* ")) {
                                   const content = line.slice(2);
                                   if (content.includes(" -> ")) {
-                                    const [left, right] = content.split(" -> ");
+                                    const [left = "", right = ""] =
+                                      content.split(" -> ");
                                     const colonIndex = left.indexOf(":");
                                     if (colonIndex !== -1) {
                                       const label = left.slice(

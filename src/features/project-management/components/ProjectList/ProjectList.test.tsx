@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { itemAt } from "@/shared/tests/itemAt";
 import type { Project } from "../../domain/Entity/Project";
 import { ProjectList } from "./index";
 
@@ -65,7 +66,7 @@ describe("ProjectList Component", () => {
 
     // Find and click the edit button
     const editButtons = screen.getAllByTitle("Edit project");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     expect(mockOnProjectEdit).toHaveBeenCalledTimes(1);
     expect(mockOnProjectEdit).toHaveBeenCalledWith(mockProjects[0]);
@@ -86,7 +87,7 @@ describe("ProjectList Component", () => {
 
     // Find and click the delete button
     const deleteButtons = screen.getAllByTitle("Delete project");
-    await user.click(deleteButtons[1]);
+    await user.click(itemAt(deleteButtons, 1));
 
     expect(mockOnProjectDelete).toHaveBeenCalledTimes(1);
     expect(mockOnProjectDelete).toHaveBeenCalledWith(mockProjects[1]);

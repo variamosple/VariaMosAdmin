@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { itemAt } from "@/shared/tests/itemAt";
 import type { Role } from "../../domain/Entity/Role";
 import { RoleList } from "./index";
 
@@ -79,7 +80,7 @@ describe("RoleList Component", () => {
     renderComponent();
 
     const detailButtons = screen.getAllByTitle("See role details");
-    await user.click(detailButtons[0]);
+    await user.click(itemAt(detailButtons, 0));
 
     expect(mockNavigate).toHaveBeenCalledTimes(1);
     expect(mockNavigate).toHaveBeenCalledWith("/roles/1");
@@ -90,7 +91,7 @@ describe("RoleList Component", () => {
     renderComponent();
 
     const editButtons = screen.getAllByTitle("Edit role");
-    await user.click(editButtons[1]); // Editor role
+    await user.click(itemAt(editButtons, 1)); // Editor role
 
     expect(mockOnRoleEdit).toHaveBeenCalledTimes(1);
     expect(mockOnRoleEdit).toHaveBeenCalledWith(mockRoles[1]);
@@ -101,7 +102,7 @@ describe("RoleList Component", () => {
     renderComponent();
 
     const deleteButtons = screen.getAllByTitle("Delete role");
-    await user.click(deleteButtons[0]); // Administrator role
+    await user.click(itemAt(deleteButtons, 0)); // Administrator role
 
     expect(mockOnRoleDelete).toHaveBeenCalledTimes(1);
     expect(mockOnRoleDelete).toHaveBeenCalledWith(mockRoles[0]);
@@ -115,7 +116,7 @@ describe("RoleList Component", () => {
     expect(paginators).toHaveLength(2);
 
     const nextButtons = screen.getAllByRole("button", { name: "Next" });
-    await user.click(nextButtons[0]);
+    await user.click(itemAt(nextButtons, 0));
 
     expect(mockOnPageChange).toHaveBeenCalledTimes(1);
     expect(mockOnPageChange).toHaveBeenCalledWith(2);

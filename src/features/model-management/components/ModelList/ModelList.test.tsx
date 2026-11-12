@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { itemAt } from "@/shared/tests/itemAt";
 import type { Model } from "../../domain/Entity/Model";
 import { ModelList } from "./index";
 
@@ -69,7 +70,7 @@ describe("ModelList Component", () => {
     );
 
     const editButtons = screen.getAllByTitle("Edit model");
-    await user.click(editButtons[0]);
+    await user.click(itemAt(editButtons, 0));
 
     expect(mockOnModelEdit).toHaveBeenCalledTimes(1);
     expect(mockOnModelEdit).toHaveBeenCalledWith(mockModels[0]);

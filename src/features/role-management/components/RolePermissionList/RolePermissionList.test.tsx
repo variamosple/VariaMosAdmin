@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
+import { itemAt } from "@/shared/tests/itemAt";
 import { RolePermissionList } from "./index";
 
 // Mock dependencies
@@ -79,7 +80,7 @@ describe("RolePermissionList", () => {
     });
     expect(deleteButtons).toHaveLength(2);
 
-    await user.click(deleteButtons[0]);
+    await user.click(itemAt(deleteButtons, 0));
     expect(mockOnPermissionDelete).toHaveBeenCalledWith(items[0]);
   });
 
@@ -99,7 +100,7 @@ describe("RolePermissionList", () => {
     expect(paginators).toHaveLength(2); // One at the top, one at the bottom
 
     const nextButtons = screen.getAllByText("Next");
-    await user.click(nextButtons[0]);
+    await user.click(itemAt(nextButtons, 0));
     expect(mockOnPageChange).toHaveBeenCalledWith(2);
   });
 });
