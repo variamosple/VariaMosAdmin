@@ -79,6 +79,12 @@ export const ResetPasswordPage: FC = () => {
     }
   };
 
+  // Checking the link, a refused link, the password changed, or the form
+  let view: "checking" | "invalid" | "done" | "form" = "form";
+  if (isVerifyingToken) view = "checking";
+  else if (!isTokenValid) view = "invalid";
+  else if (message) view = "done";
+
   return (
     <div
       className="d-flex flex-column align-items-center gap-3 p-4 rounded-2 dark-container"
@@ -97,14 +103,15 @@ export const ResetPasswordPage: FC = () => {
         <h4 className="text-light mb-2">Reset Password</h4>
       </div>
 
-      {isVerifyingToken ? (
+      {view === "checking" && (
         <div className="text-center my-3">
           <Spinner animation="border" variant="light" size="sm" />
           <p className="text-body-secondary small mt-2">
             Checking link validity...
           </p>
         </div>
-      ) : !isTokenValid ? (
+      )}
+      {view === "invalid" && (
         <div className="w-100 text-center">
           <Alert variant="danger" className="w-100 small mb-3">
             This password reset link is invalid, has expired, or has already
@@ -114,7 +121,8 @@ export const ResetPasswordPage: FC = () => {
             Request a new link
           </Link>
         </div>
-      ) : message ? (
+      )}
+      {view === "done" && (
         <div className="w-100 text-center">
           <Alert variant="success" className="w-100 small mb-3">
             {message}
@@ -123,7 +131,8 @@ export const ResetPasswordPage: FC = () => {
             Back to sign in
           </Link>
         </div>
-      ) : (
+      )}
+      {view === "form" && (
         <>
           <div className="w-100 text-center">
             <p className="text-body-secondary small">

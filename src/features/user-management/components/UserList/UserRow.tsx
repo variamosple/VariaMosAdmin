@@ -12,7 +12,10 @@ import {
 } from "react-bootstrap-icons";
 import type { RoleDetails } from "@/features/role-management/domain/Entity/Role";
 import { queryUserRolesDetails } from "@/features/user-management/api/UserRoleRepository";
-import type { User } from "@/features/user-management/domain/Entity/User";
+import {
+  accountStatus,
+  type User,
+} from "@/features/user-management/domain/Entity/User";
 import { UserRoleFilter } from "@/features/user-management/domain/Entity/UserRoleFilter";
 import { DateTime } from "@/shared/components/DateTime";
 import { IconButton } from "@/shared/components/IconButton";
@@ -67,9 +70,7 @@ export const UserRowComponent: FC<UserRowProps> = ({
 
         <td>{user.email}</td>
 
-        <td>
-          {user.isDeleted ? "deleted" : user.isEnabled ? "active" : "disabled"}
-        </td>
+        <td>{accountStatus(user)}</td>
 
         <td>
           <DateTime value={user.createdAt} />

@@ -19,6 +19,17 @@ import {
   userRefsSchema,
 } from "./bugSchemas";
 
+/** A bug to report: its text, priority, category and optional file. */
+export interface NewBug {
+  title: string;
+  description: string;
+  priority: BugPriority;
+  category: string;
+  githubRepo?: string;
+  file?: File;
+  component?: string;
+}
+
 export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
   const failure = "Error when trying to query bugs, please try again later.";
   return ADMIN_CLIENT.get("/bugs", { params: filter })
@@ -26,15 +37,28 @@ export const queryBugs = (filter: BugFilter): Promise<ResponseModel<Bug[]>> => {
     .catch((error) => toErrorResponse(error, failure));
 };
 
-export const createBug = (
-  title: string,
-  description: string,
-  priority: BugPriority,
-  category: string,
-  githubRepo?: string,
-  file?: File,
-  component?: string,
-): Promise<ResponseModel<Bug>> => {
+/** A new status, with its comment and the fields an approval may correct. */
+export interface BugStatusChange {
+  status: string;
+  comment?: string;
+  title?: string;
+  description?: string;
+  priority?: string;
+  category?: string;
+  githubRepo?: string;
+  component?: string;
+}
+
+export const createBug = (bug: NewBug): Promise<ResponseModel<Bug>> => {
+  const {
+    title,
+    description,
+    priority,
+    category,
+    githubRepo,
+    file,
+    component,
+  } = bug;
   const formData = new FormData();
   formData.append("title", title);
   formData.append("description", description);
@@ -62,15 +86,18 @@ export const createBug = (
 
 export const updateBugStatus = (
   bugId: string,
-  status: string,
-  comment?: string,
-  title?: string,
-  description?: string,
-  priority?: string,
-  category?: string,
-  githubRepo?: string,
-  component?: string,
+  change: BugStatusChange,
 ): Promise<ResponseModel<Bug>> => {
+  const {
+    status,
+    comment,
+    title,
+    description,
+    priority,
+    category,
+    githubRepo,
+    component,
+  } = change;
   return ADMIN_CLIENT.post(`/bugs/${bugId}/status`, {
     status,
     comment,

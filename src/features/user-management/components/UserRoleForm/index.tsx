@@ -10,7 +10,12 @@ import type { SelectOptionProps } from "@/shared/components/InfiniteSelect/index
 import { useSearchableOptions } from "@/shared/hooks/useSearchableOptions";
 
 const searchRoles = (search: string, page: number) =>
-  queryRoles(new RolesFilter(search, page));
+  queryRoles(
+    new RolesFilter({
+      name: search,
+      pageNumber: page,
+    }),
+  );
 
 const toOption = ({ id, name }: Role): SelectOptionProps<number> => ({
   label: name,

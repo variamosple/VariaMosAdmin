@@ -26,6 +26,12 @@ export interface ConfigurationAnnouncement {
   note?: string;
 }
 
+/** How a value is shown and typed: a switch, JSON text, or one field. */
+export const valueKindOf = (type: Configuration["type"]) => {
+  if (type === "boolean") return "switch";
+  return type === "object" || type === "array" ? "json" : "field";
+};
+
 export interface Configuration {
   id?: number;
   key: string;

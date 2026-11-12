@@ -26,6 +26,21 @@ const isRefused = (errorCode?: number | string | null) =>
 
 type Load = "loading" | "ready" | "failed" | "refused";
 
+// What the card says of the two-factor authentication of the account
+const statusText = (status: MfaStatus | null, load: Load) => {
+  if (status === null) {
+    return load === "failed"
+      ? "Two-factor authentication could not be loaded."
+      : "Loading…";
+  }
+  if (!status.available) {
+    return "Two-factor authentication is not available yet.";
+  }
+  return status.enabled
+    ? `A code from your authenticator app is asked at sign-in. ${status.recoveryCodesRemaining} recovery code(s) left.`
+    : "Ask for a code from an authenticator app at sign-in, on top of your password.";
+};
+
 type Step =
   | { name: "closed" }
   | { name: "password" }
@@ -34,6 +49,12 @@ type Step =
   | { name: "disable" };
 
 /** Saves the recovery codes as a text file. */
+// The button that confirms the step: the password, the scan, or turning off
+const submitLabelOf = (step: Step["name"]) => {
+  if (step === "password") return "Continue";
+  return step === "scan" ? "Turn on" : "Turn off";
+};
+
 const downloadCodes = (codes: string[]) => {
   const blob = new Blob(
     [`VariaMos recovery codes (each one works once)\n\n${codes.join("\n")}\n`],
@@ -162,15 +183,7 @@ export const TwoFactorCard: FC = () => {
               ) : null}
             </Card.Title>
             <Card.Text className="text-muted mb-0">
-              {status === null
-                ? load === "failed"
-                  ? "Two-factor authentication could not be loaded."
-                  : "Loading…"
-                : !status.available
-                  ? "Two-factor authentication is not available yet."
-                  : status.enabled
-                    ? `A code from your authenticator app is asked at sign-in. ${status.recoveryCodesRemaining} recovery code(s) left.`
-                    : "Ask for a code from an authenticator app at sign-in, on top of your password."}
+              {statusText(status, load)}
             </Card.Text>
           </div>
           {load === "failed" && (
@@ -340,12 +353,8 @@ export const TwoFactorCard: FC = () => {
             >
               {isBusy ? (
                 <Spinner animation="border" size="sm" />
-              ) : step.name === "password" ? (
-                "Continue"
-              ) : step.name === "scan" ? (
-                "Turn on"
               ) : (
-                "Turn off"
+                submitLabelOf(step.name)
               )}
             </Button>
           )}

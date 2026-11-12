@@ -120,8 +120,24 @@ describe("ProjectSearchForm Component", () => {
   });
 
   it.each([
-    [new ProjectsFilter("demo", true, true, true), "true", "true"],
-    [new ProjectsFilter(undefined, false, undefined, true), "false", "all"],
+    [
+      new ProjectsFilter({
+        name: "demo",
+        isTemplate: true,
+        isDeleted: true,
+        includeDeleted: true,
+      }),
+      "true",
+      "true",
+    ],
+    [
+      new ProjectsFilter({
+        isTemplate: false,
+        includeDeleted: true,
+      }),
+      "false",
+      "all",
+    ],
     [new ProjectsFilter(), "all", "false"],
   ])(
     "starts from the search of the address (UX-26)",

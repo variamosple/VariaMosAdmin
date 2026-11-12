@@ -4,7 +4,9 @@ import { isOneOf } from "@/shared/domain/Value/isOneOf";
 import { readPage, useListParams } from "@/shared/hooks/useListQueryState";
 import {
   addBugNote,
+  type BugStatusChange,
   createBug,
+  type NewBug,
   queryBugNotes,
   queryBugRepos,
   queryBugs,
@@ -18,7 +20,6 @@ import {
 } from "../api/BugRepository";
 import type { Bug, BugStatusLog, BugUserRef, RawBugNote } from "../domain/Bug";
 import type { BugFilter } from "../domain/BugFilter";
-import type { BugPriority } from "../domain/BugPriority";
 
 const BUG_PAGE_SIZE = 20;
 
@@ -179,26 +180,10 @@ export const useBugList = () => {
   };
 
   // 5. Function to submit the creation of a bug
-  const handleCreateBug = async (
-    title: string,
-    description: string,
-    priority: BugPriority,
-    category: string,
-    githubRepo?: string,
-    file?: File,
-    component?: string,
-  ) => {
+  const handleCreateBug = async (bug: NewBug) => {
     setIsSubmitting(true);
     setCreateError(null);
-    const response = await createBug(
-      title,
-      description,
-      priority,
-      category,
-      githubRepo,
-      file,
-      component,
-    );
+    const response = await createBug(bug);
 
     if (response.errorCode) {
       setCreateError(response.message || "Failed to create bug");
@@ -252,7 +237,7 @@ export const useBugList = () => {
     status: string,
     comment?: string,
   ): Promise<string | null> => {
-    const response = await updateBugStatus(id, status, comment);
+    const response = await updateBugStatus(id, { status, comment });
     if (response.errorCode) {
       return response.message || "Failed to change the status";
     }
@@ -278,29 +263,9 @@ export const useBugList = () => {
     return { assignees };
   };
 
-  const handleApprove = async (
-    id: string,
-    status: string,
-    comment?: string,
-    title?: string,
-    description?: string,
-    priority?: string,
-    category?: string,
-    githubRepo?: string,
-    component?: string,
-  ) => {
+  const handleApprove = async (id: string, change: BugStatusChange) => {
     setError(null);
-    const response = await updateBugStatus(
-      id,
-      status,
-      comment,
-      title,
-      description,
-      priority,
-      category,
-      githubRepo,
-      component,
-    );
+    const response = await updateBugStatus(id, change);
     if (response.errorCode) {
       setError(response.message || "Failed to approve bug");
       throw new Error(response.message || "Failed to approve bug");

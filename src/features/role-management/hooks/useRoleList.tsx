@@ -28,13 +28,12 @@ import { usePagedList } from "@/shared/hooks/usePagedList";
 // The list shown by the address (UX-26)
 const rolesFromParams = (params: URLSearchParams) => {
   const { sortBy, sortOrder } = readSort(params, ROLE_SORT_FIELDS);
-  return new RolesFilter(
-    readParam(params, "name"),
-    readPage(params),
-    undefined,
+  return new RolesFilter({
+    name: readParam(params, "name"),
+    pageNumber: readPage(params),
     sortBy,
     sortOrder,
-  );
+  });
 };
 
 export const useRoleList = () => {
@@ -173,13 +172,11 @@ export const useRoleList = () => {
     const chosen = wantedSort
       ? sortFields(wantedSort)
       : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
-    return new RolesFilter(
+    return new RolesFilter({
       name,
-      undefined,
-      undefined,
-      chosen.sortBy,
-      chosen.sortOrder,
-    );
+      sortBy: chosen.sortBy,
+      sortOrder: chosen.sortOrder,
+    });
   };
 
   const onSearchReset = () => {

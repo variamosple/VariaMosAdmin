@@ -166,30 +166,6 @@
       }
     },
     {
-      "includes": [
-        "src/features/auth/components/PasswordUpdateForm/PasswordUpdateForm.test.tsx",
-        "src/features/bug-tracker/api/BugRepository.ts",
-        "src/features/bug-tracker/hooks/useBugList.tsx",
-        "src/features/model-management/domain/Entity/ModelFilter.ts",
-        "src/features/permission-management/domain/Entity/PermissionsFilter.ts",
-        "src/features/project-management/domain/Entity/ProjectFilter.ts",
-        "src/features/role-management/domain/Entity/RolesFilter.ts",
-        "src/features/user-management/domain/Entity/UsersFilter.ts"
-      ],
-      "linter": {
-        "rules": {
-          "complexity": {
-            "useMaxParams": {
-              "level": "info",
-              "options": {
-                "max": 4
-              }
-            }
-          }
-        }
-      }
-    },
-    {
       "includes": ["src/features/bug-tracker/pages/BugListPage.tsx"],
       "linter": {
         "rules": {
@@ -201,31 +177,6 @@
                 "skipBlankLines": true
               }
             }
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "playwright.config.ts",
-        "src/features/auth/components/TwoFactorCard/index.tsx",
-        "src/features/auth/pages/ResetPasswordPage/index.tsx",
-        "src/features/bug-tracker/components/BugFormModal/index.tsx",
-        "src/features/bug-tracker/pages/BugListPage.tsx",
-        "src/features/global-configuration/components/ConfigurationFormModal.tsx",
-        "src/features/global-configuration/components/ScheduleChangeModal.tsx",
-        "src/features/global-configuration/pages/ConfigurationListPage.tsx",
-        "src/features/metrics-dashboard/components/Chart/ChartDateFilterForm.tsx",
-        "src/features/microservices/components/MicroServiceConfigModal.tsx",
-        "src/features/user-management/components/UserDetails/index.tsx",
-        "src/features/user-management/components/UserList/UserRow.tsx",
-        "src/shared/components/SortableHeader/index.tsx",
-        "src/shared/hooks/useListQueryState.ts"
-      ],
-      "linter": {
-        "rules": {
-          "style": {
-            "noNestedTernary": "info"
           }
         }
       }

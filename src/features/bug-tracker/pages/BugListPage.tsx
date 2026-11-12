@@ -92,15 +92,15 @@ const BugListPageComponent: FC = () => {
 
   // The form stays open with its input when the creation fails (UX-08)
   const submitBug = async (data: Bug, file?: File) => {
-    const created = await handleCreateBug(
-      data.title,
-      data.description,
-      data.priority,
-      data.category,
-      data.githubRepo,
+    const created = await handleCreateBug({
+      title: data.title,
+      description: data.description,
+      priority: data.priority,
+      category: data.category,
+      githubRepo: data.githubRepo,
       file,
-      data.component || undefined,
-    );
+      component: data.component || undefined,
+    });
     if (created) {
       setShowUserCreateModal(false);
       setShowAdminCreateModal(false);
@@ -501,11 +501,13 @@ const BugListPageComponent: FC = () => {
                     />
                     <span className="text-muted small">Loading notes...</span>
                   </div>
-                ) : notes.length === 0 ? (
+                ) : null}
+                {!isLoadingNotes && notes.length === 0 && (
                   <p className="text-muted small">
                     No comments or logs recorded yet.
                   </p>
-                ) : (
+                )}
+                {!isLoadingNotes && notes.length > 0 && (
                   <div
                     className="d-flex flex-column gap-2 mb-3"
                     style={{ maxHeight: "300px", overflowY: "auto" }}
@@ -642,11 +644,12 @@ const BugListPageComponent: FC = () => {
                   </div>
                 )}
 
-                {selectedBugForDetails.status !== "pending" ? (
+                {selectedBugForDetails.status !== "pending" && (
                   <Alert variant="warning" className="m-0 py-2 small">
                     This discussion is closed. Please use GitHub to communicate.
                   </Alert>
-                ) : canUpdate ? (
+                )}
+                {selectedBugForDetails.status === "pending" && canUpdate && (
                   <Form onSubmit={handleNoteSubmit} className="mt-3">
                     <Form.Group className="mb-2">
                       <Form.Control
@@ -675,7 +678,7 @@ const BugListPageComponent: FC = () => {
                       </Button>
                     </div>
                   </Form>
-                ) : null}
+                )}
               </div>
             </div>
           ) : null}

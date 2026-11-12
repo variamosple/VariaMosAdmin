@@ -356,13 +356,13 @@ describe("useBugList Hook", () => {
 
     let createSuccess = false;
     await act(async () => {
-      createSuccess = await result.current.handleCreateBug(
-        "New Title",
-        "New Desc",
-        "high",
-        "cat-1",
-        "repo-a",
-      );
+      createSuccess = await result.current.handleCreateBug({
+        title: "New Title",
+        description: "New Desc",
+        priority: "high",
+        category: "cat-1",
+        githubRepo: "repo-a",
+      });
     });
 
     expect(createSuccess).toBe(true);
@@ -420,7 +420,10 @@ describe("useBugList Hook", () => {
     queryBugsParams = [];
 
     await act(async () => {
-      await result.current.handleApprove("1", "approved", "Good to go");
+      await result.current.handleApprove("1", {
+        status: "approved",
+        comment: "Good to go",
+      });
     });
 
     expect(updateBugStatusBody).toEqual({

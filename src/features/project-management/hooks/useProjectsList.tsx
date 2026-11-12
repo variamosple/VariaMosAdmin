@@ -18,13 +18,13 @@ import { usePagedList } from "@/shared/hooks/usePagedList";
 
 // The list shown by the address (UX-26)
 const projectsFromParams = (params: URLSearchParams) =>
-  new ProjectsFilter(
-    readParam(params, "name"),
-    readBooleanParam(params, "isTemplate"),
-    readBooleanParam(params, "isDeleted"),
-    readBooleanParam(params, "includeDeleted"),
-    readPage(params),
-  );
+  new ProjectsFilter({
+    name: readParam(params, "name"),
+    isTemplate: readBooleanParam(params, "isTemplate"),
+    isDeleted: readBooleanParam(params, "isDeleted"),
+    includeDeleted: readBooleanParam(params, "includeDeleted"),
+    pageNumber: readPage(params),
+  });
 
 export const useProjectList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -154,12 +154,12 @@ export const useProjectList = () => {
 
   const onSearchSubmit = (search?: ProjectsFilter) => {
     void loadData(
-      new ProjectsFilter(
-        search?.name,
-        search?.isTemplate,
-        search?.isDeleted,
-        search?.includeDeleted,
-      ),
+      new ProjectsFilter({
+        name: search?.name,
+        isTemplate: search?.isTemplate,
+        isDeleted: search?.isDeleted,
+        includeDeleted: search?.includeDeleted,
+      }),
     );
   };
 

@@ -129,7 +129,14 @@ describe("ModelSearchForm Component", () => {
         onSubmit={vi.fn()}
         isLoading={false}
         onSearchReset={vi.fn()}
-        defaultFilter={new ModelsFilter("m", "domain", undefined, true, false)}
+        defaultFilter={
+          new ModelsFilter({
+            name: "m",
+            modelLevel: "domain",
+            includeDeleted: true,
+            isPublic: false,
+          })
+        }
       />,
     );
 

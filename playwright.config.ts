@@ -1,5 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// The workers asked for, else one in CI, else the Playwright default
+const workers = () => {
+  if (process.env.PLAYWRIGHT_WORKERS) {
+    return Number(process.env.PLAYWRIGHT_WORKERS);
+  }
+  return process.env.CI ? 1 : undefined;
+};
+
 export default defineConfig({
   testDir: "./tests",
   timeout: 20000,
@@ -9,11 +17,7 @@ export default defineConfig({
   // A test that passes only on a retry fails the run: the retry gives its
   // trace, it does not hide it (TST-FRONT-09)
   failOnFlakyTests: Boolean(process.env.CI),
-  workers: process.env.PLAYWRIGHT_WORKERS
-    ? Number(process.env.PLAYWRIGHT_WORKERS)
-    : process.env.CI
-      ? 1
-      : undefined,
+  workers: workers(),
   reporter: [["html", { open: "never" }]],
   use: {
     baseURL: "http://localhost:3000",

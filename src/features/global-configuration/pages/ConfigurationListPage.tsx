@@ -32,7 +32,10 @@ import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
 import { ScheduleChangeModal } from "../components/ScheduleChangeModal";
 import { ScheduledChangesPanel } from "../components/ScheduledChangesPanel";
 import type { ChangeAnnouncement } from "../domain/Entity/ChangeAnnouncement";
-import type { Configuration } from "../domain/Entity/Configuration";
+import {
+  type Configuration,
+  valueKindOf,
+} from "../domain/Entity/Configuration";
 import {
   categoriesOf,
   categoryLabel,
@@ -220,8 +223,10 @@ const ConfigurationListPageComponent: FC = () => {
               </thead>
               <tbody>
                 {items.map((config) => {
-                  const isSecret = config.isSecret;
-                  const isBoolean = config.type === "boolean";
+                  // A secret is masked, whatever its type
+                  const cell = config.isSecret
+                    ? "secret"
+                    : valueKindOf(config.type);
                   const isModified = modifiedKeys.includes(config.key);
                   const saveFailure = saveFailures[config.key];
                   // The server refuses a change to a key that requires MFA
@@ -297,12 +302,13 @@ const ConfigurationListPageComponent: FC = () => {
                         </div>
                       </td>
                       <td>
-                        {isSecret ? (
+                        {cell === "secret" && (
                           <span className="text-muted">
                             <LockFill className="text-warning me-1" />
                             <code>********</code>
                           </span>
-                        ) : isBoolean ? (
+                        )}
+                        {cell === "switch" && (
                           <div className="d-flex align-items-center gap-2">
                             <Form.Check
                               type="switch"
@@ -318,15 +324,16 @@ const ConfigurationListPageComponent: FC = () => {
                               {config.value ? "ENABLED" : "DISABLED"}
                             </Badge>
                           </div>
-                        ) : config.type === "object" ||
-                          config.type === "array" ? (
+                        )}
+                        {cell === "json" && (
                           <pre
                             className="m-0 bg-light p-2 rounded border small text-secondary"
                             style={{ fontSize: "0.8rem", maxHeight: "150px" }}
                           >
                             {JSON.stringify(config.value, null, 2)}
                           </pre>
-                        ) : (
+                        )}
+                        {cell === "field" && (
                           <span className="text-dark fw-medium">
                             {String(config.value)}
                             {config.accepts?.unit ? (
@@ -551,18 +558,18 @@ const ConfigurationListPageComponent: FC = () => {
         </InputGroup>
       </div>
 
-      {categories.length === 0 ? (
-        isLoading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" variant="primary" />
-            <div className="mt-2 text-muted">Loading settings...</div>
-          </div>
-        ) : (
-          <div className="text-center py-4 text-muted bg-light rounded border">
-            No configurations found.
-          </div>
-        )
-      ) : (
+      {categories.length === 0 && isLoading && (
+        <div className="text-center py-5">
+          <Spinner animation="border" variant="primary" />
+          <div className="mt-2 text-muted">Loading settings...</div>
+        </div>
+      )}
+      {categories.length === 0 && !isLoading && (
+        <div className="text-center py-4 text-muted bg-light rounded border">
+          No configurations found.
+        </div>
+      )}
+      {categories.length > 0 && (
         <Tabs
           id={categoryTabsId}
           activeKey={shownTab}

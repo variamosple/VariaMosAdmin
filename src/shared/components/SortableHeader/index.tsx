@@ -9,6 +9,8 @@ interface SortableHeaderProps<Field extends string> {
   onSort?: (field: Field) => void;
 }
 
+const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
+
 /** A column header that sorts the list, announced by aria-sort (UX-29) */
 export const SortableHeader = <Field extends string>({
   field,
@@ -19,11 +21,7 @@ export const SortableHeader = <Field extends string>({
   if (!onSort) return <th>{label}</th>;
   const order = sort?.by === field ? sort.order : undefined;
   return (
-    <th
-      aria-sort={
-        order === "asc" ? "ascending" : order === "desc" ? "descending" : "none"
-      }
-    >
+    <th aria-sort={order ? ARIA_SORT[order] : "none"}>
       <Button
         variant="link"
         className="p-0 fw-bold text-reset text-decoration-none"

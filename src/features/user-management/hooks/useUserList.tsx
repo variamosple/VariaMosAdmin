@@ -28,15 +28,12 @@ import { usePagedList } from "@/shared/hooks/usePagedList";
 // The list shown by the address (UX-26)
 const usersFromParams = (params: URLSearchParams) => {
   const { sortBy, sortOrder } = readSort(params, USER_SORT_FIELDS);
-  return new UsersFilter(
-    undefined,
-    undefined,
-    readParam(params, "search"),
-    readPage(params),
-    undefined,
+  return new UsersFilter({
+    search: readParam(params, "search"),
+    pageNumber: readPage(params),
     sortBy,
     sortOrder,
-  );
+  });
 };
 
 export const useUserList = () => {
@@ -198,15 +195,11 @@ export const useUserList = () => {
     const chosen = wantedSort
       ? sortFields(wantedSort)
       : { sortBy: filter?.sortBy, sortOrder: filter?.sortOrder };
-    return new UsersFilter(
-      undefined,
-      undefined,
+    return new UsersFilter({
       search,
-      undefined,
-      undefined,
-      chosen.sortBy,
-      chosen.sortOrder,
-    );
+      sortBy: chosen.sortBy,
+      sortOrder: chosen.sortOrder,
+    });
   };
 
   const onSearchReset = () => {

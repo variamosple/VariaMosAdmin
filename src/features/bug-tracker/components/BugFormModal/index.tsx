@@ -27,6 +27,10 @@ interface BugFormModalProps {
   error?: string | null;
 }
 
+// An administrator publishes the issue at once; a user reports it for review
+const submitLabelOf = (mode: "user" | "admin") =>
+  mode === "admin" ? "Create public GitHub issue" : "Report Bug";
+
 export const BugFormModal: FC<BugFormModalProps> = ({
   show,
   onHide,
@@ -241,11 +245,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
             Cancel
           </Button>
           <Button variant="primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting
-              ? "Creating..."
-              : mode === "admin"
-                ? "Create public GitHub issue"
-                : "Report Bug"}
+            {isSubmitting ? "Creating..." : submitLabelOf(mode)}
           </Button>
         </Modal.Footer>
       </Form>

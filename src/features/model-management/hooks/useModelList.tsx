@@ -22,14 +22,14 @@ import { usePagedList } from "@/shared/hooks/usePagedList";
 
 // The list shown by the address (UX-26)
 const modelsFromParams = (params: URLSearchParams) =>
-  new ModelsFilter(
-    readParam(params, "name"),
-    readParam(params, "modelLevel"),
-    readBooleanParam(params, "isDeleted"),
-    readBooleanParam(params, "includeDeleted"),
-    readBooleanParam(params, "isPublic"),
-    readPage(params),
-  );
+  new ModelsFilter({
+    name: readParam(params, "name"),
+    modelLevel: readParam(params, "modelLevel"),
+    isDeleted: readBooleanParam(params, "isDeleted"),
+    includeDeleted: readBooleanParam(params, "includeDeleted"),
+    isPublic: readBooleanParam(params, "isPublic"),
+    pageNumber: readPage(params),
+  });
 
 export const useModelList = () => {
   const [showEdit, setShowEdit] = useState(false);
@@ -69,7 +69,11 @@ export const useModelList = () => {
   // then those whose name matches what is typed, searched on the server so
   // that one beyond the first page can be chosen (EV-96)
   const searchProjects = useCallback((name?: string) => {
-    void queryProjects(new ProjectsFilter(name || undefined)).then((res) => {
+    void queryProjects(
+      new ProjectsFilter({
+        name: name || undefined,
+      }),
+    ).then((res) => {
       if (!res.errorCode && res.data) {
         setProjects(
           res.data.map((p) => ({ id: p.id || "", name: p.name || "" })),
@@ -191,13 +195,13 @@ export const useModelList = () => {
 
   const onSearchSubmit = (search?: ModelsFilter) => {
     void loadData(
-      new ModelsFilter(
-        search?.name,
-        search?.modelLevel,
-        search?.isDeleted,
-        search?.includeDeleted,
-        search?.isPublic,
-      ),
+      new ModelsFilter({
+        name: search?.name,
+        modelLevel: search?.modelLevel,
+        isDeleted: search?.isDeleted,
+        includeDeleted: search?.includeDeleted,
+        isPublic: search?.isPublic,
+      }),
     );
   };
 

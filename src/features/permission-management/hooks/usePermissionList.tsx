@@ -28,13 +28,12 @@ import { usePagedList } from "@/shared/hooks/usePagedList";
 // The list shown by the address (UX-26)
 const permissionsFromParams = (params: URLSearchParams) => {
   const { sortBy, sortOrder } = readSort(params, PERMISSION_SORT_FIELDS);
-  return new PermissionsFilter(
-    readParam(params, "name"),
-    readPage(params),
-    undefined,
+  return new PermissionsFilter({
+    name: readParam(params, "name"),
+    pageNumber: readPage(params),
     sortBy,
     sortOrder,
-  );
+  });
 };
 
 export const usePermissionList = () => {
@@ -163,25 +162,20 @@ export const usePermissionList = () => {
   // The search keeps the sort, and the sort keeps the search
   const onSearchReset = () => {
     void loadData(
-      new PermissionsFilter(
-        undefined,
-        undefined,
-        undefined,
-        filter?.sortBy,
-        filter?.sortOrder,
-      ),
+      new PermissionsFilter({
+        sortBy: filter?.sortBy,
+        sortOrder: filter?.sortOrder,
+      }),
     );
   };
 
   const onSearchSubmit = (search?: string) => {
     void loadData(
-      new PermissionsFilter(
-        search,
-        undefined,
-        undefined,
-        filter?.sortBy,
-        filter?.sortOrder,
-      ),
+      new PermissionsFilter({
+        name: search,
+        sortBy: filter?.sortBy,
+        sortOrder: filter?.sortOrder,
+      }),
     );
   };
 
@@ -192,13 +186,11 @@ export const usePermissionList = () => {
   const onSort = (field: PermissionSortField) => {
     const { sortBy, sortOrder } = sortFields(nextSort(sort, field));
     void loadData(
-      new PermissionsFilter(
-        filter?.name,
-        undefined,
-        undefined,
+      new PermissionsFilter({
+        name: filter?.name,
         sortBy,
         sortOrder,
-      ),
+      }),
     );
   };
 

@@ -101,7 +101,13 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
       }
 
       onSubmit(
-        new ModelsFilter(name, levelVal, deleted, includeDeleted, publicVal),
+        new ModelsFilter({
+          name,
+          modelLevel: levelVal,
+          isDeleted: deleted,
+          includeDeleted,
+          isPublic: publicVal,
+        }),
       );
       reset(data);
     },

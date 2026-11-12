@@ -79,7 +79,10 @@ const NotificationsAdminPageComponent: FC = () => {
     setLoadingRoles(true);
     setRolesError(null);
     const response = await queryRoles(
-      new RolesFilter(undefined, 1, ROLE_PAGE_SIZE),
+      new RolesFilter({
+        pageNumber: 1,
+        pageSize: ROLE_PAGE_SIZE,
+      }),
     );
     if (response.errorCode) {
       setRolesError(response.message || "The roles could not be loaded.");
