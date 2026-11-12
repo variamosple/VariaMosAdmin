@@ -20,7 +20,7 @@ Configuration: `vitest.config.mts` (setup file `src/setupTests.ts`), `playwright
 
 - **Test what the user sees.** Query by role, label, placeholder or text (`screen.getByRole`, `getByLabelText`...), not by CSS class or component state.
 - **Interact with `userEvent`.** Render with `renderWithUser` or `renderPage` (below), which return the `user`, then `await user.click(...)`, `await user.type(...)`. Use `fireEvent` only when `userEvent` cannot reach the event.
-- **Assert the effect, not the call alone.** Prefer `toHaveBeenCalledWith(...)` with the expected arguments to a bare `toHaveBeenCalled()`, and a visible text to `toBeTruthy()`.
+- **Assert the effect, not the call alone.** Use `toHaveBeenCalledWith(...)` with the expected arguments, and a visible text rather than `toBeTruthy()`. The lint refuses a bare `toHaveBeenCalled()` (plugin `rules/called-without-arguments.grit`); a call that takes no argument is checked with `toHaveBeenCalledOnce()`, and `.not.toHaveBeenCalled()` stays allowed.
 - **Name the behaviour.** A test title says what happens ("keeps the refused edit with its reason"), and refers to the audit finding or evolution when there is one (`(UX-14)`, `(EV-31)`).
 
 ### Rendering
