@@ -53,6 +53,7 @@ const downloadCodes = (codes: string[]) => {
  */
 export const TwoFactorCard: FC = () => {
   const titleId = useId();
+  const stepFormId = useId();
   const [status, setStatus] = useState<MfaStatus | null>(null);
   const [load, setLoad] = useState<Load>("loading");
   const [step, setStep] = useState<Step>({ name: "closed" });
@@ -154,12 +155,11 @@ export const TwoFactorCard: FC = () => {
           <div>
             <Card.Title className="mb-1">
               Two-factor authentication{" "}
-              {status &&
-                (status.enabled ? (
-                  <Badge bg="success">On</Badge>
-                ) : (
-                  <Badge bg="secondary">Off</Badge>
-                ))}
+              {status ? (
+                <Badge bg={status.enabled ? "success" : "secondary"}>
+                  {status.enabled ? "On" : "Off"}
+                </Badge>
+              ) : null}
             </Card.Title>
             <Card.Text className="text-muted mb-0">
               {status === null
@@ -178,22 +178,22 @@ export const TwoFactorCard: FC = () => {
               Try again
             </Button>
           )}
-          {status?.available &&
-            (status.enabled ? (
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={() => open({ name: "disable" })}
-              >
-                Turn off
-              </Button>
-            ) : (
-              <Button size="sm" onClick={() => open({ name: "password" })}>
-                Turn on
-              </Button>
-            ))}
+          {status?.available && status.enabled ? (
+            <Button
+              variant="outline-danger"
+              size="sm"
+              onClick={() => open({ name: "disable" })}
+            >
+              Turn off
+            </Button>
+          ) : null}
+          {status?.available && !status.enabled ? (
+            <Button size="sm" onClick={() => open({ name: "password" })}>
+              Turn on
+            </Button>
+          ) : null}
         </div>
-        {status?.enabled && (
+        {status?.enabled ? (
           <div className="mt-2 d-flex flex-wrap align-items-center gap-2">
             <Button
               variant="link"
@@ -204,13 +204,13 @@ export const TwoFactorCard: FC = () => {
             >
               Ask for the code again on all my browsers
             </Button>
-            {forgetMessage && (
+            {forgetMessage ? (
               <span className="small text-muted" role="status">
                 {forgetMessage}
               </span>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </Card.Body>
 
       <Modal
@@ -225,7 +225,7 @@ export const TwoFactorCard: FC = () => {
         </Modal.Header>
         <Modal.Body>
           {step.name === "password" && (
-            <Form id="mfa-step-form" onSubmit={onStart}>
+            <Form id={stepFormId} onSubmit={onStart}>
               <Form.Group controlId="mfa-password">
                 <Form.Label>Confirm your password</Form.Label>
                 <Form.Control
@@ -240,7 +240,7 @@ export const TwoFactorCard: FC = () => {
           )}
 
           {step.name === "scan" && (
-            <Form id="mfa-step-form" onSubmit={onConfirm}>
+            <Form id={stepFormId} onSubmit={onConfirm}>
               <p>
                 Scan this QR code with an authenticator app (Google
                 Authenticator, Microsoft Authenticator, Aegis, 2FAS…), then type
@@ -298,7 +298,7 @@ export const TwoFactorCard: FC = () => {
           )}
 
           {step.name === "disable" && (
-            <Form id="mfa-step-form" onSubmit={onDisable}>
+            <Form id={stepFormId} onSubmit={onDisable}>
               <Form.Group controlId="mfa-disable-password" className="mb-2">
                 <Form.Label>Password</Form.Label>
                 <Form.Control
@@ -322,11 +322,11 @@ export const TwoFactorCard: FC = () => {
             </Form>
           )}
 
-          {error && (
+          {error ? (
             <Alert variant="danger" className="mt-3 mb-0">
               {error}
             </Alert>
-          )}
+          ) : null}
         </Modal.Body>
         <Modal.Footer>
           {step.name === "codes" ? (
@@ -334,7 +334,7 @@ export const TwoFactorCard: FC = () => {
           ) : (
             <Button
               type="submit"
-              form="mfa-step-form"
+              form={stepFormId}
               variant={step.name === "disable" ? "danger" : "primary"}
               disabled={isBusy}
             >

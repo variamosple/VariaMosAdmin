@@ -75,14 +75,14 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
               followUp={followUps?.[serviceKeyOf(microService)]}
             />
           ))}
-          {state && (
+          {state ? (
             <TableStateRow
               state={state}
               isEmpty={!items?.length}
               colSpan={7}
               items="microservices"
             />
-          )}
+          ) : null}
         </tbody>
       </Table>
 

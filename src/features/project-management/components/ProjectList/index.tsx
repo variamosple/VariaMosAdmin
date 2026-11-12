@@ -61,14 +61,14 @@ export const ProjectList: FC<ProjectListProps> = ({
               onProjectDelete={onProjectDelete}
             />
           ))}
-          {state && (
+          {state ? (
             <TableStateRow
               state={state}
               isEmpty={!items?.length}
               colSpan={8}
               items="projects"
             />
-          )}
+          ) : null}
         </tbody>
       </Table>
 

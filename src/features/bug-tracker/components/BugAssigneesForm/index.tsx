@@ -42,7 +42,7 @@ export const BugAssigneesForm: FC<BugAssigneesFormProps> = ({
     <Form onSubmit={handleSubmit} className="border rounded p-3 mb-3">
       <fieldset disabled={isSaving}>
         <legend className="h6 mb-2">Assign administrators</legend>
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error ? <Alert variant="danger">{error}</Alert> : null}
         {candidates.map((user) => (
           <Form.Check
             key={user.id}

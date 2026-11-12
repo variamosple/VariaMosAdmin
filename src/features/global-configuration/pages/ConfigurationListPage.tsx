@@ -1,5 +1,5 @@
 import { useSession, withPageVisit } from "@variamosple/variamos-components";
-import { type FC, useMemo, useState } from "react";
+import { type FC, useId, useMemo, useState } from "react";
 import {
   Alert,
   Badge,
@@ -54,6 +54,7 @@ const lockedLabel = (config: Configuration) =>
     : "This setting is locked until a second-factor check is available";
 
 const ConfigurationListPageComponent: FC = () => {
+  const categoryTabsId = useId();
   usePageTitle("Global configurations");
   const {
     configurations,
@@ -247,16 +248,16 @@ const ConfigurationListPageComponent: FC = () => {
                             </Badge>
                           )}
                         </div>
-                        {saveFailure && isModified && (
+                        {saveFailure && isModified ? (
                           <div className="text-danger small mt-1" role="alert">
                             Not saved: {saveFailure}
                           </div>
-                        )}
-                        {config.description && (
+                        ) : null}
+                        {config.description ? (
                           <div className="text-muted small mt-1">
                             {config.description}
                           </div>
-                        )}
+                        ) : null}
                         <div className="mt-2 d-flex gap-2">
                           <Badge
                             bg="light"
@@ -264,7 +265,7 @@ const ConfigurationListPageComponent: FC = () => {
                           >
                             {config.type}
                           </Badge>
-                          {config.requiresMfa && (
+                          {config.requiresMfa ? (
                             <OverlayTrigger
                               placement="top"
                               overlay={
@@ -279,7 +280,7 @@ const ConfigurationListPageComponent: FC = () => {
                                 LOCKED
                               </Badge>
                             </OverlayTrigger>
-                          )}
+                          ) : null}
                           {config.isApplied === false && (
                             <OverlayTrigger
                               placement="top"
@@ -328,12 +329,12 @@ const ConfigurationListPageComponent: FC = () => {
                         ) : (
                           <span className="text-dark fw-medium">
                             {String(config.value)}
-                            {config.accepts?.unit && (
+                            {config.accepts?.unit ? (
                               <span className="text-muted fw-normal">
                                 {" "}
                                 {config.accepts.unit}
                               </span>
-                            )}
+                            ) : null}
                           </span>
                         )}
                       </td>
@@ -383,7 +384,7 @@ const ConfigurationListPageComponent: FC = () => {
                               label="Edit setting"
                               icon={<PencilFill />}
                             />
-                            {canSchedule && (
+                            {canSchedule ? (
                               <IconButton
                                 size="sm"
                                 variant="outline-primary"
@@ -398,7 +399,7 @@ const ConfigurationListPageComponent: FC = () => {
                                 }
                                 icon={<CalendarEvent />}
                               />
-                            )}
+                            ) : null}
                           </div>
                         )}
                       </td>
@@ -419,14 +420,14 @@ const ConfigurationListPageComponent: FC = () => {
         <div>
           <h1 className="mb-0">Global Configurations</h1>
         </div>
-        {(isLoading || isUpdating) && (
+        {isLoading || isUpdating ? (
           <Spinner animation="border" size="sm" variant="primary" />
-        )}
+        ) : null}
       </div>
       <hr />
 
       {/* Floating Action Banner for Unsaved Changes */}
-      {isDirty && (
+      {isDirty ? (
         <Alert
           variant="warning"
           className="d-flex justify-content-between align-items-center py-2 px-3 mb-4 shadow-sm border-warning rounded"
@@ -464,7 +465,7 @@ const ConfigurationListPageComponent: FC = () => {
             </Button>
           </div>
         </Alert>
-      )}
+      ) : null}
 
       <ConfirmationModal
         show={confirming === "discard"}
@@ -484,7 +485,7 @@ const ConfigurationListPageComponent: FC = () => {
         onClose={() => setAnnouncement(null)}
       />
 
-      {scheduling && (
+      {scheduling ? (
         <ScheduleChangeModal
           config={scheduling.config}
           change={scheduling.change}
@@ -492,7 +493,7 @@ const ConfigurationListPageComponent: FC = () => {
           onSaved={onScheduled}
           timeZone={timeZone}
         />
-      )}
+      ) : null}
 
       <ConfirmationModal
         show={toCancel !== undefined}
@@ -508,7 +509,7 @@ const ConfigurationListPageComponent: FC = () => {
         onCancel={() => setToCancel(undefined)}
       />
 
-      {cancelError && (
+      {cancelError ? (
         <Alert
           variant="danger"
           dismissible
@@ -517,7 +518,7 @@ const ConfigurationListPageComponent: FC = () => {
         >
           {cancelError}
         </Alert>
-      )}
+      ) : null}
       <ScheduledChangesPanel
         changes={scheduled.changes}
         error={scheduled.error}
@@ -563,7 +564,7 @@ const ConfigurationListPageComponent: FC = () => {
         )
       ) : (
         <Tabs
-          id="config-category-tabs"
+          id={categoryTabsId}
           activeKey={shownTab}
           onSelect={(k) => k && setActiveTab(k)}
           className="mb-4"

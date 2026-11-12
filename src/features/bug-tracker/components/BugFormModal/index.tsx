@@ -97,14 +97,14 @@ export const BugFormModal: FC<BugFormModalProps> = ({
 
       <Form onSubmit={handleSubmit(handleFormSubmit)}>
         <Modal.Body>
-          {error && <Alert variant="danger">{error}</Alert>}
+          {error ? <Alert variant="danger">{error}</Alert> : null}
 
           <Form.Group className="mb-3" controlId="bugTitle">
             <Form.Label>Title *</Form.Label>
             <Form.Control
               type="text"
               placeholder="e.g. Build error on auth routes"
-              isInvalid={!!errors.title}
+              isInvalid={Boolean(errors.title)}
               {...register("title", {
                 required: "Title is required",
                 maxLength: {
@@ -113,11 +113,11 @@ export const BugFormModal: FC<BugFormModalProps> = ({
                 },
               })}
             />
-            {errors.title && (
+            {errors.title ? (
               <Form.Control.Feedback type="invalid">
                 {errors.title.message as string}
               </Form.Control.Feedback>
-            )}
+            ) : null}
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="bugDescription">
@@ -126,23 +126,23 @@ export const BugFormModal: FC<BugFormModalProps> = ({
               as="textarea"
               rows={4}
               placeholder="Describe step-by-step how to reproduce the bug, the expected behavior, and what actually happens..."
-              isInvalid={!!errors.description}
+              isInvalid={Boolean(errors.description)}
               {...register("description", {
                 required: "Description is required",
               })}
             />
-            {errors.description && (
+            {errors.description ? (
               <Form.Control.Feedback type="invalid">
                 {errors.description.message as string}
               </Form.Control.Feedback>
-            )}
+            ) : null}
           </Form.Group>
 
           {mode === "admin" && (
             <Form.Group className="mb-3" controlId="bugRepo">
               <Form.Label>Target Repository (GitHub) *</Form.Label>
               <Form.Select
-                isInvalid={!!errors.githubRepo}
+                isInvalid={Boolean(errors.githubRepo)}
                 {...register("githubRepo", {
                   required: "Target repository is required",
                 })}
@@ -154,11 +154,11 @@ export const BugFormModal: FC<BugFormModalProps> = ({
                   </option>
                 ))}
               </Form.Select>
-              {errors.githubRepo && (
+              {errors.githubRepo ? (
                 <Form.Control.Feedback type="invalid">
                   {errors.githubRepo.message as string}
                 </Form.Control.Feedback>
-              )}
+              ) : null}
             </Form.Group>
           )}
 
@@ -217,7 +217,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
                 setSelectedFile(e.target.files?.[0] ?? null);
               }}
             />
-            {selectedFile && (
+            {selectedFile ? (
               <div className="d-flex align-items-center gap-2 mt-2 small">
                 <span className="text-truncate">
                   Selected file: {selectedFile.name}
@@ -232,7 +232,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
                   Remove
                 </Button>
               </div>
-            )}
+            ) : null}
           </Form.Group>
         </Modal.Body>
 

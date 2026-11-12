@@ -192,23 +192,23 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
 
       <Form onSubmit={handleSubmit(handleFormSubmit)}>
         <Modal.Body>
-          {modalError && <Alert variant="danger">{modalError}</Alert>}
+          {modalError ? <Alert variant="danger">{modalError}</Alert> : null}
 
           {/* Frozen while the approval waits for confirmation: what is
               published is what was reviewed */}
-          <fieldset disabled={!!pendingApproval}>
+          <fieldset disabled={Boolean(pendingApproval)}>
             <Form.Group className="mb-3" controlId="approveTitle">
               <Form.Label>Title *</Form.Label>
               <Form.Control
                 type="text"
-                isInvalid={!!errors.title}
+                isInvalid={Boolean(errors.title)}
                 {...register("title", { required: "Title is required" })}
               />
-              {errors.title && (
+              {errors.title ? (
                 <Form.Control.Feedback type="invalid">
                   {errors.title.message}
                 </Form.Control.Feedback>
-              )}
+              ) : null}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="approveDescription">
@@ -216,16 +216,16 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
               <Form.Control
                 as="textarea"
                 rows={4}
-                isInvalid={!!errors.description}
+                isInvalid={Boolean(errors.description)}
                 {...register("description", {
                   required: "Description is required",
                 })}
               />
-              {errors.description && (
+              {errors.description ? (
                 <Form.Control.Feedback type="invalid">
                   {errors.description.message}
                 </Form.Control.Feedback>
-              )}
+              ) : null}
             </Form.Group>
 
             <div className="row mb-3">
@@ -233,7 +233,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                 <Form.Group controlId="approveRepo">
                   <Form.Label>Target Repository (GitHub) *</Form.Label>
                   <Form.Select
-                    isInvalid={!!errors.githubRepo}
+                    isInvalid={Boolean(errors.githubRepo)}
                     {...register("githubRepo", {
                       required: "GitHub repository is required",
                     })}
@@ -245,11 +245,11 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                       </option>
                     ))}
                   </Form.Select>
-                  {errors.githubRepo && (
+                  {errors.githubRepo ? (
                     <Form.Control.Feedback type="invalid">
                       {errors.githubRepo.message}
                     </Form.Control.Feedback>
-                  )}
+                  ) : null}
                 </Form.Group>
               </div>
 
@@ -375,12 +375,12 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
                   hidden
                   disabled={isUploading}
                 />
-                {isUploading && (
+                {isUploading ? (
                   <div className="ms-2 d-flex align-items-center text-muted small">
                     <Spinner animation="border" size="sm" className="me-1" />
                     Uploading...
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 

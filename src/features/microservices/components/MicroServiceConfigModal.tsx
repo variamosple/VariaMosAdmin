@@ -164,7 +164,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
           className="mb-3"
         >
           <Tab eventKey="configs" title={`Configurations (${configs.length})`}>
-            {saveError && (
+            {saveError ? (
               <Alert
                 variant="danger"
                 dismissible
@@ -172,7 +172,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
               >
                 {saveError}
               </Alert>
-            )}
+            ) : null}
             <div className="d-flex justify-content-between align-items-center mb-3">
               <span className="small text-muted">
                 Runtime parameters & environment overrides for this service.
@@ -187,7 +187,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
               </Button>
             </div>
 
-            {showAddForm && (
+            {showAddForm ? (
               <div className="bg-light p-3 rounded mb-3 border">
                 <h6 className="fw-bold mb-2">Add new configuration key</h6>
                 <div className="row g-2">
@@ -219,7 +219,7 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
 
             {loading ? (
               <div className="text-center my-4">

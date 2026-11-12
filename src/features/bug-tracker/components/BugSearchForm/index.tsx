@@ -118,7 +118,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
                 className="form-control"
                 placeholder="Search by name"
                 {...register("search")}
-                isInvalid={!!errors.search}
+                isInvalid={Boolean(errors.search)}
               />
               <IconButton
                 label="Clear name filter"
@@ -141,7 +141,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
                   className="form-select"
                   aria-label="Repository"
                   {...register("repo")}
-                  isInvalid={!!errors.repo}
+                  isInvalid={Boolean(errors.repo)}
                 >
                   <option value="">All</option>
                   {repos.map((repoName: string) => (
@@ -172,7 +172,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
                   className="form-select"
                   aria-label="Status"
                   {...register("status")}
-                  isInvalid={!!errors.status}
+                  isInvalid={Boolean(errors.status)}
                 >
                   <option value="">All</option>
                   {GITHUB_BUG_STATUSES.map((status) => (
@@ -208,7 +208,7 @@ export const BugSearchForm: FC<BugSearchFormProps> = ({
                 className="form-select"
                 aria-label="Priority"
                 {...register("priority")}
-                isInvalid={!!errors.priority}
+                isInvalid={Boolean(errors.priority)}
               >
                 <option value="">All</option>
                 {BUG_PRIORITIES.map((priority) => (

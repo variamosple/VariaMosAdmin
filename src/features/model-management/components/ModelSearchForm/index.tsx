@@ -137,7 +137,7 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
               className="form-control"
               placeholder="Search by model name or project name"
               {...register("name")}
-              isInvalid={!!errors.name}
+              isInvalid={Boolean(errors.name)}
             />
           </Form.Group>
         </Col>

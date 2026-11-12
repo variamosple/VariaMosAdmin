@@ -57,7 +57,7 @@ const MicroServiceListPageComponent: FC = () => {
 
   // A failed reload leaves the last statuses on screen: say they are old
   // instead of letting them pass for current ones (EV-86 lot 2)
-  const isConnectionLost = !!listState.error && microServices.length > 0;
+  const isConnectionLost = Boolean(listState.error) && microServices.length > 0;
 
   return (
     <Container fluid="sm" className="my-2">
@@ -117,7 +117,7 @@ const MicroServiceListPageComponent: FC = () => {
 
       <hr />
 
-      {isConnectionLost && (
+      {isConnectionLost ? (
         <Alert variant="warning" className="d-flex align-items-center gap-2">
           <span>
             Connection to the administration service lost: the statuses below
@@ -133,7 +133,7 @@ const MicroServiceListPageComponent: FC = () => {
             Retry
           </Button>
         </Alert>
-      )}
+      ) : null}
 
       {/* Microservice Cards List */}
       <MicroServiceList
@@ -150,9 +150,9 @@ const MicroServiceListPageComponent: FC = () => {
       />
 
       {/* Service Configuration & Audit Modal */}
-      {selectedConfigService && (
+      {selectedConfigService ? (
         <MicroServiceConfigModal
-          show={!!selectedConfigService}
+          show={Boolean(selectedConfigService)}
           serviceName={selectedConfigService.serviceName}
           displayName={
             selectedConfigService.displayName ||
@@ -160,7 +160,7 @@ const MicroServiceListPageComponent: FC = () => {
           }
           onHide={() => setSelectedConfigService(undefined)}
         />
-      )}
+      ) : null}
 
       {/* Confirmation Modals */}
       <ConfirmationModal

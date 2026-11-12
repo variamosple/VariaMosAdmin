@@ -45,7 +45,7 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
           className="form-control"
           placeholder="name@example.com"
           {...register("email", { required: "Email is required" })}
-          isInvalid={!!errors.email}
+          isInvalid={Boolean(errors.email)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.email?.message}
@@ -56,7 +56,7 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
         className="w-100"
         variant="primary"
         type="submit"
-        disabled={!!errors.email || isLoading}
+        disabled={Boolean(errors.email) || isLoading}
       >
         {isLoading ? (
           <>

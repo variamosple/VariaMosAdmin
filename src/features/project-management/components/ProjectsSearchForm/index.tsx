@@ -123,7 +123,7 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
               className="form-control"
               placeholder="Project name"
               {...register("name")}
-              isInvalid={!!errors.name}
+              isInvalid={Boolean(errors.name)}
             />
           </Form.Group>
         </Col>

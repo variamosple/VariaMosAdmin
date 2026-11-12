@@ -89,14 +89,14 @@ export const RoleList: FC<RoleListParameters> = ({
               </td>
             </tr>
           ))}
-          {state && (
+          {state ? (
             <TableStateRow
               state={state}
               isEmpty={!items?.length}
               colSpan={3}
               items="roles"
             />
-          )}
+          ) : null}
         </tbody>
       </Table>
 

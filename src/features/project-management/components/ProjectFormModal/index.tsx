@@ -94,7 +94,7 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
               className="form-control"
               placeholder="Project name"
               {...register("name", { required: "Project name is required" })}
-              isInvalid={!!errors.name}
+              isInvalid={Boolean(errors.name)}
             />
             <Form.Control.Feedback type="invalid">
               {errors.name?.message}

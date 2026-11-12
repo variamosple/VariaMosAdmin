@@ -135,7 +135,7 @@ export const UserRowComponent: FC<UserRowProps> = ({
         </td>
       </tr>
 
-      {show && isLoading && (
+      {show && isLoading ? (
         <tr>
           <td colSpan={8}>
             <div className="w-100 text-center my-3">
@@ -147,15 +147,15 @@ export const UserRowComponent: FC<UserRowProps> = ({
             </div>
           </td>
         </tr>
-      )}
+      ) : null}
 
-      {show && (
+      {show ? (
         <tr>
           <td colSpan={8}>
             <RolesDetails isLoading={isLoading} roles={data} />
           </td>
         </tr>
-      )}
+      ) : null}
     </>
   );
 };

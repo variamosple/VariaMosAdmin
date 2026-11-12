@@ -49,7 +49,7 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           {...register("name", {
             required: "Full name is required",
           })}
-          isInvalid={!!errors.name}
+          isInvalid={Boolean(errors.name)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.name?.message}
@@ -65,7 +65,7 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
           className="form-control"
           placeholder="name@example.com"
           {...register("email", { required: "Email is required" })}
-          isInvalid={!!errors.email}
+          isInvalid={Boolean(errors.email)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.email?.message}
@@ -84,7 +84,7 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
             required: "password is required",
             validate: passwordPolicy.validate,
           })}
-          isInvalid={!!errors.password}
+          isInvalid={Boolean(errors.password)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.password?.message}
@@ -106,7 +106,7 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
             required: "Please confirm your password",
             validate: validateConfirmPassword,
           })}
-          isInvalid={!!errors.passwordConfirmation}
+          isInvalid={Boolean(errors.passwordConfirmation)}
         />
         <Form.Control.Feedback type="invalid">
           {errors.passwordConfirmation?.message}

@@ -112,23 +112,23 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
               icon={<PencilFill />}
             />
 
-            {isActive && (
+            {isActive ? (
               <IconButton
                 variant="warning"
                 onClick={() => onLanguageDeactivate(language)}
                 label="Deactivate language"
                 icon={<StopFill />}
               />
-            )}
+            ) : null}
 
-            {isDisabledOrPending && (
+            {isDisabledOrPending ? (
               <IconButton
                 variant="success"
                 onClick={() => onLanguageActivate(language)}
                 label="Activate language"
                 icon={<PlayFill />}
               />
-            )}
+            ) : null}
 
             {!isActive && !isDeleted && (
               <IconButton
@@ -150,7 +150,7 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
         </td>
       </tr>
 
-      {show && (
+      {show ? (
         <tr>
           <td colSpan={7}>
             <LanguageDetails
@@ -159,9 +159,9 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
             />
           </td>
         </tr>
-      )}
+      ) : null}
 
-      {showContactModal && (
+      {showContactModal ? (
         <ContactOwnerModal
           show={showContactModal}
           onClose={() => setShowContactModal(false)}
@@ -169,7 +169,7 @@ export const LanguageRowComponent: FC<LanguageRowProps> = ({
           entityName={language.name || ""}
           entityType="Language"
         />
-      )}
+      ) : null}
     </>
   );
 };

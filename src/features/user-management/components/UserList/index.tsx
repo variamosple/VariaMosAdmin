@@ -97,14 +97,14 @@ export const UserList: FC<UserListParameters> = ({
               onUserEnable={onUserEnable}
             />
           ))}
-          {state && (
+          {state ? (
             <TableStateRow
               state={state}
               isEmpty={!items?.length}
               colSpan={7}
               items="users"
             />
-          )}
+          ) : null}
         </tbody>
       </Table>
 

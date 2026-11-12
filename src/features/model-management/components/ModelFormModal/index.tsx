@@ -142,7 +142,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
       : undefined) ||
     "Select a project...";
 
-  const isEdit = !!defaultValue?.id;
+  const isEdit = Boolean(defaultValue?.id);
 
   const titleId = useId();
 
@@ -166,7 +166,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
               className="form-control"
               placeholder="Model name"
               {...register("name", { required: "Model name is required" })}
-              isInvalid={!!errors.name}
+              isInvalid={Boolean(errors.name)}
             />
             <Form.Control.Feedback type="invalid">
               {errors.name?.message}
@@ -230,14 +230,14 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
                 type="hidden"
                 {...register("projectId", { required: "Project is required" })}
               />
-              {errors.projectId && (
+              {errors.projectId ? (
                 <div
                   className="text-danger mt-1"
                   style={{ fontSize: "0.875em" }}
                 >
                   {errors.projectId.message}
                 </div>
-              )}
+              ) : null}
             </Form.Group>
           )}
 
@@ -295,11 +295,11 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
               type="hidden"
               {...register("languageId", { required: "Language is required" })}
             />
-            {errors.languageId && (
+            {errors.languageId ? (
               <div className="text-danger mt-1" style={{ fontSize: "0.875em" }}>
                 {errors.languageId.message}
               </div>
-            )}
+            ) : null}
           </Form.Group>
 
           <Form.Group className="col-12" controlId="modelLevel">

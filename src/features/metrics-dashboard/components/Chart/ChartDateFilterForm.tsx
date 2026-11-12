@@ -74,7 +74,7 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
               className="form-control"
               size="sm"
               {...register("fromDate", { required: "From date is required" })}
-              isInvalid={!!errors.fromDate}
+              isInvalid={Boolean(errors.fromDate)}
               style={formControlsStyle}
             />
             <Form.Control.Feedback type="invalid">
@@ -89,7 +89,7 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
               className="form-control"
               size="sm"
               {...register("toDate", { required: "To date is required" })}
-              isInvalid={!!errors.toDate}
+              isInvalid={Boolean(errors.toDate)}
               style={formControlsStyle}
             />
             <Form.Control.Feedback type="invalid">
@@ -111,7 +111,7 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
               validate: (value) =>
                 monthPeriod(value) !== null || "Choose a month",
             })}
-            isInvalid={!!errors.month}
+            isInvalid={Boolean(errors.month)}
             style={formControlsStyle}
           />
           <Form.Control.Feedback type="invalid">
@@ -134,7 +134,7 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
               validate: (value) =>
                 yearPeriod(value) !== null || "Enter a four-digit year",
             })}
-            isInvalid={!!errors.year}
+            isInvalid={Boolean(errors.year)}
             style={formControlsStyle}
           />
           <Form.Control.Feedback type="invalid">

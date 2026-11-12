@@ -78,14 +78,14 @@ const LineChartComponent: FC = () => {
         className="d-flex justify-content-center align-items-center w-100"
         style={{ height: "350px" }}
       >
-        {isLoading && (
+        {isLoading ? (
           <Spinner
             data-testid="loading-spinner"
             className="mt-5"
             animation="border"
             variant="primary"
           />
-        )}
+        ) : null}
 
         {!isLoading && !metric.data && (
           <span className="text-muted">No data found.</span>

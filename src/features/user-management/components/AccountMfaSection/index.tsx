@@ -31,7 +31,7 @@ export const AccountMfaSection: FC<AccountMfaSectionProps> = ({ userId }) => {
   const [isBusy, setIsBusy] = useState(false);
 
   const canReset =
-    !!operator?.permissions?.includes(RESET_MFA_PERMISSION) &&
+    operator?.permissions?.includes(RESET_MFA_PERMISSION) === true &&
     operator.id !== userId;
 
   const refresh = useCallback(() => {

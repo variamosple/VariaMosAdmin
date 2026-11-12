@@ -78,7 +78,7 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
               className="form-control"
               placeholder="Search by language name"
               {...register("name")}
-              isInvalid={!!errors.name}
+              isInvalid={Boolean(errors.name)}
             />
           </Form.Group>
         </Col>
@@ -91,7 +91,7 @@ export const LanguageSearchForm: FC<LanguageSearchFormProps> = ({
                 className="form-control"
                 aria-label="Status"
                 {...register("status")}
-                isInvalid={!!errors.name}
+                isInvalid={Boolean(errors.name)}
               >
                 <option value="">All</option>
                 <option value={LanguageStatus.ACTIVE}>Active / Approved</option>

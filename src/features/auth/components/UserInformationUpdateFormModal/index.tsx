@@ -91,11 +91,11 @@ export const PersonalInformationUpdateForModal: FC<
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">
-          {serverError && (
+          {serverError ? (
             <Alert variant="danger" className="mb-0">
               {serverError}
             </Alert>
-          )}
+          ) : null}
           <Form.Group className="w-100" controlId="countryCode">
             <Form.Label className="form-label align-self-start m-0">
               Country
@@ -108,7 +108,7 @@ export const PersonalInformationUpdateForModal: FC<
                 aria-label="Select your country"
                 className="form-control"
                 {...register("countryCode")}
-                isInvalid={!!errors.countryCode}
+                isInvalid={Boolean(errors.countryCode)}
               >
                 <option value="">Select your country</option>
 

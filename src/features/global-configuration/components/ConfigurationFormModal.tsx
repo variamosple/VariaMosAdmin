@@ -36,6 +36,7 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
 }) => {
   const titleId = useId();
   const timeZonesId = useId();
+  const booleanSwitchId = useId();
   const [inputValue, setInputValue] = useState<string>("");
   const [boolValue, setBoolValue] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -131,12 +132,12 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
             <div className="fs-5 fw-semibold">{config.key}</div>
           </div>
 
-          {config.description && (
+          {config.description ? (
             <div>
               <div className="fw-bold text-muted small">DESCRIPTION</div>
               <div>{config.description}</div>
             </div>
-          )}
+          ) : null}
 
           <div>
             <div className="fw-bold text-muted small">TYPE</div>
@@ -147,14 +148,16 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
 
           <hr className="my-1" />
 
-          {validationError && <Alert variant="danger">{validationError}</Alert>}
+          {validationError ? (
+            <Alert variant="danger">{validationError}</Alert>
+          ) : null}
 
-          {config.isReadOnly && (
+          {config.isReadOnly ? (
             <Alert variant="warning" className="py-2 small mb-0">
               This configuration is marked as <strong>read-only</strong>. It
               cannot be updated.
             </Alert>
-          )}
+          ) : null}
 
           {config.isApplied === false && (
             <Alert variant="secondary" className="py-2 small mb-0">
@@ -162,19 +165,19 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
             </Alert>
           )}
 
-          {config.requiresMfa && (
+          {config.requiresMfa ? (
             <Alert variant="warning" className="py-2 small mb-0">
               Changing this setting needs a second-factor check, which is not
               available yet: the server refuses the change.
             </Alert>
-          )}
+          ) : null}
 
           <Form.Group controlId="configValue">
             <Form.Label className="fw-bold">Value</Form.Label>
             {config.type === "boolean" ? (
               <Form.Check
                 type="switch"
-                id="bool-switch"
+                id={booleanSwitchId}
                 label={boolValue ? "Enabled" : "Disabled"}
                 checked={boolValue}
                 disabled={config.isReadOnly}
@@ -234,11 +237,11 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
             {config.accepts && config.type !== "boolean" && (
               <Form.Text muted>Accepted: {config.accepts.text}.</Form.Text>
             )}
-            {config.isSecret && (
+            {config.isSecret ? (
               <Form.Text muted>
                 The current value is hidden. Enter a new value to replace it.
               </Form.Text>
-            )}
+            ) : null}
           </Form.Group>
         </Modal.Body>
 

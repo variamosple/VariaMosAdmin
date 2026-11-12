@@ -64,11 +64,11 @@ export const ForgotPasswordPage: FC = () => {
               Enter your email address to receive a temporary reset link.
             </p>
           </div>
-          {error && (
+          {error ? (
             <Alert variant="danger" className="w-100 small">
               {error}
             </Alert>
-          )}
+          ) : null}
           <ForgotPasswordForm
             onSubmitEmail={handleSubmit}
             isLoading={isLoading}

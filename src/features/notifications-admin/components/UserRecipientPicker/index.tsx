@@ -170,7 +170,7 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
           onKeyDown={onKeyDown}
         />
 
-        {open && (
+        {open ? (
           <div
             className="position-absolute w-100 bg-white border rounded shadow-lg mt-1"
             style={{ zIndex: 1000, maxHeight: "220px", overflowY: "auto" }}
@@ -234,7 +234,7 @@ export const UserRecipientPicker: FC<UserRecipientPickerProps> = ({
                 </div>
               )}
           </div>
-        )}
+        ) : null}
         <div className="visually-hidden" aria-live="polite">
           {open && search.status === "done"
             ? `${options.length} user${options.length === 1 ? "" : "s"} found`

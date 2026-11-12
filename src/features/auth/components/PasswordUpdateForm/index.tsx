@@ -70,11 +70,11 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
       </Modal.Header>
       <Form className="w-100" onSubmit={handleSubmit(onSubmit)}>
         <Modal.Body className="d-flex flex-column gap-2">
-          {serverError && (
+          {serverError ? (
             <Alert variant="danger" className="mb-0">
               {serverError}
             </Alert>
-          )}
+          ) : null}
           <Form.Group className="w-100" controlId="currentPassword">
             <Form.Label className="form-label align-self-start m-0">
               Current password
@@ -86,7 +86,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
               {...register("currentPassword", {
                 required: "Current password is required",
               })}
-              isInvalid={!!errors.currentPassword}
+              isInvalid={Boolean(errors.currentPassword)}
             />
             <Form.Control.Feedback type="invalid">
               {errors.currentPassword?.message}
@@ -105,7 +105,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
                 required: "New password is required",
                 validate: passwordPolicy.validate,
               })}
-              isInvalid={!!errors.newPassword}
+              isInvalid={Boolean(errors.newPassword)}
             />
             <Form.Control.Feedback type="invalid">
               {errors.newPassword?.message}
@@ -127,7 +127,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
                 required: "Please confirm your password",
                 validate: validatePasswordConfirmation,
               })}
-              isInvalid={!!errors.passwordConfirmation}
+              isInvalid={Boolean(errors.passwordConfirmation)}
             />
             <Form.Control.Feedback type="invalid">
               {errors.passwordConfirmation?.message}

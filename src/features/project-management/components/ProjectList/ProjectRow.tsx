@@ -113,7 +113,7 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
         </td>
       </tr>
 
-      {show && (
+      {show ? (
         <tr>
           <td colSpan={8}>
             <ProjectDetails
@@ -122,9 +122,9 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
             />
           </td>
         </tr>
-      )}
+      ) : null}
 
-      {showContactModal && (
+      {showContactModal ? (
         <ContactOwnerModal
           show={showContactModal}
           onClose={() => setShowContactModal(false)}
@@ -132,7 +132,7 @@ export const ProjectRowComponent: FC<ProjectRowProps> = ({
           entityName={project.name || ""}
           entityType="Project"
         />
-      )}
+      ) : null}
     </>
   );
 };

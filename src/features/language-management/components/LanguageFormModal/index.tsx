@@ -71,7 +71,7 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
               className="form-control"
               placeholder="Language name"
               {...register("name", { required: "Language name is required" })}
-              isInvalid={!!errors.name}
+              isInvalid={Boolean(errors.name)}
             />
             <Form.Control.Feedback type="invalid">
               {errors.name?.message}

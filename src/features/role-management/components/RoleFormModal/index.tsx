@@ -81,7 +81,7 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
                     "Start with a capital letter, then lowercase words separated by single spaces (e.g. 'Test role').",
                 },
               })}
-              isInvalid={!!errors.name}
+              isInvalid={Boolean(errors.name)}
             />
             <Form.Control.Feedback type="invalid">
               {errors.name?.message}
