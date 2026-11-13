@@ -37,12 +37,17 @@ describe("TimeZone (EV-115 lot C)", () => {
     expect(describeInstant(at("2026-11-15T02:00:00Z"), "UTC")).toBe(
       "2026-11-15 02:00 UTC",
     );
+    expect(describeInstant(at("2026-11-15T02:00:00Z"), "Etc/UTC")).toBe(
+      "2026-11-15 02:00 UTC",
+    );
   });
 
   it("writes offsets in hours, and minutes when there are", () => {
     expect(formatOffset(0)).toBe("UTC");
     expect(formatOffset(-300)).toBe("UTC−5");
     expect(formatOffset(330)).toBe("UTC+5:30");
+    // Old local mean times have offsets of a few minutes
+    expect(formatOffset(305)).toBe("UTC+5:05");
     expect(offsetMinutes(at("2026-11-15T13:00:00Z"), "Asia/Kolkata")).toBe(330);
     expect(offsetMinutes(at("2026-11-15T13:00:30Z"), "America/Bogota")).toBe(
       -300,
@@ -95,5 +100,27 @@ describe("TimeZone (EV-115 lot C)", () => {
     expect(isKnownTimeZone("Europe/Paris")).toBe(true);
     expect(isKnownTimeZone("Mars/Base")).toBe(false);
     expect(isKnownTimeZone(browserTimeZone())).toBe(true);
+  });
+
+  it("puts UTC first once, even when the browser lists it among the others", () => {
+    vi.spyOn(Intl, "supportedValuesOf").mockReturnValue([
+      "Europe/Paris",
+      "UTC",
+    ]);
+    expect(knownTimeZones()).toEqual(["UTC", "Europe/Paris"]);
+    vi.restoreAllMocks();
+  });
+
+  it.each([
+    ["the browser's", "America/Bogota", "America/Bogota"],
+    ["UTC when the browser gives none", "", "UTC"],
+  ])("takes %s time zone", (_, given, expected) => {
+    const options = Intl.DateTimeFormat().resolvedOptions();
+    vi.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockReturnValue({
+      ...options,
+      timeZone: given,
+    });
+    expect(browserTimeZone()).toBe(expected);
+    vi.restoreAllMocks();
   });
 });

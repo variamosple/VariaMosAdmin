@@ -37,13 +37,14 @@ const server = vi.fn(async (search: string, pageNumber: number) => {
 const toOption = ({ id, name }: Item) => ({ label: name, value: id });
 
 // The last option comes into view when the test says so
-let reachLastOption: () => void = () => {};
+let observeLastOption: (isIntersecting: boolean) => void = () => {};
+const reachLastOption = () => observeLastOption(true);
 class ControlledIntersectionObserver {
   constructor(private readonly callback: IntersectionObserverCallback) {}
   observe() {
-    reachLastOption = () =>
+    observeLastOption = (isIntersecting) =>
       this.callback(
-        [{ isIntersecting: true } as IntersectionObserverEntry],
+        [{ isIntersecting } as IntersectionObserverEntry],
         this as never,
       );
   }
@@ -81,6 +82,21 @@ describe("useSearchableOptions", () => {
     act(() => reachLastOption());
 
     await waitFor(() => expect(result.current.options).toHaveLength(25));
+    expect(server).toHaveBeenLastCalledWith("", 2);
+  });
+
+  it("says it is fetching while the next page loads, and asks nothing for an option out of view", async () => {
+    const { result, showLastOption } = renderOptions();
+    expect(result.current.searchInput).toBe("");
+    await waitFor(() => expect(result.current.options).toHaveLength(20));
+    showLastOption();
+
+    act(() => observeLastOption(false));
+    expect(server).toHaveBeenCalledOnce();
+
+    act(() => reachLastOption());
+    expect(result.current.isFetching).toBe(true);
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
     expect(server).toHaveBeenLastCalledWith("", 2);
   });
 
