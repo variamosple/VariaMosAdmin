@@ -68,7 +68,6 @@ services:
       - "variamos.service.display-name=Admin Service"
       - "variamos.service.internal-port=4000"
       - "variamos.service.health-path=/health"
-    user: root
 
   variamos-ms-languages:
     build:
