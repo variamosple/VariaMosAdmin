@@ -40,24 +40,26 @@ describe("announcementOfChanges (EV-115 lot A)", () => {
     });
   });
 
-  it("gives a general title to settings of different kinds", () => {
-    expect(
-      announcementOfChanges([
-        {
-          key: "security.lockout.max_attempts",
-          announcement: {
-            title: "Sign-in protection updated",
-            body: "An account is now locked after 5 failed sign-in attempts.",
-          },
+  it("gives a general title to settings of different kinds, and no note when none has one", () => {
+    const announcement = announcementOfChanges([
+      {
+        key: "security.lockout.max_attempts",
+        announcement: {
+          title: "Sign-in protection updated",
+          body: "An account is now locked after 5 failed sign-in attempts.",
         },
-        {
-          key: "security.mfa.trusted_device_days",
-          announcement: {
-            title: "Two-factor sign-in updated",
-            body: "The two-factor sign-in code is now asked at every sign-in, on every browser.",
-          },
+      },
+      {
+        key: "security.mfa.trusted_device_days",
+        announcement: {
+          title: "Two-factor sign-in updated",
+          body: "The two-factor sign-in code is now asked at every sign-in, on every browser.",
         },
-      ])?.title,
-    ).toBe("Settings updated");
+      },
+    ]);
+    expect(announcement?.title).toBe("Settings updated");
+    expect(announcement?.body).toBe(
+      "An account is now locked after 5 failed sign-in attempts. The two-factor sign-in code is now asked at every sign-in, on every browser.",
+    );
   });
 });
