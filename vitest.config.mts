@@ -7,6 +7,11 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
     pool: "forks",
+    // Since Node 25, Node has its own localStorage, undefined without a storage
+    // file, and Vitest keeps it instead of the one of jsdom. The tests run
+    // browser code: turn Node's off in the workers. Remove once Vitest copies
+    // localStorage from jsdom itself.
+    execArgv: ["--no-experimental-webstorage"],
     // Globals and variables stubbed by vi.stubGlobal and vi.stubEnv come back
     // after each test, whatever the test does (EV-53)
     unstubGlobals: true,
