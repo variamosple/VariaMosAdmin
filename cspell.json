@@ -4,20 +4,8 @@
   "words": [
     "variamos",
     "patternfly",
-    "axios",
-    "sequelize",
-    "postgres",
-    "uuid",
-    "eject",
-    "postinstall",
     "usecases",
     "dataproviders",
-    "entrypoints",
-    "jwt",
-    "envvars",
-    "stryker",
-    "eslint",
-    "prettier",
     "commitlint",
     "lintstaged",
     "variamosple",
@@ -43,7 +31,28 @@
     "taze",
     "tootallnate",
     "unstub",
-    "worktrees"
+    "worktrees",
+    "appleboy",
+    "buildx",
+    "ACRUSERNAME",
+    "ACRUSERPASSWORD",
+    "sonarqube",
+    "trufflesecurity",
+    "knip",
+    "vitest",
+    "elif",
+    "fuser",
+    "isready",
+    "psql",
+    "PGOPTIONS",
+    "PGPASSWORD",
+    "pubout",
+    "variamosadmin",
+    "variamosadminaws",
+    "VITE",
+    "lintstagedrc",
+    "nosniff",
+    "WCAG"
   ],
   "ignorePaths": [
     "node_modules/**",
@@ -52,6 +61,10 @@
     "coverage/**",
     "package-lock.json",
     "cypress/**",
-    "biome.shared.jsonc"
-  ]
+    "biome.shared.jsonc",
+    ".env",
+    ".env.*",
+    "**/*.env"
+  ],
+  "ignoreRegExpList": ["/GHSA(-[a-z0-9]{4}){3}/g"]
 }
