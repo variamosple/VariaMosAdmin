@@ -21,7 +21,9 @@ export default defineConfig({
   reporter: [["html", { open: "never" }]],
   use: {
     baseURL: "http://localhost:3000",
-    trace: "on-first-retry",
+    // The trace of the failed run itself: with on-first-retry, a test that
+    // failed once then passed left only the trace of the passing retry
+    trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
