@@ -1,11 +1,13 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useEffect, useId } from "react";
-import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import type { FC } from "react";
+import { Form } from "react-bootstrap";
+import type { DefaultValues } from "react-hook-form";
 import {
   ROLE_NAME_PATTERN,
   type Role,
 } from "@/features/role-management/domain/Entity/Role";
+import { FormModal } from "@/shared/components/FormModal";
+import { useFormModal } from "@/shared/hooks/useFormModal";
 
 export interface RoleFormModalProps {
   modalTitle: string;
@@ -17,6 +19,11 @@ export interface RoleFormModalProps {
   submitText?: string;
 }
 
+// A copy: the form never writes into the edited role
+const roleFields = (role?: Role): DefaultValues<Role> => ({
+  ...role,
+});
+
 export const RoleFormModal: FC<RoleFormModalProps> = ({
   modalTitle,
   showModal,
@@ -26,88 +33,47 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
   isLoading,
   submitText = "Create role",
 }) => {
+  const { form, onSubmit, onCloseModal } = useFormModal<Role, Role>({
+    defaultValue,
+    toFields: roleFields,
+    submit: onRoleSubmit,
+    isLoading,
+    onClose,
+  });
   const {
     register,
-    handleSubmit,
     formState: { errors },
-    reset,
-  } = useForm<Role>();
-
-  useEffect(() => {
-    reset({ ...defaultValue });
-  }, [defaultValue, reset]);
-
-  const onSubmit: SubmitHandler<Role> = (data) => {
-    if (!isLoading) {
-      void onRoleSubmit(data).then((response) => {
-        if (!response.errorCode) {
-          reset();
-        }
-      });
-    }
-  };
-
-  const onCloseModal = () => {
-    onClose();
-    reset();
-  };
-
-  const titleId = useId();
+  } = form;
 
   return (
-    <Modal
-      aria-labelledby={titleId}
+    <FormModal
+      title={modalTitle}
       show={showModal}
-      backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
+      isLoading={isLoading}
+      submitText={submitText}
+      onClose={onCloseModal}
+      onSubmit={onSubmit}
     >
-      <Modal.Header closeButton={!isLoading}>
-        <Modal.Title id={titleId}>{modalTitle}</Modal.Title>
-      </Modal.Header>
-
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <Modal.Body>
-          <Form.Group controlId="name" className="col-12 col-md-8">
-            <Form.Label className="form-label ">Role name</Form.Label>
-            <Form.Control
-              type="text"
-              className="form-control "
-              placeholder="Role name"
-              {...register("name", {
-                required: "Role name is required",
-                pattern: {
-                  value: ROLE_NAME_PATTERN,
-                  message:
-                    "Start with a capital letter, then lowercase words separated by single spaces (e.g. 'Test role').",
-                },
-              })}
-              isInvalid={Boolean(errors.name)}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.name?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isLoading}
-            onClick={onCloseModal}
-          >
-            Cancel
-          </Button>
-
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <Spinner animation="border" variant="light" size="sm" />
-            ) : (
-              submitText
-            )}
-          </Button>
-        </Modal.Footer>
-      </Form>
-    </Modal>
+      <Form.Group controlId="name" className="col-12 col-md-8">
+        <Form.Label className="form-label ">Role name</Form.Label>
+        <Form.Control
+          type="text"
+          className="form-control "
+          placeholder="Role name"
+          {...register("name", {
+            required: "Role name is required",
+            pattern: {
+              value: ROLE_NAME_PATTERN,
+              message:
+                "Start with a capital letter, then lowercase words separated by single spaces (e.g. 'Test role').",
+            },
+          })}
+          isInvalid={Boolean(errors.name)}
+        />
+        <Form.Control.Feedback type="invalid">
+          {errors.name?.message}
+        </Form.Control.Feedback>
+      </Form.Group>
+    </FormModal>
   );
 };
