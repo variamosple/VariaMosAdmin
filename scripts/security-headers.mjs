@@ -5,6 +5,7 @@
 // Usage: node scripts/security-headers.mjs <output file>
 
 import { writeFileSync } from "node:fs";
+import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { loadEnv } from "vite";
 
@@ -76,10 +77,26 @@ export function securityHeaders(env) {
   ].join("\n");
 }
 
+/**
+ * The file to write, inside the project only: the build writes
+ * security-headers.conf at its root, and nothing else is expected.
+ */
+export function outputPath(argument, root) {
+  if (!argument) return null;
+  const path = resolve(root, argument);
+  const fromRoot = relative(root, path);
+  if (!fromRoot || fromRoot.startsWith("..") || isAbsolute(fromRoot)) {
+    return null;
+  }
+  return path;
+}
+
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
-  const output = process.argv[2];
+  const output = outputPath(process.argv[2], process.cwd());
   if (!output) {
-    console.error("Usage: node scripts/security-headers.mjs <output file>");
+    console.error(
+      "Usage: node scripts/security-headers.mjs <output file inside the project>",
+    );
     process.exit(1);
   }
   writeFileSync(
