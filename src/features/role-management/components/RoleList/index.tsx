@@ -5,7 +5,7 @@ import { PencilFill, Search, TrashFill } from "react-bootstrap-icons";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import type { RoleSortField } from "@/features/role-management/domain/Entity/RolesFilter";
 import { IconButton } from "@/shared/components/IconButton";
-import { SortableHeader } from "@/shared/components/SortableHeader";
+import { IdNameTableHead } from "@/shared/components/IdNameTableHead";
 import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { ListSort } from "@/shared/domain/Entity/ListSort";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
@@ -41,20 +41,7 @@ export const RoleList: FC<RoleListParameters> = ({
       />
 
       <Table aria-busy={state?.isLoading} striped bordered hover responsive>
-        <thead>
-          <tr>
-            <SortableHeader field="id" label="ID" sort={sort} onSort={onSort} />
-
-            <SortableHeader
-              field="name"
-              label="Name"
-              sort={sort}
-              onSort={onSort}
-            />
-
-            <th>Actions</th>
-          </tr>
-        </thead>
+        <IdNameTableHead sort={sort} onSort={onSort} />
 
         <tbody>
           {items?.map((role) => (

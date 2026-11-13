@@ -3,7 +3,7 @@ import { noData, parseResponse } from "@/shared/api/parseResponse";
 import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
 import type { Role } from "../domain/Entity/Role";
-import type { RolesFilter } from "../domain/Entity/RolesFilter";
+import { RolesFilter } from "../domain/Entity/RolesFilter";
 import { foundRoleSchema, roleSchema, rolesSchema } from "./roleSchemas";
 
 export const queryRoles = (
@@ -14,6 +14,15 @@ export const queryRoles = (
     .then((response) => parseResponse(rolesSchema, response.data, failure))
     .catch((error) => toErrorResponse(error, failure));
 };
+
+// Enough for every role to be offered as a choice: roles are few
+const ROLE_CHOICES_PAGE_SIZE = 100;
+
+/** The roles offered as a choice, for example as the audience of a message. */
+export const queryRoleChoices = (): Promise<ResponseModel<Role[]>> =>
+  queryRoles(
+    new RolesFilter({ pageNumber: 1, pageSize: ROLE_CHOICES_PAGE_SIZE }),
+  );
 
 export const createRole = (request: Role): Promise<ResponseModel<Role>> => {
   const failure =

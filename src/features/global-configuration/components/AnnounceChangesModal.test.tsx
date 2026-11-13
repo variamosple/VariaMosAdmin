@@ -76,7 +76,7 @@ describe("AnnounceChangesModal (EV-115 lot A)", () => {
       { id: 1, name: "Administrator" },
       { id: 3, name: "Product line designer" },
     ];
-    vi.spyOn(RoleRepository, "queryRoles").mockResolvedValue(roles);
+    vi.spyOn(RoleRepository, "queryRoleChoices").mockResolvedValue(roles);
     const count = vi
       .spyOn(NotificationsAdminRepository, "countNotificationRecipients")
       .mockResolvedValue(counted(1));

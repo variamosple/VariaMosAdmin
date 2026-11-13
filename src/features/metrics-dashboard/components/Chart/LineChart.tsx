@@ -1,5 +1,4 @@
 import type { FC } from "react";
-import { Spinner } from "react-bootstrap";
 import {
   CartesianGrid,
   Legend,
@@ -15,7 +14,7 @@ import {
   withChartContextWrapper,
 } from "../../context/ChartContext";
 import { useLineChartData } from "../../hooks/useLineChartData";
-import { ChartDateFilter } from "./ChartDateFilter";
+import { ChartFrame } from "./ChartFrame";
 
 const LineChartComponent: FC = () => {
   const { metric, isLoading } = useChartContext();
@@ -63,60 +62,38 @@ const LineChartComponent: FC = () => {
   ];
 
   return (
-    <div className="d-flex flex-column align-items-center col-12 col-lg-6 mb-4">
-      <div className="d-flex justify-content-between align-items-center my-2 w-100">
-        <h2 className="fs-4 my-0 text-center">{metric.title}</h2>
-
-        <ChartDateFilter id={metric.title} />
+    <ChartFrame
+      title={metric.title}
+      isLoading={isLoading}
+      hasData={Boolean(metric.data)}
+    >
+      <div className="w-100 h-100">
+        <ResponsiveContainer width="100%" height={350}>
+          <RechartsLineChart
+            data={chartData}
+            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+            <YAxis tick={{ fontSize: 10 }} />
+            <Tooltip />
+            <Legend />
+            {seriesKeys.map((key, index) => {
+              const keyStr = String(key);
+              return (
+                <Line
+                  key={keyStr}
+                  type="monotone"
+                  dataKey={keyStr}
+                  stroke={colors[index % colors.length]}
+                  activeDot={{ r: 8 }}
+                />
+              );
+            })}
+          </RechartsLineChart>
+        </ResponsiveContainer>
       </div>
-
-      <div
-        className="d-flex justify-content-center align-items-center w-100"
-        style={{ height: "350px" }}
-      >
-        {isLoading ? (
-          <Spinner
-            data-testid="loading-spinner"
-            className="mt-5"
-            animation="border"
-            variant="primary"
-          />
-        ) : null}
-
-        {!isLoading && !metric.data && (
-          <span className="text-muted">No data found.</span>
-        )}
-
-        {!isLoading && metric.data && (
-          <div className="w-100 h-100">
-            <ResponsiveContainer width="100%" height={350}>
-              <RechartsLineChart
-                data={chartData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip />
-                <Legend />
-                {seriesKeys.map((key, index) => {
-                  const keyStr = String(key);
-                  return (
-                    <Line
-                      key={keyStr}
-                      type="monotone"
-                      dataKey={keyStr}
-                      stroke={colors[index % colors.length]}
-                      activeDot={{ r: 8 }}
-                    />
-                  );
-                })}
-              </RechartsLineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </div>
-    </div>
+    </ChartFrame>
   );
 };
 

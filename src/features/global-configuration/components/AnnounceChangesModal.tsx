@@ -12,13 +12,10 @@ import {
   type DispatchNotificationRequest,
   dispatchNotification,
 } from "@/features/notifications-admin/api/NotificationsAdminRepository";
-import { queryRoles } from "@/features/role-management/api/RoleRepository";
-import type { Role } from "@/features/role-management/domain/Entity/Role";
-import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
+import { queryRoleChoices } from "@/features/role-management/api/RoleRepository";
 import { RoleCheckboxList } from "@/shared/components/RoleCheckboxList";
+import { useLoadedList } from "@/shared/hooks/useLoadedList";
 import type { ChangeAnnouncement } from "../domain/Entity/ChangeAnnouncement";
-
-const ROLE_PAGE_SIZE = 100;
 
 const accounts = (count: number) => `${count} account${count === 1 ? "" : "s"}`;
 
@@ -33,28 +30,13 @@ type Audience = "broadcast" | "role";
 // The roles an announcement may go to, loaded when first needed: most
 // announcements go to the whole site
 const useAnnouncementRoles = (audience: Audience) => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const response = await queryRoles(
-      new RolesFilter({
-        pageNumber: 1,
-        pageSize: ROLE_PAGE_SIZE,
-      }),
-    );
-    if (response.errorCode) {
-      setError(response.message || "The roles could not be loaded.");
-    } else {
-      setRoles(response.data ?? []);
-      setTotal(response.totalCount ?? response.data?.length ?? 0);
-    }
-    setLoading(false);
-  }, []);
+  const {
+    items: roles,
+    total,
+    loading,
+    error,
+    load,
+  } = useLoadedList(queryRoleChoices, "The roles could not be loaded.");
 
   useEffect(() => {
     if (audience === "role" && roles.length === 0 && !loading) {

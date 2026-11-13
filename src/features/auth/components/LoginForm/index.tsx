@@ -5,6 +5,7 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
 import "./styles.css";
+import { EmailField } from "../EmailField";
 
 export interface LoginFormProps {
   onSignIn: (credentials: Credentials) => void;
@@ -30,21 +31,10 @@ export const LoginForm: FC<LoginFormProps> = ({ onSignIn }) => {
       data-bs-theme="dark"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <Form.Group className="w-100" controlId="email">
-        <Form.Label className="form-label align-self-start m-0">
-          Email Address
-        </Form.Label>
-        <Form.Control
-          type="email"
-          className="form-control"
-          placeholder="name@example.com"
-          {...register("email", { required: "Email is required" })}
-          isInvalid={Boolean(errors.email)}
-        />
-        <Form.Control.Feedback type="invalid">
-          {errors.email?.message}
-        </Form.Control.Feedback>
-      </Form.Group>
+      <EmailField
+        registration={register("email", { required: "Email is required" })}
+        error={errors.email}
+      />
 
       <Form.Group className="w-100" controlId="password">
         <Form.Label className="form-label align-self-start m-0">

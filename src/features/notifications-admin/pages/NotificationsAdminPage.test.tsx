@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ResponseModel } from "@variamosple/variamos-components";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { queryRoles } from "@/features/role-management/api/RoleRepository";
+import { queryRoleChoices } from "@/features/role-management/api/RoleRepository";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
 import { queryUsers } from "@/features/user-management/api/UserRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
@@ -18,7 +18,7 @@ vi.mock("@/features/user-management/api/UserRepository", () => ({
 }));
 
 vi.mock("@/features/role-management/api/RoleRepository", () => ({
-  queryRoles: vi.fn(),
+  queryRoleChoices: vi.fn(),
 }));
 
 vi.mock("../api/NotificationsAdminRepository", () => ({
@@ -67,7 +67,7 @@ describe("NotificationsAdminPage Component Tests", () => {
 
     const rolesResponse = new ResponseModel<Role[]>("success");
     rolesResponse.data = mockRoles;
-    vi.mocked(queryRoles).mockResolvedValue(rolesResponse);
+    vi.mocked(queryRoleChoices).mockResolvedValue(rolesResponse);
     vi.mocked(countNotificationRecipients).mockResolvedValue(counted(2));
   });
 
@@ -159,7 +159,7 @@ describe("NotificationsAdminPage Component Tests", () => {
   });
 
   it("shows a failed roles load and loads them again on Retry", async () => {
-    vi.mocked(queryRoles).mockResolvedValueOnce(
+    vi.mocked(queryRoleChoices).mockResolvedValueOnce(
       new ResponseModel<Role[]>("queryRoles").withError(
         500,
         "The roles could not be read.",
@@ -180,7 +180,7 @@ describe("NotificationsAdminPage Component Tests", () => {
     const rolesResponse = new ResponseModel<Role[]>("queryRoles");
     rolesResponse.data = mockRoles;
     rolesResponse.totalCount = 120;
-    vi.mocked(queryRoles).mockResolvedValue(rolesResponse);
+    vi.mocked(queryRoleChoices).mockResolvedValue(rolesResponse);
     render(<NotificationsAdminPage />);
 
     await userEvent.click(await screen.findByLabelText(/By Role/i));
