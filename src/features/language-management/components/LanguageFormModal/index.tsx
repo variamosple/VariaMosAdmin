@@ -1,7 +1,9 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useEffect, useId } from "react";
-import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import type { FC } from "react";
+import { Form } from "react-bootstrap";
+import type { DefaultValues } from "react-hook-form";
+import { FormModal } from "@/shared/components/FormModal";
+import { useFormModal } from "@/shared/hooks/useFormModal";
 import type { Language } from "../../domain/Entity/Language";
 
 export interface LanguageFormModalProps {
@@ -14,6 +16,11 @@ export interface LanguageFormModalProps {
   submitText?: string;
 }
 
+// A copy: the form never writes into the edited language
+const languageFields = (language?: Language): DefaultValues<Language> => ({
+  ...language,
+});
+
 export const LanguageFormModal: FC<LanguageFormModalProps> = ({
   modalTitle,
   showModal,
@@ -23,93 +30,53 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
   isLoading,
   submitText = "Edit Language",
 }) => {
+  const { form, onSubmit, onCloseModal } = useFormModal<Language, Language>({
+    defaultValue,
+    toFields: languageFields,
+    submit: onLanguageSubmit,
+    isLoading,
+    onClose,
+  });
   const {
     register,
     formState: { errors },
-    handleSubmit,
-    reset,
-  } = useForm<Language>();
-
-  useEffect(() => {
-    reset({ ...defaultValue });
-  }, [defaultValue, reset]);
-
-  const onSubmit: SubmitHandler<Language> = (data) => {
-    if (!isLoading) {
-      void onLanguageSubmit(data).then((response) => {
-        if (!response.errorCode) {
-          reset();
-        }
-      });
-    }
-  };
-
-  const onCloseModal = () => {
-    onClose();
-    reset();
-  };
-
-  const titleId = useId();
+  } = form;
 
   return (
-    <Modal
-      aria-labelledby={titleId}
+    <FormModal
+      title={modalTitle}
       show={showModal}
-      backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
+      isLoading={isLoading}
+      submitText={submitText}
+      onClose={onCloseModal}
+      onSubmit={onSubmit}
+      bodyClassName="d-flex flex-column gap-3"
     >
-      <Modal.Header closeButton={!isLoading}>
-        <Modal.Title id={titleId}>{modalTitle}</Modal.Title>
-      </Modal.Header>
+      <Form.Group className="col-12" controlId="languageName">
+        <Form.Label className="form-label">Name</Form.Label>
+        <Form.Control
+          type="text"
+          className="form-control"
+          placeholder="Language name"
+          {...register("name", { required: "Language name is required" })}
+          isInvalid={Boolean(errors.name)}
+        />
+        <Form.Control.Feedback type="invalid">
+          {errors.name?.message}
+        </Form.Control.Feedback>
+      </Form.Group>
 
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <Modal.Body className="d-flex flex-column gap-3">
-          <Form.Group className="col-12" controlId="languageName">
-            <Form.Label className="form-label">Name</Form.Label>
-            <Form.Control
-              type="text"
-              className="form-control"
-              placeholder="Language name"
-              {...register("name", { required: "Language name is required" })}
-              isInvalid={Boolean(errors.name)}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.name?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-
-          <Form.Group className="col-12" controlId="stateAccept">
-            <Form.Label className="form-label">State</Form.Label>
-            <Form.Select
-              className="form-control"
-              aria-label="State"
-              {...register("stateAccept")}
-            >
-              <option value="ACTIVE">Active</option>
-              <option value="PENDING">Pending</option>
-            </Form.Select>
-          </Form.Group>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isLoading}
-            onClick={onCloseModal}
-          >
-            Cancel
-          </Button>
-
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <Spinner animation="border" variant="light" size="sm" />
-            ) : (
-              submitText
-            )}
-          </Button>
-        </Modal.Footer>
-      </Form>
-    </Modal>
+      <Form.Group className="col-12" controlId="stateAccept">
+        <Form.Label className="form-label">State</Form.Label>
+        <Form.Select
+          className="form-control"
+          aria-label="State"
+          {...register("stateAccept")}
+        >
+          <option value="ACTIVE">Active</option>
+          <option value="PENDING">Pending</option>
+        </Form.Select>
+      </Form.Group>
+    </FormModal>
   );
 };

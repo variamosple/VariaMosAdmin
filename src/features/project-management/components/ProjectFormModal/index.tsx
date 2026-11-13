@@ -1,12 +1,23 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useEffect, useId } from "react";
-import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import type { FC } from "react";
+import { Form } from "react-bootstrap";
+import type { DefaultValues } from "react-hook-form";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
+import { FormModal } from "@/shared/components/FormModal";
+import { useFormModal } from "@/shared/hooks/useFormModal";
 
 interface ProjectFormFields extends Omit<Project, "template"> {
   template?: string;
 }
+
+// The template flag goes through a select, as the string "true" or "false"
+const projectFields = (
+  project?: Project,
+): DefaultValues<ProjectFormFields> => ({
+  ...project,
+  template:
+    project?.template !== undefined ? String(project.template) : "false",
+});
 
 export interface ProjectFormModalProps {
   modalTitle: string;
@@ -27,25 +38,13 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
   isLoading,
   submitText = "Edit Project",
 }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ProjectFormFields>();
-
-  useEffect(() => {
-    reset({
-      ...defaultValue,
-      template:
-        defaultValue?.template !== undefined
-          ? String(defaultValue.template)
-          : "false",
-    });
-  }, [defaultValue, reset]);
-
-  const onSubmit: SubmitHandler<ProjectFormFields> = (data) => {
-    if (!isLoading) {
+  const { form, onSubmit, onCloseModal } = useFormModal<
+    ProjectFormFields,
+    Project
+  >({
+    defaultValue,
+    toFields: projectFields,
+    submit: (data) => {
       let template = false;
       if (data?.template !== undefined && data?.template !== null) {
         template = String(data.template) === "true";
@@ -59,112 +58,83 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
         template,
       };
 
-      void onProjectSubmit(updatedProject).then((response) => {
-        if (!response.errorCode) {
-          reset();
-        }
-      });
-    }
-  };
-
-  const onCloseModal = () => {
-    onClose();
-    reset();
-  };
-
-  const titleId = useId();
+      return onProjectSubmit(updatedProject);
+    },
+    isLoading,
+    onClose,
+  });
+  const {
+    register,
+    formState: { errors },
+  } = form;
 
   return (
-    <Modal
-      aria-labelledby={titleId}
+    <FormModal
+      title={modalTitle}
       show={showModal}
-      backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
+      isLoading={isLoading}
+      submitText={submitText}
+      onClose={onCloseModal}
+      onSubmit={onSubmit}
+      bodyClassName="d-flex flex-column gap-3"
     >
-      <Modal.Header closeButton={!isLoading}>
-        <Modal.Title id={titleId}>{modalTitle}</Modal.Title>
-      </Modal.Header>
+      <Form.Group className="col-12" controlId="projectName">
+        <Form.Label className="form-label">Name</Form.Label>
+        <Form.Control
+          type="text"
+          className="form-control"
+          placeholder="Project name"
+          {...register("name", { required: "Project name is required" })}
+          isInvalid={Boolean(errors.name)}
+        />
+        <Form.Control.Feedback type="invalid">
+          {errors.name?.message}
+        </Form.Control.Feedback>
+      </Form.Group>
 
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <Modal.Body className="d-flex flex-column gap-3">
-          <Form.Group className="col-12" controlId="projectName">
-            <Form.Label className="form-label">Name</Form.Label>
-            <Form.Control
-              type="text"
-              className="form-control"
-              placeholder="Project name"
-              {...register("name", { required: "Project name is required" })}
-              isInvalid={Boolean(errors.name)}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.name?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
+      <Form.Group className="col-12" controlId="template">
+        <Form.Label className="form-label">Access level</Form.Label>
+        <Form.Select
+          className="form-control"
+          aria-label="Access level"
+          {...register("template")}
+        >
+          <option value="false">Private</option>
+          <option value="true">Public</option>
+        </Form.Select>
+      </Form.Group>
 
-          <Form.Group className="col-12" controlId="template">
-            <Form.Label className="form-label">Access level</Form.Label>
-            <Form.Select
-              className="form-control"
-              aria-label="Access level"
-              {...register("template")}
-            >
-              <option value="false">Private</option>
-              <option value="true">Public</option>
-            </Form.Select>
-          </Form.Group>
+      <Form.Group className="col-12" controlId="author">
+        <Form.Label className="form-label">Author</Form.Label>
+        <Form.Control
+          type="text"
+          className="form-control"
+          placeholder="Project author"
+          {...register("author")}
+        />
+      </Form.Group>
 
-          <Form.Group className="col-12" controlId="author">
-            <Form.Label className="form-label">Author</Form.Label>
-            <Form.Control
-              type="text"
-              className="form-control"
-              placeholder="Project author"
-              {...register("author")}
-            />
-          </Form.Group>
+      <Form.Group className="col-12" controlId="description">
+        <Form.Label className="form-label">Description</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={3}
+          className="form-control"
+          placeholder="Project description"
+          {...register("description")}
+        />
+      </Form.Group>
 
-          <Form.Group className="col-12" controlId="description">
-            <Form.Label className="form-label">Description</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              className="form-control"
-              placeholder="Project description"
-              {...register("description")}
-            />
-          </Form.Group>
-
-          <Form.Group className="col-12" controlId="source">
-            <Form.Label className="form-label">Source</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              className="form-control"
-              placeholder="Project source"
-              {...register("source")}
-            />
-          </Form.Group>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isLoading}
-            onClick={onCloseModal}
-          >
-            Cancel
-          </Button>
-
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <Spinner animation="border" variant="light" size="sm" />
-            ) : (
-              submitText
-            )}
-          </Button>
-        </Modal.Footer>
-      </Form>
-    </Modal>
+      <Form.Group className="col-12" controlId="source">
+        <Form.Label className="form-label">Source</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={3}
+          className="form-control"
+          placeholder="Project source"
+          {...register("source")}
+        />
+      </Form.Group>
+    </FormModal>
   );
 };

@@ -1,11 +1,13 @@
 import type { ResponseModel } from "@variamosple/variamos-components";
-import { type FC, useEffect, useId } from "react";
-import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import type { FC } from "react";
+import { Form } from "react-bootstrap";
+import type { DefaultValues } from "react-hook-form";
 import {
   PERMISSION_NAME_PATTERN,
   type Permission,
 } from "@/features/permission-management/domain/Entity/Permission";
+import { FormModal } from "@/shared/components/FormModal";
+import { useFormModal } from "@/shared/hooks/useFormModal";
 
 export interface PermissionFormModalProps {
   modalTitle: string;
@@ -19,6 +21,13 @@ export interface PermissionFormModalProps {
   submitText?: string;
 }
 
+// A copy: the form never writes into the edited permission
+const permissionFields = (
+  permission?: Permission,
+): DefaultValues<Permission> => ({
+  ...permission,
+});
+
 export const PermissionFormModal: FC<PermissionFormModalProps> = ({
   modalTitle,
   showModal,
@@ -28,88 +37,49 @@ export const PermissionFormModal: FC<PermissionFormModalProps> = ({
   isLoading,
   submitText = "Create permission",
 }) => {
+  const { form, onSubmit, onCloseModal } = useFormModal<Permission, Permission>(
+    {
+      defaultValue,
+      toFields: permissionFields,
+      submit: onPermissionSubmit,
+      isLoading,
+      onClose,
+    },
+  );
   const {
     register,
-    handleSubmit,
     formState: { errors },
-    reset,
-  } = useForm<Permission>();
-
-  useEffect(() => {
-    reset({ ...defaultValue });
-  }, [defaultValue, reset]);
-
-  const onSubmit: SubmitHandler<Permission> = (data) => {
-    if (!isLoading) {
-      void onPermissionSubmit(data).then((response) => {
-        if (!response.errorCode) {
-          reset();
-        }
-      });
-    }
-  };
-
-  const onCloseModal = () => {
-    onClose();
-    reset();
-  };
-
-  const titleId = useId();
+  } = form;
 
   return (
-    <Modal
-      aria-labelledby={titleId}
+    <FormModal
+      title={modalTitle}
       show={showModal}
-      backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
+      isLoading={isLoading}
+      submitText={submitText}
+      onClose={onCloseModal}
+      onSubmit={onSubmit}
     >
-      <Modal.Header closeButton={!isLoading}>
-        <Modal.Title id={titleId}>{modalTitle}</Modal.Title>
-      </Modal.Header>
-
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <Modal.Body>
-          <Form.Group className="col-6 col-md-4" controlId="name">
-            <Form.Label className="form-label">Permission name</Form.Label>
-            <Form.Control
-              type="text"
-              className="form-control"
-              placeholder="Permission name"
-              {...register("name", {
-                required: "Permission name is required",
-                pattern: {
-                  value: PERMISSION_NAME_PATTERN,
-                  message:
-                    "Use 'resource::action' or 'module::resource::action': lowercase letters, digits and hyphens (e.g. 'users::query').",
-                },
-              })}
-              isInvalid={Boolean(errors.name)}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.name?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isLoading}
-            onClick={onCloseModal}
-          >
-            Cancel
-          </Button>
-
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <Spinner animation="border" variant="light" size="sm" />
-            ) : (
-              submitText
-            )}
-          </Button>
-        </Modal.Footer>
-      </Form>
-    </Modal>
+      <Form.Group className="col-6 col-md-4" controlId="name">
+        <Form.Label className="form-label">Permission name</Form.Label>
+        <Form.Control
+          type="text"
+          className="form-control"
+          placeholder="Permission name"
+          {...register("name", {
+            required: "Permission name is required",
+            pattern: {
+              value: PERMISSION_NAME_PATTERN,
+              message:
+                "Use 'resource::action' or 'module::resource::action': lowercase letters, digits and hyphens (e.g. 'users::query').",
+            },
+          })}
+          isInvalid={Boolean(errors.name)}
+        />
+        <Form.Control.Feedback type="invalid">
+          {errors.name?.message}
+        </Form.Control.Feedback>
+      </Form.Group>
+    </FormModal>
   );
 };
