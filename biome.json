@@ -63,19 +63,6 @@
       }
     },
     {
-      "includes": [
-        "tests/accessibility/accessibility.mocked.spec.ts",
-        "tests/responsive/responsive.mocked.spec.ts"
-      ],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noPlaywrightNetworkidle": "off"
-          }
-        }
-      }
-    },
-    {
       "includes": ["src/shared/components/About/index.tsx"],
       "linter": {
         "rules": {

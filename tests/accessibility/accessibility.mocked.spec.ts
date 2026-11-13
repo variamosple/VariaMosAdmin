@@ -8,9 +8,10 @@ const WCAG_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 
 const violations = async (page: Page) => {
   // Measured on a settled page: during the session check the guest button is
-  // disabled, and its colour then takes 0.15 s to turn back; axe measuring in
-  // between reports a contrast that no user sees (flaky in CI before).
-  await page.waitForLoadState("networkidle");
+  // disabled, and its color then takes 0.15 s to turn back; axe measuring in
+  // between reports a contrast that no user sees (flaky in CI before). Every
+  // load shows a spinner, so none left means nothing is loading.
+  await expect(page.locator(".spinner-border")).toHaveCount(0);
   await page.waitForFunction(() =>
     document
       .getAnimations()
@@ -43,7 +44,10 @@ test.describe("Accessibility - signed out screens", () => {
     test(`the ${name} screen has no WCAG A or AA violation`, async ({
       page,
     }) => {
+      // The session check answers before its spinner is gone
+      const sessionChecked = page.waitForResponse("**/auth/session-info");
       await page.goto(`http://localhost:3000${path}`);
+      await sessionChecked;
       await expect(
         page.getByRole("button", { name: heading }).first(),
       ).toBeVisible();
