@@ -1,15 +1,36 @@
 # The language service's own folder name, inside its image
 # cspell:ignore Lenguage
 services:
+  # Socket proxy (EV-71 lot 2): the admin reaches Docker through it, for
+  # listing and inspecting containers, their logs, start, stop and restart
+  # only. Create, exec, images, volumes and networks answer 403.
+  docker-socket-proxy:
+    image: lscr.io/linuxserver/socket-proxy@sha256:823dda971e9a3951257eb251586a804199819fe1587c35faa43adc7b52a2ff16
+    container_name: docker-socket-proxy-test
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - POST=0
+      - ALLOW_START=1
+      - ALLOW_STOP=1
+      - ALLOW_RESTARTS=1
+      - ALLOW_LOGS=1
+
   variamos-ms-admin:
     build:
       context: ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin
       dockerfile: Dockerfile
     container_name: variamos-ms-admin-test
+    depends_on:
+      - docker-socket-proxy
     ports:
       - "4000:4000"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key:/variaMosAdminService/jwtRS256.key
       - ${VARIAMOS_WORKSPACE_DIR:-../}variamos_ms_admin/jwtRS256.key.pub:/variaMosAdminService/jwtRS256.key.pub
     # No env file: since variamos_ms_admin#108 it is neither in git nor in the
@@ -33,7 +54,7 @@ services:
       - SECURE_COOKIE=false
       - COOKIE_EXP_IN_MS=1200000
       - COOKIE_PATH=/
-      - DOCKER_SOCKET_PATH=/var/run/docker.sock
+      - DOCKER_HOST=tcp://docker-socket-proxy:2375
       - LOGIN_REDIRECT_URI=http://localhost:3000/variamos_admin/#/login
       - HOME_REDIRECT_URI=http://localhost:3000/variamos_admin/
       - ADMIN_HOME_URI=http://localhost:3000/variamos_admin

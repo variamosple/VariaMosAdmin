@@ -52,7 +52,9 @@
     "VITE",
     "lintstagedrc",
     "nosniff",
-    "WCAG"
+    "WCAG",
+    "tmpfs",
+    "lscr"
   ],
   "ignorePaths": [
     "node_modules/**",
