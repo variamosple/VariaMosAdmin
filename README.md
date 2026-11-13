@@ -16,7 +16,7 @@ This is the admin dashboard frontend for the VariaMos project, built using React
 
 ### Prerequisites
 
-- Node.js 24 (`.nvmrc`, `.mise.toml`)
+- Node.js 26 (`.nvmrc`, `.mise.toml`)
 
 ### Installation
 

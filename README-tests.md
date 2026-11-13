@@ -101,7 +101,7 @@ vi.mock("@variamosple/variamos-components", async () =>
 
 ## Commands
 
-Prerequisite: Node 24 (`.nvmrc`, `.mise.toml`).
+Prerequisite: Node 26 (`.nvmrc`, `.mise.toml`).
 
 ```bash
 npm test                  # unit and component tests, once
