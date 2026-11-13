@@ -1,13 +1,12 @@
 import { type FC, useCallback, useMemo } from "react";
-import { Col, Form, InputGroup, Row } from "react-bootstrap";
-import { Trash } from "react-bootstrap-icons";
+import { Col, Form, Row } from "react-bootstrap";
 import {
   type SubmitHandler,
   type UseFormRegister,
   useForm,
 } from "react-hook-form";
 import { ModelsFilter } from "@/features/model-management/domain/Entity/ModelFilter";
-import { IconButton } from "@/shared/components/IconButton";
+import { DeletedStatusField } from "@/shared/components/DeletedStatusField";
 import { useSearchAsTyped } from "@/shared/hooks/useSearchAsTyped";
 
 export interface ModelSearchFormProps {
@@ -156,28 +155,11 @@ export const ModelSearchForm: FC<ModelSearchFormProps> = ({
         <ChoiceFields register={register} />
 
         <Col xs={12} sm lg={3} className="mt-2 mt-sm-0">
-          <Form.Group className="w-100" controlId="isDeleted">
-            <Form.Label>Status</Form.Label>
-            <InputGroup>
-              <Form.Select
-                className="form-control"
-                aria-label="Status"
-                {...register("isDeleted")}
-              >
-                <option value="false">Active</option>
-                <option value="true">Deleted</option>
-                <option value="all">All</option>
-              </Form.Select>
-              <IconButton
-                label="Clear results"
-                variant="outline-secondary"
-                onClick={onReset}
-                className="fw-bold"
-                disabled={isLoading}
-                icon={<Trash />}
-              />
-            </InputGroup>
-          </Form.Group>
+          <DeletedStatusField
+            registration={register("isDeleted")}
+            onReset={onReset}
+            isLoading={isLoading}
+          />
         </Col>
       </Row>
     </Form>

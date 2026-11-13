@@ -5,6 +5,7 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import type { UserRegistration } from "@/features/user-management/domain/Entity/UserRegistration";
 import "./styles.css";
 import { usePasswordPolicy } from "@/features/auth/hooks/usePasswordPolicy";
+import { EmailField } from "../EmailField";
 
 export interface SignUpFormProps {
   onSignUp: (credentials: UserRegistration) => void;
@@ -56,21 +57,10 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onSignUp }) => {
         </Form.Control.Feedback>
       </Form.Group>
 
-      <Form.Group className="w-100" controlId="email">
-        <Form.Label className="form-label align-self-start m-0">
-          Email Address
-        </Form.Label>
-        <Form.Control
-          type="email"
-          className="form-control"
-          placeholder="name@example.com"
-          {...register("email", { required: "Email is required" })}
-          isInvalid={Boolean(errors.email)}
-        />
-        <Form.Control.Feedback type="invalid">
-          {errors.email?.message}
-        </Form.Control.Feedback>
-      </Form.Group>
+      <EmailField
+        registration={register("email", { required: "Email is required" })}
+        error={errors.email}
+      />
 
       <Form.Group className="w-100" controlId="password">
         <Form.Label className="form-label align-self-start m-0">

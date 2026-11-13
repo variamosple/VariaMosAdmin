@@ -3,7 +3,6 @@ import {
   type FC,
   type ReactNode,
   type SubmitEvent,
-  useCallback,
   useEffect,
   useId,
   useRef,
@@ -20,12 +19,11 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { Megaphone, People, Person, Send } from "react-bootstrap-icons";
-import { queryRoles } from "@/features/role-management/api/RoleRepository";
-import type { Role } from "@/features/role-management/domain/Entity/Role";
-import { RolesFilter } from "@/features/role-management/domain/Entity/RolesFilter";
+import { queryRoleChoices } from "@/features/role-management/api/RoleRepository";
 import type { User } from "@/features/user-management/domain/Entity/User";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { RoleCheckboxList } from "@/shared/components/RoleCheckboxList";
+import { useLoadedList } from "@/shared/hooks/useLoadedList";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import {
   countNotificationRecipients,
@@ -33,8 +31,6 @@ import {
   dispatchNotification,
 } from "../api/NotificationsAdminRepository";
 import { UserRecipientPicker } from "../components/UserRecipientPicker";
-
-const ROLE_PAGE_SIZE = 100;
 
 const accounts = (count: number) => `${count} account${count === 1 ? "" : "s"}`;
 
@@ -45,28 +41,13 @@ type Feedback = { type: "success" | "danger"; message: string };
 // Users are searched on the server by the picker (UX-03); roles are few,
 // they are loaded once
 const useRoleOptions = () => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const response = await queryRoles(
-      new RolesFilter({
-        pageNumber: 1,
-        pageSize: ROLE_PAGE_SIZE,
-      }),
-    );
-    if (response.errorCode) {
-      setError(response.message || "The roles could not be loaded.");
-    } else {
-      setRoles(response.data ?? []);
-      setTotal(response.totalCount ?? response.data?.length ?? 0);
-    }
-    setLoading(false);
-  }, []);
+  const {
+    items: roles,
+    total,
+    loading,
+    error,
+    load,
+  } = useLoadedList(queryRoleChoices, "The roles could not be loaded.");
 
   useEffect(() => {
     void load();

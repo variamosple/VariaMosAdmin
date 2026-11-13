@@ -2,6 +2,31 @@ import type { FC } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import type { UptimeHistorySlot } from "../domain/Entity/MicroService";
 
+// The day, status, uptime (in the full bar) and latency of a slot
+const slotTooltip = (
+  slot: UptimeHistorySlot,
+  id: string,
+  withUptime: boolean,
+) => (
+  <Tooltip id={id}>
+    <div className="text-start">
+      <strong>
+        {new Date(slot.timestamp).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        })}
+      </strong>
+      <div>
+        Status: <span className="fw-bold">{slot.status}</span>
+      </div>
+      {withUptime && slot.status !== "NO_DATA" && (
+        <div>Uptime: {slot.uptimePercentage}%</div>
+      )}
+      {slot.responseTimeMs > 0 && <div>Latency: {slot.responseTimeMs}ms</div>}
+    </div>
+  </Tooltip>
+);
+
 export interface UptimeBarProps {
   history?: UptimeHistorySlot[];
   uptimePercentage?: number;
@@ -45,25 +70,10 @@ export const UptimeBar: FC<UptimeBarProps> = ({
         style={{ height: "6px", gap: "1px", background: "transparent" }}
       >
         {slots.map((slot, index) => {
-          const dateStr = new Date(slot.timestamp).toLocaleDateString(
-            undefined,
-            {
-              month: "short",
-              day: "numeric",
-            },
-          );
-          const tooltipContent = (
-            <Tooltip id={`slot-compact-${index}`}>
-              <div className="text-start">
-                <strong>{dateStr}</strong>
-                <div>
-                  Status: <span className="fw-bold">{slot.status}</span>
-                </div>
-                {slot.responseTimeMs > 0 && (
-                  <div>Latency: {slot.responseTimeMs}ms</div>
-                )}
-              </div>
-            </Tooltip>
+          const tooltipContent = slotTooltip(
+            slot,
+            `slot-compact-${index}`,
+            false,
           );
 
           return (
@@ -104,29 +114,7 @@ export const UptimeBar: FC<UptimeBarProps> = ({
         style={{ height: "24px", gap: "2px", background: "transparent" }}
       >
         {slots.map((slot, index) => {
-          const dateStr = new Date(slot.timestamp).toLocaleDateString(
-            undefined,
-            {
-              month: "short",
-              day: "numeric",
-            },
-          );
-          const tooltipContent = (
-            <Tooltip id={`slot-${index}`}>
-              <div className="text-start">
-                <strong>{dateStr}</strong>
-                <div>
-                  Status: <span className="fw-bold">{slot.status}</span>
-                </div>
-                {slot.status !== "NO_DATA" && (
-                  <div>Uptime: {slot.uptimePercentage}%</div>
-                )}
-                {slot.responseTimeMs > 0 && (
-                  <div>Latency: {slot.responseTimeMs}ms</div>
-                )}
-              </div>
-            </Tooltip>
-          );
+          const tooltipContent = slotTooltip(slot, `slot-${index}`, true);
 
           return (
             <OverlayTrigger

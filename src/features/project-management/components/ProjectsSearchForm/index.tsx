@@ -1,9 +1,9 @@
-import { type FC, useCallback, useEffect, useRef } from "react";
-import { Col, Form, InputGroup, Row } from "react-bootstrap";
-import { Trash } from "react-bootstrap-icons";
+import { type FC, useCallback, useMemo } from "react";
+import { Col, Form, Row } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { ProjectsFilter } from "@/features/project-management/domain/Entity/ProjectFilter";
-import { IconButton } from "@/shared/components/IconButton";
+import { DeletedStatusField } from "@/shared/components/DeletedStatusField";
+import { useSearchAsTyped } from "@/shared/hooks/useSearchAsTyped";
 
 export interface ProjectSearchFormProps {
   onSubmit: (search?: ProjectsFilter) => void;
@@ -34,7 +34,6 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
   onSearchReset,
   defaultFilter,
 }) => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
     register,
     handleSubmit,
@@ -99,23 +98,8 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
     [onSubmit, reset],
   );
 
-  useEffect(() => {
-    if (!isDirty) return;
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      void handleSubmit(submit)();
-    }, 500);
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [isDirty, handleSubmit, submit]);
+  const search = useMemo(() => handleSubmit(submit), [handleSubmit, submit]);
+  useSearchAsTyped(isDirty, search);
 
   return (
     <Form onSubmit={handleSubmit(submit)}>
@@ -149,28 +133,11 @@ export const ProjectSearchForm: FC<ProjectSearchFormProps> = ({
         </Col>
 
         <Col xs={12} sm lg={4} className="mt-2 mt-sm-0">
-          <Form.Group className="w-100" controlId="isDeleted">
-            <Form.Label>Status</Form.Label>
-            <InputGroup>
-              <Form.Select
-                className="form-control"
-                aria-label="Status"
-                {...register("isDeleted")}
-              >
-                <option value="false">Active</option>
-                <option value="true">Deleted</option>
-                <option value="all">All</option>
-              </Form.Select>
-              <IconButton
-                label="Clear results"
-                variant="outline-secondary"
-                onClick={onReset}
-                className="fw-bold"
-                disabled={isLoading}
-                icon={<Trash />}
-              />
-            </InputGroup>
-          </Form.Group>
+          <DeletedStatusField
+            registration={register("isDeleted")}
+            onReset={onReset}
+            isLoading={isLoading}
+          />
         </Col>
       </Row>
     </Form>

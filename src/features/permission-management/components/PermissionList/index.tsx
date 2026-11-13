@@ -5,7 +5,7 @@ import { PencilFill, TrashFill } from "react-bootstrap-icons";
 import type { Permission } from "@/features/permission-management/domain/Entity/Permission";
 import type { PermissionSortField } from "@/features/permission-management/domain/Entity/PermissionsFilter";
 import { IconButton } from "@/shared/components/IconButton";
-import { SortableHeader } from "@/shared/components/SortableHeader";
+import { IdNameTableHead } from "@/shared/components/IdNameTableHead";
 import { TableStateRow } from "@/shared/components/TableStateRow";
 import type { ListSort } from "@/shared/domain/Entity/ListSort";
 import type { PaginationControlsProps } from "@/shared/hoc/WithPagination";
@@ -40,20 +40,7 @@ export const PermissionList: FC<PermissionListParameters> = ({
       />
 
       <Table aria-busy={state?.isLoading} striped bordered hover responsive>
-        <thead>
-          <tr>
-            <SortableHeader field="id" label="ID" sort={sort} onSort={onSort} />
-
-            <SortableHeader
-              field="name"
-              label="Name"
-              sort={sort}
-              onSort={onSort}
-            />
-
-            <th>Actions</th>
-          </tr>
-        </thead>
+        <IdNameTableHead sort={sort} onSort={onSort} />
 
         <tbody>
           {items?.map((permission) => (

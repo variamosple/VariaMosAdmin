@@ -1,8 +1,9 @@
-import { type FC, useCallback, useEffect, useRef } from "react";
+import { type FC, useCallback, useMemo } from "react";
 import { Col, Form, InputGroup, Row } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { IconButton } from "@/shared/components/IconButton";
+import { useSearchAsTyped } from "@/shared/hooks/useSearchAsTyped";
 
 export interface SearchFormProps {
   onSubmit: (search?: string) => void;
@@ -24,7 +25,6 @@ export const SearchForm: FC<SearchFormProps> = ({
   placeholder = "Search",
   defaultSearch = "",
 }) => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
     register,
     handleSubmit,
@@ -50,23 +50,8 @@ export const SearchForm: FC<SearchFormProps> = ({
     [onSubmit, reset],
   );
 
-  useEffect(() => {
-    if (!isDirty) return;
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      void handleSubmit(submit)();
-    }, 500);
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [isDirty, handleSubmit, submit]);
+  const search = useMemo(() => handleSubmit(submit), [handleSubmit, submit]);
+  useSearchAsTyped(isDirty, search);
 
   return (
     <Form onSubmit={handleSubmit(submit)}>
