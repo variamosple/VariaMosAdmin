@@ -106,20 +106,32 @@ Object.defineProperty(window, "IntersectionObserver", {
   value: MockIntersectionObserver,
 });
 
-// Polyfill window.getComputedStyle to return default transition values in JSDOM,
-// preventing NaN timeout warnings in third-party transition helpers (like react-bootstrap)
+// jsdom gives no transition to an element outside the document (an empty
+// string): the transition helpers of react-bootstrap would then wait NaN ms.
+// Answer "0s" instead. The CSS properties of a computed style are read-only
+// since jsdom 31: own properties shadow them rather than set them.
+const NO_TRANSITION = new Map([
+  ["transition-duration", "0s"],
+  ["transition-delay", "0s"],
+]);
+
+const withoutTransition = (style: CSSStyleDeclaration): CSSStyleDeclaration => {
+  const read = style.getPropertyValue.bind(style);
+  return Object.defineProperties(style, {
+    transitionDuration: { value: style.transitionDuration || "0s" },
+    transitionDelay: { value: style.transitionDelay || "0s" },
+    getPropertyValue: {
+      value: (name: string) => read(name) || (NO_TRANSITION.get(name) ?? ""),
+    },
+  });
+};
+
 const originalGetComputedStyle = window.getComputedStyle;
 window.getComputedStyle = function (elt, ...args) {
   const style = originalGetComputedStyle.call(this, elt, ...args);
-  if (style) {
-    if (!style.transitionDuration) {
-      style.transitionDuration = "0s";
-    }
-    if (!style.transitionDelay) {
-      style.transitionDelay = "0s";
-    }
-  }
-  return style;
+  return style.transitionDuration && style.transitionDelay
+    ? style
+    : withoutTransition(style);
 };
 
 // A request with no handler fails the test: it would reach the network
