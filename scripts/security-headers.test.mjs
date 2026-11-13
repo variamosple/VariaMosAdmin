@@ -1,6 +1,7 @@
 import {
   apiOrigins,
   contentSecurityPolicy,
+  outputPath,
   securityHeaders,
 } from "./security-headers.mjs";
 
@@ -62,5 +63,23 @@ describe("security headers", () => {
     expect(headers).toContain('add_header X-Frame-Options "DENY" always;');
     // A report-only header would let a violation through
     expect(headers).not.toContain("Report-Only");
+  });
+
+  it.each([
+    ["security-headers.conf", "/app/security-headers.conf"],
+    ["./build/headers.conf", "/app/build/headers.conf"],
+  ])("writes %j inside the project", (argument, path) => {
+    expect(outputPath(argument, "/app")).toBe(path);
+  });
+
+  it.each([
+    undefined,
+    "",
+    ".",
+    "../outside.conf",
+    "/etc/nginx/security-headers.conf",
+    "build/../../outside.conf",
+  ])("refuses to write %j, outside the project or not a file", (argument) => {
+    expect(outputPath(argument, "/app")).toBeNull();
   });
 });
