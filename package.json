@@ -21,6 +21,7 @@
     "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
     "find-deadcode": "knip",
+    "spell": "cspell --no-progress --dot --gitignore \"**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs,json,jsonc,css,md,yml,yaml,sh}\" \"**/Dockerfile*\"",
     "check-updates": "taze",
     "playwright:run:mocked": "bash ./scripts/run-mocked-playwright.sh",
     "docker:test:up": "VARIAMOS_WORKSPACE_DIR=${VARIAMOS_WORKSPACE_DIR:-} docker compose -f docker-compose.test.yml up -d --build",

@@ -1,3 +1,6 @@
+# DOKCERHUB: name of the organization's registry secrets, shared by many repositories
+# odified: cspell's split of the [Ll]ast-[Mm]odified pattern
+# cspell:ignore DOKCERHUB odified
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # Last updated: 20230623:22:32
