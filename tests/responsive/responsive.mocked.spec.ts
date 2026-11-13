@@ -76,8 +76,12 @@ const signIn = async (page: Page) => {
   await page.route("**/v1/permissions**", (route) =>
     route.fulfill(list([permission, permission])),
   );
+  // By the end of the path, whatever the query: the bug routes have no /v1
   for (const path of ["bugs", "micro-services", "configurations"]) {
-    await page.route(`**/v1/${path}?**`, (route) => route.fulfill(list([])));
+    await page.route(
+      (url) => url.pathname.endsWith(`/${path}`),
+      (route) => route.fulfill(list([])),
+    );
   }
 };
 
@@ -112,28 +116,69 @@ const pageOverflow = (page: Page) =>
       document.documentElement.clientWidth,
   );
 
+// What a screen shows once its data is in: the width is measured on it
+const cell = (name: string) => (page: Page) =>
+  page.getByRole("cell", { name, exact: true }).first();
+// Visible only: the bugs list renders its three tabs, two of them hidden
+const text = (content: string) => (page: Page) =>
+  page.getByText(content, { exact: true }).filter({ visible: true });
+
 const SCREENS = [
-  { name: "users list", path: "/#/users", heading: "Users list" },
-  { name: "user detail", path: "/#/users/u1", heading: "User information" },
-  { name: "roles list", path: "/#/roles", heading: "Roles list" },
-  { name: "role detail", path: "/#/roles/1", heading: role.name },
+  {
+    name: "users list",
+    path: "/#/users",
+    heading: "Users list",
+    loaded: cell(user.name),
+  },
+  {
+    name: "user detail",
+    path: "/#/users/u1",
+    heading: "User information",
+    loaded: cell(role.name),
+  },
+  {
+    name: "roles list",
+    path: "/#/roles",
+    heading: "Roles list",
+    loaded: cell(role.name),
+  },
+  {
+    name: "role detail",
+    path: "/#/roles/1",
+    heading: role.name,
+    loaded: cell(permission.name),
+  },
   {
     name: "permissions list",
     path: "/#/permissions",
     heading: "Permissions list",
+    loaded: cell(permission.name),
   },
-  { name: "bugs list", path: "/#/bugs", heading: "Bugs list" },
+  {
+    name: "bugs list",
+    path: "/#/bugs",
+    heading: "Bugs list",
+    loaded: text("No bugs found."),
+  },
   {
     name: "monitoring",
     path: "/#/monitoring",
     heading: "Microservices & System Status",
+    loaded: text("No microservices yet."),
   },
   {
     name: "configurations",
     path: "/#/configurations",
     heading: "Global Configurations",
+    loaded: text("No configurations found."),
   },
-  { name: "my account", path: "/#/my-account", heading: "My account" },
+  // The page shows its heading only once the account is loaded
+  {
+    name: "my account",
+    path: "/#/my-account",
+    heading: "My account",
+    loaded: (page: Page) => page.getByRole("heading", { name: "My account" }),
+  },
 ];
 
 for (const width of WIDTHS) {
@@ -157,7 +202,7 @@ for (const width of WIDTHS) {
         await expect(
           page.getByRole("heading", { name: screen.heading }),
         ).toBeVisible();
-        await page.waitForLoadState("networkidle");
+        await expect(screen.loaded(page)).toBeVisible();
 
         expect(await overflowingContent(page)).toEqual([]);
       });
@@ -175,7 +220,7 @@ for (const width of WIDTHS) {
       await expect(
         page.getByRole("heading", { name: "Users list" }),
       ).toBeVisible();
-      await page.waitForLoadState("networkidle");
+      await expect(cell(user.name)(page)).toBeVisible();
 
       expect(await pageOverflow(page)).toBe(0);
     });
