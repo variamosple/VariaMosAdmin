@@ -1,0 +1,210 @@
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { cloneElement, isValidElement, type ReactNode } from "react";
+import type { Metric } from "../domain/Entity/Metric";
+import { KeyFigures } from "./KeyFigures";
+import { PeriodPicker } from "./PeriodPicker";
+import { RankingChart } from "./RankingChart";
+import { TimeSeriesChart } from "./TimeSeriesChart";
+
+// jsdom measures nothing: the charts get a fixed size
+vi.mock("recharts", async (importOriginal) => {
+  const original = await importOriginal<typeof import("recharts")>();
+  return {
+    ...original,
+    ResponsiveContainer: ({ children }: { children: ReactNode }) =>
+      isValidElement(children)
+        ? cloneElement(children, { width: 800, height: 300 } as never)
+        : null,
+  };
+});
+
+const series = (rows: [string, number, string][]): Metric => ({
+  id: "sign_ins",
+  title: "Sign-ins",
+  chartType: "bar",
+  defaultFilter: "series",
+  data: rows.map(([name, count, date]) => ({ series: name, count, date })),
+});
+
+describe("charts of the statistics page", () => {
+  it("draws a chart over time with its note, and says when there is nothing", () => {
+    const { rerender } = render(
+      <TimeSeriesChart
+        metric={series([
+          ["Password", 2, "2026-09-01"],
+          ["Failed", 1, "2026-09-01"],
+          ["Password", 0, "2026-09-02"],
+          ["Failed", 0, "2026-09-02"],
+        ])}
+        step="day"
+      />,
+    );
+    const card = screen.getByRole("region", { name: "Sign-ins" });
+    expect(
+      within(card).getByText(
+        "Successful sign-ins by method, and failed attempts.",
+      ),
+    ).toBeInTheDocument();
+    expect(card.querySelector("svg")).not.toBeNull();
+
+    rerender(
+      <TimeSeriesChart
+        metric={{ ...series([]), id: "visits_over_time", chartType: "line" }}
+        step="week"
+      />,
+    );
+    expect(
+      screen.getByText("No activity recorded for the selected period."),
+    ).toBeInTheDocument();
+  });
+
+  it("draws a line chart for visits", () => {
+    render(
+      <TimeSeriesChart
+        metric={{
+          id: "visits_over_time",
+          title: "Visits and visitors",
+          chartType: "line",
+          defaultFilter: "series",
+          data: [
+            { series: "Visits", count: 3, date: "2026-09" },
+            { series: "Visitors", count: 2, date: "2026-09" },
+          ],
+        }}
+        step="month"
+      />,
+    );
+    expect(
+      screen.getByText("Visitors are distinct accounts."),
+    ).toBeInTheDocument();
+  });
+
+  it("ranks the pages under their names, with the parts of VariaMos they belong to", () => {
+    render(
+      <RankingChart
+        metric={{
+          id: "top_visited_pages",
+          title: "Most visited pages",
+          chartType: "ranking",
+          defaultFilter: "page",
+          labelKey: "page",
+          data: [
+            { page: "UserLanguageList", count: 963 },
+            { page: "UserList", count: 177 },
+            { page: "SharedExperimentsList", count: 2 },
+          ],
+        }}
+      />,
+    );
+    const legend = screen.getByRole("list");
+    expect(
+      within(legend)
+        .getAllByRole("listitem")
+        .map((i) => i.textContent),
+    ).toEqual(["Languages", "Administration", "Laboratory"]);
+    expect(screen.getByText("My languages")).toBeInTheDocument();
+  });
+
+  it("ranks other values as they come, without a legend", () => {
+    render(
+      <RankingChart
+        metric={{
+          id: "models_by_type",
+          title: "Models by type",
+          chartType: "ranking",
+          defaultFilter: "type",
+          labelKey: "type",
+          data: [{ type: "Scope", count: 26 }],
+        }}
+      />,
+    );
+    expect(screen.queryByRole("list")).toBeNull();
+    expect(screen.getByText("Scope")).toBeInTheDocument();
+  });
+
+  it("shows a figure without a change when there is none to compare", () => {
+    render(
+      <KeyFigures
+        withChange
+        figures={[
+          {
+            key: "returning_users",
+            label: "Returning users",
+            unit: "percent",
+            count: 50,
+            previous: null,
+          },
+          {
+            key: "visits",
+            label: "Visits",
+            unit: "count",
+            count: 5,
+            previous: 5,
+          },
+        ]}
+      />,
+    );
+    expect(screen.getByTestId("figure-returning_users")).toHaveTextContent(
+      "50 %no earlier figure",
+    );
+    expect(screen.getByText("no change vs previous period")).toHaveClass(
+      "text-muted",
+    );
+  });
+});
+
+describe("PeriodPicker", () => {
+  const period = { fromDate: "2026-09-01", toDate: "2026-09-30" };
+
+  it("gives a ready-made period with its key", async () => {
+    const onChange = vi.fn();
+    render(
+      <PeriodPicker
+        period={period}
+        preset="30d"
+        isLoading={false}
+        onChange={onChange}
+      />,
+    );
+
+    await userEvent
+      .setup()
+      .click(screen.getByRole("button", { name: "7 days" }));
+
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ fromDate: expect.any(String) }),
+      "7d",
+    );
+    expect(screen.getByRole("button", { name: "30 days" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("gives a month chosen by hand, without a key", async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <PeriodPicker
+        period={period}
+        preset="30d"
+        isLoading={false}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Custom…" }));
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Period" }),
+      "month",
+    );
+    await user.type(screen.getByLabelText("Month"), "2026-02");
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+
+    expect(onChange).toHaveBeenCalledWith(
+      { fromDate: "2026-02-01", toDate: "2026-02-28" },
+      null,
+    );
+  });
+});

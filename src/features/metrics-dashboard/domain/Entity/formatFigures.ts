@@ -60,16 +60,13 @@ export const figureChange = ({
     return { text: "no earlier figure", direction: "none" };
   }
   const difference = count - previous;
-  let direction: FigureChange["direction"] = "flat";
-  if (difference > 0) direction = "up";
-  if (difference < 0) direction = "down";
+  if (difference === 0) return { text: "no change", direction: "flat" };
+  const direction = difference > 0 ? "up" : "down";
   const sign = difference > 0 ? "+" : "";
   if (unit === "percent")
     return { text: `${sign}${difference} pts`, direction };
   if (previous === 0) {
-    return difference === 0
-      ? { text: "no change", direction: "flat" }
-      : { text: `${sign}${difference} (none before)`, direction };
+    return { text: `${sign}${difference} (none before)`, direction };
   }
   const percent = Math.round((difference / previous) * 100);
   return { text: `${sign}${percent} %`, direction };
