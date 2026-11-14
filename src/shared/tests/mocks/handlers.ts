@@ -572,7 +572,6 @@ export const handlers = [
           roles: ["Admin"],
           permissions: ["READ_PRIVILEGES"],
         },
-        authToken: "fake-token",
       },
     });
   }),
