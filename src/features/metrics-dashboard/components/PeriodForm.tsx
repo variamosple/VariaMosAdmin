@@ -2,14 +2,11 @@ import type { FC } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import {
-  type ChartDateFilterFormProperties,
-  useChartContext,
-} from "../../context/ChartContext";
-import {
+  type ChartPeriod,
   type ChartPeriodMode,
   monthPeriod,
   yearPeriod,
-} from "../../domain/Entity/ChartPeriod";
+} from "../domain/Entity/ChartPeriod";
 
 const formControlsStyle: React.CSSProperties = {
   backgroundImage: "none",
@@ -31,10 +28,19 @@ const periodOf = (data: ChartPeriodFormValues) => {
   return { fromDate: data.fromDate, toDate: data.toDate };
 };
 
-export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
-  onFilterSubmit,
+export interface PeriodFormProps {
+  /** The period shown, where the form starts. */
+  period: ChartPeriod;
+  isLoading: boolean;
+  onSubmit: (period: ChartPeriod) => void;
+}
+
+/** A period of the page: two dates, a month or a year (MA-EU-01). */
+export const PeriodForm: FC<PeriodFormProps> = ({
+  period: current,
+  isLoading,
+  onSubmit: onPeriodSubmit,
 }) => {
-  const { isLoading, chartFilter } = useChartContext();
   const {
     register,
     handleSubmit,
@@ -43,8 +49,8 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
   } = useForm<ChartPeriodFormValues>({
     defaultValues: {
       mode: "range",
-      fromDate: chartFilter.fromDate,
-      toDate: chartFilter.toDate,
+      fromDate: current.fromDate,
+      toDate: current.toDate,
       month: "",
       year: "",
     },
@@ -53,7 +59,7 @@ export const ChartDateFilterForm: FC<ChartDateFilterFormProperties> = ({
 
   const onSubmit: SubmitHandler<ChartPeriodFormValues> = (data) => {
     const period = periodOf(data);
-    if (period) onFilterSubmit(period);
+    if (period) onPeriodSubmit(period);
   };
 
   return (
