@@ -92,7 +92,9 @@ test.describe("Bug Tracker - Real DB E2E Flows", () => {
     // Wait for configurations/menu to load
     await page.waitForResponse("**/v1/configurations/menu");
 
-    const dropdownToggle = page.locator("#nav-dropdown");
+    const dropdownToggle = page.locator(
+      ".variamos-header-options > .dropdown-toggle",
+    );
     await expect(dropdownToggle).toBeVisible();
     await dropdownToggle.click();
 
