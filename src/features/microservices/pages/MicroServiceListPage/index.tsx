@@ -21,6 +21,7 @@ import {
 } from "@/shared/components/AnnouncementModal";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { BackupStatusLine } from "../../components/BackupStatusLine";
 import { MicroServiceConfigModal } from "../../components/MicroServiceConfigModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
 import type { MicroService } from "../../domain/Entity/MicroService";
@@ -205,6 +206,8 @@ const MicroServiceListPageComponent: FC = () => {
       </Row>
 
       <hr />
+
+      <BackupStatusLine refreshedAt={list.lastRefreshedAt} />
 
       {isConnectionLost ? <ConnectionLost list={list} /> : null}
 
