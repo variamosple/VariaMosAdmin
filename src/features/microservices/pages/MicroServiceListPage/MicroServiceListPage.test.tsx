@@ -275,6 +275,50 @@ describe("MicroServiceListPage Integration", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows the state of the nightly database backup (EV-86)", async () => {
+    server.use(
+      http.get("*/v1/backups/status", () =>
+        HttpResponse.json({
+          data: {
+            configured: true,
+            status: {
+              file: "db_backup.sql.gz",
+              createdAt: new Date().toISOString(),
+              sizeBytes: 69087000,
+            },
+            problems: [],
+          },
+        }),
+      ),
+    );
+    renderPage(<MicroServiceListPage />);
+
+    expect(
+      await screen.findByText(
+        "Last database backup: less than an hour ago, 65.9 MB, intact.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("warns about a backup problem", async () => {
+    server.use(
+      http.get("*/v1/backups/status", () =>
+        HttpResponse.json({
+          data: {
+            configured: true,
+            status: null,
+            problems: [{ kind: "status-missing", message: "Unreadable." }],
+          },
+        }),
+      ),
+    );
+    renderPage(<MicroServiceListPage />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Database backup: Unreadable.",
+    );
+  });
+
   it("offers no announcement without the right to send one", async () => {
     renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();
