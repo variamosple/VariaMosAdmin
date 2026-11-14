@@ -243,4 +243,40 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
     await expect(page.getByText("Start Languages Service?")).toBeVisible();
     await page.getByRole("button", { name: "Start microservice" }).click();
   });
+
+  test("suggests a maintenance announcement to whoever may send one (EV-86)", async ({
+    page,
+  }) => {
+    await mockSignedIn(page, [
+      "micro-services::query",
+      "micro-services::manage",
+      "admin::notifications::dispatch",
+    ]);
+    await page.route("**/v1/micro-services?*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          data: mockMicroservices,
+          totalItems: 2,
+          totalPages: 1,
+          currentPage: 1,
+        }),
+      });
+    });
+    await page.goto("http://localhost:3000/#/monitoring");
+
+    const adminRow = page.locator("tr", { hasText: "Administration Service" });
+    await adminRow.locator('button[title="Announce maintenance"]').click();
+
+    await expect(
+      page.getByRole("heading", { name: "Announce a maintenance?" }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Title")).toHaveValue(
+      "Maintenance: Administration Service",
+    );
+    await expect(page.getByLabel("Message")).toHaveValue(
+      /^Administration Service will restart at \d{2}:\d{2} UTC/,
+    );
+  });
 });

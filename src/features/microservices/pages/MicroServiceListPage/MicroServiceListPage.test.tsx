@@ -4,12 +4,16 @@ import { server } from "@/shared/tests/mocks/server";
 import { renderPage } from "@/shared/tests/render";
 import { MicroServiceListPage } from "./index";
 
+// The permissions of the signed-in user, changed by the tests
+const session = vi.hoisted(() => ({ permissions: [] as string[] }));
+
 // Mock @variamosple/variamos-components to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
   const React = await import("react");
   const { useState, useCallback } = React;
   return {
     withPageVisit: <T,>(component: T): T => component,
+    useSession: () => ({ user: { permissions: session.permissions } }),
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
@@ -88,6 +92,7 @@ vi.mock("@patternfly/react-log-viewer", async () => {
 describe("MicroServiceListPage Integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    session.permissions = [];
 
     server.use(
       http.get("*/v1/micro-services", () => {
@@ -267,6 +272,46 @@ describe("MicroServiceListPage Integration", () => {
 
     expect(
       await screen.findByText("Service A could not be stopped"),
+    ).toBeInTheDocument();
+  });
+
+  it("offers no announcement without the right to send one", async () => {
+    renderPage(<MicroServiceListPage />);
+    expect(await screen.findByText("Service A")).toBeInTheDocument();
+
+    expect(screen.queryByTitle("Announce maintenance")).not.toBeInTheDocument();
+  });
+
+  it("suggests a maintenance announcement for the service of the row (EV-86)", async () => {
+    session.permissions = ["admin::notifications::dispatch"];
+    const { user } = renderPage(<MicroServiceListPage />);
+    expect(await screen.findByText("Service A")).toBeInTheDocument();
+
+    const [first] = screen.getAllByTitle("Announce maintenance");
+    await user.click(first as HTMLElement);
+
+    expect(
+      await screen.findByRole("heading", { name: "Announce a maintenance?" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue("Maintenance: Service A"),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Message")).toHaveDisplayValue(
+      /^Service A will restart at \d{2}:\d{2} UTC/,
+    );
+  });
+
+  it("reminds whoever may announce it before a restart", async () => {
+    session.permissions = ["admin::notifications::dispatch"];
+    const { user } = renderPage(<MicroServiceListPage />);
+    expect(await screen.findByText("Service A")).toBeInTheDocument();
+
+    await user.click(screen.getByTitle("Restart Service"));
+
+    expect(
+      screen.getByText(
+        'Restart Service A? Users working in it can be warned first with "Announce maintenance" on its row.',
+      ),
     ).toBeInTheDocument();
   });
 });
