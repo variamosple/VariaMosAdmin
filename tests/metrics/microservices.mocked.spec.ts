@@ -19,6 +19,23 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
       },
       targetUrl: "http://localhost:4000",
       replicasCount: 1,
+      containers: [
+        {
+          id: "c-admin",
+          name: "variamos_ms_admin_aws_main",
+          state: "running",
+          status: "Up 2 hours",
+          created: "2026-09-20T00:00:00Z",
+          labels: {},
+          // Sampled every 30 s by the admin (EV-86 lot 2)
+          resources: {
+            cpuPercent: 2.5,
+            memoryUsedBytes: 152 * 1024 * 1024,
+            memoryLimitBytes: 4096 * 1024 * 1024,
+            sampledAt: "2026-09-21T00:00:00Z",
+          },
+        },
+      ],
     },
     {
       id: "ms-languages",
@@ -154,7 +171,11 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
     const adminRow = page.locator("tr", { hasText: "Administration Service" });
     await expect(adminRow.locator("td").nth(1)).toContainText("UP");
     await expect(adminRow.locator("td").nth(2)).toContainText("28 ms");
-    await expect(adminRow.locator("td").nth(3)).toContainText("99.8%");
+    await expect(adminRow.locator("td").nth(3)).toContainText("2.5 %");
+    await expect(adminRow.locator("td").nth(4)).toContainText(
+      "152 MB / 4.0 GB",
+    );
+    await expect(adminRow.locator("td").nth(5)).toContainText("99.8%");
     await expect(
       adminRow.locator('button[title="Restart Service"]'),
     ).toBeVisible();
@@ -164,7 +185,9 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
 
     const langRow = page.locator("tr", { hasText: "Languages Service" });
     await expect(langRow.locator("td").nth(1)).toContainText("DOWN");
-    await expect(langRow.locator("td").nth(3)).toContainText("94.5%");
+    // A stopped service has no CPU or memory
+    await expect(langRow.locator("td").nth(3)).toHaveText("—");
+    await expect(langRow.locator("td").nth(5)).toContainText("94.5%");
     await expect(
       langRow.locator('button[title="Start Service"]'),
     ).toBeVisible();
