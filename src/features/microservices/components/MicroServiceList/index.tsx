@@ -52,6 +52,8 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
             <th>Name</th>
             <th>Status</th>
             <th>Latency</th>
+            <th>CPU</th>
+            <th>Memory</th>
             <th>Uptime (30d)</th>
             <th>Port</th>
             <th>Containers</th>
@@ -79,7 +81,7 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
             <TableStateRow
               state={state}
               isEmpty={!items?.length}
-              colSpan={7}
+              colSpan={9}
               items="microservices"
             />
           ) : null}

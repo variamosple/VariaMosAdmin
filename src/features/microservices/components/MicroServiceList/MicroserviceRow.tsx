@@ -6,6 +6,7 @@ import type {
   HealthStatus,
   MicroService,
 } from "../../domain/Entity/MicroService";
+import { formatBytes, serviceResourcesOf } from "../../domain/serviceResources";
 import { UptimeBar } from "../UptimeBar";
 import "@patternfly/react-core/dist/styles/base-no-reset.css";
 import { LogViewer } from "@patternfly/react-log-viewer";
@@ -240,6 +241,40 @@ const UptimeCell: FC<{ microService: MicroService }> = ({ microService }) => {
   );
 };
 
+// CPU and memory of the running containers, sampled every 30 s (EV-86 lot 2)
+const ResourceCells: FC<{ microService: MicroService }> = ({
+  microService,
+}) => {
+  const resources = serviceResourcesOf(microService);
+  const cpu = resources?.cpuPercent;
+  const limit = resources?.memoryLimitBytes;
+  return (
+    <>
+      <td
+        title={
+          resources && cpu === null
+            ? "Measured from the second sample, 30 s after the start"
+            : "Average over the last 30 s; 100 % is one full core"
+        }
+      >
+        {typeof cpu === "number" ? `${cpu} %` : "—"}
+      </td>
+      <td>
+        {resources ? (
+          <span className="small">
+            {formatBytes(resources.memoryUsedBytes)}
+            {typeof limit === "number" && limit > 0 ? (
+              <span className="text-muted"> / {formatBytes(limit)}</span>
+            ) : null}
+          </span>
+        ) : (
+          "—"
+        )}
+      </td>
+    </>
+  );
+};
+
 // The logs under the row: a spinner until the first line comes
 const LogsRow: FC<{ isLoading: boolean; logs: string }> = ({
   isLoading,
@@ -247,7 +282,7 @@ const LogsRow: FC<{ isLoading: boolean; logs: string }> = ({
 }) =>
   isLoading ? (
     <tr>
-      <td colSpan={7}>
+      <td colSpan={9}>
         <div className="w-100 text-center my-3">
           <Spinner animation="border" variant="primary" />
         </div>
@@ -255,7 +290,7 @@ const LogsRow: FC<{ isLoading: boolean; logs: string }> = ({
     </tr>
   ) : (
     <tr>
-      <td colSpan={7} className="p-0">
+      <td colSpan={9} className="p-0">
         <div className="p-2 bg-dark">
           <MicroServiceLogs isLoading={isLoading} logs={logs} />
         </div>
@@ -304,6 +339,8 @@ export const MicroServiceRowComponent: FC<MicroServiceRowProps> = (props) => {
             ? `${microService.health.responseTimeMs} ms`
             : "—"}
         </td>
+
+        <ResourceCells microService={microService} />
 
         <UptimeCell microService={microService} />
 
