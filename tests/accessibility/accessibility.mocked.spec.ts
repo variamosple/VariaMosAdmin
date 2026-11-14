@@ -6,6 +6,15 @@ import { json, mockSignedIn, mockSignedOut } from "../helpers/session";
 // WCAG 2.1 A and AA rules, checked by axe-core on the main screens (EV-96)
 const WCAG_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 
+// Colors are measured at rest. A Bootstrap button eases its color for 0.15 s
+// when it is enabled: the guest link goes from gray (contrast 4.69) to blue
+// (4.50, the AA limit), and the colors in between fall under the limit. The
+// wait for running transitions below missed it once under WebKit; with
+// reduced motion, Bootstrap gives .btn no transition at all.
+test.beforeEach(async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+});
+
 const violations = async (page: Page) => {
   // Measured on a settled page: during the session check the guest button is
   // disabled, and its color then takes 0.15 s to turn back; axe measuring in
