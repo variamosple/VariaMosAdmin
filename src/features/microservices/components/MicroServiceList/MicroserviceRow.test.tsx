@@ -199,3 +199,60 @@ describe("MicroServiceRowComponent latency", () => {
     expect(screen.getByText("2400 ms")).toBeInTheDocument();
   });
 });
+
+describe("MicroServiceRowComponent CPU and memory (EV-86 lot 2)", () => {
+  const MB = 1024 * 1024;
+  const container = (cpuPercent: number | null) => ({
+    id: "c1",
+    name: "test-micro_1",
+    state: "running",
+    status: "Up 1 hour",
+    created: new Date(),
+    labels: {},
+    resources: {
+      cpuPercent,
+      memoryUsedBytes: 152 * MB,
+      memoryLimitBytes: 4096 * MB,
+      sampledAt: new Date().toISOString(),
+    },
+  });
+  const renderRow = (containers: MicroService["containers"]) =>
+    render(
+      <table>
+        <tbody>
+          <MicroServiceRowComponent
+            microService={{ ...mockMicroservice, containers }}
+            onMicroServiceStart={vi.fn()}
+            onMicroServiceRestart={vi.fn()}
+            onMicroServiceStop={vi.fn()}
+          />
+        </tbody>
+      </table>,
+    );
+
+  it("shows the CPU and the memory used out of the limit", () => {
+    renderRow([container(2.5)]);
+
+    expect(screen.getByText("2.5 %")).toBeInTheDocument();
+    expect(screen.getByText("152 MB")).toBeInTheDocument();
+    expect(screen.getByText("/ 4.0 GB")).toBeInTheDocument();
+  });
+
+  it("says when the CPU comes, before the second sample", () => {
+    renderRow([container(null)]);
+
+    expect(
+      screen.getByTitle(
+        "Measured from the second sample, 30 s after the start",
+      ),
+    ).toHaveTextContent("—");
+    expect(screen.getByText("152 MB")).toBeInTheDocument();
+  });
+
+  it("shows dashes for a service without sampled container", () => {
+    renderRow([]);
+
+    expect(screen.queryByText(/ %$/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ MB$/)).not.toBeInTheDocument();
+  });
+});

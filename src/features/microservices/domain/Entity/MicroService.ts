@@ -5,6 +5,16 @@ interface Labels {
   [label: string]: string;
 }
 
+// CPU and memory of a running container, sampled every 30 s (EV-86 lot 2).
+// cpuPercent is null until the second sample; 100 is one full core.
+export interface ContainerResources {
+  cpuPercent: number | null;
+  memoryUsedBytes: number;
+  // The container's limit, or the machine's memory without one
+  memoryLimitBytes: number;
+  sampledAt: string;
+}
+
 interface ContainerInstanceInfo {
   id: string;
   name: string;
@@ -12,6 +22,8 @@ interface ContainerInstanceInfo {
   status: string;
   created: Date;
   labels: Labels;
+  // Absent for a stopped container, or before its first sample
+  resources?: ContainerResources;
 }
 
 type JsonPrimitive = string | number | boolean | null;
