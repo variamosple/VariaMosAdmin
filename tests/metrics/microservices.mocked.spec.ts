@@ -156,10 +156,7 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
       },
     );
 
-    // 2. Set auth token and navigate
-    await page.addInitScript(() => {
-      window.localStorage.setItem("authToken", "fake-jwt-token");
-    });
+    // 2. Navigate: the session is the mocked session-info
     await page.goto("http://localhost:3000/#/monitoring");
 
     // Verify main page title

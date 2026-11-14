@@ -49,9 +49,6 @@ test.describe("Metrics - Mocked E2E Flows", () => {
       });
     });
 
-    await page.addInitScript(() => {
-      window.localStorage.setItem("authToken", "fake-jwt-token");
-    });
     await page.goto("http://localhost:3000/#/metrics");
 
     await expect(page.locator("h1").first()).toHaveText("Metrics");
