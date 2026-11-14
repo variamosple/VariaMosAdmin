@@ -637,6 +637,19 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
     await page.getByText("Report a problem").click();
     await expect(page.locator(".modal-title")).toHaveText("Report a New Bug");
 
+    // The field messages wait for a submission attempt: the interface shows
+    // any .invalid-feedback that holds text
+    const titleMessage = page.getByText("Title is required");
+    const descriptionMessage = page.getByText("Description is required");
+    await expect(titleMessage).toBeHidden();
+    await expect(descriptionMessage).toBeHidden();
+    await page
+      .locator(".modal-footer")
+      .getByRole("button", { name: "Report Bug" })
+      .click();
+    await expect(titleMessage).toBeVisible();
+    await expect(descriptionMessage).toBeVisible();
+
     await page.locator("#bugTitle").fill("Global Bug");
     await page.locator("#bugDescription").fill("Global bug description");
     await page.locator("#bugCategory").selectOption("Editor");
