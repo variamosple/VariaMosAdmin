@@ -628,7 +628,9 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
       await modal.getByRole("button", { name: "Cancel" }).click();
     }
 
-    const dropdownToggle = page.locator("#nav-dropdown");
+    const dropdownToggle = page.locator(
+      ".variamos-header-options > .dropdown-toggle",
+    );
     await expect(dropdownToggle).toBeVisible();
     await dropdownToggle.click();
 
