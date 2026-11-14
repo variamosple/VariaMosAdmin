@@ -44,6 +44,26 @@ describe("ForgotPasswordForm Component", () => {
     });
   });
 
+  it("sends the email typed right after an empty attempt", async () => {
+    render(<ForgotPasswordForm onSubmitEmail={mockOnSubmitEmail} />);
+    const user = userEvent.setup();
+    const button = screen.getByRole("button", { name: /send reset link/i });
+
+    await user.click(button);
+    expect(await screen.findByText("Email is required")).toBeInTheDocument();
+    expect(button).toBeEnabled();
+
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "user@example.com",
+    );
+    await user.click(button);
+
+    await waitFor(() => {
+      expect(mockOnSubmitEmail).toHaveBeenCalledWith("user@example.com");
+    });
+  });
+
   it("disables submit button and shows sending status when isLoading is true", () => {
     render(
       <ForgotPasswordForm onSubmitEmail={mockOnSubmitEmail} isLoading={true} />,

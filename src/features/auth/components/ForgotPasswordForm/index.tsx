@@ -42,11 +42,14 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
         error={errors.email}
       />
 
+      {/* Disabled only while sending, as the sign-in form: a button
+          disabled by the error lost the click given right after typing,
+          before the validation had run again */}
       <Button
         className="w-100"
         variant="primary"
         type="submit"
-        disabled={Boolean(errors.email) || isLoading}
+        disabled={isLoading}
       >
         {isLoading ? (
           <>
