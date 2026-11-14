@@ -12,10 +12,13 @@ import {
   Tabs,
 } from "react-bootstrap";
 import { Search } from "react-bootstrap-icons";
+import {
+  AnnouncementModal,
+  NOTIFICATION_DISPATCH_PERMISSION,
+} from "@/shared/components/AnnouncementModal";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useTimeZone } from "@/shared/hooks/useTimeZone";
-import { AnnounceChangesModal } from "../components/AnnounceChangesModal";
 import { ConfigurationFormModal } from "../components/ConfigurationFormModal";
 import {
   ConfigurationGroups,
@@ -30,7 +33,6 @@ import { formatUtc } from "../domain/Entity/ScheduledChange";
 import { useChangePlanning } from "../hooks/useChangePlanning";
 import { useConfigurationList } from "../hooks/useConfigurationList";
 
-const NOTIFICATION_DISPATCH_PERMISSION = "admin::notifications::dispatch";
 const CONFIGURATION_UPDATE_PERMISSION = "configurations::update";
 
 interface UnsavedChangesBannerProps {
@@ -295,7 +297,7 @@ const ConfigurationListPageComponent: FC = () => {
         onCancel={() => setConfirming(undefined)}
       />
 
-      <AnnounceChangesModal
+      <AnnouncementModal
         announcement={announcement}
         onClose={() => setAnnouncement(null)}
       />

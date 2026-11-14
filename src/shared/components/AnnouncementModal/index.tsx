@@ -15,13 +15,26 @@ import {
 import { queryRoleChoices } from "@/features/role-management/api/RoleRepository";
 import { RoleCheckboxList } from "@/shared/components/RoleCheckboxList";
 import { useLoadedList } from "@/shared/hooks/useLoadedList";
-import type { ChangeAnnouncement } from "../domain/Entity/ChangeAnnouncement";
 
 const accounts = (count: number) => `${count} account${count === 1 ? "" : "s"}`;
 
-export interface AnnounceChangesModalProps {
-  /** What the saved settings suggest; the dialog is shown while set. */
-  announcement: ChangeAnnouncement | null;
+/** The right to send an announcement, checked again by the server. */
+export const NOTIFICATION_DISPATCH_PERMISSION =
+  "admin::notifications::dispatch";
+
+/** A suggested announcement, editable before it is sent. */
+export interface AnnouncementDraft {
+  title: string;
+  body: string;
+  /** The settings it announces, recorded with it (EV-115 lot A). */
+  keys?: string[];
+}
+
+export interface AnnouncementModalProps {
+  /** The suggested text; the dialog is shown while set. */
+  announcement: AnnouncementDraft | null;
+  /** The dialog title. */
+  heading?: string;
   onClose: () => void;
 }
 
@@ -87,7 +100,7 @@ interface PendingAnnouncement {
 }
 
 // The announcement being written, reviewed (number of accounts) and sent
-const useAnnouncementDraft = (props: AnnounceChangesModalProps) => {
+const useAnnouncementDraft = (props: AnnouncementModalProps) => {
   const { announcement, onClose } = props;
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -129,7 +142,7 @@ const useAnnouncementDraft = (props: AnnounceChangesModalProps) => {
       roles: audience === "role" ? selectedRoles : undefined,
       title,
       body,
-      announces: announcement.keys,
+      announces: announcement.keys?.length ? announcement.keys : undefined,
     };
     setBusy(true);
     const counted = await countNotificationRecipients(request);
@@ -292,11 +305,12 @@ const AnnouncementButtons: FC<{ draft: Draft; onClose: () => void }> = ({
 };
 
 /**
- * Offers to tell users about the settings just saved (EV-115 lot A). The
- * text is suggested and editable; nothing is sent without "Send", then the
- * confirmation of the number of accounts reached.
+ * Offers to tell users about a change: settings just saved (EV-115 lot A)
+ * or a service about to restart (EV-86). The text is suggested and
+ * editable; nothing is sent without "Send", then the confirmation of the
+ * number of accounts reached.
  */
-export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = (props) => {
+export const AnnouncementModal: FC<AnnouncementModalProps> = (props) => {
   const { announcement, onClose } = props;
   const titleId = useId();
   const draft = useAnnouncementDraft(props);
@@ -313,7 +327,7 @@ export const AnnounceChangesModal: FC<AnnounceChangesModalProps> = (props) => {
     >
       <Modal.Header closeButton={!busy}>
         <Modal.Title id={titleId} as="h2" className="fs-5">
-          Announce this change?
+          {props.heading ?? "Announce this change?"}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>

@@ -4,7 +4,7 @@ import { ResponseModel } from "@variamosple/variamos-components";
 import * as NotificationsAdminRepository from "@/features/notifications-admin/api/NotificationsAdminRepository";
 import * as RoleRepository from "@/features/role-management/api/RoleRepository";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
-import { AnnounceChangesModal } from "./AnnounceChangesModal";
+import { AnnouncementModal } from ".";
 
 vi.mock("@variamosple/variamos-components", async () =>
   (
@@ -24,7 +24,7 @@ const counted = (count: number) => {
   return response;
 };
 
-describe("AnnounceChangesModal (EV-115 lot A)", () => {
+describe("AnnouncementModal (EV-115 lot A)", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -38,9 +38,7 @@ describe("AnnounceChangesModal (EV-115 lot A)", () => {
       .mockResolvedValue(new ResponseModel<void>("dispatch"));
     const onClose = vi.fn();
     const user = userEvent.setup();
-    render(
-      <AnnounceChangesModal announcement={ANNOUNCEMENT} onClose={onClose} />,
-    );
+    render(<AnnouncementModal announcement={ANNOUNCEMENT} onClose={onClose} />);
 
     await user.type(screen.getByLabelText("Message"), " Thank you.");
     await user.click(screen.getByRole("button", { name: "Send" }));
@@ -81,9 +79,7 @@ describe("AnnounceChangesModal (EV-115 lot A)", () => {
       .spyOn(NotificationsAdminRepository, "countNotificationRecipients")
       .mockResolvedValue(counted(1));
     const user = userEvent.setup();
-    render(
-      <AnnounceChangesModal announcement={ANNOUNCEMENT} onClose={vi.fn()} />,
-    );
+    render(<AnnouncementModal announcement={ANNOUNCEMENT} onClose={vi.fn()} />);
 
     await user.click(screen.getByLabelText("Some roles"));
     await user.click(screen.getByRole("button", { name: "Send" }));
@@ -116,9 +112,7 @@ describe("AnnounceChangesModal (EV-115 lot A)", () => {
     );
     const onClose = vi.fn();
     const user = userEvent.setup();
-    render(
-      <AnnounceChangesModal announcement={ANNOUNCEMENT} onClose={onClose} />,
-    );
+    render(<AnnouncementModal announcement={ANNOUNCEMENT} onClose={onClose} />);
 
     await user.click(screen.getByRole("button", { name: "Send" }));
     await user.click(
@@ -127,5 +121,37 @@ describe("AnnounceChangesModal (EV-115 lot A)", () => {
 
     expect(await screen.findByText("Service down.")).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("records no setting for an announcement without one (EV-86)", async () => {
+    vi.spyOn(
+      NotificationsAdminRepository,
+      "countNotificationRecipients",
+    ).mockResolvedValue(counted(3));
+    const dispatch = vi
+      .spyOn(NotificationsAdminRepository, "dispatchNotification")
+      .mockResolvedValue(new ResponseModel<void>("dispatch"));
+    const user = userEvent.setup();
+    render(
+      <AnnouncementModal
+        announcement={{ title: "Maintenance: Languages", body: "Soon." }}
+        heading="Announce a maintenance?"
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Announce a maintenance?" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Send to 3 accounts" }),
+    );
+
+    await waitFor(() =>
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ announces: undefined }),
+      ),
+    );
   });
 });

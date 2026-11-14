@@ -15,6 +15,7 @@ import { Badge, ButtonGroup, Spinner } from "react-bootstrap";
 import {
   ArrowClockwise,
   DashCircle,
+  Megaphone,
   PlayFill,
   Search,
   Sliders,
@@ -28,6 +29,8 @@ export interface MicroServiceRowProps {
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
   onMicroServiceConfigure?: (microservice: MicroService) => void;
+  // Given to whoever may send announcements (EV-86, MA-NO-05)
+  onMicroServiceAnnounce?: (microservice: MicroService) => void;
   // A start, restart or stop under way, or one that failed (EV-86 lot 3)
   followUp?: FollowUp;
 }
@@ -187,6 +190,15 @@ const ServiceActions: FC<ServiceActionsProps> = (props) => {
             icon={<StopFill />}
           />
         </>
+      ) : null}
+
+      {props.onMicroServiceAnnounce ? (
+        <IconButton
+          variant="outline-secondary"
+          onClick={() => props.onMicroServiceAnnounce?.(microService)}
+          label="Announce maintenance"
+          icon={<Megaphone size={14} />}
+        />
       ) : null}
 
       <IconButton

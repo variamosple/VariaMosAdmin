@@ -1,5 +1,6 @@
 import {
   type ResponseModel,
+  useSession,
   withPageVisit,
 } from "@variamosple/variamos-components";
 import { type FC, useState } from "react";
@@ -13,11 +14,17 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { ArrowClockwise } from "react-bootstrap-icons";
+import {
+  type AnnouncementDraft,
+  AnnouncementModal,
+  NOTIFICATION_DISPATCH_PERMISSION,
+} from "@/shared/components/AnnouncementModal";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { MicroServiceConfigModal } from "../../components/MicroServiceConfigModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
 import type { MicroService } from "../../domain/Entity/MicroService";
+import { maintenanceAnnouncementOf } from "../../domain/maintenanceAnnouncement";
 import { useMicroServiceList } from "../../hooks/useMicroServiceList";
 
 type ServiceList = ReturnType<typeof useMicroServiceList>;
@@ -94,6 +101,8 @@ interface ActionConfirmationProps {
   show: boolean;
   microService?: MicroService;
   variant?: string;
+  // A reminder that users can be warned first (EV-86, MA-NO-05)
+  hint?: string;
   perform: (microService: MicroService) => Promise<ResponseModel<void>>;
   setShow: (show: boolean) => void;
   setMicroService: (microService: MicroService | undefined) => void;
@@ -105,7 +114,12 @@ const ActionConfirmation: FC<ActionConfirmationProps> = (props) => {
     <ConfirmationModal
       show={props.show}
       title={`${verb} microservice`}
-      message={`${verb} ${microService?.displayName || microService?.serviceName || "this microservice"}?`}
+      message={[
+        `${verb} ${microService?.displayName || microService?.serviceName || "this microservice"}?`,
+        props.hint,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       confirmLabel={`${verb} microservice`}
       confirmButtonVariant={props.variant}
       onConfirm={() => {
@@ -122,7 +136,13 @@ const ActionConfirmation: FC<ActionConfirmationProps> = (props) => {
   );
 };
 
-const ActionConfirmations: FC<{ list: ServiceList }> = ({ list }) => (
+const ANNOUNCE_HINT =
+  'Users working in it can be warned first with "Announce maintenance" on its row.';
+
+const ActionConfirmations: FC<{ list: ServiceList; canAnnounce: boolean }> = ({
+  list,
+  canAnnounce,
+}) => (
   <>
     <ActionConfirmation
       verb="Start"
@@ -137,6 +157,7 @@ const ActionConfirmations: FC<{ list: ServiceList }> = ({ list }) => (
       show={list.showRestart}
       microService={list.toRestartMicroService}
       variant="warning"
+      hint={canAnnounce ? ANNOUNCE_HINT : undefined}
       perform={list.performMicroSerViceRestart}
       setShow={list.setShowRestart}
       setMicroService={list.setToRestartMicroService}
@@ -146,6 +167,7 @@ const ActionConfirmations: FC<{ list: ServiceList }> = ({ list }) => (
       show={list.showStop}
       microService={list.toStopMicroService}
       variant="danger"
+      hint={canAnnounce ? ANNOUNCE_HINT : undefined}
       perform={list.performMicroSerViceStop}
       setShow={list.setShowStop}
       setMicroService={list.setToStopMicroService}
@@ -160,6 +182,13 @@ const MicroServiceListPageComponent: FC = () => {
   >(undefined);
   const list = useMicroServiceList();
   const { microServices, listState } = list;
+  // Offered to whoever may send announcements; the server checks it again
+  const canAnnounce = (useSession()?.user?.permissions ?? []).includes(
+    NOTIFICATION_DISPATCH_PERMISSION,
+  );
+  const [announcement, setAnnouncement] = useState<AnnouncementDraft | null>(
+    null,
+  );
 
   // A failed reload leaves the last statuses on screen: say they are old
   // instead of letting them pass for current ones (EV-86 lot 2)
@@ -191,6 +220,11 @@ const MicroServiceListPageComponent: FC = () => {
         onMicroServiceRestart={list.onMicroServiceRestart}
         onMicroServiceStop={list.onMicroServiceStop}
         onMicroServiceConfigure={(ms) => setSelectedConfigService(ms)}
+        onMicroServiceAnnounce={
+          canAnnounce
+            ? (ms) => setAnnouncement(maintenanceAnnouncementOf(ms, new Date()))
+            : undefined
+        }
       />
 
       {/* Service Configuration & Audit Modal */}
@@ -206,7 +240,13 @@ const MicroServiceListPageComponent: FC = () => {
         />
       ) : null}
 
-      <ActionConfirmations list={list} />
+      <ActionConfirmations list={list} canAnnounce={canAnnounce} />
+
+      <AnnouncementModal
+        announcement={announcement}
+        heading="Announce a maintenance?"
+        onClose={() => setAnnouncement(null)}
+      />
     </Container>
   );
 };

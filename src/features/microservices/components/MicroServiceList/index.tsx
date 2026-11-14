@@ -15,6 +15,7 @@ export interface MicroServiceListParameters extends PaginationControlsProps {
   onMicroServiceRestart: (microservice: MicroService) => void;
   onMicroServiceStop: (microservice: MicroService) => void;
   onMicroServiceConfigure?: (microservice: MicroService) => void;
+  onMicroServiceAnnounce?: (microservice: MicroService) => void;
   // Actions under way, by service key
   followUps?: Record<string, FollowUp>;
 }
@@ -29,6 +30,7 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
   onMicroServiceRestart,
   onMicroServiceStop,
   onMicroServiceConfigure,
+  onMicroServiceAnnounce,
   followUps,
 }) => {
   return (
@@ -74,6 +76,7 @@ export const MicroServiceList: FC<MicroServiceListParameters> = ({
               onMicroServiceRestart={onMicroServiceRestart}
               onMicroServiceStop={onMicroServiceStop}
               onMicroServiceConfigure={onMicroServiceConfigure}
+              onMicroServiceAnnounce={onMicroServiceAnnounce}
               followUp={followUps?.[serviceKeyOf(microService)]}
             />
           ))}
