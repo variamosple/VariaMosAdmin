@@ -26,13 +26,14 @@ test.describe("Auth - Real E2E Flows", () => {
     await page.locator('button[type="submit"]').click();
     const signInResponse = await signInPromise;
     const signInBody = await signInResponse.json();
-    if (signInBody.data?.authToken) {
-      await page.evaluate((t) => {
-        window.localStorage.setItem("authToken", t);
-      }, signInBody.data.authToken);
-    }
+    // The session stays in the httpOnly cookie: never in an answer or in
+    // the browser storage (EV-117)
+    expect(signInBody.data?.authToken).toBeUndefined();
 
     await expect(page).toHaveURL("http://localhost:3000/variamos_admin/#/");
+    expect(
+      await page.evaluate(() => window.localStorage.getItem("authToken")),
+    ).toBeNull();
 
     await page.goto("http://localhost:3000/variamos_admin/#/my-account");
     await expect(page.locator("h1")).toHaveText("My account");
@@ -96,12 +97,13 @@ test.describe("Auth - Real E2E Flows", () => {
     await page.locator('button[type="submit"]').click();
     const signInResponse = await signInPromise;
     const signInBody = await signInResponse.json();
-    if (signInBody.data?.authToken) {
-      await page.evaluate((t) => {
-        window.localStorage.setItem("authToken", t);
-      }, signInBody.data.authToken);
-    }
+    // The session stays in the httpOnly cookie: never in an answer or in
+    // the browser storage (EV-117)
+    expect(signInBody.data?.authToken).toBeUndefined();
 
     await expect(page).toHaveURL("http://localhost:3000/variamos_admin/#/");
+    expect(
+      await page.evaluate(() => window.localStorage.getItem("authToken")),
+    ).toBeNull();
   });
 });

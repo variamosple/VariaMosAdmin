@@ -20,8 +20,8 @@ describe("AxiosConfig Interceptors", () => {
     window.location.hash = "";
   });
 
-  it("should add Authorization header if token exists in localStorage", async () => {
-    localStorage.setItem("authToken", "test-token");
+  it("never sends a token kept in localStorage: the cookie carries the session", async () => {
+    localStorage.setItem("authToken", "stale-token");
     server.use(
       http.get("*/data-auth-check", () => {
         return HttpResponse.json({ ok: true });
@@ -29,7 +29,8 @@ describe("AxiosConfig Interceptors", () => {
     );
 
     const response = await ADMIN_CLIENT.get("/data-auth-check");
-    expect(response.config.headers.Authorization).toBe("Bearer test-token");
+    expect(response.config.headers.Authorization).toBeUndefined();
+    expect(response.config.withCredentials).toBe(true);
   });
 
   it("should not add Authorization header if token is absent", async () => {

@@ -1,25 +1,14 @@
-import axios, {
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
-} from "axios";
+import axios, { type AxiosInstance } from "axios";
 import type { NavigateFunction } from "react-router-dom";
 import { AppConfig } from "./AppConfig";
 
-const authInterceptor = (config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem("authToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-};
-
+// The session travels in the httpOnly cookie of the admin service, sent by
+// withCredentials: no token is read from the browser storage (EV-117)
 export const ADMIN_CLIENT = axios.create({
   baseURL: AppConfig.ADMIN_API_URL,
   timeout: 30000,
   withCredentials: true,
 });
-
-ADMIN_CLIENT.interceptors.request.use(authInterceptor);
 
 export const LANGUAGES_CLIENT = axios.create({
   baseURL: AppConfig.LANGUAGES_API_URL,
@@ -27,15 +16,11 @@ export const LANGUAGES_CLIENT = axios.create({
   withCredentials: true,
 });
 
-LANGUAGES_CLIENT.interceptors.request.use(authInterceptor);
-
 export const PROJECTS_CLIENT = axios.create({
   baseURL: AppConfig.PROJECTS_API_URL,
   timeout: 30000,
   withCredentials: true,
 });
-
-PROJECTS_CLIENT.interceptors.request.use(authInterceptor);
 
 // Pages a signed-out visitor may stay on: a 401 there sends nowhere
 const PUBLIC_PATHS = new Set([
