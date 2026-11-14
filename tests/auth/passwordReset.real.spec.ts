@@ -362,7 +362,10 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.locator('input[type="email"]').fill("temp");
     await page.locator('input[type="email"]').clear();
     await expect(page.getByText("Email is required")).toBeVisible();
-    await expect(page.locator('button[type="submit"]')).toBeDisabled();
+    // The button stays enabled; sending an empty field only shows the error
+    await page.locator('button[type="submit"]').click();
+    await expect(page.getByText("Email is required")).toBeVisible();
+    await expect(page).toHaveURL(/.*forgot-password/);
 
     const dummyLink =
       "http://localhost:3000/variamos_admin/#/reset-password?token=dummy_valid_token";
