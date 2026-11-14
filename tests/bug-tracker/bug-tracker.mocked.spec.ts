@@ -181,9 +181,6 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
       .filter({ has: page.getByRole("cell") });
 
   const loginAndGoToBugs = async (page: Page) => {
-    await page.addInitScript(() => {
-      window.localStorage.setItem("authToken", "fake-jwt-token");
-    });
     await page.goto("http://localhost:3000");
 
     const emailLocator = page.getByLabel("Email");
@@ -212,9 +209,6 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
       });
     });
 
-    await page.addInitScript(() => {
-      window.localStorage.setItem("authToken", "fake-jwt-token");
-    });
     await page.goto("http://localhost:3000");
 
     const emailLocator = page.getByLabel("Email");
@@ -611,9 +605,6 @@ test.describe("Admin - Bug Tracker E2E Flows", () => {
       }
     });
 
-    await page.addInitScript(() => {
-      window.localStorage.setItem("authToken", "fake-jwt-token");
-    });
     await page.goto("http://localhost:3000");
 
     const emailLocator = page.getByLabel("Email");

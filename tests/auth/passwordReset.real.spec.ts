@@ -30,11 +30,8 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.locator('button[type="submit"]').click();
     const signInResponse = await signInPromise;
     const signInBody = await signInResponse.json();
-    if (signInBody.data?.authToken) {
-      await page.evaluate((t) => {
-        window.localStorage.setItem("authToken", t);
-      }, signInBody.data.authToken);
-    }
+    // The session stays in the httpOnly cookie, never in the answer (EV-117)
+    expect(signInBody.data?.authToken).toBeUndefined();
 
     await expect(page).toHaveURL("http://localhost:3000/variamos_admin/#/");
 
@@ -108,11 +105,8 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.locator('button[type="submit"]').click();
     const signInResponse2 = await signInPromise2;
     const signInBody2 = await signInResponse2.json();
-    if (signInBody2.data?.authToken) {
-      await page.evaluate((t) => {
-        window.localStorage.setItem("authToken", t);
-      }, signInBody2.data.authToken);
-    }
+    // The session stays in the httpOnly cookie, never in the answer (EV-117)
+    expect(signInBody2.data?.authToken).toBeUndefined();
     await expect(page).toHaveURL("http://localhost:3000/variamos_admin/#/");
   });
 
@@ -166,11 +160,8 @@ test.describe("Admin - Password Reset Flow", () => {
     await page.locator('button[type="submit"]').click();
     const signInResponse = await signInPromise;
     const signInBody = await signInResponse.json();
-    if (signInBody.data?.authToken) {
-      await page.evaluate((t) => {
-        window.localStorage.setItem("authToken", t);
-      }, signInBody.data.authToken);
-    }
+    // The session stays in the httpOnly cookie, never in the answer (EV-117)
+    expect(signInBody.data?.authToken).toBeUndefined();
 
     await expect(page).toHaveURL("http://localhost:3000/variamos_admin/#/");
   });
