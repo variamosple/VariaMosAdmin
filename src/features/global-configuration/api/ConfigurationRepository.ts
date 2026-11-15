@@ -32,3 +32,22 @@ export const updateConfiguration = (
       ),
     );
 };
+
+/** What the form sends to create a setting (EV-18 lot C.3). */
+export type NewConfiguration = Pick<
+  Configuration,
+  "key" | "value" | "type" | "category" | "isSecret" | "description"
+>;
+
+export const createConfiguration = (
+  configuration: NewConfiguration,
+): Promise<ResponseModel<Configuration>> => {
+  return ADMIN_CLIENT.post("/v1/configurations", configuration)
+    .then((response) => response.data)
+    .catch((error) =>
+      toErrorResponse(
+        error,
+        `Error when trying to create configuration '${configuration.key}', please try again later.`,
+      ),
+    );
+};

@@ -24,6 +24,7 @@ import {
   ConfigurationGroups,
   type ConfigurationRowContext,
 } from "../components/ConfigurationTable";
+import { NewConfigurationModal } from "../components/NewConfigurationModal";
 import { ScheduleChangeModal } from "../components/ScheduleChangeModal";
 import { ScheduledChangesPanel } from "../components/ScheduledChangesPanel";
 import type { ChangeAnnouncement } from "../domain/Entity/ChangeAnnouncement";
@@ -34,6 +35,7 @@ import { useChangePlanning } from "../hooks/useChangePlanning";
 import { useConfigurationList } from "../hooks/useConfigurationList";
 
 const CONFIGURATION_UPDATE_PERMISSION = "configurations::update";
+const CONFIGURATION_CREATE_PERMISSION = "configurations::create";
 
 interface UnsavedChangesBannerProps {
   modifiedCount: number;
@@ -224,6 +226,8 @@ const useConfigurationRights = () => {
     canAnnounce: permissions.includes(NOTIFICATION_DISPATCH_PERMISSION),
     // Planning is a change of the setting: the server asks the same right
     canUpdate: permissions.includes(CONFIGURATION_UPDATE_PERMISSION),
+    // A new key (EV-18 lot C.3) has its own permission
+    canCreate: permissions.includes(CONFIGURATION_CREATE_PERMISSION),
   };
 };
 
@@ -235,7 +239,9 @@ const ConfigurationListPageComponent: FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [toEditConfig, setToEditConfig] = useState<Configuration>();
   const [showEdit, setShowEdit] = useState<boolean>(false);
-  const { userId, canAnnounce, canUpdate } = useConfigurationRights();
+  const { userId, canAnnounce, canUpdate, canCreate } =
+    useConfigurationRights();
+  const [creating, setCreating] = useState(false);
   const [announcement, setAnnouncement] = useState<ChangeAnnouncement | null>(
     null,
   );
@@ -269,9 +275,16 @@ const ConfigurationListPageComponent: FC = () => {
         <div>
           <h1 className="mb-0">Global Configurations</h1>
         </div>
-        {isLoading || isUpdating ? (
-          <Spinner animation="border" size="sm" variant="primary" />
-        ) : null}
+        <div className="d-flex align-items-center gap-2">
+          {isLoading || isUpdating ? (
+            <Spinner animation="border" size="sm" variant="primary" />
+          ) : null}
+          {canCreate ? (
+            <Button size="sm" onClick={() => setCreating(true)}>
+              New configuration
+            </Button>
+          ) : null}
+        </div>
       </div>
       <hr />
 
@@ -318,6 +331,12 @@ const ConfigurationListPageComponent: FC = () => {
         onClose={() => setShowEdit(false)}
         config={toEditConfig}
         onConfigSubmit={list.setLocalValue}
+      />
+
+      <NewConfigurationModal
+        show={creating}
+        onClose={() => setCreating(false)}
+        onCreated={() => void list.refresh()}
       />
 
       <SearchField value={searchTerm} onChange={setSearchTerm} />
