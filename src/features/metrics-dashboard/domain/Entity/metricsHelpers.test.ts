@@ -1,6 +1,12 @@
 import { lastDays, periodStep } from "./ChartPeriod";
 import { figureChange, figureText, stepLabel } from "./formatFigures";
-import { keyFiguresOf, type Metric, rankingOf, timeSeriesOf } from "./Metric";
+import {
+  hourGridOf,
+  keyFiguresOf,
+  type Metric,
+  rankingOf,
+  timeSeriesOf,
+} from "./Metric";
 import { pageOf } from "./pageNames";
 
 const metricOf = (data: Metric["data"], labelKey?: string): Metric => ({
@@ -118,5 +124,23 @@ describe("chart data", () => {
       name: "SomethingNew",
       area: "Other",
     });
+  });
+
+  it("reads the sign-ins grid as 7 days of 24 hours, Monday first", () => {
+    const grid = hourGridOf(
+      metricOf([
+        { day: 1, hour: 0, count: 2 },
+        { day: 7, hour: 23, count: 5 },
+        { day: 8, hour: 1, count: 9 },
+        { day: 3, hour: 24, count: 9 },
+      ]),
+    );
+    expect(grid.counts).toHaveLength(7);
+    expect(grid.counts.every((row) => row.length === 24)).toBe(true);
+    expect(grid.counts[0]?.[0]).toBe(2);
+    expect(grid.counts[6]?.[23]).toBe(5);
+    // A cell out of the week is left out
+    expect(grid).toMatchObject({ max: 5, total: 7 });
+    expect(hourGridOf(metricOf(null))).toMatchObject({ max: 0, total: 0 });
   });
 });

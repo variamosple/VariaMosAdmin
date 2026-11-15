@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { cloneElement, isValidElement, type ReactNode } from "react";
 import type { Metric } from "../domain/Entity/Metric";
+import { HourGridChart, stepOf } from "./HourGridChart";
 import { KeyFigures } from "./KeyFigures";
 import { PeriodPicker } from "./PeriodPicker";
 import { RankingChart } from "./RankingChart";
@@ -206,5 +207,70 @@ describe("PeriodPicker", () => {
       { fromDate: "2026-02-01", toDate: "2026-02-28" },
       null,
     );
+  });
+
+  it("draws the sign-ins grid as a table, with the busiest hour, and says when there is nothing", () => {
+    const grid = (data: Metric["data"]): Metric => ({
+      id: "sign_ins_by_hour",
+      title: "Sign-ins by day and hour (America/Bogota)",
+      chartType: "heatmap",
+      defaultFilter: "day",
+      labelKey: "hour",
+      data,
+    });
+    const { rerender } = render(
+      <HourGridChart
+        metric={grid([
+          { day: 3, hour: 10, count: 4 },
+          { day: 6, hour: 5, count: 1 },
+          { day: 1, hour: 0, count: 0 },
+        ])}
+      />,
+    );
+    const card = screen.getByRole("region", {
+      name: "Sign-ins by day and hour (America/Bogota)",
+    });
+    const table = within(card).getByRole("table");
+    // A row header per day, Monday first
+    expect(
+      within(table)
+        .getAllByRole("rowheader")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
+    expect(
+      within(card).getByText(/Busiest: Wednesday, 10:00–11:00/),
+    ).toHaveTextContent("(4 sign-ins)");
+    expect(screen.getByTestId("cell-3-10")).toHaveAttribute(
+      "title",
+      "Wednesday, 10:00–11:00: 4 sign-ins",
+    );
+    expect(screen.getByTestId("cell-6-5")).toHaveAttribute(
+      "title",
+      "Saturday, 05:00–06:00: 1 sign-in",
+    );
+    expect(screen.getByTestId("cell-3-10")).toHaveTextContent("4");
+    expect(screen.getByTestId("cell-7-23")).toHaveAttribute(
+      "title",
+      "Sunday, 23:00–00:00: 0 sign-ins",
+    );
+    // The busiest cell is the darkest, an empty one the neutral of the page
+    expect(screen.getByTestId("cell-3-10").style.background).not.toBe(
+      screen.getByTestId("cell-6-5").style.background,
+    );
+    expect(screen.getByTestId("cell-1-0").style.background).toContain(
+      "--bs-tertiary-bg",
+    );
+
+    rerender(<HourGridChart metric={grid(null)} />);
+    expect(
+      screen.getByText("No activity recorded for the selected period."),
+    ).toBeInTheDocument();
+  });
+
+  it("steps a count by quarter of the busiest hour", () => {
+    expect([0, 1, 2, 3, 4, 5, 8].map((count) => stepOf(count, 8))).toEqual([
+      0, 1, 1, 2, 2, 3, 4,
+    ]);
+    expect(stepOf(3, 0)).toBe(0);
   });
 });

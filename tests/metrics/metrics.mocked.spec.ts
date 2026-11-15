@@ -174,6 +174,18 @@ const metrics = [
     ),
   },
   {
+    id: "sign_ins_by_hour",
+    title: "Sign-ins by day and hour (UTC)",
+    chartType: "heatmap",
+    defaultFilter: "day",
+    labelKey: "hour",
+    data: Array.from({ length: 7 * 24 }, (_, i) => ({
+      day: Math.floor(i / 24) + 1,
+      hour: i % 24,
+      count: i % 24 >= 8 && i % 24 < 18 && i < 5 * 24 ? 1 + (i % 5) : 0,
+    })),
+  },
+  {
     id: "new_accounts",
     title: "New accounts",
     chartType: "bar",
@@ -240,11 +252,21 @@ test.describe("Metrics - Mocked E2E Flows", () => {
       "Most visited pages",
       "Most used languages (active projects)",
       "Sign-ins",
+      "Sign-ins by day and hour (UTC)",
       "New accounts",
       "Models by type",
     ]) {
-      await expect(page.getByRole("heading", { name: title })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: title, exact: true }),
+      ).toBeVisible();
     }
+    // The grid, a table of 7 days, read in the reader's zone
+    const grid = page.getByRole("region", {
+      name: "Sign-ins by day and hour (UTC)",
+    });
+    await expect(grid.getByRole("rowheader")).toHaveCount(7);
+    await expect(grid.getByText(/^Busiest: Monday, 09:00–10:00/)).toBeVisible();
+    expect(asked[0]?.get("timeZone")).toBeTruthy();
     // Pages under a readable name
     await expect(page.getByText("My languages")).toBeVisible();
     expect(asked[0]?.get("startDate")).toBeTruthy();

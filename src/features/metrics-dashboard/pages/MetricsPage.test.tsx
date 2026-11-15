@@ -77,6 +77,14 @@ const METRICS = [
     defaultFilter: "page",
     data: [],
   },
+  {
+    id: "sign_ins_by_hour",
+    title: "Sign-ins by day and hour (UTC)",
+    chartType: "heatmap",
+    defaultFilter: "day",
+    labelKey: "hour",
+    data: [{ day: 2, hour: 9, count: 3 }],
+  },
 ];
 
 describe("MetricsPage", () => {
@@ -114,6 +122,13 @@ describe("MetricsPage", () => {
         Date.parse(String(first?.get("startDate")))) /
       86_400_000;
     expect(days).toBe(29);
+    // Without a zone chosen in "My account", the browser's
+    expect(first?.get("timeZone")).toBe(
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+    );
+    expect(
+      screen.getByRole("region", { name: "Sign-ins by day and hour (UTC)" }),
+    ).toBeInTheDocument();
 
     await userEvent
       .setup()
@@ -145,5 +160,25 @@ describe("MetricsPage", () => {
     await userEvent.setup().click(retry);
     expect(await screen.findByText("Over the period")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+  });
+
+  it("reads the sign-ins grid in the zone chosen in My account", async () => {
+    const zones: (string | null)[] = [];
+    server.use(
+      http.get("*/auth/my-account/preferences", () =>
+        HttpResponse.json({
+          data: { timeZone: "Pacific/Auckland", updatedAt: null },
+        }),
+      ),
+      http.get("*/v1/metrics", ({ request }) => {
+        zones.push(new URL(request.url).searchParams.get("timeZone"));
+        return HttpResponse.json({ data: METRICS });
+      }),
+    );
+
+    render(<MetricsPage />);
+
+    await waitFor(() => expect(zones).toContain("Pacific/Auckland"));
+    expect(zones.at(-1)).toBe("Pacific/Auckland");
   });
 });
