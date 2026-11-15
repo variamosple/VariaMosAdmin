@@ -5,6 +5,8 @@ test.describe("Model Management - Mocked Flows", () => {
   const mockModels = [
     {
       id: "1",
+      // vms_projects always names the project of a model
+      projectId: "p1",
       name: "First Model",
       description: "This is the first mock model",
       author: "Author One",
@@ -26,6 +28,7 @@ test.describe("Model Management - Mocked Flows", () => {
     },
     {
       id: "2",
+      projectId: "p2",
       name: "Second Model",
       description: "This is the second mock model",
       author: "Author Two",

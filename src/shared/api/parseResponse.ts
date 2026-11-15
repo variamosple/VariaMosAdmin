@@ -1,14 +1,22 @@
 import { ResponseModel } from "@variamosple/variamos-components";
 import * as z from "zod/mini";
 
+// A field the Python services send as null when it is empty (their
+// ResponseModel serializes every field); read as absent
+const absentWhenNull = <T>(schema: z.ZodMiniType<T>) =>
+  z.pipe(
+    z.optional(z.nullable(schema)),
+    z.transform((value) => value ?? undefined),
+  );
+
 // The envelope every API of the module answers with; fields it does not
 // know are kept, so a new field on the server breaks nothing
 const envelopeFields = {
-  transactionId: z.optional(z.string()),
+  transactionId: absentWhenNull(z.string()),
   // null is "no error" in the shared ResponseModel
   errorCode: z.optional(z.nullable(z.union([z.number(), z.string()]))),
-  message: z.optional(z.string()),
-  totalCount: z.optional(z.number()),
+  message: absentWhenNull(z.string()),
+  totalCount: absentWhenNull(z.number()),
 };
 const errorEnvelope = z.looseObject(envelopeFields);
 

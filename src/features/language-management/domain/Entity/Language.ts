@@ -6,8 +6,9 @@ export interface Language {
   type?: string;
   stateAccept?: LanguageStatus | string;
   semantics?: JSON;
-  createdAt?: Date;
-  updatedAt?: Date;
+  // ISO text as the server sends it, or a Date
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
   owners?: LanguageOwner[];
 }
 
