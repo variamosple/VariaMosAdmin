@@ -98,6 +98,38 @@ describe("UserRowComponent", () => {
     expect(screen.getByText("active")).toBeInTheDocument();
   });
 
+  // EV-29: the list shows such a row instead of failing the page
+  it("flags an address that is not well formed, and only that one", () => {
+    const { rerender } = render(
+      <table>
+        <tbody>
+          <UserRowComponent
+            {...defaultProps}
+            user={{
+              ...mockUserActive,
+              email: "old-address",
+              emailValid: false,
+            }}
+          />
+        </tbody>
+      </table>,
+    );
+
+    expect(screen.getByText("old-address")).toBeInTheDocument();
+    expect(screen.getByText("Address not well formed")).toBeInTheDocument();
+
+    rerender(
+      <table>
+        <tbody>
+          <UserRowComponent {...defaultProps} user={mockUserActive} />
+        </tbody>
+      </table>,
+    );
+    expect(
+      screen.queryByText("Address not well formed"),
+    ).not.toBeInTheDocument();
+  });
+
   it("should navigate to details page when search button is clicked", async () => {
     const user = userEvent.setup();
     render(
