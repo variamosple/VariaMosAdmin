@@ -20,7 +20,7 @@ export const userSchema: z.ZodMiniType<User> = z.looseObject(accountFields);
 
 // A row of the list, read as stored (EV-29): no made-up creation date, and
 // the address flagged when it is not well formed
-export const userListItemSchema: z.ZodMiniType<User> = z.looseObject({
+const userListItemSchema: z.ZodMiniType<User> = z.looseObject({
   ...accountFields,
   createdAt: z.nullable(isoDate),
   emailValid: z.optional(z.boolean()),
