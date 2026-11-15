@@ -29,14 +29,27 @@ test.describe("Metrics & Monitoring - Real E2E Flows", () => {
 
     await expect(page.locator("h1").first()).toHaveText("Metrics");
 
-    await expect(page.getByText("Daily Unique Visits")).toBeVisible({
+    // Key figures, then every chart, for the last 30 days (EV-90)
+    await expect(page.getByText("Over the period")).toBeVisible({
       timeout: 30000,
     });
-    await expect(page.getByText("Daily Visits")).toBeVisible();
-    await expect(page.getByText("Monthly Visits")).toBeVisible();
-    await expect(
-      page.getByText("Top visited pages", { exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText("Yearly visits")).toBeVisible();
+    await expect(page.getByTestId("figure-visits")).toBeVisible();
+    await expect(page.getByText("On the platform today")).toBeVisible();
+    for (const title of [
+      "Visits and visitors",
+      "Active users and projects",
+      "Most visited pages",
+      "Sign-ins",
+      "New accounts",
+      "Models by type",
+    ]) {
+      await expect(page.getByRole("heading", { name: title })).toBeVisible();
+    }
+    await expect(page.getByText(/Yearly visits/)).toBeVisible();
+
+    // A ready-made period reads the whole page again
+    const reread = page.waitForResponse(/\/v1\/metrics\?startDate=/);
+    await page.getByRole("button", { name: "12 months" }).click();
+    expect((await reread).status()).toBe(200);
   });
 });

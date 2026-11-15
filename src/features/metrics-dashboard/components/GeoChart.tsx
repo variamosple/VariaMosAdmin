@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
 import { type ISOCode, regions, WorldMap } from "react-svg-worldmap";
-import type { Metric } from "../../domain/Entity/Metric";
-import { useGeoChartData } from "../../hooks/useGeoChartData";
+import type { Metric } from "../domain/Entity/Metric";
+import { useGeoChartData } from "../hooks/useGeoChartData";
 
 // The countries the map can draw
 const MAP_CODES = new Set(regions.map((region) => region.code.toLowerCase()));
@@ -42,13 +42,13 @@ export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
   })();
 
   return (
-    <div className="d-flex flex-column align-items-center w-100 mb-4">
-      <div className="d-flex justify-content-between align-items-center my-2 mx-3 w-100">
-        <h1 className="fs-4 m-0 w-auto">
+    <section className="border rounded p-3 h-100" aria-label={metric.title}>
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h3 className="fs-5 m-0">
           {metric.title} - {activeFilter}
-        </h1>
+        </h3>
 
-        <ButtonGroup>
+        <ButtonGroup size="sm">
           {filterOptions.map((option) => (
             <ToggleButton
               key={option}
@@ -66,15 +66,18 @@ export const GeoChart: FC<GeoChartProps> = ({ metric }) => {
         </ButtonGroup>
       </div>
 
-      <div className="col-12 d-flex justify-content-center">
+      <p className="text-muted small mb-0">
+        Visits by country, every year, whatever the period.
+      </p>
+      <div className="d-flex justify-content-center">
         <WorldMap
           color="#1C5C9E"
           title=""
           value-suffix=" visits"
-          size="xxl"
+          size="responsive"
           data={chartData}
         />
       </div>
-    </div>
+    </section>
   );
 };

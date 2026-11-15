@@ -1,25 +1,22 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ChartDateFilterForm } from "./ChartDateFilterForm";
+import { PeriodForm } from "./PeriodForm";
 
 const mockFilterSubmit = vi.fn();
 
-vi.mock("../../context/ChartContext", async () => {
-  return {
-    useChartContext: () => ({
-      isLoading: false,
-      chartFilter: { fromDate: "2026-01-01", toDate: "2026-01-05" },
-    }),
-  };
-});
-
-describe("ChartDateFilterForm Component", () => {
+describe("PeriodForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should render default values from context", () => {
-    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+  it("starts from the period shown", () => {
+    render(
+      <PeriodForm
+        period={{ fromDate: "2026-01-01", toDate: "2026-01-05" }}
+        isLoading={false}
+        onSubmit={mockFilterSubmit}
+      />,
+    );
 
     const fromInput = screen.getByLabelText("From") as HTMLInputElement;
     const toInput = screen.getByLabelText("To") as HTMLInputElement;
@@ -29,7 +26,13 @@ describe("ChartDateFilterForm Component", () => {
   });
 
   it("should trigger validation when dates are cleared and submitted", async () => {
-    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+    render(
+      <PeriodForm
+        period={{ fromDate: "2026-01-01", toDate: "2026-01-05" }}
+        isLoading={false}
+        onSubmit={mockFilterSubmit}
+      />,
+    );
 
     const fromInput = screen.getByLabelText("From") as HTMLInputElement;
     const toInput = screen.getByLabelText("To") as HTMLInputElement;
@@ -49,7 +52,13 @@ describe("ChartDateFilterForm Component", () => {
   });
 
   it("should submit new filter values when valid", async () => {
-    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+    render(
+      <PeriodForm
+        period={{ fromDate: "2026-01-01", toDate: "2026-01-05" }}
+        isLoading={false}
+        onSubmit={mockFilterSubmit}
+      />,
+    );
 
     const fromInput = screen.getByLabelText("From") as HTMLInputElement;
     const toInput = screen.getByLabelText("To") as HTMLInputElement;
@@ -72,7 +81,13 @@ describe("ChartDateFilterForm Component", () => {
   });
 
   it("sends the first and last day of the chosen month", async () => {
-    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+    render(
+      <PeriodForm
+        period={{ fromDate: "2026-01-01", toDate: "2026-01-05" }}
+        isLoading={false}
+        onSubmit={mockFilterSubmit}
+      />,
+    );
     const user = userEvent.setup();
 
     await user.selectOptions(screen.getByLabelText("Period"), "month");
@@ -89,7 +104,13 @@ describe("ChartDateFilterForm Component", () => {
   });
 
   it("sends the whole chosen year", async () => {
-    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+    render(
+      <PeriodForm
+        period={{ fromDate: "2026-01-01", toDate: "2026-01-05" }}
+        isLoading={false}
+        onSubmit={mockFilterSubmit}
+      />,
+    );
     const user = userEvent.setup();
 
     await user.selectOptions(screen.getByLabelText("Period"), "year");
@@ -105,7 +126,13 @@ describe("ChartDateFilterForm Component", () => {
   });
 
   it("asks for a year before sending anything", async () => {
-    render(<ChartDateFilterForm onFilterSubmit={mockFilterSubmit} />);
+    render(
+      <PeriodForm
+        period={{ fromDate: "2026-01-01", toDate: "2026-01-05" }}
+        isLoading={false}
+        onSubmit={mockFilterSubmit}
+      />,
+    );
     const user = userEvent.setup();
 
     await user.selectOptions(screen.getByLabelText("Period"), "year");
