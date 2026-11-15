@@ -8,6 +8,15 @@ const workers = () => {
   return process.env.CI ? 1 : undefined;
 };
 
+// One part of the tests, as "2/5": each CI runner of the real e2e runs its
+// own part, with its own database and services. Every test otherwise.
+const shard = () => {
+  const [current, total] = (process.env.PLAYWRIGHT_SHARD ?? "")
+    .split("/")
+    .map(Number);
+  return current && total ? { current, total } : null;
+};
+
 export default defineConfig({
   testDir: "./tests",
   timeout: 20000,
@@ -18,6 +27,7 @@ export default defineConfig({
   // trace, it does not hide it (TST-FRONT-09)
   failOnFlakyTests: Boolean(process.env.CI),
   workers: workers(),
+  shard: shard(),
   reporter: [["html", { open: "never" }]],
   use: {
     baseURL: "http://localhost:3000",

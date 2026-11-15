@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# The jobs run side by side, each on its own runner, so that a run takes
+# about two minutes (EV-118). The dependencies come from a cache of
+# node_modules, keyed on the lockfile: npm ci only runs when it changed.
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -25,10 +28,16 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 26
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules
+        id: modules
+        uses: actions/cache@v6
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-node26-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
+        if: steps.modules.outputs.cache-hit != 'true'
         run: |
           npm ci --ignore-scripts
 
@@ -64,18 +73,6 @@ jobs:
         run: |
           npm run find-deadcode
 
-      - name: Run unit tests with the coverage thresholds
-        run: |
-          npm run test:coverage
-
-      # The organization's token is not given to Dependabot pull requests
-      - name: Analyze with SonarCloud, coverage included
-        if: github.event.pull_request.user.login != 'dependabot[bot]'
-        # trufflehog takes the pinned hash for a SonarCloud token: skip this line
-        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1 trufflehog:ignore
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
       - name: Verify production build
         run: |
           npm run build
@@ -88,6 +85,109 @@ jobs:
           # SHA above when Dependabot updates the action
           version: 3.99.7
 
+  # The unit tests in four parts, one runner each. Each part keeps its results
+  # and its coverage in a blob report; the coverage job merges them.
+  unit-tests:
+    name: unit-tests (${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+
+      - name: Restore node_modules
+        id: modules
+        uses: actions/cache@v6
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-node26-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.modules.outputs.cache-hit != 'true'
+        run: |
+          npm ci --ignore-scripts
+
+      - name: Run part ${{ matrix.shard }} of the unit tests
+        run: |
+          npx vitest run --coverage --shard=${{ matrix.shard }}/4 --reporter=blob
+
+      - name: Keep the blob report
+        uses: actions/upload-artifact@v7
+        with:
+          name: vitest-blob-${{ matrix.shard }}
+          path: .vitest-reports/
+          include-hidden-files: true
+          retention-days: 1
+
+  # Every test result and the whole coverage, from the four parts: the
+  # coverage thresholds of vitest.config.mts apply here, then SonarCloud
+  # reads the merged lcov report
+  coverage:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+
+      - name: Restore node_modules
+        id: modules
+        uses: actions/cache@v6
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-node26-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.modules.outputs.cache-hit != 'true'
+        run: |
+          npm ci --ignore-scripts
+
+      - name: Get the blob reports
+        uses: actions/download-artifact@v8
+        with:
+          pattern: vitest-blob-*
+          path: .vitest-reports
+          merge-multiple: true
+
+      - name: Merge the unit tests with the coverage thresholds
+        run: |
+          npx vitest run --merge-reports --coverage
+
+      # The JRE and the plugins of the scanner, kept from run to run
+      - name: Restore the SonarCloud cache
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        uses: actions/cache@v6
+        with:
+          path: ~/.sonar/cache
+          key: sonar-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: sonar-${{ runner.os }}-
+
+      # The organization's token is not given to Dependabot pull requests
+      - name: Analyze with SonarCloud, coverage included
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        # trufflehog takes the pinned hash for a SonarCloud token: skip this line
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1 trufflehog:ignore
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   # Runs next to the checks, one job per browser, each on its own runner:
   # the four run at the same time. `npm run playwright:run:mocked` without
   # arguments still runs Chromium, Firefox and WebKit in one go.
@@ -95,6 +195,8 @@ jobs:
   # browsers: no apt-get on the Ubuntu mirror, which can take more than 45
   # minutes. Edge (T-31) is installed on the GitHub runner but not in the
   # image, so its job runs on the runner.
+  # The mocked tests share nothing (every answer of the API is mocked in the
+  # page, and each worker has its own browser): three workers run them.
   e2e-mocked:
     name: e2e-mocked (${{ matrix.browser }})
     runs-on: ubuntu-latest
@@ -127,10 +229,16 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 26
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules
+        id: modules
+        uses: actions/cache@v6
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-node26-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
+        if: steps.modules.outputs.cache-hit != 'true'
         run: |
           npm ci --ignore-scripts
 
@@ -146,10 +254,27 @@ jobs:
         run: |
           ./node_modules/.bin/playwright install ffmpeg
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # The layers of the image come from the GitHub Actions cache: npm ci
+      # only runs again in the image when the lockfile changed. Only the
+      # Chromium job on main writes it; the pull requests read it.
+      - name: Build the frontend image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          load: true
+          tags: variamos-admin-frontend
+          cache-from: type=gha,scope=frontend-mocked
+          cache-to: ${{ github.event_name == 'push' && matrix.browser == 'chromium' && 'type=gha,scope=frontend-mocked,mode=max,ignore-error=true' || '' }}
+
       - name: Run Mocked E2E Tests (${{ matrix.browser }})
         run: |
           npm run playwright:run:mocked -- --project=${{ matrix.browser }}
         env:
+          FRONTEND_IMAGE_BUILT: '1'
+          PLAYWRIGHT_WORKERS: 3
           PLAYWRIGHT_IN_DOCKER: ${{ matrix.in-docker }}
           PLAYWRIGHT_EDGE: ${{ matrix.edge }}
 
@@ -161,16 +286,20 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-  # The required check: it passes only when the checks and the mocked e2e
-  # both pass (a skipped required check would count as passed)
+  # The required check: it passes only when the checks, the unit tests with
+  # their coverage and the mocked e2e all pass (a skipped required check
+  # would count as passed). Its name stays the one the protection of main
+  # asks for.
   build-and-test:
-    needs: [checks, e2e-mocked]
+    needs: [checks, unit-tests, coverage, e2e-mocked]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
-      - name: Require the checks and the mocked e2e
+      - name: Require the checks, the unit tests and the mocked e2e
         run: |
           test "${{ needs.checks.result }}" = success
+          test "${{ needs.unit-tests.result }}" = success
+          test "${{ needs.coverage.result }}" = success
           test "${{ needs.e2e-mocked.result }}" = success

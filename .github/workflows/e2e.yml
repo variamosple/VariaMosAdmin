@@ -1,14 +1,32 @@
 name: Frontend Real E2E CI
 
+# On main, the run also writes the layers of the test images to the cache
+# that the pull requests read (docker-compose.ci-cache-write.yml)
 on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# The real e2e in five parts, one runner each (EV-118): each part has its own
+# database and its own services, so the parts share nothing. In a part, the
+# tests still run one at a time: they share that database and its settings.
 jobs:
   e2e-real:
+    name: e2e-real (${{ matrix.shard }}/5)
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      # Every part reports, even when another one fails
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
 
     steps:
       - name: Stop native PostgreSQL and start test container
@@ -116,18 +134,47 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 26
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules
+        id: modules
+        uses: actions/cache@v6
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-node26-${{ hashFiles('package-lock.json') }}
 
       - name: Install frontend dependencies
+        if: steps.modules.outputs.cache-hit != 'true'
         run: |
           npm ci --ignore-scripts
 
-      - name: Run Real E2E Tests (Playwright)
+      # A BuildKit builder, which can read and write the GitHub Actions cache
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # docker compose reaches the cache with the runtime variables of the
+      # runner, which only actions see: they are given to the next steps.
+      # Set just before the tests, after the dependencies are installed.
+      - name: Give the cache variables to docker compose
+        uses: actions/github-script@v9
+        with:
+          script: |
+            for (const [name, value] of Object.entries(process.env)) {
+              if (name.startsWith('ACTIONS_') && value) {
+                core.setSecret(value);
+                core.exportVariable(name, value);
+              }
+            }
+
+      - name: Run part ${{ matrix.shard }} of the real E2E tests (Playwright)
         run: |
           npm run playwright:run:real
         env:
           VARIAMOS_WORKSPACE_DIR: ./
+          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
+          # The cache is read everywhere and written by part 1 on main
+          COMPOSE_FILE: ${{ github.event_name == 'push' && matrix.shard == 1 && 'docker-compose.test.yml:docker-compose.ci-cache.yml:docker-compose.ci-cache-write.yml' || 'docker-compose.test.yml:docker-compose.ci-cache.yml' }}
+          PLAYWRIGHT_SHARD: ${{ matrix.shard }}/5
           PLAYWRIGHT_WORKERS: 1
           PLAYWRIGHT_IN_DOCKER: 1
 
@@ -142,7 +189,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-real-report
+          name: playwright-real-report-${{ matrix.shard }}
           path: playwright-report/
           if-no-files-found: ignore
           retention-days: 7
