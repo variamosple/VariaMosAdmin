@@ -119,7 +119,7 @@ jobs:
 
       - name: Run part ${{ matrix.shard }} of the unit tests
         run: |
-          npx vitest run --coverage --shard=${{ matrix.shard }}/4 --reporter=blob
+          npm run test:coverage -- --shard=${{ matrix.shard }}/4 --reporter=blob
 
       - name: Keep the blob report
         uses: actions/upload-artifact@v7
@@ -169,7 +169,7 @@ jobs:
 
       - name: Merge the unit tests with the coverage thresholds
         run: |
-          npx vitest run --merge-reports --coverage
+          npm run test:coverage -- --merge-reports
 
       # The JRE and the plugins of the scanner, kept from run to run
       - name: Restore the SonarCloud cache
