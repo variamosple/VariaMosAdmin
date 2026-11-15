@@ -1,17 +1,14 @@
 import { type FC, type SubmitEvent, useEffect, useId, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import {
-  type AcceptedValues,
   type Configuration,
   type ConfigurationValue,
   valueKindOf,
 } from "../domain/Entity/Configuration";
-
-/** A whole number within the bounds the server sent; true without bounds. */
-const isWithinAccepted = (value: number, accepts?: AcceptedValues) =>
-  accepts?.min === undefined ||
-  accepts.max === undefined ||
-  (Number.isInteger(value) && value >= accepts.min && value <= accepts.max);
+import {
+  type FormInput,
+  parsedValueOf,
+} from "../domain/Entity/ConfigurationInput";
 
 /** Time zones the browser knows, offered while typing one. */
 // A secret is typed hidden; a number in a number field
@@ -52,59 +49,6 @@ const fieldValueOf = (config: Configuration): string => {
     return JSON.stringify(config.value, null, 2);
   }
   return textOf(config.value);
-};
-
-type ParsedValue = { value: ConfigurationValue } | { error: string };
-
-const numberOf = (input: string, accepts?: AcceptedValues): ParsedValue => {
-  const num = Number(input);
-  if (Number.isNaN(num)) return { error: "Please enter a valid number." };
-  // The server refuses it too; saying it here spares a failed save
-  if (!isWithinAccepted(num, accepts)) {
-    return { error: `Enter ${accepts?.text}.` };
-  }
-  return { value: num };
-};
-
-// Throws on text that is not JSON
-const jsonOf = (type: "array" | "object", input: string): ParsedValue => {
-  const parsed = JSON.parse(input);
-  if (type === "array" && !Array.isArray(parsed)) {
-    return {
-      error: 'Value must be a valid JSON array (e.g. ["val1", "val2"]).',
-    };
-  }
-  if (
-    type === "object" &&
-    (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
-  ) {
-    return {
-      error: 'Value must be a valid JSON object (e.g. { "key": "value" }).',
-    };
-  }
-  return { value: parsed };
-};
-
-interface FormInput {
-  inputValue: string;
-  boolValue: boolean;
-}
-
-/** The value to save from the form, or why it is refused. */
-const parsedValueOf = (
-  config: Configuration,
-  input: FormInput,
-): ParsedValue => {
-  const { inputValue, boolValue } = input;
-  if (config.isSecret && config.type !== "boolean" && !inputValue.trim()) {
-    return { error: "Enter a new value for this secret." };
-  }
-  if (config.type === "boolean") return { value: boolValue };
-  if (config.type === "number") return numberOf(inputValue, config.accepts);
-  if (config.type === "array" || config.type === "object") {
-    return jsonOf(config.type, inputValue);
-  }
-  return { value: inputValue };
 };
 
 const ConfigurationFacts: FC<{ config: Configuration }> = ({ config }) => (
@@ -160,7 +104,7 @@ interface ValueInputProps {
   setBoolValue: (value: boolean) => void;
 }
 
-const ValueInput: FC<ValueInputProps> = (props) => {
+export const ValueInput: FC<ValueInputProps> = (props) => {
   const { config, input, setInputValue, setBoolValue } = props;
   const timeZonesId = useId();
   const booleanSwitchId = useId();

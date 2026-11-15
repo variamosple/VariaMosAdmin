@@ -80,6 +80,34 @@ describe("ConfigurationListPage (UX-14)", () => {
     return user;
   };
 
+  it("offers to create a setting only to whoever may (EV-18 lot C.3)", async () => {
+    await renderPage();
+    expect(
+      screen.queryByRole("button", { name: "New configuration" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("reloads the list once a setting is created (EV-18 lot C.3)", async () => {
+    session.user.permissions = ["configurations::create"];
+    const created = new ResponseModel<Configuration>("createConfiguration");
+    created.data = toggle("general.new_flag", false);
+    vi.spyOn(ConfigurationRepository, "createConfiguration").mockResolvedValue(
+      created,
+    );
+    const user = await renderPage();
+
+    await user.click(screen.getByRole("button", { name: "New configuration" }));
+    await user.type(screen.getByLabelText("Key"), "general.new_flag");
+    await user.selectOptions(screen.getByLabelText("Type"), "boolean");
+    await user.click(screen.getByRole("button", { name: "Create" }));
+
+    await waitFor(() =>
+      expect(ConfigurationRepository.queryConfigurations).toHaveBeenCalledTimes(
+        2,
+      ),
+    );
+  });
+
   it("asks before discarding the changes", async () => {
     const user = await renderPage();
     await user.click(
