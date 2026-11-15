@@ -7,6 +7,7 @@ import { type ComponentType, lazy, Suspense } from "react";
 import { Spinner } from "react-bootstrap";
 import { Navigate, Outlet, type RouteObject } from "react-router-dom";
 import {
+  DefaultCountry,
   ForgotPasswordPage,
   LoginPage,
   MfaInvitationBanner,
@@ -107,6 +108,7 @@ export const ROUTES: RouteObject[] = [
         <AuthWrapper redirectPath={AppConfig.LOGIN_URL}>
           <MainLayout>
             <MfaInvitationBanner />
+            <DefaultCountry />
             <Suspense fallback={<PageLoading />}>
               <Outlet />
             </Suspense>

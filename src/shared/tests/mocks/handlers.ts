@@ -44,6 +44,10 @@ export const handlers = [
   http.get(apiTarget("/auth/my-account/preferences"), () =>
     HttpResponse.json({ data: { timeZone: null, updatedAt: null } }),
   ),
+  // Sent after a sign-in: the account already has a country (EV-90)
+  http.put(apiTarget("/auth/my-account/default-country"), () =>
+    HttpResponse.json({ data: { saved: false } }),
+  ),
   http.get(apiTarget("/v1/metrics"), () => {
     return HttpResponse.json({
       data: [
