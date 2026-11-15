@@ -1,6 +1,6 @@
 import { useQuery, useRouter } from "@variamosple/variamos-components";
 import { type FC, useEffect, useState } from "react";
-import { Accordion, ButtonGroup, Spinner } from "react-bootstrap";
+import { Accordion, Badge, ButtonGroup, Spinner } from "react-bootstrap";
 import {
   Ban,
   CheckCircle,
@@ -68,7 +68,20 @@ export const UserRowComponent: FC<UserRowProps> = ({
 
         <td>{user.name}</td>
 
-        <td>{user.email}</td>
+        <td>
+          {user.email}
+          {/* Stored before the address was checked (EV-29) */}
+          {user.emailValid === false && (
+            <Badge
+              bg="warning"
+              text="dark"
+              className="ms-2"
+              title="This stored address would be refused today"
+            >
+              Address not well formed
+            </Badge>
+          )}
+        </td>
 
         <td>{accountStatus(user)}</td>
 

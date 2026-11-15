@@ -1,4 +1,4 @@
-import { userSchema } from "./userSchemas";
+import { userSchema, usersSchema } from "./userSchemas";
 
 const account = {
   id: "u-1",
@@ -46,5 +46,29 @@ describe("userSchema (EV-97 lot 6c)", () => {
     ["a status that is not a boolean", { isEnabled: "true" }],
   ])("refuses %s", (_name, change) => {
     expect(userSchema.safeParse({ ...account, ...change }).success).toBe(false);
+  });
+});
+
+describe("usersSchema (EV-29)", () => {
+  it("reads a row stored without creation date and with a flagged address", () => {
+    const [row] = usersSchema.parse([
+      { ...account, email: "old-address", emailValid: false, createdAt: null },
+    ]);
+
+    expect(row).toMatchObject({
+      email: "old-address",
+      emailValid: false,
+      createdAt: null,
+    });
+  });
+
+  it("reads the rows of a server that does not send emailValid yet", () => {
+    expect(usersSchema.safeParse([account]).success).toBe(true);
+  });
+
+  it("still refuses a status that is not a boolean", () => {
+    expect(
+      usersSchema.safeParse([{ ...account, isEnabled: "true" }]).success,
+    ).toBe(false);
   });
 });
