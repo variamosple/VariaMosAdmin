@@ -15,6 +15,12 @@ const apiTarget = (path: string) => {
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 };
 
+// The zone of the machine would decide the country sent: a runner in UTC sends none
+vi.mock("@/shared/domain/TimeZone", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/domain/TimeZone")>()),
+  browserTimeZone: () => "America/Bogota",
+}));
+
 // Mock Subcomponents
 vi.mock("../../components/GoogleLogin", async () => ({
   GoogleLogin: () => <div data-testid="mock-google-login">Google Login</div>,
