@@ -43,8 +43,15 @@ test.describe("Metrics & Monitoring - Real E2E Flows", () => {
       "New accounts",
       "Models by type",
     ]) {
-      await expect(page.getByRole("heading", { name: title })).toBeVisible();
+      // Exact: "Sign-ins" is also the start of the grid's title
+      await expect(
+        page.getByRole("heading", { name: title, exact: true }),
+      ).toBeVisible();
     }
+    // The sign-ins grid, its title naming the reader's time zone
+    await expect(
+      page.getByRole("heading", { name: /^Sign-ins by day and hour \(.+\)$/ }),
+    ).toBeVisible();
     await expect(page.getByText(/Yearly visits/)).toBeVisible();
 
     // A ready-made period reads the whole page again
