@@ -102,4 +102,24 @@ describe("parseResponse (EV-97 lot 6c)", () => {
     expect(response.errorCode).toBeFalsy();
     expect(response.message).toBe("Notification dispatched successfully.");
   });
+
+  it("reads the empty fields a Python service sends as null as absent", () => {
+    // The ResponseModel of variamos_security (Python) serializes them all
+    const response = parseResponse(
+      countSchema,
+      {
+        transactionId: "ProjectsAdminQuery",
+        errorCode: null,
+        message: null,
+        totalCount: null,
+        data: { count: 2 },
+      },
+      FAILURE,
+    );
+
+    expect(response.errorCode).toBeFalsy();
+    expect(response.data).toEqual({ count: 2 });
+    expect(response.message).toBeUndefined();
+    expect(response.totalCount).toBeUndefined();
+  });
 });

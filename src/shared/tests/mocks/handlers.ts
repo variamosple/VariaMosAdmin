@@ -24,7 +24,8 @@ interface LanguageRequestBody {
 }
 
 interface ProjectRequestBody {
-  id?: number;
+  // vms_projects names a project by a text id
+  id?: string;
   name?: string;
   description?: string;
 }
@@ -461,8 +462,8 @@ export const handlers = [
   http.get(projectsApiTarget("/v1/admin/projects"), () => {
     return HttpResponse.json({
       data: [
-        { id: 1, name: "Project One", description: "First project" },
-        { id: 2, name: "Project Two", description: "Second project" },
+        { id: "1", name: "Project One", description: "First project" },
+        { id: "2", name: "Project Two", description: "Second project" },
       ],
     });
   }),
@@ -470,8 +471,8 @@ export const handlers = [
   http.get(projectsApiTarget("/v1/projects"), () => {
     return HttpResponse.json({
       data: [
-        { id: 1, name: "Project One", description: "First project" },
-        { id: 2, name: "Project Two", description: "Second project" },
+        { id: "1", name: "Project One", description: "First project" },
+        { id: "2", name: "Project Two", description: "Second project" },
       ],
     });
   }),

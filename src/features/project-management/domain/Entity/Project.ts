@@ -4,7 +4,8 @@ export interface Project {
   description?: string;
   author?: string;
   source?: string;
-  date?: Date;
+  // ISO text as the server sends it, or a Date
+  date?: string | Date;
   template?: boolean;
   project?: ProjectProject;
   owners?: { id?: string; name?: string; email: string }[];
