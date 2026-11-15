@@ -29,6 +29,18 @@ jobs:
         shard: [1, 2, 3, 4, 5]
 
     steps:
+      # The containerd image store of Docker reads and writes the GitHub
+      # Actions cache with its default builder: the images go straight into
+      # Docker, with no BuildKit container to start, copy from and clean up
+      - name: Use the containerd image store of Docker
+        run: |
+          config=/etc/docker/daemon.json
+          [ -s "$config" ] || echo '{}' | sudo tee "$config" >/dev/null
+          sudo jq '.features["containerd-snapshotter"] = true' "$config" | sudo tee "$config.new" >/dev/null
+          sudo mv "$config.new" "$config"
+          sudo systemctl restart docker
+          docker info -f '{{ .DriverStatus }}'
+
       - name: Stop native PostgreSQL and start test container
         run: |
           # 1. Forcefully stop native host PostgreSQL and free port 5432
@@ -147,11 +159,6 @@ jobs:
         run: |
           npm ci --ignore-scripts
 
-      # A BuildKit builder, which can read and write the GitHub Actions cache
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-
       # docker compose reaches the cache with the runtime variables of the
       # runner, which only actions see: they are given to the next steps.
       # Set just before the tests, after the dependencies are installed.
@@ -171,7 +178,6 @@ jobs:
           npm run playwright:run:real
         env:
           VARIAMOS_WORKSPACE_DIR: ./
-          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
           # The cache is read everywhere and written by part 1 on main
           COMPOSE_FILE: ${{ github.event_name == 'push' && matrix.shard == 1 && 'docker-compose.test.yml:docker-compose.ci-cache.yml:docker-compose.ci-cache-write.yml' || 'docker-compose.test.yml:docker-compose.ci-cache.yml' }}
           PLAYWRIGHT_SHARD: ${{ matrix.shard }}/5

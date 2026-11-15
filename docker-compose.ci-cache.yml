@@ -1,7 +1,7 @@
 # CI only (e2e.yml): the layers of the seven test images come from the
 # GitHub Actions cache, written on main by docker-compose.ci-cache-write.yml.
 # A service whose code did not change is not built again.
-# Needs a BuildKit builder (docker/setup-buildx-action) and the runtime token
+# Needs the containerd image store of Docker and the runtime token
 # of the cache in the environment: see the workflow.
 services:
   variamos-ms-admin:

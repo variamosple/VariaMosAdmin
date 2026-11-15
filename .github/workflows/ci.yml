@@ -254,8 +254,17 @@ jobs:
         run: |
           ./node_modules/.bin/playwright install ffmpeg
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # The containerd image store of Docker reads and writes the GitHub
+      # Actions cache with its default builder: the images go straight into
+      # Docker, with no BuildKit container to start, copy from and clean up
+      - name: Use the containerd image store of Docker
+        run: |
+          config=/etc/docker/daemon.json
+          [ -s "$config" ] || echo '{}' | sudo tee "$config" >/dev/null
+          sudo jq '.features["containerd-snapshotter"] = true' "$config" | sudo tee "$config.new" >/dev/null
+          sudo mv "$config.new" "$config"
+          sudo systemctl restart docker
+          docker info -f '{{ .DriverStatus }}'
 
       # The layers of the image come from the GitHub Actions cache: npm ci
       # only runs again in the image when the lockfile changed. Only the
