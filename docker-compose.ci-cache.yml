@@ -1,0 +1,34 @@
+# CI only (e2e.yml): the layers of the seven test images come from the
+# GitHub Actions cache, written on main by docker-compose.ci-cache-write.yml.
+# A service whose code did not change is not built again.
+# Needs the containerd image store of Docker and the runtime token
+# of the cache in the environment: see the workflow.
+services:
+  variamos-ms-admin:
+    build:
+      cache_from:
+        - type=gha,scope=e2e-variamos-ms-admin
+  variamos-ms-languages:
+    build:
+      cache_from:
+        - type=gha,scope=e2e-variamos-ms-languages
+  variamos-ms-projects:
+    build:
+      cache_from:
+        - type=gha,scope=e2e-variamos-ms-projects
+  variamos-ms-notifications:
+    build:
+      cache_from:
+        - type=gha,scope=e2e-variamos-ms-notifications
+  semantic-translator:
+    build:
+      cache_from:
+        - type=gha,scope=e2e-semantic-translator
+  vms-domain-application:
+    build:
+      cache_from:
+        - type=gha,scope=e2e-vms-domain-application
+  vms-requirements-autocomplete:
+    build:
+      cache_from:
+        - type=gha,scope=e2e-vms-requirements-autocomplete

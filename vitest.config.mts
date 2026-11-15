@@ -1,6 +1,11 @@
 import path from "node:path";
 import { defineConfig } from "vitest/config";
 
+// A shard (--shard, CI) runs part of the tests and covers part of the code:
+// the thresholds below apply to the merged report (--merge-reports), which
+// covers every test. They are never lowered for a shard, only checked once.
+const isShard = process.argv.some((arg) => arg.startsWith("--shard"));
+
 export default defineConfig({
   test: {
     globals: true,
@@ -42,12 +47,14 @@ export default defineConfig({
       ],
       // Just under the measure of 2026-10-23 (82.89 / 68.1 / 76.86 / 83.33).
       // Raise them, never lower them (T-17).
-      thresholds: {
-        statements: 81,
-        branches: 66,
-        functions: 75,
-        lines: 81,
-      },
+      thresholds: isShard
+        ? undefined
+        : {
+            statements: 81,
+            branches: 66,
+            functions: 75,
+            lines: 81,
+          },
     },
   },
   resolve: {

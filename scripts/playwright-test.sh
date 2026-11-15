@@ -18,7 +18,7 @@ image="mcr.microsoft.com/playwright:v${version}-noble"
 owner="$(id -u):$(id -g)"
 exec docker run --rm --network host --ipc host \
     -v "$PWD":/work -w /work \
-    -e CI -e PLAYWRIGHT_WORKERS -e OWNER="$owner" \
+    -e CI -e PLAYWRIGHT_WORKERS -e PLAYWRIGHT_SHARD -e OWNER="$owner" \
     "$image" sh -c 'npx playwright test "$@"; status=$?
         chown -R "$OWNER" playwright-report test-results 2>/dev/null
         exit $status' playwright-test "$@"

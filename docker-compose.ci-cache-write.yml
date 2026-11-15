@@ -1,0 +1,33 @@
+# CI only (e2e.yml), with docker-compose.ci-cache.yml, on main: writes the
+# layers of the seven test images to the GitHub Actions cache, every stage
+# included (mode=max). Pull requests only read them, so that they do not fill
+# the cache with one copy per branch.
+services:
+  variamos-ms-admin:
+    build:
+      cache_to:
+        - type=gha,scope=e2e-variamos-ms-admin,mode=max,ignore-error=true
+  variamos-ms-languages:
+    build:
+      cache_to:
+        - type=gha,scope=e2e-variamos-ms-languages,mode=max,ignore-error=true
+  variamos-ms-projects:
+    build:
+      cache_to:
+        - type=gha,scope=e2e-variamos-ms-projects,mode=max,ignore-error=true
+  variamos-ms-notifications:
+    build:
+      cache_to:
+        - type=gha,scope=e2e-variamos-ms-notifications,mode=max,ignore-error=true
+  semantic-translator:
+    build:
+      cache_to:
+        - type=gha,scope=e2e-semantic-translator,mode=max,ignore-error=true
+  vms-domain-application:
+    build:
+      cache_to:
+        - type=gha,scope=e2e-vms-domain-application,mode=max,ignore-error=true
+  vms-requirements-autocomplete:
+    build:
+      cache_to:
+        - type=gha,scope=e2e-vms-requirements-autocomplete,mode=max,ignore-error=true

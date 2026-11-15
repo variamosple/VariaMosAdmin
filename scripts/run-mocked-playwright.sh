@@ -7,8 +7,11 @@ IMAGE_NAME="variamos-admin-frontend"
 CONTAINER_NAME="admin-front-test"
 PORT=3000
 
-echo "Building frontend Docker image..."
-docker build -t $IMAGE_NAME .
+# In CI the image is already built, its layers taken from the cache
+if [[ "${FRONTEND_IMAGE_BUILT:-}" != "1" ]]; then
+    echo "Building frontend Docker image..."
+    docker build -t $IMAGE_NAME .
+fi
 
 # Ensure old container is removed if it exists
 docker rm -f $CONTAINER_NAME 2>/dev/null || true
