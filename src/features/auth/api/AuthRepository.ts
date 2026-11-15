@@ -12,6 +12,7 @@ import type { UserRegistration } from "@/features/user-management/domain/Entity/
 import { parseResponse } from "@/shared/api/parseResponse";
 import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import { countryOfTimeZone } from "../domain/DefaultCountry";
 import type { PasswordPolicy } from "../domain/PasswordPolicy";
 import {
   passwordPolicySchema,
@@ -116,6 +117,22 @@ export const updatePersonalInformation = (
         "Error when trying to get account details, please try again later.",
       ),
     );
+};
+
+/**
+ * Gives the account the country of the browser's time zone when it has
+ * none (EV-90); a country already chosen is kept by the server. Never
+ * fails: the account then simply stays without a country.
+ */
+export const offerDefaultCountry = async (): Promise<void> => {
+  const countryCode = countryOfTimeZone();
+  if (!countryCode) return;
+  // Short: the sign-in waits for it before leaving the page
+  await ADMIN_CLIENT.put(
+    "/auth/my-account/default-country",
+    { countryCode },
+    { timeout: 3000 },
+  ).catch(() => undefined);
 };
 
 export const updateUserPassword = (

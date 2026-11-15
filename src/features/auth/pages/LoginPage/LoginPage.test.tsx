@@ -100,6 +100,29 @@ describe("LoginPage Page Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith(AppConfig.HOME_PAGE);
   });
 
+  it("offers the country of the time zone before leaving the page (EV-90)", async () => {
+    const sent: string[] = [];
+    server.use(
+      http.put(
+        apiTarget("/auth/my-account/default-country"),
+        async ({ request }) => {
+          sent.push(await request.text());
+          expect(mockNavigate).not.toHaveBeenCalled();
+          return HttpResponse.json({ data: { saved: true } });
+        },
+      ),
+    );
+    mockSignIn.mockResolvedValueOnce({ errorCode: null, data: {} });
+    renderLoginPage();
+
+    await userEvent.setup().click(screen.getByTestId("mock-login-form"));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(AppConfig.HOME_PAGE);
+    });
+    expect(sent).toHaveLength(1);
+  });
+
   it("handles failed sign in and displays error message", async () => {
     mockSignIn.mockResolvedValueOnce({
       errorCode: 401,

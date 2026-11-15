@@ -23,6 +23,7 @@ vi.mock("@/shared/layouts/SignInLayout", async () => ({
 vi.mock("@/features/auth", async () => ({
   ForgotPasswordPage: () => <div>ForgotPasswordPage</div>,
   LoginPage: () => <div>LoginPage</div>,
+  DefaultCountry: () => null,
   MfaInvitationBanner: () => null,
   MyAccountPage: () => <div>MyAccountPage</div>,
   ResetPasswordPage: () => <div>ResetPasswordPage</div>,

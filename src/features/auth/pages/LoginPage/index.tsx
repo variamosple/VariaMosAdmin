@@ -7,7 +7,10 @@ import { loginMessageOf } from "@/shared/api/errorMessages";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { pageLoader } from "@/shared/infrastructure/PageLoader";
-import { registerRedirect } from "../../api/AuthRepository";
+import {
+  offerDefaultCountry,
+  registerRedirect,
+} from "../../api/AuthRepository";
 import { requestSignInMfa } from "../../api/MfaRepository";
 import { GoogleLogin } from "../../components/GoogleLogin";
 import { LoginForm } from "../../components/LoginForm";
@@ -40,8 +43,11 @@ const useSignInSteps = () => {
       } else if (response.errorCode) {
         setErrorMessage(response.message);
       } else {
-        navigate(
-          safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
+        // Before leaving: the next page may be another application (EV-90)
+        void offerDefaultCountry().then(() =>
+          navigate(
+            safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
+          ),
         );
       }
     });
@@ -52,8 +58,10 @@ const useSignInSteps = () => {
     void requestSignInMfa(code, rememberDevice)
       .then((response) => {
         if (!response.errorCode) {
-          pageLoader.load(
-            safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
+          void offerDefaultCountry().then(() =>
+            pageLoader.load(
+              safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
+            ),
           );
           return;
         }
