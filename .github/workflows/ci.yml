@@ -117,11 +117,16 @@ jobs:
         run: |
           npm ci --ignore-scripts
 
+      # The blob report alone prints nothing of a failed test: the default
+      # reporter shows it in the log, github-actions annotates the pull request
       - name: Run part ${{ matrix.shard }} of the unit tests
         run: |
-          npm run test:coverage -- --shard=${{ matrix.shard }}/4 --reporter=blob
+          npm run test:coverage -- --shard=${{ matrix.shard }}/4 \
+            --reporter=blob --reporter=default --reporter=github-actions
 
+      # Kept after a failure too, to merge and read it locally
       - name: Keep the blob report
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: vitest-blob-${{ matrix.shard }}
