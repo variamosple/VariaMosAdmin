@@ -2,8 +2,10 @@ import { withPageVisit } from "@variamosple/variamos-components";
 import { type FC, useCallback, useEffect, useId, useState } from "react";
 import { Alert, Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { useTimeZone } from "@/shared/hooks/useTimeZone";
 import { queryMetrics } from "../api/MetricsRepository";
 import { GeoChart } from "../components/GeoChart";
+import { HourGridChart } from "../components/HourGridChart";
 import { KeyFigures } from "../components/KeyFigures";
 import { PeriodPicker } from "../components/PeriodPicker";
 import { RankingChart } from "../components/RankingChart";
@@ -29,22 +31,25 @@ const ChartOf: FC<{ metric: Metric; period: ChartPeriod }> = ({
   }
   if (metric.chartType === "ranking") return <RankingChart metric={metric} />;
   if (metric.chartType === "geo") return <GeoChart metric={metric} />;
+  if (metric.chartType === "heatmap") return <HourGridChart metric={metric} />;
   return null;
 };
 
 const MetricsPageComponent: FC = () => {
   usePageTitle("Metrics");
   const sectionId = useId();
+  // The zone chosen in "My account", else the browser's
+  const { timeZone } = useTimeZone();
   const [period, setPeriod] = useState<ChartPeriod>(() => lastDays(30));
   const [preset, setPreset] = useState<string | null>(DEFAULT_PRESET);
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
 
-  const load = useCallback((chosen: ChartPeriod) => {
+  const load = useCallback((chosen: ChartPeriod, zone: string) => {
     setIsLoading(true);
     setProblem(null);
-    return queryMetrics(chosen)
+    return queryMetrics(chosen, zone)
       .then((response) => {
         if (response.errorCode) {
           setProblem(response.message || "The statistics could not be read.");
@@ -56,8 +61,8 @@ const MetricsPageComponent: FC = () => {
   }, []);
 
   useEffect(() => {
-    void load(period);
-  }, [load, period]);
+    void load(period, timeZone);
+  }, [load, period, timeZone]);
 
   const overview = metrics.find((metric) => metric.id === "overview");
   const content = metrics.find((metric) => metric.id === "content_overview");
@@ -99,7 +104,7 @@ const MetricsPageComponent: FC = () => {
           <Button
             size="sm"
             variant="outline-danger"
-            onClick={() => load(period)}
+            onClick={() => load(period, timeZone)}
           >
             Retry
           </Button>
