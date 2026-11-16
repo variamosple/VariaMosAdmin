@@ -41,8 +41,17 @@ describe("languageSchema (EV-97, services of the other teams)", () => {
     ).toBe("Renamed");
   });
 
+  // As production sent it on 2026-11-16: a bigint column comes as text
+  it("reads an id sent as text as a number", () => {
+    const [parsed] = languagesSchema.parse([{ ...language, id: "399" }]);
+
+    expect(parsed?.id).toBe(399);
+  });
+
   it("refuses a body that is not a list of languages", () => {
     expect(languagesSchema.safeParse({ id: 7 }).success).toBe(false);
-    expect(languagesSchema.safeParse([{ id: "7" }]).success).toBe(false);
+    expect(languagesSchema.safeParse([{ id: "seven" }]).success).toBe(false);
+    expect(languagesSchema.safeParse([{ id: "7.5" }]).success).toBe(false);
+    expect(languagesSchema.safeParse([{ id: 7.5 }]).success).toBe(false);
   });
 });

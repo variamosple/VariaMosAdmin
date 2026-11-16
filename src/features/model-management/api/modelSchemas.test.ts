@@ -29,6 +29,18 @@ describe("modelSchema (EV-97, services of the other teams)", () => {
     expect(parsed?.owners?.[0]?.email).toBe("ana@example.com");
   });
 
+  it("reads a language id sent as text as a number", () => {
+    expect(modelSchema.parse({ ...model, languageId: "399" }).languageId).toBe(
+      399,
+    );
+    expect(modelSchema.parse({ ...model, languageId: 399 }).languageId).toBe(
+      399,
+    );
+    expect(
+      modelSchema.safeParse({ ...model, languageId: "a language" }).success,
+    ).toBe(false);
+  });
+
   it("reads an owner without a name as an empty name", () => {
     const parsed = modelSchema.parse({
       ...model,

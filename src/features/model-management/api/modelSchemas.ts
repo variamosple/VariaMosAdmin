@@ -1,5 +1,5 @@
 import * as z from "zod/mini";
-import { optionalText } from "@/shared/api/schemas";
+import { optionalText, wholeNumber } from "@/shared/api/schemas";
 import type { Model } from "../domain/Entity/Model";
 
 // Models as vms_projects sends them to the administration (EV-97, services
@@ -37,7 +37,8 @@ export const modelSchema: z.ZodMiniType<Model> = z.looseObject({
   isDeleted: absent(z.boolean()),
   modelLevel: optionalText,
   isPublic: absent(z.boolean()),
-  languageId: absent(z.number()),
+  // A language id, which production may send as text (see wholeNumber)
+  languageId: absent(wholeNumber),
 });
 
 export const modelsSchema = z.array(modelSchema);
