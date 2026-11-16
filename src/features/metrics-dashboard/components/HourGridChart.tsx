@@ -2,8 +2,8 @@ import type { FC } from "react";
 import { hourGridOf, type Metric, WEEK_DAYS } from "../domain/Entity/Metric";
 import { ChartCard } from "./ChartCard";
 
-// One hue, light to dark (Bootstrap blue 100, 300, 500, 700); no sign-in
-// stays the neutral of the page
+// One hue, light to dark (Bootstrap blue 100, 300, 500, 700); an hour with
+// nothing stays the neutral of the page
 const EMPTY = "var(--bs-tertiary-bg)";
 const STEPS = ["#cfe2ff", "#6ea8fe", "#0d6efd", "#084298"];
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
@@ -22,18 +22,45 @@ const colorOf = (count: number, max: number): string => {
 const hourText = (hour: number) =>
   `${String(hour).padStart(2, "0")}:00–${String((hour + 1) % 24).padStart(2, "0")}:00`;
 
-const signIns = (count: number) => `${count} sign-in${count === 1 ? "" : "s"}`;
+/** What a grid counts, by the id the database gives it. */
+interface GridWords {
+  one: string;
+  many: string;
+  note?: string;
+}
+
+const GRID_WORDS: Record<string, GridWords> = {
+  sign_ins_by_hour: {
+    one: "sign-in",
+    many: "sign-ins",
+    note: "Successful sign-ins, by password or Google, in the hour they started.",
+  },
+  visits_by_hour: {
+    one: "visit",
+    many: "visits",
+    // The title gives the day the hours start from when the period starts before
+    note: "Pages opened, in the hour of the visit. Older visits, recorded without their hour, are left out.",
+  },
+};
+
+const OTHER_GRID: GridWords = { one: "event", many: "events" };
+
+const gridWordsOf = (metric: Metric): GridWords =>
+  GRID_WORDS[metric.id] ?? OTHER_GRID;
 
 export interface HourGridChartProps {
   metric: Metric;
 }
 
 /**
- * Sign-ins by day of the week and hour, as a table: each cell is coloured
- * by its count and says it on hover and to screen readers.
+ * Sign-ins or visits by day of the week and hour, as a table: each cell is
+ * coloured by its count and says it on hover and to screen readers.
  */
 export const HourGridChart: FC<HourGridChartProps> = ({ metric }) => {
   const grid = hourGridOf(metric);
+  const words = gridWordsOf(metric);
+  const counted = (count: number) =>
+    `${count} ${count === 1 ? words.one : words.many}`;
   let busiest = { day: 0, hour: 0, count: 0 };
   grid.counts.forEach((row, day) => {
     row.forEach((count, hour) => {
@@ -44,12 +71,12 @@ export const HourGridChart: FC<HourGridChartProps> = ({ metric }) => {
   return (
     <ChartCard
       title={metric.title}
-      note="Successful sign-ins, by password or Google, in the hour they started."
+      note={words.note}
       isEmpty={grid.total === 0}
     >
       <p className="small mb-2">
         Busiest: {WEEK_DAYS[busiest.day]}, {hourText(busiest.hour)} (
-        {signIns(busiest.count)}).
+        {counted(busiest.count)}).
       </p>
       <table
         className="w-100"
@@ -60,7 +87,7 @@ export const HourGridChart: FC<HourGridChartProps> = ({ metric }) => {
         }}
       >
         <caption className="visually-hidden">
-          {metric.title}: sign-ins for each day of the week and hour.
+          {metric.title}: {words.many} for each day of the week and hour.
         </caption>
         <thead className="visually-hidden">
           <tr>
@@ -87,10 +114,10 @@ export const HourGridChart: FC<HourGridChartProps> = ({ metric }) => {
               {row.map((count, hour) => (
                 <td
                   key={HOURS[hour]}
-                  title={`${WEEK_DAYS[day]}, ${hourText(hour)}: ${signIns(count)}`}
+                  title={`${WEEK_DAYS[day]}, ${hourText(hour)}: ${counted(count)}`}
                   className="rounded-1 p-0"
                   style={{ height: 20, background: colorOf(count, grid.max) }}
-                  data-testid={`cell-${day + 1}-${hour}`}
+                  data-testid={`${metric.id}-${day + 1}-${hour}`}
                 >
                   <span className="visually-hidden">{count}</span>
                 </td>

@@ -75,7 +75,7 @@ export const rankingOf = (
   }));
 };
 
-/** The days of the sign-ins grid, ISO order: 1 is Monday. */
+/** The days of the hour grids, ISO order: 1 is Monday. */
 export const WEEK_DAYS = [
   "Monday",
   "Tuesday",
@@ -86,7 +86,7 @@ export const WEEK_DAYS = [
   "Sunday",
 ] as const;
 
-/** The sign-ins grid: a count per day (Monday first) and hour (0 to 23). */
+/** An hour grid: a count per day (Monday first) and hour (0 to 23). */
 export interface HourGrid {
   counts: number[][];
   max: number;

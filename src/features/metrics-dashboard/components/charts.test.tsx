@@ -240,31 +240,63 @@ describe("PeriodPicker", () => {
     expect(
       within(card).getByText(/Busiest: Wednesday, 10:00–11:00/),
     ).toHaveTextContent("(4 sign-ins)");
-    expect(screen.getByTestId("cell-3-10")).toHaveAttribute(
+    expect(screen.getByTestId("sign_ins_by_hour-3-10")).toHaveAttribute(
       "title",
       "Wednesday, 10:00–11:00: 4 sign-ins",
     );
-    expect(screen.getByTestId("cell-6-5")).toHaveAttribute(
+    expect(screen.getByTestId("sign_ins_by_hour-6-5")).toHaveAttribute(
       "title",
       "Saturday, 05:00–06:00: 1 sign-in",
     );
-    expect(screen.getByTestId("cell-3-10")).toHaveTextContent("4");
-    expect(screen.getByTestId("cell-7-23")).toHaveAttribute(
+    expect(screen.getByTestId("sign_ins_by_hour-3-10")).toHaveTextContent("4");
+    expect(screen.getByTestId("sign_ins_by_hour-7-23")).toHaveAttribute(
       "title",
       "Sunday, 23:00–00:00: 0 sign-ins",
     );
     // The busiest cell is the darkest, an empty one the neutral of the page
-    expect(screen.getByTestId("cell-3-10").style.background).not.toBe(
-      screen.getByTestId("cell-6-5").style.background,
-    );
-    expect(screen.getByTestId("cell-1-0").style.background).toContain(
-      "--bs-tertiary-bg",
-    );
+    expect(
+      screen.getByTestId("sign_ins_by_hour-3-10").style.background,
+    ).not.toBe(screen.getByTestId("sign_ins_by_hour-6-5").style.background);
+    expect(
+      screen.getByTestId("sign_ins_by_hour-1-0").style.background,
+    ).toContain("--bs-tertiary-bg");
 
     rerender(<HourGridChart metric={grid(null)} />);
     expect(
       screen.getByText("No activity recorded for the selected period."),
     ).toBeInTheDocument();
+  });
+
+  it("names what a grid counts: visits, sign-ins, or events for another one", () => {
+    const grid = (id: string): Metric => ({
+      id,
+      title: `${id} (UTC)`,
+      chartType: "heatmap",
+      defaultFilter: "day",
+      labelKey: "hour",
+      data: [{ day: 2, hour: 14, count: 1 }],
+    });
+    const { rerender } = render(
+      <HourGridChart metric={grid("visits_by_hour")} />,
+    );
+    expect(screen.getByTestId("visits_by_hour-2-14")).toHaveAttribute(
+      "title",
+      "Tuesday, 14:00–15:00: 1 visit",
+    );
+    expect(
+      screen.getByText(/Pages opened, in the hour of the visit/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "visits_by_hour (UTC): visits for each day of the week and hour.",
+      ),
+    ).toBeInTheDocument();
+
+    rerender(<HourGridChart metric={grid("downloads_by_hour")} />);
+    expect(screen.getByTestId("downloads_by_hour-2-14")).toHaveAttribute(
+      "title",
+      "Tuesday, 14:00–15:00: 1 event",
+    );
   });
 
   it("steps a count by quarter of the busiest hour", () => {

@@ -218,6 +218,24 @@ const metrics = [
       ],
     },
   },
+  // Last, beside the visits by country; hours recorded since the 10th
+  {
+    id: "visits_by_hour",
+    title: "Visits by day and hour (UTC), recorded since 2026-11-10",
+    chartType: "heatmap",
+    defaultFilter: "day",
+    labelKey: "hour",
+    // 2 an hour from 08:00 to 20:00, and 9 on Wednesday at 15:00
+    data: Array.from({ length: 7 * 24 }, (_, i) => {
+      const hour = i % 24;
+      const daytime = hour >= 8 && hour < 20 ? 2 : 0;
+      return {
+        day: Math.floor(i / 24) + 1,
+        hour,
+        count: i === 2 * 24 + 15 ? 9 : daytime,
+      };
+    }),
+  },
 ];
 
 test.describe("Metrics - Mocked E2E Flows", () => {
@@ -255,6 +273,7 @@ test.describe("Metrics - Mocked E2E Flows", () => {
       "Sign-ins by day and hour (UTC)",
       "New accounts",
       "Models by type",
+      "Visits by day and hour (UTC), recorded since 2026-11-10",
     ]) {
       await expect(
         page.getByRole("heading", { name: title, exact: true }),
@@ -266,6 +285,14 @@ test.describe("Metrics - Mocked E2E Flows", () => {
     });
     await expect(grid.getByRole("rowheader")).toHaveCount(7);
     await expect(grid.getByText(/^Busiest: Monday, 09:00–10:00/)).toBeVisible();
+    // The visits grid counts visits, not sign-ins
+    const visitGrid = page.getByRole("region", {
+      name: "Visits by day and hour (UTC), recorded since 2026-11-10",
+    });
+    await expect(visitGrid.getByRole("rowheader")).toHaveCount(7);
+    await expect(
+      visitGrid.getByText("Busiest: Wednesday, 15:00–16:00 (9 visits)."),
+    ).toBeVisible();
     expect(asked[0]?.get("timeZone")).toBeTruthy();
     // Pages under a readable name
     await expect(page.getByText("My languages")).toBeVisible();
