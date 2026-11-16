@@ -209,12 +209,6 @@ for (const width of WIDTHS) {
     }
 
     test("the signed in page does not scroll sideways", async ({ page }) => {
-      // Known defect at 375 px: the header of @variamosple/variamos-components
-      // does not fold, and pushes the account menu out of the window. When
-      // the library fixes it, this test passes and Playwright reports it:
-      // remove this line then.
-      test.fail(width < 576, "header of variamos-components, not folded");
-
       await signIn(page);
       await page.goto("/#/users");
       await expect(
