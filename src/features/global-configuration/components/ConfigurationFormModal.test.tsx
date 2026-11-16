@@ -163,6 +163,19 @@ describe("ConfigurationFormModal accepted values", () => {
     );
   });
 
+  it("refuses an emptied number field instead of saving 0", async () => {
+    const user = userEvent.setup();
+    const { onConfigSubmit } = renderForm(
+      configuration({ type: "number", value: 1, isSecret: false }),
+    );
+
+    await user.clear(screen.getByLabelText("Value"));
+    await user.click(screen.getByRole("button", { name: "Apply Changes" }));
+
+    expect(onConfigSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText("Enter a number.")).toBeInTheDocument();
+  });
+
   it("sends any number for a key without bounds", async () => {
     const user = userEvent.setup();
     const { onConfigSubmit } = renderForm(

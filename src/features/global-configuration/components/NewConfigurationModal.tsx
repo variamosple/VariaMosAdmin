@@ -66,10 +66,6 @@ const submissionOf = (draft: Draft): Submission => {
         "The key is dot-separated lowercase words, e.g. general.welcome_text.",
     };
   }
-  // An empty number field would otherwise read as 0
-  if (draft.type === "number" && !draft.inputValue.trim()) {
-    return { error: "Enter a number." };
-  }
   try {
     const parsed = parsedValueOf(configurationOf(draft), draft);
     if ("error" in parsed) return parsed;
