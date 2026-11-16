@@ -13,6 +13,8 @@ const isWithinAccepted = (value: number, accepts?: AcceptedValues) =>
 export type ParsedValue = { value: ConfigurationValue } | { error: string };
 
 const numberOf = (input: string, accepts?: AcceptedValues): ParsedValue => {
+  // An empty field would otherwise read as 0
+  if (!input.trim()) return { error: "Enter a number." };
   const num = Number(input);
   if (Number.isNaN(num)) return { error: "Please enter a valid number." };
   // The server refuses it too; saying it here spares a failed save
