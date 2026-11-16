@@ -53,6 +53,10 @@ test.describe("Metrics & Monitoring - Real E2E Flows", () => {
       page.getByRole("heading", { name: /^Sign-ins by day and hour \(.+\)$/ }),
     ).toBeVisible();
     await expect(page.getByText(/Yearly visits/)).toBeVisible();
+    // The visits grid, last; its title may add from which day hours count
+    await expect(
+      page.getByRole("heading", { name: /^Visits by day and hour \(.+\)/ }),
+    ).toBeVisible();
 
     // A ready-made period reads the whole page again
     const reread = page.waitForResponse(/\/v1\/metrics\?startDate=/);
