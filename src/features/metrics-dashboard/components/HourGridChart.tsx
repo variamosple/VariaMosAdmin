@@ -45,7 +45,7 @@ const GRID_WORDS: Record<string, GridWords> = {
 
 const OTHER_GRID: GridWords = { one: "event", many: "events" };
 
-export const gridWordsOf = (metric: Metric): GridWords =>
+const gridWordsOf = (metric: Metric): GridWords =>
   GRID_WORDS[metric.id] ?? OTHER_GRID;
 
 export interface HourGridChartProps {
