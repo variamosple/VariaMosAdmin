@@ -130,8 +130,18 @@ test.describe("Admin - Password Reset Flow", () => {
       ),
     ).toBeVisible();
 
-    const tokenHash = await dbHelper.getLatestResetToken(smtpEmail);
-    expect(tokenHash).not.toBeNull();
+    // The admin answers before it writes the token, so that the response time
+    // tells nothing about the account: wait for the token, not read it once
+    let tokenHash: string | null = null;
+    await expect
+      .poll(
+        async () => {
+          tokenHash = await dbHelper.getLatestResetToken(smtpEmail);
+          return tokenHash;
+        },
+        { timeout: 10_000 },
+      )
+      .not.toBeNull();
 
     const recoveryLink = `/variamos_admin/#/reset-password?token=${tokenHash}`;
     const verifyTokenPromise2 = page.waitForResponse("**/auth/verify-token*");
