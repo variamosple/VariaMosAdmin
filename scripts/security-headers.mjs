@@ -10,13 +10,17 @@ import { pathToFileURL } from "node:url";
 import { loadEnv } from "vite";
 
 // Addresses the page fetches or opens a WebSocket to
-const API_VARIABLES = [
+export const API_VARIABLES = [
   "VITE_ADMIN_API_URL",
   "VITE_ADMIN_WS_URL",
   "VITE_LANGUAGES_API_URL",
   "VITE_PROJECTS_API_URL",
   "VITE_NOTIFICATION_API_URL",
 ];
+
+// Stands for the API origins in the template completed at container start
+// (etc/runtime-config.sh), when the addresses are known
+export const ORIGINS_PLACEHOLDER = "__API_ORIGINS__";
 
 // Google sign-in: its script, button frame, style and calls
 const GOOGLE_SIGN_IN = "https://accounts.google.com/gsi/";
@@ -32,10 +36,11 @@ export function apiOrigins(env) {
       // A relative address is covered by 'self'
     }
   }
-  return [...origins].sort((a, b) => a.localeCompare(b, "en"));
+  // Code point order, as "LC_ALL=C sort" in etc/runtime-config.sh
+  return [...origins].sort((a, b) => Number(a > b) - Number(a < b));
 }
 
-export function contentSecurityPolicy(env) {
+export function contentSecurityPolicy(env, origins = apiOrigins(env)) {
   const directives = {
     "default-src": ["'self'"],
     "script-src": ["'self'", `${GOOGLE_SIGN_IN}client`],
@@ -50,7 +55,7 @@ export function contentSecurityPolicy(env) {
     "font-src": ["'self'", "https://fonts.gstatic.com"],
     // Bootstrap draws its icons as data: images; downloads use blob:
     "img-src": ["'self'", "data:", "blob:"],
-    "connect-src": ["'self'", ...apiOrigins(env), GOOGLE_SIGN_IN],
+    "connect-src": ["'self'", ...origins, GOOGLE_SIGN_IN],
     // Google sign-in button and the video of the About page
     "frame-src": [GOOGLE_SIGN_IN, "https://drive.google.com"],
     "frame-ancestors": ["'none'"],
@@ -67,9 +72,9 @@ export function contentSecurityPolicy(env) {
  * The policy blocks what it does not list. It was only reported first, and
  * the production console showed no violation (2026-10-28).
  */
-export function securityHeaders(env) {
+export function securityHeaders(env, origins = apiOrigins(env)) {
   return [
-    `add_header Content-Security-Policy "${contentSecurityPolicy(env)}" always;`,
+    `add_header Content-Security-Policy "${contentSecurityPolicy(env, origins)}" always;`,
     'add_header X-Content-Type-Options "nosniff" always;',
     'add_header X-Frame-Options "DENY" always;',
     'add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;',

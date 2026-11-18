@@ -1,4 +1,19 @@
+# Context of the image: the sources only. The .env file stays: the
+# deployment workflow writes the addresses of the build in it.
 node_modules
 dist
 build
+coverage
+reports
+playwright-report
+test-results
+blob-report
+.stryker-tmp
 .git
+.github
+# Keys and credentials never enter the image
+*.key
+*.pem
+credentials*.json
+# Personal notes, never versioned
+*.local.md
