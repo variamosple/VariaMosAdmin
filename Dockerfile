@@ -8,10 +8,12 @@ COPY package.json package-lock.json ./
 # No lifecycle script of the dependencies runs during the build
 RUN npm ci --ignore-scripts
 
-# Source code, with the .env file written by the deployment workflow; the
-# security headers list the API addresses of that same file (EV-75 lot 3)
+# Source code, with the .env file written by the deployment workflow. Its
+# values become the defaults of the configuration completed at container
+# start (SPC-2026-11-18-001, lot A1): build.env and the template of the
+# security headers (EV-75 lot 3)
 COPY ./ .
-RUN npm run build && node scripts/security-headers.mjs security-headers.conf
+RUN npm run build && node scripts/runtime-config.mjs runtime-config
 
 
 # The official nginx image without root (SonarCloud S6471): it runs as the
@@ -20,15 +22,23 @@ RUN npm run build && node scripts/security-headers.mjs security-headers.conf
 FROM nginxinc/nginx-unprivileged:alpine
 
 COPY ./etc/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/security-headers.conf /etc/nginx/security-headers.conf
+COPY --from=build /app/runtime-config /etc/nginx/variamos
 
 # Copy the built React application from the builder stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# At each start, the nginx image runs the scripts of /docker-entrypoint.d:
+# this one writes config.js and the security headers from the VITE_*
+# variables of the container, or the values of the build
+COPY --chmod=755 ./etc/runtime-config.sh /docker-entrypoint.d/40-variamos-runtime-config.sh
+
 # Create a symlink to support the homepage 'variamos_admin/' prefix path.
-# The image folders belong to root: this step only runs as root
+# The image folders belong to root: this step only runs as root. The two
+# files written at start-up belong to the nginx user, and only them
 USER root
-RUN ln -s /usr/share/nginx/html /usr/share/nginx/html/variamos_admin
+RUN ln -s /usr/share/nginx/html /usr/share/nginx/html/variamos_admin \
+ && touch /etc/nginx/security-headers.conf \
+ && chown nginx /usr/share/nginx/html/config.js /etc/nginx/security-headers.conf
 USER nginx
 
 # Expose port 3000 to the outside world

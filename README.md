@@ -40,6 +40,18 @@ This is the admin dashboard frontend for the VariaMos project, built using React
    npm run build
    ```
 
+### Addresses and Docker image
+
+The page reads its addresses from `AppConfig`: the `VITE_*` values of the build (`.env`), unless the container gives others at start-up.
+
+- At each start, the container runs `etc/runtime-config.sh`. It writes `config.js`, which the page reads before the application, and the security headers of nginx, whose content security policy lists the origins of these addresses.
+- A `VITE_*` variable given to the container replaces the value of the build; a variable given empty empties it; a variable not given keeps the value of the build. Without variables, the container serves exactly what the build gave.
+- The same image therefore runs in production and in the development kit, which gives it the kit addresses:
+   ```bash
+   docker run -p 3000:3000 -e VITE_ADMIN_API_URL=http://localhost:8090/variamos_ms_admin <image>
+   ```
+- Variables: `VITE_ADMIN_API_URL`, `VITE_ADMIN_WS_URL`, `VITE_LANGUAGES_API_URL`, `VITE_PROJECTS_API_URL`, `VITE_NOTIFICATION_API_URL`, `VITE_GOOGLE_CLIENT_ID`, `VITE_GOOGLE_REDIRECT_URI`, `VITE_LOGIN_URL`, `VITE_HOME_PAGE` (`scripts/runtime-config.mjs`).
+
 ---
 
 ## Testing
