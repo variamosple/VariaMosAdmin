@@ -11,6 +11,8 @@
     "preview": "vite preview",
     "build": "tsc && vite build",
     "test": "vitest run",
+    "kit": "bash scripts/kit.sh start",
+    "kit:stop": "bash scripts/kit.sh stop",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "stryker": "stryker run",

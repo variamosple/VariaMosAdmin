@@ -54,6 +54,17 @@ The page reads its addresses from `AppConfig`: the `VITE_*` values of the build 
 
 ---
 
+## Running it with the rest of the platform
+
+The [development kit](https://github.com/variamosple/variamos_dev_kit) runs the whole platform locally with Docker, with a sanitized copy of the production database. Clone it next to this repository, then:
+
+```bash
+npm run kit       # build this repository and start the kit with it
+npm run kit:stop  # stop the kit (its database is kept)
+```
+
+The UI opens on `http://localhost:8090/variamos_admin/`, with the addresses of the kit. The kit is looked for next to this repository, or in `KIT_DIR`. `./kit build off <service>` in the kit goes back to the published image; `./kit doctor` checks the machine.
+
 ## Testing
 
 The test layers, the rules for writing tests and the commands are in [README-tests.md](README-tests.md).

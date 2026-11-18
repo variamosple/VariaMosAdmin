@@ -44,4 +44,9 @@ USER nginx
 # Expose port 3000 to the outside world
 EXPOSE 3000
 
+# Health of the container, seen by Docker and by "docker compose up --wait"
+# (SPC-2026-11-18-001, lot A2)
+HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/variamos_admin/"]
+
 CMD ["nginx", "-g", "daemon off;"]
