@@ -36,7 +36,10 @@ COPY --chmod=755 ./etc/runtime-config.sh /docker-entrypoint.d/40-variamos-runtim
 # The image folders belong to root: this step only runs as root. The two
 # files written at start-up belong to the nginx user, and only them
 USER root
-RUN ln -s /usr/share/nginx/html /usr/share/nginx/html/variamos_admin \
+# The packages of the base image get their fixes: its own release can lag
+# behind Alpine (brotli-libs on 2026-11-19, lot Q1)
+RUN apk upgrade --no-cache \
+ && ln -s /usr/share/nginx/html /usr/share/nginx/html/variamos_admin \
  && touch /etc/nginx/security-headers.conf \
  && chown nginx /usr/share/nginx/html/config.js /etc/nginx/security-headers.conf
 USER nginx
