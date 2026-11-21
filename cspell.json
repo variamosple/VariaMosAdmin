@@ -54,7 +54,8 @@
     "nosniff",
     "WCAG",
     "tmpfs",
-    "lscr"
+    "lscr",
+    "aquasec"
   ],
   "ignorePaths": [
     "node_modules/**",

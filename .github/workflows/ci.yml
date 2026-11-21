@@ -78,7 +78,7 @@ jobs:
           npm run build
 
       - name: Run TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@ea68ca03c865c5f324e86e849ced20ed3cf9dbbb # v3.99.8
+        uses: trufflesecurity/trufflehog@3bd2b5887eb0efb8fa18bfd1d296032924e4ffdc # v3.99.9
         with:
           path: ./
           # The image of the same release, not "latest": change it with the
@@ -281,6 +281,13 @@ jobs:
           tags: variamos-admin-frontend
           cache-from: type=gha,scope=frontend-mocked
           cache-to: ${{ github.event_name == 'push' && matrix.browser == 'chromium' && 'type=gha,scope=frontend-mocked,mode=max,ignore-error=true' || '' }}
+
+      # The check of the publish workflow, before the merge (lot Q1): once,
+      # on the Chromium job. build.env holds the public addresses of the build
+      - name: Check the image (Trivy, environment files and keys)
+        if: matrix.browser == 'chromium'
+        run: |
+          bash scripts/scan-image.sh variamos-admin-frontend etc/nginx/variamos/build.env
 
       - name: Run Mocked E2E Tests (${{ matrix.browser }})
         run: |

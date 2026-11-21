@@ -1,0 +1,42 @@
+# Builds, checks and deploys the frontend with the shared workflow of the
+# organization: https://github.com/variamosple/.github
+#
+# The build settings are public addresses (A1): the image keeps them in
+# etc/nginx/variamos/build.env, the only file the image check accepts. The
+# .env of the repository is for local work and is replaced here.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: variamosple/.github/.github/workflows/deploy.yml@v1
+    with:
+      image: variamosadmin
+      service: variamosadminaws
+      page-url: https://app.variamos.com/variamos_admin/
+      scan: block
+      allowed-files: etc/nginx/variamos/build.env
+      build-env: |
+        REACT_APP_ADMIN_API_URL=${{ vars.REACT_APP_ADMIN_API_URL }}
+        VITE_ADMIN_API_URL=${{ vars.REACT_APP_ADMIN_API_URL }}
+        REACT_APP_ADMIN_WS_URL=${{ vars.REACT_APP_ADMIN_WS_URL }}
+        VITE_ADMIN_WS_URL=${{ vars.REACT_APP_ADMIN_WS_URL }}
+        REACT_APP_LANGUAGES_API_URL=${{ vars.REACT_APP_LANGUAGES_API_URL }}
+        VITE_LANGUAGES_API_URL=${{ vars.REACT_APP_LANGUAGES_API_URL }}
+        REACT_APP_PROJECTS_API_URL=${{ vars.REACT_APP_PROJECTS_API_URL }}
+        VITE_PROJECTS_API_URL=${{ vars.REACT_APP_PROJECTS_API_URL }}
+        REACT_APP_GOOGLE_CLIENT_ID=${{ vars.REACT_APP_GOOGLE_CLIENT_ID }}
+        VITE_GOOGLE_CLIENT_ID=${{ vars.REACT_APP_GOOGLE_CLIENT_ID }}
+        REACT_APP_GOOGLE_REDIRECT_URI=${{ vars.REACT_APP_GOOGLE_REDIRECT_URI }}
+        VITE_GOOGLE_REDIRECT_URI=${{ vars.REACT_APP_GOOGLE_REDIRECT_URI }}
+        REACT_APP_LOGIN_URL="${{ vars.REACT_APP_LOGIN_URL }}"
+        VITE_LOGIN_URL="${{ vars.REACT_APP_LOGIN_URL }}"
+        REACT_APP_HOME_PAGE="${{ vars.REACT_APP_HOME_PAGE }}"
+        VITE_HOME_PAGE="${{ vars.REACT_APP_HOME_PAGE }}"
+        REACT_APP_NOTIFICATION_API_URL="${{ vars.REACT_APP_NOTIFICATION_API_URL }}"
+        VITE_NOTIFICATION_API_URL="${{ vars.REACT_APP_NOTIFICATION_API_URL }}"
+    secrets: inherit
