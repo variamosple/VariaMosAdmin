@@ -95,6 +95,9 @@ test.describe("Admin - Sign-in and access failures", () => {
     await login(page, userEmail, password);
     await expect(page).toHaveURL(/variamos_admin\/(#\/)?$/);
 
+    // A full load, as a bookmark: changing only the hash of the open page
+    // does not reach the router
+    await page.goto("about:blank");
     await page.goto("/variamos_admin/#/users");
     await expect(page).toHaveURL(/#\/403/);
     await expect(
