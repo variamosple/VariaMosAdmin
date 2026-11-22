@@ -341,7 +341,9 @@ describe("MicroServiceListPage Integration", () => {
 
     expect(
       await screen.findByRole("region", { name: "Background tasks" }),
-    ).toHaveTextContent("Periodic bugs synchronization: not run yet.");
+    ).toHaveTextContent(
+      "Periodic bugs synchronization: not run yet (every 15 minutes).",
+    );
   });
 
   it("offers no announcement without the right to send one", async () => {
