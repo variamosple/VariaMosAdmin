@@ -129,6 +129,51 @@ describe("LoginPage Page Component", () => {
     expect(sent).toHaveLength(1);
   });
 
+  describe("back from a Google sign-in of an account without a country (EV-90)", () => {
+    beforeEach(() => {
+      mockQueryParams.set("signed-in", "google");
+    });
+
+    it("offers the country of the time zone, then loads the home page", async () => {
+      const load = vi.spyOn(pageLoader, "load").mockImplementation(() => {});
+      const sent: string[] = [];
+      server.use(
+        http.put(
+          apiTarget("/auth/my-account/default-country"),
+          async ({ request }) => {
+            sent.push(await request.text());
+            expect(load).not.toHaveBeenCalled();
+            return HttpResponse.json({ data: { saved: true } });
+          },
+        ),
+      );
+
+      renderLoginPage();
+
+      expect(screen.getByRole("status")).toHaveTextContent("Signing in…");
+      expect(screen.queryByTestId("mock-login-form")).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(load).toHaveBeenCalledWith(AppConfig.HOME_PAGE);
+      });
+      expect(sent).toEqual([JSON.stringify({ countryCode: "CO" })]);
+    });
+
+    it("still goes home when the country cannot be saved", async () => {
+      const load = vi.spyOn(pageLoader, "load").mockImplementation(() => {});
+      server.use(
+        http.put(apiTarget("/auth/my-account/default-country"), () =>
+          HttpResponse.json({ message: "down" }, { status: 503 }),
+        ),
+      );
+
+      renderLoginPage();
+
+      await waitFor(() => {
+        expect(load).toHaveBeenCalledWith(AppConfig.HOME_PAGE);
+      });
+    });
+  });
+
   it("handles failed sign in and displays error message", async () => {
     mockSignIn.mockResolvedValueOnce({
       errorCode: 401,
