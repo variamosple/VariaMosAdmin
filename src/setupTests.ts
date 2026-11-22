@@ -163,6 +163,15 @@ afterEach(() => {
   }
 });
 afterAll(async () => {
+  // A react-bootstrap modal or fade sets a timer of a few milliseconds that
+  // ends its transition, and never clears it on unmount. A file that ends
+  // just after one opens closed jsdom before the timer, which then failed
+  // with "document is not defined". Let those timers run first, on real
+  // timers, so that a file left on fake timers does not wait forever.
+  vi.useRealTimers();
+  await new Promise((resolve) => {
+    setTimeout(resolve, 20);
+  });
   server.close();
   if (getGlobalDispatcher) {
     const dispatcher = getGlobalDispatcher();
