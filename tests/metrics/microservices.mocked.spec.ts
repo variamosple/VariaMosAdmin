@@ -276,4 +276,62 @@ test.describe("Microservices - Complete Mocked E2E Workflow", () => {
       /^Administration Service will restart at \d{2}:\d{2} UTC/,
     );
   });
+
+  test("shows the background tasks of the admin, a failing one first (ADM-N34)", async ({
+    page,
+  }) => {
+    await page.route("**/v1/micro-services?*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          data: mockMicroservices,
+          totalItems: 2,
+          totalPages: 1,
+          currentPage: 1,
+        }),
+      });
+    });
+    const now = new Date().toISOString();
+    await page.route("**/v1/background-tasks", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          data: [
+            {
+              name: "Journals purge",
+              intervalMs: 86400000,
+              running: false,
+              lastRunAt: now,
+              lastSuccessAt: now,
+              lastFailureAt: null,
+              consecutiveFailures: 0,
+            },
+            {
+              name: "Periodic bugs synchronization",
+              intervalMs: 900000,
+              running: false,
+              lastRunAt: now,
+              lastSuccessAt: null,
+              lastFailureAt: now,
+              consecutiveFailures: 3,
+            },
+          ],
+          totalCount: 2,
+        }),
+      });
+    });
+    await page.goto("http://localhost:3000/#/monitoring");
+
+    const block = page.getByRole("region", { name: "Background tasks" });
+    await expect(block).toBeVisible();
+    await expect(block.getByRole("listitem")).toHaveText([
+      "Periodic bugs synchronization: failing (3 in a row), never succeeded.",
+      "Journals purge: last run less than a minute ago.",
+    ]);
+    await expect(block.getByRole("alert")).toContainText(
+      "Periodic bugs synchronization: failing",
+    );
+  });
 });

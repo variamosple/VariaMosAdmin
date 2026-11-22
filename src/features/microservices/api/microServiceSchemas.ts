@@ -1,5 +1,6 @@
 import * as z from "zod/mini";
 import { optionalText } from "@/shared/api/schemas";
+import type { BackgroundTask } from "../domain/backgroundTasks";
 import type { BackupReport } from "../domain/backupStatus";
 import type { MicroServiceConfigItem } from "../domain/Entity/MicroService";
 
@@ -35,3 +36,16 @@ export const backupReportSchema: z.ZodMiniType<BackupReport> = z.looseObject({
   ),
   problems: z.array(z.looseObject({ kind: z.string(), message: z.string() })),
 });
+
+// GET /v1/background-tasks (ADM-N34): the runs of the admin's background tasks
+const backgroundTaskSchema: z.ZodMiniType<BackgroundTask> = z.looseObject({
+  name: z.string(),
+  intervalMs: z.number(),
+  running: z.boolean(),
+  lastRunAt: z.nullable(z.string()),
+  lastSuccessAt: z.nullable(z.string()),
+  lastFailureAt: z.nullable(z.string()),
+  consecutiveFailures: z.number(),
+});
+
+export const backgroundTasksSchema = z.array(backgroundTaskSchema);
