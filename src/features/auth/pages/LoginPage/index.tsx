@@ -1,5 +1,5 @@
 import { useRouter, useSession } from "@variamosple/variamos-components";
-import { type FC, useEffect, useState } from "react";
+import { type FC, type ReactNode, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import type { Credentials } from "@/features/user-management/domain/Entity/Credentials";
@@ -25,6 +25,8 @@ const useSignInSteps = () => {
   const [isCheckingCode, setIsCheckingCode] = useState(false);
   const [trustedDeviceDays, setTrustedDeviceDays] = useState(0);
   const { signIn, signInAsGuest, isLoading } = useSession();
+  // Back from a Google sign-in, only to be offered the country (EV-90)
+  const isEndingGoogleSignIn = queryParams.get("signed-in") === "google";
 
   const onSignIn = (credentials: Credentials) => {
     void signIn(credentials).then((response) => {
@@ -92,6 +94,16 @@ const useSignInSteps = () => {
       setErrorMessage(loginMessage);
     }
 
+    // Google sign-in of an account without a country: signed in already,
+    // back here to be offered the country of the browser, then home (EV-90).
+    // Home only: the address names no page, so a link cannot send elsewhere
+    if (isEndingGoogleSignIn) {
+      void offerDefaultCountry().then(() =>
+        pageLoader.load(AppConfig.HOME_PAGE),
+      );
+      return;
+    }
+
     // Google sign-in of an account with a second factor
     if (queryParams.get("mfa") === "required") {
       setTrustedDeviceDays(Number(queryParams.get("trustedDeviceDays")) || 0);
@@ -105,11 +117,12 @@ const useSignInSteps = () => {
     if (redirectTo) {
       void registerRedirect(redirectTo).then();
     }
-  }, [queryParams]);
+  }, [queryParams, isEndingGoogleSignIn]);
 
   return {
     errorMessage,
     setErrorMessage,
+    isEndingGoogleSignIn,
     isMfaStep,
     setIsMfaStep,
     isCheckingCode,
@@ -153,25 +166,42 @@ const OtherWays: FC<OtherWaysProps> = ({ isLoading, onSignInAsGuest }) => (
   </>
 );
 
+const SignInCard: FC<{ children: ReactNode }> = ({ children }) => (
+  <div
+    className="d-flex flex-column align-items-center gap-3 p-4 rounded-2 dark-container"
+    style={{ width: 350 }}
+    data-bs-theme="dark"
+  >
+    <img
+      src="./images/VariaMosLogo.webp"
+      width={1200}
+      height={245}
+      alt="Variamos logo"
+      className="img-fluid"
+    />
+    {children}
+  </div>
+);
+
 export const LoginPage: FC = () => {
   usePageTitle("Sign in");
   const steps = useSignInSteps();
   const { errorMessage, setErrorMessage, isMfaStep } = steps;
 
-  return (
-    <div
-      className="d-flex flex-column align-items-center gap-3 p-4 rounded-2 dark-container"
-      style={{ width: 350 }}
-      data-bs-theme="dark"
-    >
-      <img
-        src="./images/VariaMosLogo.webp"
-        width={1200}
-        height={245}
-        alt="Variamos logo"
-        className="img-fluid"
-      />
+  // Signed in by Google already: only the country is left to offer
+  if (steps.isEndingGoogleSignIn) {
+    return (
+      <SignInCard>
+        <output className="d-flex align-items-center gap-2">
+          <Spinner animation="border" size="sm" aria-hidden="true" />
+          Signing in…
+        </output>
+      </SignInCard>
+    );
+  }
 
+  return (
+    <SignInCard>
       {isMfaStep ? (
         <MfaCodeForm
           onSubmitCode={steps.onSubmitCode}
@@ -202,6 +232,6 @@ export const LoginPage: FC = () => {
           onSignInAsGuest={steps.onSignInAsGuest}
         />
       )}
-    </div>
+    </SignInCard>
   );
 };
