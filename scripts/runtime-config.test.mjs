@@ -119,6 +119,17 @@ describe("configuration read at container start", () => {
     );
   });
 
+  it("keeps each value on one line", () => {
+    const { config } = start(BUILD, {
+      VITE_LOGIN_URL: "https://x.example/\r\nlogin\n",
+      VITE_HOME_PAGE: "",
+    });
+
+    expect(config.VITE_LOGIN_URL).toBe("https://x.example/login");
+    expect(config.VITE_HOME_PAGE).toBe("");
+    expect(config.VITE_ADMIN_API_URL).toBe(BUILD.VITE_ADMIN_API_URL);
+  });
+
   it("lists every value read by the page", () => {
     expect(RUNTIME_VARIABLES).toEqual(Object.keys(BUILD));
   });
