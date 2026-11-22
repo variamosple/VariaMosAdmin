@@ -44,6 +44,7 @@ test.describe("Global Configurations - Real E2E Flows", () => {
     await page.click('button[type="submit"]');
 
     // Verify Sandbox state
+    await expect(page.locator(".modal")).toHaveCount(0);
     await expect(page.locator(".alert-warning")).toBeVisible();
     await expect(
       siteNameRow.locator(".badge", { hasText: "UNSAVED" }),
@@ -67,10 +68,17 @@ test.describe("Global Configurations - Real E2E Flows", () => {
       "Successfully saved 1 configuration(s).",
     );
 
-    // Cleanup: Restore original site name
+    // Cleanup: Restore original site name. As for the first save, wait until
+    // the modal is closed and the edit is in the sandbox before saving: on
+    // WebKit, a click on Save Changes while the modal was still closing once
+    // sent no request.
     await siteNameRow.locator('button[title="Edit setting"]').click();
     await input.fill("VariaMos");
     await page.click('.modal-content button[type="submit"]');
+    await expect(page.locator(".modal")).toHaveCount(0);
+    await expect(
+      siteNameRow.locator(".badge", { hasText: "UNSAVED" }),
+    ).toBeVisible();
 
     const cleanupPromise = page.waitForResponse(
       (response) =>
