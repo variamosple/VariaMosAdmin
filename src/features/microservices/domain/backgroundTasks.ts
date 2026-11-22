@@ -38,6 +38,26 @@ export function ageOf(at: string, now: Date): string {
   return plural(Math.floor(elapsedMs / DAY_MS), "day");
 }
 
+const every = (count: number, unit: string): string =>
+  count === 1 ? `every ${unit}` : `every ${count} ${unit}s`;
+
+/**
+ * "every minute", "every 15 minutes", "every hour", "every day": the largest
+ * unit that divides the interval. Null below a minute or for no interval.
+ */
+export function intervalOf(intervalMs: number): string | null {
+  if (!Number.isFinite(intervalMs) || intervalMs < MINUTE_MS) return null;
+  if (intervalMs % DAY_MS === 0) return every(intervalMs / DAY_MS, "day");
+  if (intervalMs % HOUR_MS === 0) return every(intervalMs / HOUR_MS, "hour");
+  return every(Math.round(intervalMs / MINUTE_MS), "minute");
+}
+
+const notRunYet = (task: BackgroundTask): string => {
+  // The first run comes one interval after the start of the admin
+  const interval = intervalOf(task.intervalMs);
+  return interval ? `not run yet (${interval})` : "not run yet";
+};
+
 const stateOf = (task: BackgroundTask, now: Date): string => {
   if (task.consecutiveFailures > 0) {
     const success = task.lastSuccessAt
@@ -46,7 +66,7 @@ const stateOf = (task: BackgroundTask, now: Date): string => {
     return `failing (${task.consecutiveFailures} in a row), ${success}`;
   }
   if (task.lastRunAt) return `last run ${ageOf(task.lastRunAt, now)}`;
-  return "not run yet";
+  return notRunYet(task);
 };
 
 /** One line per task, the failing ones first, in the order of the admin. */

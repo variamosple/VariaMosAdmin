@@ -2,6 +2,7 @@ import {
   ageOf,
   type BackgroundTask,
   backgroundTaskLinesOf,
+  intervalOf,
 } from "./backgroundTasks";
 
 const NOW = new Date("2026-11-22T15:00:00Z");
@@ -31,6 +32,45 @@ describe("background tasks (ADM-N34)", () => {
     expect(ageOf("2026-11-22T15:00:20Z", NOW)).toBe("less than a minute ago");
   });
 
+  it("gives the interval in the largest unit that divides it", () => {
+    expect(intervalOf(60 * 1000)).toBe("every minute");
+    expect(intervalOf(15 * 60 * 1000)).toBe("every 15 minutes");
+    expect(intervalOf(90 * 60 * 1000)).toBe("every 90 minutes");
+    expect(intervalOf(60 * 60 * 1000)).toBe("every hour");
+    expect(intervalOf(6 * 60 * 60 * 1000)).toBe("every 6 hours");
+    expect(intervalOf(24 * 60 * 60 * 1000)).toBe("every day");
+    expect(intervalOf(48 * 60 * 60 * 1000)).toBe("every 2 days");
+  });
+
+  it("gives no interval below a minute", () => {
+    expect(intervalOf(0)).toBeNull();
+    expect(intervalOf(30 * 1000)).toBeNull();
+    expect(intervalOf(Number.NaN)).toBeNull();
+  });
+
+  it("says when a task that has not run yet runs", () => {
+    const [withInterval] = backgroundTaskLinesOf(
+      [
+        task({
+          name: "Periodic bugs synchronization",
+          intervalMs: 15 * 60 * 1000,
+          lastRunAt: null,
+          lastSuccessAt: null,
+        }),
+      ],
+      NOW,
+    );
+    const [withoutInterval] = backgroundTaskLinesOf(
+      [task({ intervalMs: 0, lastRunAt: null, lastSuccessAt: null })],
+      NOW,
+    );
+
+    expect(withInterval?.text).toBe(
+      "Periodic bugs synchronization: not run yet (every 15 minutes).",
+    );
+    expect(withoutInterval?.text).toBe("Journals purge: not run yet.");
+  });
+
   it("gives the last run of a task that works", () => {
     expect(backgroundTaskLinesOf([task()], NOW)).toEqual([
       {
@@ -55,7 +95,7 @@ describe("background tasks (ADM-N34)", () => {
     );
 
     expect(lines.map((line) => line.text)).toEqual([
-      "Periodic bugs synchronization: not run yet.",
+      "Periodic bugs synchronization: not run yet (every day).",
       "Journals purge: last run 5 minutes ago, running.",
     ]);
   });
