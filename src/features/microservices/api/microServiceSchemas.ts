@@ -38,15 +38,14 @@ export const backupReportSchema: z.ZodMiniType<BackupReport> = z.looseObject({
 });
 
 // GET /v1/background-tasks (ADM-N34): the runs of the admin's background tasks
-export const backgroundTaskSchema: z.ZodMiniType<BackgroundTask> =
-  z.looseObject({
-    name: z.string(),
-    intervalMs: z.number(),
-    running: z.boolean(),
-    lastRunAt: z.nullable(z.string()),
-    lastSuccessAt: z.nullable(z.string()),
-    lastFailureAt: z.nullable(z.string()),
-    consecutiveFailures: z.number(),
-  });
+const backgroundTaskSchema: z.ZodMiniType<BackgroundTask> = z.looseObject({
+  name: z.string(),
+  intervalMs: z.number(),
+  running: z.boolean(),
+  lastRunAt: z.nullable(z.string()),
+  lastSuccessAt: z.nullable(z.string()),
+  lastFailureAt: z.nullable(z.string()),
+  consecutiveFailures: z.number(),
+});
 
 export const backgroundTasksSchema = z.array(backgroundTaskSchema);
