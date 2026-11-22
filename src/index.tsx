@@ -6,6 +6,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import "./shared/types/global.d.ts";
 import reportWebVitals from "./reportWebVitals";
+import { PageErrorBoundary } from "./shared/components/PageErrorBoundary";
 import { reloadOnStaleFiles } from "./shared/infrastructure/StaleFilesReload";
 
 reloadOnStaleFiles();
@@ -33,7 +34,10 @@ if (!container) throw new Error("The page has no #root element.");
 const root = ReactDOM.createRoot(container);
 root.render(
   <React.StrictMode>
-    <Root />
+    {/* Last resort, for an error outside the pages (ADM-N43) */}
+    <PageErrorBoundary>
+      <Root />
+    </PageErrorBoundary>
   </React.StrictMode>,
 );
 

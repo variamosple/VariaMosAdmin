@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import userEvent from "@testing-library/user-event";
+import { createMemoryRouter, Link, RouterProvider } from "react-router-dom";
 import { ROUTES } from "./router";
 
 // Mock SecurityWrapper and Layouts
@@ -64,6 +65,11 @@ vi.mock("@/features/activity-journal", async () => ({
 vi.mock("@/features/bug-tracker", async () => ({
   BugListPage: () => <div>BugListPage</div>,
 }));
+
+// A page that fails while it renders (ADM-N43)
+const Broken = () => {
+  throw new Error("render failed");
+};
 
 describe("Router Configuration", () => {
   it("defines expected main routes and children paths", () => {
@@ -145,5 +151,50 @@ describe("Router Configuration", () => {
     render(<RouterProvider router={router} />);
 
     expect(screen.getByText("HomePage")).toBeInTheDocument();
+  });
+
+  it("keeps the menu when a page fails, and clears the error on another page (ADM-N43)", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const mainRoute = ROUTES.find((r) => r.path === "/");
+    const router = createMemoryRouter(
+      [
+        {
+          path: "/",
+          element: (
+            <>
+              <Link to="/fine">Menu: fine page</Link>
+              {mainRoute?.element}
+            </>
+          ),
+          children: [
+            { path: "broken", element: <Broken /> },
+            { path: "fine", element: <div>Fine page</div> },
+          ],
+        },
+      ],
+      { initialEntries: ["/broken"] },
+    );
+    render(<RouterProvider router={router} />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Something went wrong on this page",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Menu: fine page" }),
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("link", { name: "Menu: fine page" }),
+    );
+
+    expect(await screen.findByText("Fine page")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Something went wrong on this page"),
+    ).not.toBeInTheDocument();
+    consoleError.mockRestore();
   });
 });
