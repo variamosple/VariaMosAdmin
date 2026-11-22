@@ -3,9 +3,14 @@ import {
   NotAuthorized,
   ProtectedRoute,
 } from "@variamosple/variamos-components";
-import { type ComponentType, lazy, Suspense } from "react";
+import { type ComponentType, type FC, lazy, Suspense } from "react";
 import { Spinner } from "react-bootstrap";
-import { Navigate, Outlet, type RouteObject } from "react-router-dom";
+import {
+  Navigate,
+  Outlet,
+  type RouteObject,
+  useLocation,
+} from "react-router-dom";
 import {
   DefaultCountry,
   ForgotPasswordPage,
@@ -16,6 +21,7 @@ import {
   SignUpPage,
 } from "@/features/auth";
 import { NotFound } from "@/shared/components/NotFound";
+import { PageErrorBoundary } from "@/shared/components/PageErrorBoundary";
 import { SecurityWrapper } from "@/shared/components/SecurityWrapper";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { MainLayout } from "@/shared/layouts/MainLayout";
@@ -98,6 +104,19 @@ const PageLoading = () => (
   </div>
 );
 
+// The page under the menu: an error while it renders leaves the menu in
+// place, and going to another page clears it (ADM-N43)
+const PageOutlet: FC = () => {
+  const { pathname } = useLocation();
+  return (
+    <PageErrorBoundary resetKey={pathname}>
+      <Suspense fallback={<PageLoading />}>
+        <Outlet />
+      </Suspense>
+    </PageErrorBoundary>
+  );
+};
+
 const NOT_AUTHORIZED_PATH = "/403";
 
 export const ROUTES: RouteObject[] = [
@@ -109,9 +128,7 @@ export const ROUTES: RouteObject[] = [
           <MainLayout>
             <MfaInvitationBanner />
             <DefaultCountry />
-            <Suspense fallback={<PageLoading />}>
-              <Outlet />
-            </Suspense>
+            <PageOutlet />
           </MainLayout>
         </AuthWrapper>
       </SecurityWrapper>
