@@ -319,6 +319,31 @@ describe("MicroServiceListPage Integration", () => {
     );
   });
 
+  it("shows the background tasks of the admin under the backup (ADM-N34)", async () => {
+    server.use(
+      http.get("*/v1/background-tasks", () =>
+        HttpResponse.json({
+          data: [
+            {
+              name: "Periodic bugs synchronization",
+              intervalMs: 900000,
+              running: false,
+              lastRunAt: null,
+              lastSuccessAt: null,
+              lastFailureAt: null,
+              consecutiveFailures: 0,
+            },
+          ],
+        }),
+      ),
+    );
+    renderPage(<MicroServiceListPage />);
+
+    expect(
+      await screen.findByRole("region", { name: "Background tasks" }),
+    ).toHaveTextContent("Periodic bugs synchronization: not run yet.");
+  });
+
   it("offers no announcement without the right to send one", async () => {
     renderPage(<MicroServiceListPage />);
     expect(await screen.findByText("Service A")).toBeInTheDocument();

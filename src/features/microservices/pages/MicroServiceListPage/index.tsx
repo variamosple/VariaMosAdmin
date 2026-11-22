@@ -21,6 +21,7 @@ import {
 } from "@/shared/components/AnnouncementModal";
 import ConfirmationModal from "@/shared/components/ConfirmationModal";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { BackgroundTasksBlock } from "../../components/BackgroundTasksBlock";
 import { BackupStatusLine } from "../../components/BackupStatusLine";
 import { MicroServiceConfigModal } from "../../components/MicroServiceConfigModal";
 import { MicroServiceList } from "../../components/MicroServiceList";
@@ -208,6 +209,7 @@ const MicroServiceListPageComponent: FC = () => {
       <hr />
 
       <BackupStatusLine refreshedAt={list.lastRefreshedAt} />
+      <BackgroundTasksBlock refreshedAt={list.lastRefreshedAt} />
 
       {isConnectionLost ? <ConnectionLost list={list} /> : null}
 

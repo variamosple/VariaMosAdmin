@@ -3,10 +3,12 @@ import { noData, parseResponse } from "@/shared/api/parseResponse";
 import { toErrorResponse } from "@/shared/api/toErrorResponse";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { ADMIN_CLIENT } from "@/shared/infrastructure/AxiosConfig";
+import type { BackgroundTask } from "../domain/backgroundTasks";
 import type { BackupReport } from "../domain/backupStatus";
 import type { MicroService } from "../domain/Entity/MicroService";
 import type { MicroServiceFilter } from "../domain/Entity/MicroServiceFilter";
 import {
+  backgroundTasksSchema,
   backupReportSchema,
   configItemSchema,
   configItemsSchema,
@@ -17,6 +19,17 @@ export const getBackupStatus = (): Promise<ResponseModel<BackupReport>> => {
   return ADMIN_CLIENT.get("/v1/backups/status")
     .then((response) =>
       parseResponse(backupReportSchema, response.data, failure),
+    )
+    .catch((error) => toErrorResponse(error, failure));
+};
+
+export const getBackgroundTasks = (): Promise<
+  ResponseModel<BackgroundTask[]>
+> => {
+  const failure = "The background tasks cannot be read.";
+  return ADMIN_CLIENT.get("/v1/background-tasks")
+    .then((response) =>
+      parseResponse(backgroundTasksSchema, response.data, failure),
     )
     .catch((error) => toErrorResponse(error, failure));
 };
