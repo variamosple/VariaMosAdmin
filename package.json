@@ -9,7 +9,7 @@
   "scripts": {
     "start": "vite",
     "preview": "vite preview",
-    "build": "tsc && vite build",
+    "build": "tsc --incremental --tsBuildInfoFile node_modules/.cache/tsc/app.tsbuildinfo && vite build",
     "test": "vitest run",
     "kit": "bash scripts/kit.sh start",
     "kit:stop": "bash scripts/kit.sh stop",
@@ -21,7 +21,7 @@
     "lint": "biome check --error-on-warnings . && node scripts/check-suppressions.mjs",
     "lint:errors": "biome check --diagnostic-level=error .",
     "lint:fix": "biome check --write .",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
+    "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/app.tsbuildinfo && tsc --noEmit -p tsconfig.e2e.json --incremental --tsBuildInfoFile node_modules/.cache/tsc/e2e.tsbuildinfo",
     "find-deadcode": "knip",
     "spell": "cspell --no-progress --dot --gitignore \"**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs,json,jsonc,css,md,yml,yaml,sh}\" \"**/Dockerfile*\"",
     "check-updates": "taze",
