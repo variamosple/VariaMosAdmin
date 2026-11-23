@@ -1,5 +1,6 @@
 import { type FC, useEffect, useRef } from "react";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
+import { loadGoogleSignInScript } from "./googleSignInScript";
 
 interface GoogleLoginProps {
   text?: "signin_with" | "signup_with";
@@ -39,9 +40,10 @@ export const GoogleLogin: FC<GoogleLoginProps> = ({ text = "signin_with" }) => {
       initializeGoogleSignIn();
       return;
     }
-    // The Google script loads on its own; wait for it while the button is
-    // shown, and stop when leaving the page, or it would check forever when
-    // the script never loads (blocked, offline)
+    // The Google script is added by the first page that shows the button;
+    // wait for it while the button is shown, and stop when leaving the page,
+    // or it would check forever when the script never loads (blocked, offline)
+    loadGoogleSignInScript();
     const intervalId = setInterval(() => {
       if (window.google?.accounts?.id) {
         initializeGoogleSignIn();

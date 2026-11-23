@@ -46,13 +46,9 @@ export function contentSecurityPolicy(env, origins = apiOrigins(env)) {
     "script-src": ["'self'", `${GOOGLE_SIGN_IN}client`],
     // The Google sign-in script injects its own style element and attributes;
     // inline styles cannot run code, scripts stay strict
-    "style-src": [
-      "'self'",
-      "'unsafe-inline'",
-      "https://fonts.googleapis.com",
-      `${GOOGLE_SIGN_IN}style`,
-    ],
-    "font-src": ["'self'", "https://fonts.gstatic.com"],
+    "style-src": ["'self'", "'unsafe-inline'", `${GOOGLE_SIGN_IN}style`],
+    // The Play font is served with the application (ADM-N45)
+    "font-src": ["'self'"],
     // Bootstrap draws its icons as data: images; downloads use blob:
     "img-src": ["'self'", "data:", "blob:"],
     "connect-src": ["'self'", ...origins, GOOGLE_SIGN_IN],
