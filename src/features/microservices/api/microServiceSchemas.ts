@@ -42,6 +42,8 @@ const backgroundTaskSchema: z.ZodMiniType<BackgroundTask> = z.looseObject({
   name: z.string(),
   intervalMs: z.number(),
   running: z.boolean(),
+  runningSince: z.optional(z.nullable(z.string())),
+  stuck: z.optional(z.boolean()),
   lastRunAt: z.nullable(z.string()),
   lastSuccessAt: z.nullable(z.string()),
   lastFailureAt: z.nullable(z.string()),

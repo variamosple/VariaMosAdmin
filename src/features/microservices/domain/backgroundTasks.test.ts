@@ -100,6 +100,43 @@ describe("background tasks (ADM-N34)", () => {
     ]);
   });
 
+  // ADM-N47: a run past its time limit holds the task until it ends
+  it("says how long a stuck task has been running, among the failing ones", () => {
+    const lines = backgroundTaskLinesOf(
+      [
+        task({ name: "Periodic bugs synchronization" }),
+        task({
+          name: "Container resources sampling",
+          intervalMs: 30_000,
+          running: true,
+          runningSince: "2026-11-22T13:00:00Z",
+          stuck: true,
+          lastSuccessAt: "2026-11-22T12:59:30Z",
+          consecutiveFailures: 240,
+        }),
+      ],
+      NOW,
+    );
+
+    expect(lines[0]).toEqual({
+      name: "Container resources sampling",
+      failing: true,
+      text: "Container resources sampling: failing (240 in a row), last success 2 hours ago, stuck for 2 hours.",
+    });
+  });
+
+  it("marks a stuck task as failing before its failure is counted", () => {
+    const [line] = backgroundTaskLinesOf(
+      [task({ running: true, stuck: true, runningSince: null })],
+      NOW,
+    );
+
+    expect(line).toMatchObject({
+      failing: true,
+      text: "Journals purge: last run 5 minutes ago, stuck.",
+    });
+  });
+
   it("gives the failures in a row and the last success of a failing task", () => {
     const [line] = backgroundTaskLinesOf(
       [
