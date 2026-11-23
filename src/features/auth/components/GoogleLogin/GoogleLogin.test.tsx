@@ -29,6 +29,18 @@ describe("GoogleLogin Component", () => {
     expect(container).toBeInTheDocument();
   });
 
+  // The button of Google appears later: its place is kept so the form does
+  // not move under a click
+  it("keeps the height of the Google button before it renders", () => {
+    vi.stubGlobal("google", undefined);
+
+    render(<GoogleLogin />);
+
+    expect(screen.getByTestId("google-signin-container")).toHaveStyle({
+      minHeight: "40px",
+    });
+  });
+
   it("initializes Google Sign-In and renders button immediately if window.google is defined", () => {
     vi.stubGlobal("google", {
       accounts: {

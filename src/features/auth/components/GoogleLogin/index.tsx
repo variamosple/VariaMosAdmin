@@ -2,6 +2,13 @@ import { type FC, useEffect, useRef } from "react";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { loadGoogleSignInScript } from "./googleSignInScript";
 
+/**
+ * Height of the "large" Google button, kept from the first render: the
+ * script is added by this component, so the button appears after the form,
+ * and its arrival pushed the centered form up under a click on "Sign in".
+ */
+const GOOGLE_BUTTON_HEIGHT_PX = 40;
+
 interface GoogleLoginProps {
   text?: "signin_with" | "signup_with";
 }
@@ -58,7 +65,7 @@ export const GoogleLogin: FC<GoogleLoginProps> = ({ text = "signin_with" }) => {
       data-testid="google-signin-container"
       className="g_id_signin"
       data-locale="en"
-      style={{ colorScheme: "normal" }}
+      style={{ colorScheme: "normal", minHeight: GOOGLE_BUTTON_HEIGHT_PX }}
     />
   );
 };
