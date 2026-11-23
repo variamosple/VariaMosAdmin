@@ -1,4 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+// The Play font, served with the application rather than by Google (ADM-N45)
+import "@fontsource/play/400.css";
+import "@fontsource/play/700.css";
 import React, { lazy, Suspense } from "react";
 import { Spinner } from "react-bootstrap";
 import ReactDOM from "react-dom/client";

@@ -6,6 +6,7 @@ import { SignInLayout } from "./SignInLayout";
 // Mock @variamosple/variamos-components completely to avoid ESM import errors
 vi.mock("@variamosple/variamos-components", async () => {
   return {
+    DEFAULT_MAIN_CONTENT_ID: "main-content",
     useSession: vi.fn(),
     useRouter: vi.fn(),
     ResponseModel: class ResponseModel {
@@ -51,6 +52,25 @@ describe("SignInLayout", () => {
     expect(screen.getByTestId("test-child")).toBeInTheDocument();
     expect(screen.getByTestId("about-component")).toBeInTheDocument();
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  // ADM-N15: the same landmark as the pages after sign-in
+  it("puts the form and the About panel in a main landmark", () => {
+    (useSession as import("vitest").Mock).mockReturnValue({
+      isAuthenticated: false,
+    });
+
+    render(
+      <SignInLayout>
+        <div data-testid="test-child">Child Element</div>
+      </SignInLayout>,
+    );
+
+    const main = screen.getByRole("main");
+    expect(main).toHaveAttribute("id", "main-content");
+    expect(main).toHaveAttribute("tabindex", "-1");
+    expect(main).toContainElement(screen.getByTestId("test-child"));
+    expect(main).toContainElement(screen.getByTestId("about-component"));
   });
 
   it("schedules redirect to Home page and cleans up timeout on unmount if authenticated", () => {

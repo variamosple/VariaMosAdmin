@@ -34,9 +34,10 @@
     "microservices:docker:logs": "docker compose -f docker-compose.test.yml logs -f"
   },
   "dependencies": {
+    "@fontsource/play": "^5.3.0",
     "@patternfly/react-core": "^6.7.0",
     "@patternfly/react-log-viewer": "^6.5.0",
-    "@variamosple/variamos-components": "^0.7.0",
+    "@variamosple/variamos-components": "^0.8.0",
     "axios": "^1.21.1",
     "bootstrap": "^5.3.9",
     "qrcode.react": "^4.2.0",

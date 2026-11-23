@@ -1,4 +1,5 @@
 import {
+  DEFAULT_MAIN_CONTENT_ID,
   Footer,
   Header,
   MenuContextProvider,
@@ -19,7 +20,10 @@ export const MainLayout: FC<{ children?: ReactNode }> = ({ children }) => {
         />
       </MenuContextProvider>
 
-      {children}
+      {/* Focused by the skip link of the header (ADM-N15) */}
+      <main id={DEFAULT_MAIN_CONTENT_ID} tabIndex={-1}>
+        {children}
+      </main>
 
       <Footer />
     </>
