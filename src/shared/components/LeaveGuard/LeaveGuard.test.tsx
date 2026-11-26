@@ -21,13 +21,20 @@ const NoteForm = () => {
   );
 };
 
-const renderPages = () => {
+// A form that the header keeps from page to page, as the global bug form
+const KeptForm = () => {
+  useUnsavedInput(true, { keptOnNavigation: true });
+  return <p>Kept form</p>;
+};
+
+const renderPages = ({ withKeptForm = false } = {}) => {
   const router = createMemoryRouter(
     [
       {
         element: (
           <>
             <LeaveGuard />
+            {withKeptForm ? <KeptForm /> : null}
             <nav>
               <Link to="/roles">Roles</Link>
               <Link to="/notes?search=x">Search</Link>
@@ -96,6 +103,14 @@ describe("LeaveGuard", () => {
     await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
     expect(router.state.location.pathname).toBe("/notes");
     expect(screen.getByLabelText("Note")).toHaveValue("Half a role");
+  });
+
+  it("lets the page go while only a form kept on navigation holds input", async () => {
+    const router = renderPages({ withKeptForm: true });
+    await userEvent.click(screen.getByRole("link", { name: "Roles" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/roles");
+    expect(screen.getByText("Kept form")).toBeInTheDocument();
   });
 
   it("keeps the page when only its search changes, and lets sign-in go", async () => {
