@@ -1,4 +1,7 @@
-import type { ResponseModel } from "@variamosple/variamos-components";
+import {
+  type ResponseModel,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
 import {
   type FC,
   useCallback,
@@ -16,6 +19,8 @@ import {
   useForm,
 } from "react-hook-form";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
+import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 
 interface ModelFormFields extends Omit<Model, "isPublic" | "languageId"> {
   isPublic?: string;
@@ -239,14 +244,14 @@ const modelOf = (model: Model | undefined, data: ModelFormFields): Model => ({
 const FormButtons: FC<{
   isLoading: boolean;
   submitText: string;
-  onCancel: () => void;
-}> = ({ isLoading, submitText, onCancel }) => (
-  <Modal.Footer>
+  closing: ReturnType<typeof useDiscardConfirmation>;
+}> = ({ isLoading, submitText, closing }) => (
+  <ClosingFooter closing={closing}>
     <Button
       type="button"
       variant="secondary"
       disabled={isLoading}
-      onClick={onCancel}
+      onClick={closing.requestClose}
     >
       Cancel
     </Button>
@@ -258,7 +263,7 @@ const FormButtons: FC<{
         submitText
       )}
     </Button>
-  </Modal.Footer>
+  </ClosingFooter>
 );
 
 const NameField: FC<{
@@ -321,13 +326,15 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
   const { resetTo: resetProject } = project;
   const { resetTo: resetLanguage } = language;
 
+  const form = useForm<ModelFormFields>();
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
     setValue,
-  } = useForm<ModelFormFields>();
+  } = form;
+  const holdsInput = useFormHoldsInput(form);
 
   useEffect(() => {
     reset(formValuesOf(defaultValue));
@@ -352,6 +359,11 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
     language.resetTo(defaultValue?.languageId);
     project.resetTo(defaultValue?.projectId);
   };
+  // Closing with unsaved input asks first (UX-08)
+  const closing = useDiscardConfirmation({
+    holdsInput: showModal && holdsInput,
+    onClose: onCloseModal,
+  });
 
   const titleId = useId();
 
@@ -360,7 +372,8 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
       aria-labelledby={titleId}
       show={showModal}
       backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
+      keyboard={!isLoading}
+      onHide={isLoading ? undefined : closing.requestClose}
     >
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title id={titleId}>{modalTitle}</Modal.Title>
@@ -416,7 +429,7 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
         <FormButtons
           isLoading={isLoading}
           submitText={submitText}
-          onCancel={onCloseModal}
+          closing={closing}
         />
       </Form>
     </Modal>

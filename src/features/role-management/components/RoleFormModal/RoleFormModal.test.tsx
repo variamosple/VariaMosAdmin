@@ -6,6 +6,10 @@ import { RoleFormModal } from "./index";
 
 vi.mock("@variamosple/variamos-components", async () => {
   return {
+    // The unsaved input and the discard confirmation of FormModal
+    ...(await (
+      await import("@/shared/tests/mocks/variamosComponents")
+    ).formInput()),
     ResponseModel: class ResponseModel<T> {
       errorCode?: number | null = null;
       message?: string;

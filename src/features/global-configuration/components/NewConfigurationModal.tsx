@@ -1,5 +1,10 @@
+import {
+  isUnsavedInput,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
 import { type FC, type SubmitEvent, useId, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   createConfiguration,
   type NewConfiguration,
@@ -183,6 +188,12 @@ export const NewConfigurationModal: FC<NewConfigurationModalProps> = (
     onClose();
   };
 
+  // Closing with unsaved input asks first (UX-08)
+  const closing = useDiscardConfirmation({
+    holdsInput: show && isUnsavedInput({ ...EMPTY_DRAFT }, { ...draft }),
+    onClose: close,
+  });
+
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const submission = submissionOf(draft);
@@ -202,8 +213,13 @@ export const NewConfigurationModal: FC<NewConfigurationModalProps> = (
   };
 
   return (
-    <Modal aria-labelledby={titleId} show={show} onHide={close}>
-      <Modal.Header closeButton>
+    <Modal
+      aria-labelledby={titleId}
+      show={show}
+      onHide={isSaving ? undefined : closing.requestClose}
+      keyboard={!isSaving}
+    >
+      <Modal.Header closeButton={!isSaving}>
         <Modal.Title id={titleId}>New configuration</Modal.Title>
       </Modal.Header>
       <Form noValidate onSubmit={(e) => void handleSubmit(e)}>
@@ -221,8 +237,12 @@ export const NewConfigurationModal: FC<NewConfigurationModalProps> = (
             effect before then.
           </Form.Text>
         </Modal.Body>
-        <Modal.Footer>
-          <Button type="button" variant="secondary" onClick={close}>
+        <ClosingFooter closing={closing}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={closing.requestClose}
+          >
             Cancel
           </Button>
           <Button variant="primary" type="submit" disabled={isSaving}>
@@ -231,7 +251,7 @@ export const NewConfigurationModal: FC<NewConfigurationModalProps> = (
             ) : null}
             Create
           </Button>
-        </Modal.Footer>
+        </ClosingFooter>
       </Form>
     </Modal>
   );

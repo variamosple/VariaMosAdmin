@@ -93,11 +93,40 @@ test.describe("Auth - session kept while the admin does not answer", () => {
   }) => {
     const admin = { current: "signed-in" as AdminState };
     await mockAdmin(page, admin);
-    await startTypingARole(page);
+    await page.goto("http://localhost:3000/#/roles");
+    await expect(
+      page.getByRole("button", { name: "Create role" }),
+    ).toBeVisible();
 
     admin.current = "signed-out";
     await page.clock.fastForward(60_000);
     await page.clock.fastForward(1_000);
+    await expect(page).toHaveURL(/#\/login/);
+  });
+
+  // TRV-65: an ended session stays ended, but a form being typed is kept
+  // until its author has copied it or chosen to drop it
+  test("keeps a role being typed when the session is over, until it is dropped", async ({
+    page,
+  }) => {
+    const admin = { current: "signed-in" as AdminState };
+    await mockAdmin(page, admin);
+    const dialog = await startTypingARole(page);
+
+    admin.current = "signed-out";
+    await page.clock.fastForward(60_000);
+    await page.clock.fastForward(1_000);
+    const banner = page.getByRole("alert").filter({
+      hasText: "Your session has ended. Your input is still on this page",
+    });
+    await expect(banner).toBeVisible();
+    await expect(page).toHaveURL(/#\/roles/);
+    await expect(dialog.getByLabel("Role name")).toHaveValue("Reviewers");
+
+    await banner.getByRole("button", { name: "Sign in here" }).click();
+    await banner
+      .getByRole("button", { name: "Drop my input and sign in" })
+      .click();
     await expect(page).toHaveURL(/#\/login/);
   });
 

@@ -1,4 +1,8 @@
 import {
+  isUnsavedInput,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
+import {
   type FC,
   useCallback,
   useEffect,
@@ -13,6 +17,7 @@ import {
   dispatchNotification,
 } from "@/features/notifications-admin/api/NotificationsAdminRepository";
 import { queryRoleChoices } from "@/features/role-management/api/RoleRepository";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import { RoleCheckboxList } from "@/shared/components/RoleCheckboxList";
 import { useLoadedList } from "@/shared/hooks/useLoadedList";
 
@@ -172,7 +177,21 @@ const useAnnouncementDraft = (props: AnnouncementModalProps) => {
     onClose();
   };
 
+  // The suggested text, edited: closing asks first (UX-08)
+  const holdsInput =
+    announcement !== null &&
+    isUnsavedInput(
+      {
+        title: announcement.title,
+        body: announcement.body,
+        audience: "broadcast",
+        selectedRoles: [],
+      },
+      { title, body, audience, selectedRoles },
+    );
+
   return {
+    holdsInput,
     fields: { title, setTitle, body, setBody, audience, setAudience },
     selectedRoles,
     toggleRole,
@@ -317,11 +336,16 @@ export const AnnouncementModal: FC<AnnouncementModalProps> = (props) => {
   // Kept by the dialog: loaded once for all its openings
   const roles = useAnnouncementRoles(draft.fields.audience);
   const { pending, busy, error } = draft;
+  const closing = useDiscardConfirmation({
+    holdsInput: draft.holdsInput,
+    onClose,
+  });
 
   return (
     <Modal
       show={announcement !== null}
-      onHide={busy ? undefined : onClose}
+      onHide={busy ? undefined : closing.requestClose}
+      keyboard={!busy}
       aria-labelledby={titleId}
       centered
     >
@@ -345,9 +369,9 @@ export const AnnouncementModal: FC<AnnouncementModalProps> = (props) => {
           </Alert>
         ) : null}
       </Modal.Body>
-      <Modal.Footer>
-        <AnnouncementButtons draft={draft} onClose={onClose} />
-      </Modal.Footer>
+      <ClosingFooter closing={closing}>
+        <AnnouncementButtons draft={draft} onClose={closing.requestClose} />
+      </ClosingFooter>
     </Modal>
   );
 };

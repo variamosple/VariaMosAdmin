@@ -1,6 +1,11 @@
+import {
+  isUnsavedInput,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { useId, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 
 interface Owner {
   id?: string | number;
@@ -16,6 +21,8 @@ export interface ContactOwnerModalProps {
   entityType: "Language" | "Project" | "Model";
 }
 
+const DEFAULT_SUBJECT = "GENERAL_INQUIRY";
+
 export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
   show,
   onClose,
@@ -23,8 +30,25 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
   entityName,
   entityType,
 }) => {
-  const [subjectKey, setSubjectKey] = useState("GENERAL_INQUIRY");
+  const [subjectKey, setSubjectKey] = useState(DEFAULT_SUBJECT);
   const [customBody, setCustomBody] = useState("");
+
+  // Sent or dropped, the message starts again from the default subject
+  const close = () => {
+    setSubjectKey(DEFAULT_SUBJECT);
+    setCustomBody("");
+    onClose();
+  };
+  // Closing with a message written asks first (UX-08)
+  const closing = useDiscardConfirmation({
+    holdsInput:
+      show &&
+      isUnsavedInput(
+        { subjectKey: DEFAULT_SUBJECT },
+        { subjectKey, customBody },
+      ),
+    onClose: close,
+  });
 
   const hasEmail = (owner: Owner) =>
     typeof owner.email === "string" && owner.email.trim() !== "";
@@ -54,7 +78,12 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
   const titleId = useId();
 
   return (
-    <Modal aria-labelledby={titleId} show={show} onHide={onClose} centered>
+    <Modal
+      aria-labelledby={titleId}
+      show={show}
+      onHide={closing.requestClose}
+      centered
+    >
       <Modal.Header closeButton>
         <Modal.Title id={titleId}>Contact Owners of {entityName}</Modal.Title>
       </Modal.Header>
@@ -96,20 +125,20 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
           )
         )}
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
+      <ClosingFooter closing={closing}>
+        <Button variant="secondary" onClick={closing.requestClose}>
           Cancel
         </Button>
         <a
           className={`btn btn-primary ${!emailList ? "disabled" : ""}`}
           href={emailList ? mailtoHref : undefined}
           aria-disabled={!emailList}
-          onClick={onClose}
+          onClick={close}
           title="Send Email"
         >
           Send Email
         </a>
-      </Modal.Footer>
+      </ClosingFooter>
     </Modal>
   );
 };

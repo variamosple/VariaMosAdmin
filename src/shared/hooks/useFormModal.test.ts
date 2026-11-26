@@ -99,4 +99,28 @@ describe("useFormModal", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(result.current.form.getValues("name")).toBe("a");
   });
+
+  it("holds input once a field differs from the item, blanks aside", async () => {
+    const { result } = render({
+      submit: vi.fn(),
+      defaultValue: { name: "a" },
+    });
+    await waitFor(() =>
+      expect(result.current.form.getValues("name")).toBe("a"),
+    );
+    expect(result.current.holdsInput).toBe(false);
+
+    act(() => result.current.form.setValue("name", " a "));
+    expect(result.current.holdsInput).toBe(false);
+    act(() => result.current.form.setValue("name", "b"));
+    expect(result.current.holdsInput).toBe(true);
+
+    act(() => result.current.onCloseModal());
+    expect(result.current.holdsInput).toBe(false);
+  });
+
+  it("holds no input in an empty creation form", () => {
+    const { result } = render({ submit: vi.fn() });
+    expect(result.current.holdsInput).toBe(false);
+  });
 });

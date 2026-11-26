@@ -154,4 +154,33 @@ describe("AnnouncementModal (EV-115 lot A)", () => {
       ),
     );
   });
+
+  describe("closing (UX-08)", () => {
+    it("closes at once on the suggested text", async () => {
+      const onClose = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <AnnouncementModal announcement={ANNOUNCEMENT} onClose={onClose} />,
+      );
+
+      await user.keyboard("{Escape}");
+
+      expect(onClose).toHaveBeenCalledOnce();
+    });
+
+    it("asks before dropping an edited text", async () => {
+      const onClose = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <AnnouncementModal announcement={ANNOUNCEMENT} onClose={onClose} />,
+      );
+
+      await user.type(screen.getByLabelText("Message"), " Thank you.");
+      await user.keyboard("{Escape}");
+      expect(onClose).not.toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Discard" }));
+
+      expect(onClose).toHaveBeenCalledOnce();
+    });
+  });
 });

@@ -1,4 +1,8 @@
-import { withPageVisit } from "@variamosple/variamos-components";
+import {
+  isUnsavedInput,
+  useUnsavedInput,
+  withPageVisit,
+} from "@variamosple/variamos-components";
 import {
   type FC,
   type ReactNode,
@@ -79,6 +83,15 @@ const useNotificationDraft = () => {
   const removeUser = (userId: string) => {
     setSelectedUsers((prev) => prev.filter((user) => user.id !== userId));
   };
+  // A notification being written keeps the page when the connection is lost
+  // or the session ends, and the browser asks before the tab is closed
+  useUnsavedInput(
+    isUnsavedInput(
+      { roles: [], users: [] },
+      { title, body, roles: selectedRoles, users: selectedUsers },
+    ),
+  );
+
   // The form is emptied once the notification is sent
   const clear = () => {
     setTitle("");

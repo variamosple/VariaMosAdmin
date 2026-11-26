@@ -118,4 +118,43 @@ describe("ContactOwnerModal - Behavior & Anti-Fragile Tests", () => {
 
     expect(onCloseMock).toHaveBeenCalledOnce();
   });
+
+  describe("closing (UX-08)", () => {
+    const renderOpen = (onClose: () => void) =>
+      render(
+        <ContactOwnerModal
+          show={true}
+          onClose={onClose}
+          owners={defaultOwners}
+          entityName="FeatureIDE"
+          entityType="Language"
+        />,
+      );
+
+    it("closes at once with the default subject and no message", async () => {
+      const onClose = vi.fn();
+      renderOpen(onClose);
+
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+      expect(onClose).toHaveBeenCalledOnce();
+    });
+
+    it("asks before dropping a written message, not after sending it", async () => {
+      const onClose = vi.fn();
+      renderOpen(onClose);
+      const body = screen.getByLabelText(/Message Body/i);
+      await userEvent.type(body, "Please update it");
+
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+      expect(onClose).not.toHaveBeenCalled();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Keep editing" }),
+      );
+      await userEvent.click(screen.getByRole("link", { name: /Send Email/i }));
+
+      expect(onClose).toHaveBeenCalledOnce();
+      expect(body).toHaveValue("");
+    });
+  });
 });

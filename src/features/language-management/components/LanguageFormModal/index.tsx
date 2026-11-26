@@ -30,7 +30,10 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
   isLoading,
   submitText = "Edit Language",
 }) => {
-  const { form, onSubmit, onCloseModal } = useFormModal<Language, Language>({
+  const { form, onSubmit, onCloseModal, holdsInput } = useFormModal<
+    Language,
+    Language
+  >({
     defaultValue,
     toFields: languageFields,
     submit: onLanguageSubmit,
@@ -49,6 +52,7 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
       isLoading={isLoading}
       submitText={submitText}
       onClose={onCloseModal}
+      holdsInput={holdsInput}
       onSubmit={onSubmit}
       bodyClassName="d-flex flex-column gap-3"
     >

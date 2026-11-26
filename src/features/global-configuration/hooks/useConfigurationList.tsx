@@ -1,3 +1,4 @@
+import { useUnsavedInput } from "@variamosple/variamos-components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "@/shared/context/ToastContext";
 import {
@@ -157,6 +158,8 @@ export const useConfigurationList = () => {
   }, [localConfigs, originalConfigs]);
 
   const isDirty = modifiedKeys.length > 0;
+  // Settings edited and not saved keep the page (TRV-65)
+  useUnsavedInput(isDirty);
 
   /**
    * Saves every modified key, one request each, and says which were saved

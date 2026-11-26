@@ -6,6 +6,7 @@ import {
   type UseFormReturn,
   useForm,
 } from "react-hook-form";
+import { useFormHoldsInput } from "./useFormHoldsInput";
 
 interface FormModalOptions<TFields extends FieldValues, TItem, TSaved> {
   /** The item to edit, if any; the form is filled again when it changes. */
@@ -20,7 +21,9 @@ interface FormModalOptions<TFields extends FieldValues, TItem, TSaved> {
 /**
  * The state of a form in a modal: filled from the edited item, brought back
  * to it (edits dropped) after a successful save or when the modal closes, and
- * never sent while a save is running.
+ * never sent while a save is running. `holdsInput` says whether the fields
+ * differ from the values the form was filled with (isUnsavedInput), for
+ * FormModal.
  */
 export const useFormModal = <
   TFields extends FieldValues,
@@ -36,9 +39,11 @@ export const useFormModal = <
   form: UseFormReturn<TFields>;
   onSubmit: ReturnType<UseFormReturn<TFields>["handleSubmit"]>;
   onCloseModal: () => void;
+  holdsInput: boolean;
 } => {
   const form = useForm<TFields>();
   const { reset, handleSubmit } = form;
+  const holdsInput = useFormHoldsInput(form);
 
   useEffect(() => {
     reset(toFields(defaultValue));
@@ -59,5 +64,5 @@ export const useFormModal = <
     reset();
   };
 
-  return { form, onSubmit, onCloseModal };
+  return { form, onSubmit, onCloseModal, holdsInput };
 };

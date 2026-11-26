@@ -125,7 +125,10 @@ test.describe("Role & Permission Management - Mocked Flows", () => {
 
       await expect(page.getByRole("dialog")).toBeVisible();
 
+      // The typed name is dropped only once confirmed (UX-08)
       await page.getByRole("button", { name: "Cancel" }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await page.getByRole("button", { name: "Discard" }).click();
       await expect(page.getByRole("dialog")).toBeHidden();
     });
   });

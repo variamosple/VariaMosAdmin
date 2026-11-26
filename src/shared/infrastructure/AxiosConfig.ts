@@ -1,4 +1,5 @@
-import axios, { type AxiosInstance } from "axios";
+import { hasUnsavedInput } from "@variamosple/variamos-components";
+import axios, { type AxiosError, type AxiosInstance } from "axios";
 import type { NavigateFunction } from "react-router-dom";
 import { AppConfig } from "./AppConfig";
 
@@ -36,23 +37,43 @@ const currentRoutePath = () => {
   return path;
 };
 
+// The check of the session itself: its answer is read by the session
+// watcher, and checking again on its 401 would loop
+const isSessionCheck = (error: AxiosError) =>
+  error.config?.url?.endsWith("/auth/session-info") === true;
+
+/**
+ * What a 401 of a service does on a private page. The session is checked at
+ * once: the admin renews an expired token, or says that the session is over,
+ * and the page keeps its unsaved input either way (TRV-65). Only a page that
+ * holds no input is sent to the sign-in page at once, given `navigate` (the
+ * admin service); the other services leave it to the check.
+ */
 export const setupAxiosInterceptors = (
   axiosInstance: AxiosInstance,
-  navigate: NavigateFunction,
+  navigate: NavigateFunction | null,
+  checkSession: () => void = () => undefined,
 ) => {
   const interceptorId = axiosInstance.interceptors.response.use(
     (response) => {
       return response;
     },
-    (error) => {
+    (error: AxiosError) => {
       if (
         error?.response?.status === 401 &&
-        !PUBLIC_PATHS.has(currentRoutePath())
+        !PUBLIC_PATHS.has(currentRoutePath()) &&
+        !isSessionCheck(error)
       ) {
-        // A code, never the server text: the login page shows its own. The
-        // current page is given back after sign-in (UX-27).
-        const redirectTo = encodeURIComponent(window.location.href);
-        void navigate(`/login?reason=session-expired&redirectTo=${redirectTo}`);
+        if (navigate && !hasUnsavedInput()) {
+          // A code, never the server text: the login page shows its own.
+          // The current page is given back after sign-in (UX-27).
+          const redirectTo = encodeURIComponent(window.location.href);
+          void navigate(
+            `/login?reason=session-expired&redirectTo=${redirectTo}`,
+          );
+        } else {
+          checkSession();
+        }
       }
 
       return Promise.reject(error);

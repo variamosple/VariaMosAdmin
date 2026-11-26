@@ -1,4 +1,8 @@
-import type { ResponseModel } from "@variamosple/variamos-components";
+import {
+  isUnsavedInput,
+  type ResponseModel,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
 import { QRCodeSVG } from "qrcode.react";
 import {
   type FC,
@@ -18,6 +22,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { ErrorCodes } from "@/shared/api/errorCodes";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   confirmMfaEnrollment,
   disableMfa,
@@ -418,6 +423,19 @@ export const TwoFactorCard: FC = () => {
   const mfa = useMfaStatus();
   const steps = useMfaSteps(mfa.refresh);
   const { step } = steps;
+  // A typed password or code is dropped only once confirmed (UX-08); the
+  // recovery codes step closes by its own button only
+  const closing = useDiscardConfirmation({
+    holdsInput:
+      step.name !== "closed" &&
+      step.name !== "codes" &&
+      isUnsavedInput(
+        {},
+        { password: steps.fields.password, code: steps.fields.code },
+      ),
+    onClose: steps.close,
+  });
+  const isLocked = step.name === "codes" || steps.isBusy;
 
   if (mfa.load === "refused") return null;
 
@@ -431,11 +449,12 @@ export const TwoFactorCard: FC = () => {
       <Modal
         aria-labelledby={titleId}
         show={step.name !== "closed"}
-        onHide={step.name === "codes" ? undefined : steps.close}
-        backdrop={step.name === "codes" ? "static" : true}
+        onHide={isLocked ? undefined : closing.requestClose}
+        backdrop={isLocked ? "static" : true}
+        keyboard={!isLocked}
         centered
       >
-        <Modal.Header closeButton={step.name !== "codes"}>
+        <Modal.Header closeButton={!isLocked}>
           <Modal.Title id={titleId}>Two-factor authentication</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -447,9 +466,9 @@ export const TwoFactorCard: FC = () => {
             </Alert>
           ) : null}
         </Modal.Body>
-        <Modal.Footer>
+        <ClosingFooter closing={closing}>
           <StepButton formId={stepFormId} steps={steps} />
-        </Modal.Footer>
+        </ClosingFooter>
       </Modal>
     </Card>
   );

@@ -151,13 +151,27 @@ describe("NewConfigurationModal (EV-18 lot C.3)", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("forgets the draft when cancelled", async () => {
+  it("asks before a cancel drops the draft, then forgets it (UX-08)", async () => {
     const { user, onClose } = renderModal();
 
     await user.type(screen.getByLabelText("Key"), "general.motd");
     await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onClose).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Keep editing" }));
+    expect(screen.getByLabelText("Key")).toHaveValue("general.motd");
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Discard" }));
 
     expect(onClose).toHaveBeenCalledWith();
     expect(screen.getByLabelText("Key")).toHaveValue("");
+  });
+
+  it("closes at once when nothing was typed", async () => {
+    const { user, onClose } = renderModal();
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(onClose).toHaveBeenCalledOnce();
   });
 });

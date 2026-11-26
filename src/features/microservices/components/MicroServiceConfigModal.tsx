@@ -1,3 +1,7 @@
+import {
+  isUnsavedInput,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
 import { type FC, useEffect, useId, useState } from "react";
 import {
   Alert,
@@ -12,6 +16,7 @@ import {
 } from "react-bootstrap";
 import { Check, PencilSquare, PlusLg } from "react-bootstrap-icons";
 import { DateTime } from "@/shared/components/DateTime";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   getMicroServiceAuditLogs,
   getMicroServiceConfigurations,
@@ -122,7 +127,16 @@ const useParameterEdit = (settings: ServiceSettings) => {
     }
   };
 
-  return { editingKey, editValue, setEditValue, isSaving, startEdit, save };
+  // The edit dropped when the dialog is closed
+  const drop = () => {
+    setEditingKey(null);
+    setEditValue("");
+  };
+
+  return {
+    ...{ editingKey, editValue, setEditValue, isSaving },
+    ...{ startEdit, save, drop },
+  };
 };
 
 type ParameterEdit = ReturnType<typeof useParameterEdit>;
@@ -168,8 +182,15 @@ const useNewParameter = (settings: ServiceSettings) => {
     }
   };
 
+  // The new parameter dropped when the dialog is closed
+  const drop = () => {
+    setNewKey("");
+    setNewValue("");
+    setShowAddForm(false);
+  };
+
   const fields = { newKey, setNewKey, newValue, setNewValue };
-  return { showAddForm, setShowAddForm, fields, isAdding, add };
+  return { showAddForm, setShowAddForm, fields, isAdding, add, drop };
 };
 
 type NewParameter = ReturnType<typeof useNewParameter>;
@@ -408,6 +429,29 @@ const AuditTab: FC<{ settings: ServiceSettings }> = ({ settings }) => {
   );
 };
 
+// The parameter being edited holds another value than its own (a secret
+// starts empty), or a new parameter is being typed
+const holdsTypedValue = (
+  configs: MicroServiceConfigItem[],
+  edit: ParameterEdit,
+  adding: NewParameter,
+) => {
+  const edited = configs.find((config) => config.key === edit.editingKey);
+  const isEdited =
+    edited !== undefined &&
+    isUnsavedInput(
+      { value: edited.isSecret ? "" : edited.value },
+      { value: edit.editValue },
+    );
+  return (
+    isEdited ||
+    isUnsavedInput(
+      {},
+      { key: adding.fields.newKey, value: adding.fields.newValue },
+    )
+  );
+};
+
 export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
   show,
   serviceName,
@@ -419,12 +463,21 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
   const edit = useParameterEdit(settings);
   const adding = useNewParameter(settings);
   const titleId = useId();
+  // A value typed and not saved is dropped only once confirmed (UX-08)
+  const closing = useDiscardConfirmation({
+    holdsInput: show && holdsTypedValue(settings.configs, edit, adding),
+    onClose: () => {
+      edit.drop();
+      adding.drop();
+      onHide();
+    },
+  });
 
   return (
     <Modal
       aria-labelledby={titleId}
       show={show}
-      onHide={onHide}
+      onHide={closing.requestClose}
       size="lg"
       centered
       animation={false}
@@ -458,15 +511,15 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
         </Tabs>
       </Modal.Body>
 
-      <Modal.Footer>
+      <ClosingFooter closing={closing}>
         <Button
           variant="secondary"
-          onClick={onHide}
+          onClick={closing.requestClose}
           data-testid="config-modal-close-btn"
         >
           Close
         </Button>
-      </Modal.Footer>
+      </ClosingFooter>
     </Modal>
   );
 };

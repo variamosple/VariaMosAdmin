@@ -7,6 +7,10 @@ import { PersonalInformationUpdateForModal } from "./index";
 // Mock @variamosple/variamos-components completely
 vi.mock("@variamosple/variamos-components", async () => {
   return {
+    // The unsaved input and the discard confirmation of the forms
+    ...(await (
+      await import("@/shared/tests/mocks/variamosComponents")
+    ).formInput()),
     useQuery: vi.fn(),
     ResponseModel: class ResponseModel {
       errorCode?: number | null;
@@ -191,5 +195,28 @@ describe("PersonalInformationUpdateForModal Component", () => {
 
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
+  });
+
+  it("asks before Cancel drops another country (UX-08)", async () => {
+    const user = userEvent.setup();
+    render(
+      <PersonalInformationUpdateForModal
+        onUpdatePersonalInformationSubmit={mockOnSubmit}
+        showModal={true}
+        onClose={mockOnClose}
+        isLoading={false}
+        defaultValue={{ countryCode: "US" }}
+      />,
+    );
+
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: /select your country/i }),
+      "CO",
+    );
+    await user.click(screen.getByRole("button", { name: /cancel/i }));
+    expect(mockOnClose).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Discard" }));
+
+    expect(mockOnClose).toHaveBeenCalledOnce();
   });
 });

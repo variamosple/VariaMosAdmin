@@ -38,7 +38,7 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
   isLoading,
   submitText = "Edit Project",
 }) => {
-  const { form, onSubmit, onCloseModal } = useFormModal<
+  const { form, onSubmit, onCloseModal, holdsInput } = useFormModal<
     ProjectFormFields,
     Project
   >({
@@ -75,6 +75,7 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
       isLoading={isLoading}
       submitText={submitText}
       onClose={onCloseModal}
+      holdsInput={holdsInput}
       onSubmit={onSubmit}
       bodyClassName="d-flex flex-column gap-3"
     >

@@ -33,13 +33,15 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
   isLoading,
   submitText = "Create role",
 }) => {
-  const { form, onSubmit, onCloseModal } = useFormModal<Role, Role>({
-    defaultValue,
-    toFields: roleFields,
-    submit: onRoleSubmit,
-    isLoading,
-    onClose,
-  });
+  const { form, onSubmit, onCloseModal, holdsInput } = useFormModal<Role, Role>(
+    {
+      defaultValue,
+      toFields: roleFields,
+      submit: onRoleSubmit,
+      isLoading,
+      onClose,
+    },
+  );
   const {
     register,
     formState: { errors },
@@ -52,6 +54,7 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
       isLoading={isLoading}
       submitText={submitText}
       onClose={onCloseModal}
+      holdsInput={holdsInput}
       onSubmit={onSubmit}
     >
       <Form.Group controlId="name" className="col-12 col-md-8">

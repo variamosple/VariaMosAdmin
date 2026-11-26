@@ -1,10 +1,16 @@
-import { type ResponseModel, useQuery } from "@variamosple/variamos-components";
+import {
+  type ResponseModel,
+  useDiscardConfirmation,
+  useQuery,
+} from "@variamosple/variamos-components";
 import { type FC, useEffect, useId, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import { queryCountries } from "@/shared/api/CountriesRepository";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import type { Country } from "@/shared/domain/Entity/Country";
+import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 
 export interface PersonalInformationUpdateForModalProps {
   onUpdatePersonalInformationSubmit: (
@@ -35,12 +41,14 @@ export const PersonalInformationUpdateForModal: FC<
     initialFilter: null,
   });
 
+  const form = useForm<PersonalInformationUpdate>();
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<PersonalInformationUpdate>();
+  } = form;
+  const holdsInput = useFormHoldsInput(form);
   // A refused update is told in the open modal, the input kept (UX-05)
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -65,6 +73,12 @@ export const PersonalInformationUpdateForModal: FC<
     setServerError(null);
   };
 
+  // Closing with unsaved input asks first (UX-08)
+  const closing = useDiscardConfirmation({
+    holdsInput: showModal && holdsInput,
+    onClose: onCloseModal,
+  });
+
   useEffect(() => {
     if (showModal && !isLoadingCountries && !areCountriesLoaded) {
       void loadData(null);
@@ -84,7 +98,8 @@ export const PersonalInformationUpdateForModal: FC<
       aria-labelledby={titleId}
       show={showModal}
       backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
+      onHide={isLoading ? undefined : closing.requestClose}
+      keyboard={!isLoading}
     >
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title id={titleId}>Personal information update</Modal.Title>
@@ -125,12 +140,12 @@ export const PersonalInformationUpdateForModal: FC<
             </Form.Control.Feedback>
           </Form.Group>
 
-          <Modal.Footer>
+          <ClosingFooter closing={closing}>
             <Button
               type="button"
               variant="secondary"
               disabled={isLoading}
-              onClick={onCloseModal}
+              onClick={closing.requestClose}
             >
               Cancel
             </Button>
@@ -142,7 +157,7 @@ export const PersonalInformationUpdateForModal: FC<
                 "Update Information"
               )}
             </Button>
-          </Modal.Footer>
+          </ClosingFooter>
         </Modal.Body>
       </Form>
     </Modal>

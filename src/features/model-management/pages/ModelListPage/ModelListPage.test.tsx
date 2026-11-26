@@ -9,6 +9,10 @@ vi.mock("@variamosple/variamos-components", async () => {
   const React = require("react") as typeof import("react");
   const { useState, useCallback } = React;
   return {
+    // The unsaved input and the discard confirmation of the forms
+    ...(await (
+      await import("@/shared/tests/mocks/variamosComponents")
+    ).formInput()),
     withPageVisit: <T,>(component: T): T => component,
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
