@@ -17,7 +17,8 @@ const LEAVES_ON_PURPOSE = new Set(["/login"]);
  * button of the browser or any change of route, asks first, as closing a
  * form does (UX-08, ADR-0075). A change of the search or the tab of the
  * same page keeps it: it does not leave the page. Closing or reloading the
- * tab is asked by the browser (useUnsavedInput).
+ * tab is asked by the browser (useUnsavedInput). Signing out from the menu
+ * asks in the header (variamos-components 0.12.0).
  */
 const shouldAskBeforeLeaving: BlockerFunction = ({
   currentLocation,
@@ -25,7 +26,8 @@ const shouldAskBeforeLeaving: BlockerFunction = ({
 }) =>
   currentLocation.pathname !== nextLocation.pathname &&
   !LEAVES_ON_PURPOSE.has(nextLocation.pathname) &&
-  hasUnsavedInput();
+  // The global bug form of the header stays when the page changes
+  hasUnsavedInput({ leavingPage: true });
 
 /** Asks before a change of route drops unsaved input. */
 export const LeaveGuard: FC = () => {

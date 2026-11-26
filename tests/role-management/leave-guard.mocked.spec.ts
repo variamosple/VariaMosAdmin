@@ -1,10 +1,12 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "../helpers/mockedTest";
-import { json, mockSignedIn } from "../helpers/session";
+import { ADMIN, json, mockSignedIn, mockSignedOut } from "../helpers/session";
 
 // EV-96: a page that holds input asks before it is left, by a change of
 // route, the back button or the closing of the tab. A 401 says that the
 // session is being confirmed and keeps the input (ADM-N09, TRV-65).
+// Signing out from the menu asks too, and the global bug form, which the
+// header keeps from page to page, does not stop the back button.
 
 const ROLE_PAGE = "http://localhost:3000/#/roles/10";
 
@@ -43,6 +45,25 @@ const choosePermission = async (page: Page) => {
 
 const askedToLeave = (page: Page) =>
   page.getByRole("dialog", { name: /^Discard your input\?/ });
+
+const askedToSignOut = (page: Page) =>
+  page.getByRole("dialog", { name: /^Sign out\?/ });
+
+/** Signing out closes the session: session-info then says so. */
+const mockLogout = async (page: Page) => {
+  const calls: string[] = [];
+  await page.route("**/auth/logout", async (route) => {
+    calls.push(route.request().method());
+    await mockSignedOut(page);
+    await route.fulfill(json({ data: null }));
+  });
+  return calls;
+};
+
+const clickLogout = async (page: Page) => {
+  await page.getByRole("button", { name: ADMIN.name }).click();
+  await page.getByRole("button", { name: "Logout" }).click();
+};
 
 test.describe("Leaving a page that holds input (EV-96)", () => {
   test.beforeEach(async ({ context }) => {
@@ -93,6 +114,84 @@ test.describe("Leaving a page that holds input (EV-96)", () => {
       "title",
       "bugs::query",
     );
+  });
+
+  test("asks before signing out drops the input, and keeps it on demand", async ({
+    page,
+  }) => {
+    await mockRolePage(page);
+    const logouts = await mockLogout(page);
+    await page.goto(ROLE_PAGE);
+    await choosePermission(page);
+
+    await clickLogout(page);
+    await expect(askedToSignOut(page)).toBeVisible();
+    // The answer that loses nothing has the focus
+    await expect(
+      askedToSignOut(page).getByRole("button", { name: "Keep editing" }),
+    ).toBeFocused();
+    await askedToSignOut(page)
+      .getByRole("button", { name: "Keep editing" })
+      .click();
+    await expect(askedToSignOut(page)).toBeHidden();
+    await expect(page).toHaveURL(/#\/roles\/10$/);
+    await expect(page.getByPlaceholder("Select a permission")).toHaveAttribute(
+      "title",
+      "bugs::query",
+    );
+    expect(logouts).toEqual([]);
+
+    await clickLogout(page);
+    await askedToSignOut(page)
+      .getByRole("button", { name: "Sign out" })
+      .click();
+    await expect(page).toHaveURL(/#\/login/);
+    expect(logouts).toEqual(["POST"]);
+    // The sign-in page is not asked again
+    await expect(askedToLeave(page)).toBeHidden();
+  });
+
+  test("signs out at once without input", async ({ page }) => {
+    await mockRolePage(page);
+    const logouts = await mockLogout(page);
+    await page.goto(ROLE_PAGE);
+    await expect(page.getByPlaceholder("Select a permission")).toBeVisible();
+
+    await clickLogout(page);
+    await expect(page).toHaveURL(/#\/login/);
+    expect(logouts).toEqual(["POST"]);
+    await expect(askedToSignOut(page)).toBeHidden();
+  });
+
+  test("lets the back button go while only the global bug form holds input", async ({
+    page,
+  }) => {
+    await mockRolePage(page);
+    await page.route("**/v1/configurations/menu", (route) =>
+      route.fulfill(
+        json({
+          data: {
+            items: [],
+            subMenu: [],
+            options: [{ title: "Report a problem", location: "#report-bug" }],
+          },
+        }),
+      ),
+    );
+    await page.goto(ROLE_PAGE);
+    await page.getByRole("button", { name: "Back to role list" }).click();
+    await expect(page).toHaveURL(/#\/roles$/);
+
+    await page.getByRole("button", { name: ADMIN.name }).click();
+    await page.getByRole("button", { name: "Report a problem" }).click();
+    const bugForm = page.getByRole("dialog", { name: "Report a New Bug" });
+    await bugForm.getByLabel("Title *").fill("Half a report");
+
+    await page.goBack();
+    await expect(page).toHaveURL(/#\/roles\/10$/);
+    await expect(askedToLeave(page)).toBeHidden();
+    // The form lives in the header: it stays, with its input
+    await expect(bugForm.getByLabel("Title *")).toHaveValue("Half a report");
   });
 
   test("asks the browser before the tab is closed", async ({ page }) => {
