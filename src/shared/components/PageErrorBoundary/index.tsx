@@ -17,7 +17,7 @@ interface PageErrorBoundaryState {
 }
 
 /** What the global bug form opens with: the page and its error. */
-export const pageErrorReport = (error: Error) => ({
+const pageErrorReport = (error: Error) => ({
   title: "A page stopped because of an error",
   description: [
     `Page: ${window.location.hash || window.location.pathname}`,

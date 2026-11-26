@@ -19,7 +19,7 @@ const LEAVES_ON_PURPOSE = new Set(["/login"]);
  * same page keeps it: it does not leave the page. Closing or reloading the
  * tab is asked by the browser (useUnsavedInput).
  */
-export const shouldAskBeforeLeaving: BlockerFunction = ({
+const shouldAskBeforeLeaving: BlockerFunction = ({
   currentLocation,
   nextLocation,
 }) =>
