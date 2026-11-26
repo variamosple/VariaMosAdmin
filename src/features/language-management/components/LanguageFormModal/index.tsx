@@ -2,6 +2,7 @@ import type { ResponseModel } from "@variamosple/variamos-components";
 import type { FC } from "react";
 import { Form } from "react-bootstrap";
 import type { DefaultValues } from "react-hook-form";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { FormModal } from "@/shared/components/FormModal";
 import { useFormModal } from "@/shared/hooks/useFormModal";
 import type { Language } from "../../domain/Entity/Language";
@@ -21,7 +22,7 @@ const languageFields = (language?: Language): DefaultValues<Language> => ({
   ...language,
 });
 
-export const LanguageFormModal: FC<LanguageFormModalProps> = ({
+const LanguageFormModalDialog: FC<LanguageFormModalProps> = ({
   modalTitle,
   showModal,
   onClose,
@@ -84,3 +85,11 @@ export const LanguageFormModal: FC<LanguageFormModalProps> = ({
     </FormModal>
   );
 };
+
+export const LanguageFormModal = withDialogBoundary(
+  LanguageFormModalDialog,
+  (p) => ({
+    show: p.showModal,
+    onClose: p.onClose,
+  }),
+);

@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   type Configuration,
@@ -190,7 +191,7 @@ export interface ConfigurationFormModalProps {
   onConfigSubmit: (key: string, value: ConfigurationValue) => void;
 }
 
-export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
+const ConfigurationFormModalDialog: FC<ConfigurationFormModalProps> = ({
   showModal,
   onClose,
   config,
@@ -300,3 +301,11 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
     </Modal>
   );
 };
+
+export const ConfigurationFormModal = withDialogBoundary(
+  ConfigurationFormModalDialog,
+  (p) => ({
+    show: p.showModal,
+    onClose: p.onClose,
+  }),
+);

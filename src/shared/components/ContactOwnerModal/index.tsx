@@ -5,6 +5,7 @@ import {
 import type { FC } from "react";
 import { useId, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 
 interface Owner {
@@ -23,7 +24,7 @@ export interface ContactOwnerModalProps {
 
 const DEFAULT_SUBJECT = "GENERAL_INQUIRY";
 
-export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
+const ContactOwnerModalDialog: FC<ContactOwnerModalProps> = ({
   show,
   onClose,
   owners,
@@ -142,3 +143,11 @@ export const ContactOwnerModal: FC<ContactOwnerModalProps> = ({
     </Modal>
   );
 };
+
+export const ContactOwnerModal = withDialogBoundary(
+  ContactOwnerModalDialog,
+  (p) => ({
+    show: p.show,
+    onClose: p.onClose,
+  }),
+);

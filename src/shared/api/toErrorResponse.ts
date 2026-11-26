@@ -3,8 +3,10 @@ import axios from "axios";
 import {
   errorMessageOf,
   SYSTEM_ERROR_MESSAGE,
+  sessionRefusedMessage,
   UNREACHABLE_MESSAGE,
 } from "./errorMessages";
+import { isPublicRoute } from "./routePath";
 
 /** Error code when no response came back: network down or timeout. */
 export const UNREACHABLE_ERROR_CODE = 503;
@@ -26,10 +28,18 @@ const isErrorBody = (
   !Array.isArray(data) &&
   ("errorCode" in data || "message" in data);
 
+// No body written by the service: unreachable, or failed on its side
+const unansweredMessage = (status: number | undefined) =>
+  !status || PROXY_STATUSES.has(status)
+    ? UNREACHABLE_MESSAGE
+    : SYSTEM_ERROR_MESSAGE;
+
 /**
  * The ResponseModel for a failed request. Its errorCode is always set, so a
  * failure can never be read as a success, and its message comes from the
- * message table (T-16).
+ * message table (T-16). A 401 of a private page says that the session is
+ * being confirmed and the input kept; on a sign-in page, it is about the
+ * form, and the API message stays.
  */
 export const toErrorResponse = <T = Record<string, never>>(
   error: Error | object | null | undefined,
@@ -43,18 +53,19 @@ export const toErrorResponse = <T = Record<string, never>>(
   console.error("Axios error:", error.message);
   const status = error.response?.status;
   const data = error.response?.data;
+  const sessionRefused = status === 401 && !isPublicRoute();
 
   if (status && isErrorBody(data)) {
     const response = Object.assign(new ResponseModel<T>(), data);
     if (!response.errorCode) response.errorCode = status;
-    response.message = errorMessageOf(status, data.errorCode, data.message);
+    response.message = sessionRefused
+      ? sessionRefusedMessage()
+      : errorMessageOf(status, data.errorCode, data.message);
     return response;
   }
 
   return new ResponseModel<T>("BACK-ERROR").withError(
     status ?? UNREACHABLE_ERROR_CODE,
-    !status || PROXY_STATUSES.has(status)
-      ? UNREACHABLE_MESSAGE
-      : SYSTEM_ERROR_MESSAGE,
+    sessionRefused ? sessionRefusedMessage() : unansweredMessage(status),
   );
 };

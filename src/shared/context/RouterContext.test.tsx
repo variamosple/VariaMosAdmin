@@ -13,7 +13,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import { RouterProvider } from "./RouterContext";
+import { RouterContextProvider } from "./RouterContext";
 
 // Initialize a global listener array that doesn't suffer from lexical hoisting ReferenceErrors
 // Initialize a global listener array that doesn't suffer from lexical hoisting ReferenceErrors
@@ -91,7 +91,7 @@ const NavigateTo = ({ url }: { url: string }) => {
   );
 };
 
-describe("RouterContext & RouterProvider", () => {
+describe("RouterContext & RouterContextProvider", () => {
   const mockNavigate = vi.fn();
   const mockLocation = { pathname: "/current-page" };
   const mockParams = { id: "123" };
@@ -128,9 +128,9 @@ describe("RouterContext & RouterProvider", () => {
 
   it("provides RouterContext values to consumer components", () => {
     render(
-      <RouterProvider>
+      <RouterContextProvider>
         <ConsumerComponent />
-      </RouterProvider>,
+      </RouterContextProvider>,
     );
 
     expect(screen.getByTestId("pathname")).toHaveTextContent("/current-page");
@@ -140,9 +140,9 @@ describe("RouterContext & RouterProvider", () => {
   it("navigates to relative path inside VariaMos application", async () => {
     const user = userEvent.setup();
     render(
-      <RouterProvider>
+      <RouterContextProvider>
         <ConsumerComponent />
-      </RouterProvider>,
+      </RouterContextProvider>,
     );
 
     await user.click(screen.getByTestId("navigate-btn"));
@@ -152,9 +152,9 @@ describe("RouterContext & RouterProvider", () => {
   it("opens absolute URL in new window/tab if not in same origin", async () => {
     const user = userEvent.setup();
     render(
-      <RouterProvider>
+      <RouterContextProvider>
         <ConsumerComponent />
-      </RouterProvider>,
+      </RouterContextProvider>,
     );
 
     await user.click(screen.getByTestId("navigate-absolute"));
@@ -172,9 +172,9 @@ describe("RouterContext & RouterProvider", () => {
   ])("routes %s inside the application as %s", async (url, route) => {
     const user = userEvent.setup();
     render(
-      <RouterProvider>
+      <RouterContextProvider>
         <NavigateTo url={url} />
-      </RouterProvider>,
+      </RouterContextProvider>,
     );
 
     await user.click(screen.getByRole("button", { name: "Go" }));
@@ -189,9 +189,9 @@ describe("RouterContext & RouterProvider", () => {
   ])("opens %s, outside the application, in the browser", async (url) => {
     const user = userEvent.setup();
     render(
-      <RouterProvider>
+      <RouterContextProvider>
         <NavigateTo url={url} />
-      </RouterProvider>,
+      </RouterContextProvider>,
     );
 
     await user.click(screen.getByRole("button", { name: "Go" }));
@@ -202,9 +202,9 @@ describe("RouterContext & RouterProvider", () => {
 
   it("subscribes to variamosNavigate event on mount and unsubscribes on unmount", () => {
     const { unmount } = render(
-      <RouterProvider>
+      <RouterContextProvider>
         <ConsumerComponent />
-      </RouterProvider>,
+      </RouterContextProvider>,
     );
 
     expect(Events.subscribe).toHaveBeenCalledWith(

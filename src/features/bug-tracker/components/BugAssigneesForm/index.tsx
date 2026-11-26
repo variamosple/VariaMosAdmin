@@ -1,5 +1,6 @@
 import { type FC, type SubmitEvent, useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
+import { useReportedInput } from "@/shared/hooks/useReportedInput";
 import type { BugUserRef } from "../../domain/Bug";
 
 interface BugAssigneesFormProps {
@@ -7,6 +8,8 @@ interface BugAssigneesFormProps {
   candidates: BugUserRef[];
   // Resolves to an error message, or null when the assignees were saved
   onSave: (userIds: string[]) => Promise<string | null>;
+  /** Told whether a change of the assignees is not saved yet. */
+  onHoldsInputChange?: (holdsInput: boolean) => void;
 }
 
 const sameIds = (a: string[], b: string[]) =>
@@ -16,11 +19,13 @@ export const BugAssigneesForm: FC<BugAssigneesFormProps> = ({
   assignees,
   candidates,
   onSave,
+  onHoldsInputChange,
 }) => {
   const current = assignees.map((user) => user.id);
   const [selected, setSelected] = useState<string[]>(current);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useReportedInput(!sameIds(selected, current), onHoldsInputChange);
 
   if (candidates.length === 0) return null;
 

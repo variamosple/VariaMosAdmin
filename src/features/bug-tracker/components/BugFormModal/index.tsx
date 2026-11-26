@@ -13,6 +13,7 @@ import {
   type UseFormRegister,
   useForm,
 } from "react-hook-form";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 import type { Bug } from "../../domain/Bug";
@@ -212,7 +213,7 @@ const AttachmentField: FC<AttachmentFieldProps> = ({
   );
 };
 
-export const BugFormModal: FC<BugFormModalProps> = ({
+const BugFormModalDialog: FC<BugFormModalProps> = ({
   show,
   onHide,
   onSubmit,
@@ -315,3 +316,8 @@ export const BugFormModal: FC<BugFormModalProps> = ({
     </Modal>
   );
 };
+
+export const BugFormModal = withDialogBoundary(BugFormModalDialog, (p) => ({
+  show: p.show,
+  onClose: p.onHide,
+}));

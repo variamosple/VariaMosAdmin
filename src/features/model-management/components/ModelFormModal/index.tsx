@@ -19,6 +19,7 @@ import {
   useForm,
 } from "react-hook-form";
 import type { Model } from "@/features/model-management/domain/Entity/Model";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 
@@ -308,7 +309,7 @@ const projectNameOf = (
     : undefined) ||
   "Select a project...";
 
-export const ModelFormModal: FC<ModelFormModalProps> = ({
+const ModelFormModalDialog: FC<ModelFormModalProps> = ({
   modalTitle,
   showModal,
   onClose,
@@ -435,3 +436,8 @@ export const ModelFormModal: FC<ModelFormModalProps> = ({
     </Modal>
   );
 };
+
+export const ModelFormModal = withDialogBoundary(ModelFormModalDialog, (p) => ({
+  show: p.showModal,
+  onClose: p.onClose,
+}));

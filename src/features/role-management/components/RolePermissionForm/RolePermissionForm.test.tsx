@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { hasUnsavedInput } from "@variamosple/variamos-components";
 import "@testing-library/jest-dom/vitest";
 import { queryPermissions } from "@/features/permission-management/api/PermissionRepository";
 import { RolePermissionForm } from "./index";
@@ -145,5 +146,33 @@ describe("RolePermissionForm", () => {
     const submitBtn = screen.getByRole("button");
     expect(submitBtn).toBeDisabled();
     expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+  });
+
+  it("holds input while a chosen permission is not added, until it is", async () => {
+    const onSubmit = vi
+      .fn()
+      .mockResolvedValueOnce(false)
+      .mockResolvedValue(true);
+    render(
+      <RolePermissionForm
+        onRolePermissionSubmit={onSubmit}
+        isLoading={false}
+      />,
+    );
+    await screen.findByText("Read Permission");
+    expect(hasUnsavedInput()).toBe(false);
+
+    const user = userEvent.setup();
+    await user.selectOptions(screen.getByTestId("select-element"), "101");
+    expect(hasUnsavedInput()).toBe(true);
+
+    // Refused: the choice stays
+    await user.click(screen.getByRole("button", { name: "Add permission" }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(hasUnsavedInput()).toBe(true);
+
+    // Added: the form is emptied
+    await user.click(screen.getByRole("button", { name: "Add permission" }));
+    await waitFor(() => expect(hasUnsavedInput()).toBe(false));
   });
 });

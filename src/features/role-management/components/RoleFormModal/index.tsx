@@ -6,6 +6,7 @@ import {
   ROLE_NAME_PATTERN,
   type Role,
 } from "@/features/role-management/domain/Entity/Role";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { FormModal } from "@/shared/components/FormModal";
 import { useFormModal } from "@/shared/hooks/useFormModal";
 
@@ -24,7 +25,7 @@ const roleFields = (role?: Role): DefaultValues<Role> => ({
   ...role,
 });
 
-export const RoleFormModal: FC<RoleFormModalProps> = ({
+const RoleFormModalDialog: FC<RoleFormModalProps> = ({
   modalTitle,
   showModal,
   onClose,
@@ -80,3 +81,8 @@ export const RoleFormModal: FC<RoleFormModalProps> = ({
     </FormModal>
   );
 };
+
+export const RoleFormModal = withDialogBoundary(RoleFormModalDialog, (p) => ({
+  show: p.showModal,
+  onClose: p.onClose,
+}));

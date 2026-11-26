@@ -2,8 +2,9 @@ import {
   isUnsavedInput,
   useDiscardConfirmation,
 } from "@variamosple/variamos-components";
-import { type FC, useId } from "react";
+import { type FC, useId, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import type { Bug, BugStatusLog, BugUserRef } from "../../domain/Bug";
 import type { BugNoteDraft } from "../../hooks/useBugDetails";
@@ -68,9 +69,21 @@ type BugDetailsProps = Omit<BugDetailsModalProps, "bug" | "onHide"> & {
   bug: Bug;
 };
 
+type BugEditFormsProps = BugDetailsProps & {
+  onAssigneesInput: (holdsInput: boolean) => void;
+  onStatusInput: (holdsInput: boolean) => void;
+};
+
 // The forms that change the bug, for those who may update it
-const BugEditForms: FC<BugDetailsProps> = (props) => {
-  const { bug, assignableUsers, onSaveAssignees, onChangeStatus } = props;
+const BugEditForms: FC<BugEditFormsProps> = (props) => {
+  const {
+    bug,
+    assignableUsers,
+    onSaveAssignees,
+    onChangeStatus,
+    onAssigneesInput,
+    onStatusInput,
+  } = props;
   // Kept apart, so that the forms below see it set
   const bugId = bug.id;
   if (!bugId) return null;
@@ -81,6 +94,7 @@ const BugEditForms: FC<BugDetailsProps> = (props) => {
         assignees={bug.assignedAdmins ?? []}
         candidates={assignableUsers}
         onSave={(userIds) => onSaveAssignees(bug, bugId, userIds)}
+        onHoldsInputChange={onAssigneesInput}
       />
       {bug.gitIssueNumber && bug.status ? (
         <BugStatusForm
@@ -89,6 +103,7 @@ const BugEditForms: FC<BugDetailsProps> = (props) => {
           onChangeStatus={(status, comment) =>
             onChangeStatus(bug, bugId, { status, comment })
           }
+          onHoldsInputChange={onStatusInput}
         />
       ) : null}
     </>
@@ -114,13 +129,20 @@ const BugDiscussion: FC<BugDetailsProps> = (props) => {
 };
 
 /** The details of a bug, its timeline, and what an administrator changes. */
-export const BugDetailsModal: FC<BugDetailsModalProps> = (props) => {
+const BugDetailsModalDialog: FC<BugDetailsModalProps> = (props) => {
   const { bug, onHide, canUpdate, draft } = props;
   const titleId = useId();
+  // A change of the assignees or of the status not saved yet is input too
+  const [assigneesInput, setAssigneesInput] = useState(false);
+  const [statusInput, setStatusInput] = useState(false);
   // A written comment is dropped only once confirmed (UX-08), and then for
   // good: it does not come back on the next bug
   const closing = useDiscardConfirmation({
-    holdsInput: Boolean(bug) && isUnsavedInput({}, { body: draft.body }),
+    holdsInput:
+      Boolean(bug) &&
+      (isUnsavedInput({}, { body: draft.body }) ||
+        assigneesInput ||
+        statusInput),
     onClose: () => {
       draft.setBody("");
       onHide();
@@ -144,7 +166,14 @@ export const BugDetailsModal: FC<BugDetailsModalProps> = (props) => {
         {bug ? (
           <div>
             <BugSummary bug={bug} />
-            {canUpdate ? <BugEditForms {...props} bug={bug} /> : null}
+            {canUpdate ? (
+              <BugEditForms
+                {...props}
+                bug={bug}
+                onAssigneesInput={setAssigneesInput}
+                onStatusInput={setStatusInput}
+              />
+            ) : null}
             <hr />
             <BugDiscussion {...props} bug={bug} />
           </div>
@@ -158,3 +187,11 @@ export const BugDetailsModal: FC<BugDetailsModalProps> = (props) => {
     </Modal>
   );
 };
+
+export const BugDetailsModal = withDialogBoundary(
+  BugDetailsModalDialog,
+  (p) => ({
+    show: Boolean(p.bug),
+    onClose: p.onHide,
+  }),
+);

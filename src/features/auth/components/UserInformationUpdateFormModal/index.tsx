@@ -8,6 +8,7 @@ import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { PersonalInformationUpdate } from "@/features/user-management/domain/Entity/PersonalInformationUpdate";
 import { queryCountries } from "@/shared/api/CountriesRepository";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import type { Country } from "@/shared/domain/Entity/Country";
 import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
@@ -22,7 +23,7 @@ export interface PersonalInformationUpdateForModalProps {
   defaultValue?: PersonalInformationUpdate;
 }
 
-export const PersonalInformationUpdateForModal: FC<
+const PersonalInformationUpdateForModalDialog: FC<
   PersonalInformationUpdateForModalProps
 > = ({
   onUpdatePersonalInformationSubmit,
@@ -163,3 +164,11 @@ export const PersonalInformationUpdateForModal: FC<
     </Modal>
   );
 };
+
+export const PersonalInformationUpdateForModal = withDialogBoundary(
+  PersonalInformationUpdateForModalDialog,
+  (p) => ({
+    show: p.showModal,
+    onClose: p.onClose,
+  }),
+);

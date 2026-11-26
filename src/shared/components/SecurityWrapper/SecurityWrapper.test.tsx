@@ -2,10 +2,6 @@ import { render, screen } from "@testing-library/react";
 import * as AxiosConfig from "@/shared/infrastructure/AxiosConfig";
 import { SecurityWrapper } from "./index";
 
-const mockNavigate = vi.fn();
-vi.mock("react-router-dom", async () => ({
-  useNavigate: () => mockNavigate,
-}));
 const mockCheckSession = vi.hoisted(() => vi.fn());
 vi.mock("@variamosple/variamos-components", () => ({
   hasUnsavedInput: () => false,
@@ -35,23 +31,14 @@ describe("SecurityWrapper Component", () => {
     // Verify it renders children
     expect(screen.getByTestId("child").textContent).toBe("Protected Content");
 
-    // Every service reads its 401 the same way; only the admin may send
-    // a page without input to the sign-in page at once
-    expect(setupSpy).toHaveBeenCalledWith(
+    // Every service reads its 401 the same way: the session is checked
+    for (const client of [
       AxiosConfig.ADMIN_CLIENT,
-      mockNavigate,
-      mockCheckSession,
-    );
-    expect(setupSpy).toHaveBeenCalledWith(
       AxiosConfig.PROJECTS_CLIENT,
-      null,
-      mockCheckSession,
-    );
-    expect(setupSpy).toHaveBeenCalledWith(
       AxiosConfig.LANGUAGES_CLIENT,
-      null,
-      mockCheckSession,
-    );
+    ]) {
+      expect(setupSpy).toHaveBeenCalledWith(client, mockCheckSession);
+    }
 
     const ejectSpies = [
       AxiosConfig.ADMIN_CLIENT,

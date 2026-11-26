@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createMemoryRouter, Link, RouterProvider } from "react-router-dom";
+import {
+  createMemoryRouter,
+  Link,
+  RouterProvider,
+  useSearchParams,
+} from "react-router-dom";
 import { ROUTES } from "./router";
 
 // Mock SecurityWrapper and Layouts
@@ -69,6 +74,13 @@ vi.mock("@/features/bug-tracker", async () => ({
 // A page that fails while it renders (ADM-N43)
 const Broken = () => {
   throw new Error("render failed");
+};
+
+// A page that fails for one filter of its address only (ADM-N53)
+const FailsOnFilter = () => {
+  const [params] = useSearchParams();
+  if (params.get("status") === "bad") throw new Error("bad filter");
+  return <div>Filtered list</div>;
 };
 
 describe("Router Configuration", () => {
@@ -195,6 +207,39 @@ describe("Router Configuration", () => {
     expect(
       screen.queryByText("Something went wrong on this page"),
     ).not.toBeInTheDocument();
+    consoleError.mockRestore();
+  });
+
+  it("clears the error when the filter in the address changes (ADM-N53)", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const mainRoute = ROUTES.find((r) => r.path === "/");
+    const router = createMemoryRouter(
+      [
+        {
+          path: "/",
+          element: (
+            <>
+              <Link to="/list?status=good">Filter: good</Link>
+              {mainRoute?.element}
+            </>
+          ),
+          children: [{ path: "list", element: <FailsOnFilter /> }],
+        },
+      ],
+      { initialEntries: ["/list?status=bad"] },
+    );
+    render(<RouterProvider router={router} />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Something went wrong on this page",
+      }),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("link", { name: "Filter: good" }));
+
+    expect(await screen.findByText("Filtered list")).toBeInTheDocument();
     consoleError.mockRestore();
   });
 });

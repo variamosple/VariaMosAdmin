@@ -16,6 +16,7 @@ import {
 } from "react-bootstrap";
 import { Check, PencilSquare, PlusLg } from "react-bootstrap-icons";
 import { DateTime } from "@/shared/components/DateTime";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   getMicroServiceAuditLogs,
@@ -452,7 +453,7 @@ const holdsTypedValue = (
   );
 };
 
-export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
+const MicroServiceConfigModalDialog: FC<MicroServiceConfigModalProps> = ({
   show,
   serviceName,
   displayName,
@@ -523,3 +524,11 @@ export const MicroServiceConfigModal: FC<MicroServiceConfigModalProps> = ({
     </Modal>
   );
 };
+
+export const MicroServiceConfigModal = withDialogBoundary(
+  MicroServiceConfigModalDialog,
+  (p) => ({
+    show: p.show,
+    onClose: p.onHide,
+  }),
+);

@@ -14,14 +14,20 @@ const PENDING: Bug = {
 };
 
 /** The window with its comment draft, as the bug list page holds it. */
-const DetailsWithDraft = ({ onHide }: { onHide: () => void }) => {
+const DetailsWithDraft = ({
+  onHide,
+  bug = PENDING,
+}: {
+  onHide: () => void;
+  bug?: Bug;
+}) => {
   const [body, setBody] = useState("");
   return (
     <BugDetailsModal
-      bug={PENDING}
+      bug={bug}
       onHide={onHide}
       canUpdate
-      assignableUsers={[]}
+      assignableUsers={[{ id: "admin-2", name: "Ana Admin" }]}
       notes={[]}
       isLoadingNotes={false}
       draft={{
@@ -62,5 +68,35 @@ describe("BugDetailsModal closing (UX-08)", () => {
     expect(onHide).toHaveBeenCalledOnce();
     // Not carried over to the next bug shown
     expect(comment).toHaveValue("");
+  });
+
+  it("asks before dropping a status comment or a change of assignees", async () => {
+    const onHide = vi.fn();
+    render(
+      <DetailsWithDraft
+        onHide={onHide}
+        bug={{ ...PENDING, status: "open", gitIssueNumber: 7 }}
+      />,
+    );
+
+    await userEvent.type(
+      screen.getByLabelText("Comment (optional)"),
+      "Fixed in 2.1",
+    );
+    await userEvent.keyboard("{Escape}");
+    expect(onHide).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
+    await userEvent.clear(screen.getByLabelText("Comment (optional)"));
+
+    await userEvent.click(screen.getByLabelText("Ana Admin"));
+    await userEvent.keyboard("{Escape}");
+    expect(onHide).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Discard" })).toBeInTheDocument();
+
+    // Back as it was: nothing left to lose
+    await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
+    await userEvent.click(screen.getByLabelText("Ana Admin"));
+    await userEvent.keyboard("{Escape}");
+    expect(onHide).toHaveBeenCalledOnce();
   });
 });
