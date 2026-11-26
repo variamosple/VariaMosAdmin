@@ -4,6 +4,7 @@ import {
 } from "@variamosple/variamos-components";
 import { type FC, type SubmitEvent, useId, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   createConfiguration,
@@ -171,9 +172,7 @@ export interface NewConfigurationModalProps {
 }
 
 /** Creates a setting (EV-18 lot C.3), for whoever holds configurations::create. */
-export const NewConfigurationModal: FC<NewConfigurationModalProps> = (
-  props,
-) => {
+const NewConfigurationModalDialog: FC<NewConfigurationModalProps> = (props) => {
   const { show, onClose, onCreated } = props;
   const titleId = useId();
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
@@ -256,3 +255,11 @@ export const NewConfigurationModal: FC<NewConfigurationModalProps> = (
     </Modal>
   );
 };
+
+export const NewConfigurationModal = withDialogBoundary(
+  NewConfigurationModalDialog,
+  (p) => ({
+    show: p.show,
+    onClose: p.onClose,
+  }),
+);

@@ -1,6 +1,5 @@
 import { useSession } from "@variamosple/variamos-components";
 import { type FC, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   ADMIN_CLIENT,
   LANGUAGES_CLIENT,
@@ -14,34 +13,24 @@ export interface SecurityWrapperProps {
 
 /**
  * Reads the 401 of every service of the private pages: the session is
- * checked, and a page with unsaved input is never left (TRV-65).
+ * checked, and only the answer of the admin decides whether the page goes
+ * to the sign-in page; a page with unsaved input is never left (TRV-65).
  */
 export const SecurityWrapper: FC<SecurityWrapperProps> = ({ children }) => {
-  const navigate = useNavigate();
   const { checkSession } = useSession();
 
   useEffect(() => {
-    const watched = [
-      [
-        ADMIN_CLIENT,
-        setupAxiosInterceptors(ADMIN_CLIENT, navigate, checkSession),
-      ],
-      [
-        PROJECTS_CLIENT,
-        setupAxiosInterceptors(PROJECTS_CLIENT, null, checkSession),
-      ],
-      [
-        LANGUAGES_CLIENT,
-        setupAxiosInterceptors(LANGUAGES_CLIENT, null, checkSession),
-      ],
-    ] as const;
+    const watched = [ADMIN_CLIENT, PROJECTS_CLIENT, LANGUAGES_CLIENT].map(
+      (client) =>
+        [client, setupAxiosInterceptors(client, checkSession)] as const,
+    );
 
     return () => {
       for (const [client, interceptorId] of watched) {
         client.interceptors.response.eject(interceptorId);
       }
     };
-  }, [navigate, checkSession]);
+  }, [checkSession]);
 
   return <>{children}</>;
 };

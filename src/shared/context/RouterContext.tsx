@@ -18,7 +18,9 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-export const RouterProvider: FC<{ children?: ReactNode }> = ({ children }) => {
+export const RouterContextProvider: FC<{ children?: ReactNode }> = ({
+  children,
+}) => {
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();

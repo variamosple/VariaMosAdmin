@@ -1,5 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {
+  type BugReportPrefill,
+  Events,
+} from "@variamosple/variamos-components";
 import { PageErrorBoundary } from "./index";
 
 const Broken = () => {
@@ -97,5 +101,27 @@ describe("PageErrorBoundary (ADM-N43)", () => {
     );
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("opens the global bug form with the page and the error (ADM-N53)", async () => {
+    const opened = vi.fn();
+    const onOpen = (event: CustomEvent<BugReportPrefill>) =>
+      opened(event.detail);
+    Events.subscribe("openReportBugModal", onOpen);
+    render(
+      <PageErrorBoundary resetKey="/broken">
+        <Broken />
+      </PageErrorBoundary>,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Report this problem" }),
+    );
+
+    expect(opened).toHaveBeenCalledWith({
+      title: "A page stopped because of an error",
+      description: expect.stringContaining("Error: render failed"),
+    });
+    Events.unsubscribe("openReportBugModal", onOpen);
   });
 });

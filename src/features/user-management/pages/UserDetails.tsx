@@ -88,14 +88,15 @@ const useRoleChanges = (
   const { pushToast, removeToast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
 
-  const onUserRoleCreate = (userRole: UserRole) => {
+  // Says whether the role was assigned, so that the form is emptied
+  const onUserRoleCreate = (userRole: UserRole): Promise<boolean> => {
     if (!userIdParam) {
       pushToast({
         title: "Role assignment",
         message: "User ID is missing",
         variant: "danger",
       });
-      return;
+      return Promise.resolve(false);
     }
 
     setIsCreating(true);
@@ -104,7 +105,7 @@ const useRoleChanges = (
       message: "Assigning role...",
     });
 
-    void createUserRole({ ...userRole, userId: userIdParam })
+    return createUserRole({ ...userRole, userId: userIdParam })
       .then((response) => {
         removeToast(toastId);
         if (!response.errorCode && roles.filter) {
@@ -117,6 +118,7 @@ const useRoleChanges = (
             failure: "Failed to assign role",
           }),
         );
+        return !response.errorCode;
       })
       .finally(() => {
         setIsCreating(false);

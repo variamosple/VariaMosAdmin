@@ -7,6 +7,7 @@ import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { usePasswordPolicy } from "@/features/auth/hooks/usePasswordPolicy";
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 
@@ -19,7 +20,7 @@ export interface PasswordUpdateFormProps {
   isLoading: boolean;
 }
 
-export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
+const PasswordUpdateFormDialog: FC<PasswordUpdateFormProps> = ({
   onUpdatePasswordSubmit,
   showModal,
   onClose,
@@ -176,3 +177,11 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
     </Modal>
   );
 };
+
+export const PasswordUpdateForm = withDialogBoundary(
+  PasswordUpdateFormDialog,
+  (p) => ({
+    show: p.showModal,
+    onClose: p.onClose,
+  }),
+);

@@ -3,6 +3,7 @@ import type { FC } from "react";
 import { Form } from "react-bootstrap";
 import type { DefaultValues } from "react-hook-form";
 import type { Project } from "@/features/project-management/domain/Entity/Project";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { FormModal } from "@/shared/components/FormModal";
 import { useFormModal } from "@/shared/hooks/useFormModal";
 
@@ -29,7 +30,7 @@ export interface ProjectFormModalProps {
   submitText?: string;
 }
 
-export const ProjectFormModal: FC<ProjectFormModalProps> = ({
+const ProjectFormModalDialog: FC<ProjectFormModalProps> = ({
   modalTitle,
   showModal,
   onClose,
@@ -139,3 +140,11 @@ export const ProjectFormModal: FC<ProjectFormModalProps> = ({
     </FormModal>
   );
 };
+
+export const ProjectFormModal = withDialogBoundary(
+  ProjectFormModalDialog,
+  (p) => ({
+    show: p.showModal,
+    onClose: p.onClose,
+  }),
+);

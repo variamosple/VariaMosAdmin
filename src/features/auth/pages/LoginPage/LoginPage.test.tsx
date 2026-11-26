@@ -61,6 +61,8 @@ describe("LoginPage Page Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQueryParams = new URLSearchParams();
+    // Where the page lives: a 401 there is about the form, not a session
+    window.location.hash = "#/login";
 
     (useRouter as import("vitest").Mock).mockReturnValue({
       queryParams: mockQueryParams,
@@ -72,6 +74,10 @@ describe("LoginPage Page Component", () => {
       signInAsGuest: mockSignInAsGuest,
       isLoading: false,
     });
+  });
+
+  afterEach(() => {
+    window.location.hash = "";
   });
 
   const renderLoginPage = () =>

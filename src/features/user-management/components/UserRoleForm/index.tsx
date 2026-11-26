@@ -1,3 +1,4 @@
+import { useUnsavedInput } from "@variamosple/variamos-components";
 import { type FC, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
@@ -22,8 +23,11 @@ const toOption = ({ id, name }: Role): SelectOptionProps<number> => ({
   value: Number(id),
 });
 
+const NO_OPTION: SelectOptionProps<number> = { label: "", value: 0 };
+
 export interface UserRoleFormProps {
-  onUserRoleSubmit: (roleRole: UserRole) => void;
+  /** Says whether the role was added: the form is then emptied. */
+  onUserRoleSubmit: (roleRole: UserRole) => Promise<boolean>;
   isLoading: boolean;
   submitText?: string;
 }
@@ -33,12 +37,10 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
   isLoading,
   submitText = "Add role",
 }) => {
-  const [selectedOption, setSelectedOption] = useState<
-    SelectOptionProps<number>
-  >({
-    label: "",
-    value: 0,
-  });
+  const [selectedOption, setSelectedOption] =
+    useState<SelectOptionProps<number>>(NO_OPTION);
+  // A role chosen and not added yet is input: leaving the page asks first
+  useUnsavedInput(selectedOption.value !== NO_OPTION.value);
   const {
     options: roleOptions,
     isFetching,
@@ -51,12 +53,15 @@ export const UserRoleForm: FC<UserRoleFormProps> = ({
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<UserRole>();
 
-  const onSubmit: SubmitHandler<UserRole> = (data) => {
-    if (!isLoading) {
-      onUserRoleSubmit(data);
+  const onSubmit: SubmitHandler<UserRole> = async (data) => {
+    if (isLoading) return;
+    if (await onUserRoleSubmit(data)) {
+      setSelectedOption(NO_OPTION);
+      reset();
     }
   };
 

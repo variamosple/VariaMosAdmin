@@ -1,3 +1,4 @@
+import { type PageTexts, pageText } from "@variamosple/variamos-components";
 import { type ErrorCode, ErrorCodes } from "./errorCodes";
 
 /** Shown for any server error: its detail stays in the server log. */
@@ -7,6 +8,23 @@ export const SYSTEM_ERROR_MESSAGE =
 /** Shown when no answer came back, or only the proxy answered. */
 export const UNREACHABLE_MESSAGE =
   "The server cannot be reached. Check your connection and try again.";
+
+/**
+ * A 401 on a private page. The session is being checked meanwhile: a
+ * token expired during a restart of the admin is renewed, so the action
+ * can be tried again; an ended session shows the session banner. The
+ * server text ("Unauthorized", "Your session has expired") said neither.
+ */
+// cspell:disable -- texts in Spanish and French
+export const SESSION_REFUSED_TEXTS: PageTexts = {
+  en: "Your session could not be confirmed. Nothing you typed is lost: try again in a moment.",
+  es: "No se pudo confirmar tu sesión. No se pierde nada de lo que escribiste: inténtalo de nuevo en un momento.",
+  fr: "Votre session n'a pas pu être confirmée. Rien de ce que vous avez saisi n'est perdu : réessayez dans un instant.",
+};
+// cspell:enable
+
+/** The message of a 401 on a private page, in the language of the page. */
+export const sessionRefusedMessage = () => pageText(SESSION_REFUSED_TEXTS);
 
 // Expected errors: the API message is meant for the user and is kept; this
 // one is shown when the API sent none

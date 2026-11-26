@@ -1,5 +1,9 @@
 import { AxiosError, AxiosHeaders, type AxiosResponse } from "axios";
-import { SYSTEM_ERROR_MESSAGE, UNREACHABLE_MESSAGE } from "./errorMessages";
+import {
+  SESSION_REFUSED_TEXTS,
+  SYSTEM_ERROR_MESSAGE,
+  UNREACHABLE_MESSAGE,
+} from "./errorMessages";
 import { toErrorResponse, UNREACHABLE_ERROR_CODE } from "./toErrorResponse";
 
 const failedWith = (status: number, data: object | string | null) =>
@@ -18,6 +22,45 @@ describe("toErrorResponse", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    window.location.hash = "";
+    document.documentElement.lang = "";
+  });
+
+  it("says on a private page that the session is being confirmed, not 'Unauthorized'", () => {
+    window.location.hash = "#/roles/7";
+    for (const body of [
+      { errorCode: 401, message: "Unauthorized" },
+      { message: "Your session has expired, please log in again." },
+      null,
+    ]) {
+      const response = toErrorResponse(failedWith(401, body), "Fallback");
+      expect(response.errorCode).toBe(401);
+      expect(response.message).toBe(SESSION_REFUSED_TEXTS.en);
+    }
+  });
+
+  it("speaks the language of the page for the session message", () => {
+    window.location.hash = "#/users";
+    document.documentElement.lang = "es-CO";
+    expect(
+      toErrorResponse(failedWith(401, { errorCode: 401 }), "Fallback").message,
+    ).toBe(SESSION_REFUSED_TEXTS.es);
+    document.documentElement.lang = "fr";
+    expect(
+      toErrorResponse(failedWith(401, { errorCode: 401 }), "Fallback").message,
+    ).toBe(SESSION_REFUSED_TEXTS.fr);
+  });
+
+  it("keeps the message of a 401 on a sign-in page: it is about the form", () => {
+    window.location.hash = "#/login";
+    const response = toErrorResponse(
+      failedWith(401, {
+        errorCode: "UNAUTHORIZED_ACCESS",
+        message: "Invalid email or password.",
+      }),
+      "Fallback",
+    );
+    expect(response.message).toBe("Invalid email or password.");
   });
 
   it("keeps the error body and the message of an expected error", () => {

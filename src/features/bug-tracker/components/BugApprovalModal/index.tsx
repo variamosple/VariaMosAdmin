@@ -14,6 +14,7 @@ import {
   type UseFormRegister,
   useForm,
 } from "react-hook-form";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 import { attachmentUrl } from "../../api/attachmentUrl";
@@ -402,7 +403,7 @@ const formValuesOf = (bug: Bug, categories: string[]): ApproveFormData => ({
   comment: "",
 });
 
-export const BugApprovalModal: FC<BugApprovalModalProps> = ({
+const BugApprovalModalDialog: FC<BugApprovalModalProps> = ({
   show,
   bug,
   onHide,
@@ -537,3 +538,11 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
     </Modal>
   );
 };
+
+export const BugApprovalModal = withDialogBoundary(
+  BugApprovalModalDialog,
+  (p) => ({
+    show: p.show,
+    onClose: p.onHide,
+  }),
+);

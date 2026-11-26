@@ -11,6 +11,7 @@ import {
   Modal,
   Spinner,
 } from "react-bootstrap";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   cityOf,
@@ -304,7 +305,7 @@ const useTypedChange = (config?: Configuration, change?: ScheduledChange) => {
 const submitLabelOf = (planned: boolean) =>
   planned ? "Save the planned change" : "Schedule";
 
-export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
+const ScheduleChangeModalDialog: FC<ScheduleChangeModalProps> = ({
   config,
   change,
   onClose,
@@ -407,3 +408,11 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
     </Modal>
   );
 };
+
+export const ScheduleChangeModal = withDialogBoundary(
+  ScheduleChangeModalDialog,
+  (p) => ({
+    show: p.config !== undefined,
+    onClose: p.onClose,
+  }),
+);

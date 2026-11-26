@@ -1,4 +1,5 @@
 import {
+  DialogErrorBoundary,
   isUnsavedInput,
   type ResponseModel,
   useDiscardConfirmation,
@@ -446,30 +447,34 @@ export const TwoFactorCard: FC = () => {
         {mfa.status?.enabled ? <ForgetBrowsers /> : null}
       </Card.Body>
 
-      <Modal
-        aria-labelledby={titleId}
-        show={step.name !== "closed"}
-        onHide={isLocked ? undefined : closing.requestClose}
-        backdrop={isLocked ? "static" : true}
-        keyboard={!isLocked}
-        centered
-      >
-        <Modal.Header closeButton={!isLocked}>
-          <Modal.Title id={titleId}>Two-factor authentication</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <StepBody formId={stepFormId} steps={steps} />
+      {/* An error in the steps stays in the dialog: the page keeps its
+          input (ADM-N53) */}
+      <DialogErrorBoundary show={step.name !== "closed"} onClose={steps.close}>
+        <Modal
+          aria-labelledby={titleId}
+          show={step.name !== "closed"}
+          onHide={isLocked ? undefined : closing.requestClose}
+          backdrop={isLocked ? "static" : true}
+          keyboard={!isLocked}
+          centered
+        >
+          <Modal.Header closeButton={!isLocked}>
+            <Modal.Title id={titleId}>Two-factor authentication</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <StepBody formId={stepFormId} steps={steps} />
 
-          {steps.error ? (
-            <Alert variant="danger" className="mt-3 mb-0">
-              {steps.error}
-            </Alert>
-          ) : null}
-        </Modal.Body>
-        <ClosingFooter closing={closing}>
-          <StepButton formId={stepFormId} steps={steps} />
-        </ClosingFooter>
-      </Modal>
+            {steps.error ? (
+              <Alert variant="danger" className="mt-3 mb-0">
+                {steps.error}
+              </Alert>
+            ) : null}
+          </Modal.Body>
+          <ClosingFooter closing={closing}>
+            <StepButton formId={stepFormId} steps={steps} />
+          </ClosingFooter>
+        </Modal>
+      </DialogErrorBoundary>
     </Card>
   );
 };

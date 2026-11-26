@@ -20,6 +20,7 @@ import {
   ResetPasswordPage,
   SignUpPage,
 } from "@/features/auth";
+import { LeaveGuard } from "@/shared/components/LeaveGuard";
 import { NotFound } from "@/shared/components/NotFound";
 import { PageErrorBoundary } from "@/shared/components/PageErrorBoundary";
 import { SecurityWrapper } from "@/shared/components/SecurityWrapper";
@@ -105,15 +106,19 @@ const PageLoading = () => (
 );
 
 // The page under the menu: an error while it renders leaves the menu in
-// place, and going to another page clears it (ADM-N43)
+// place, and going to another page, or changing the search of this one,
+// clears it (ADM-N43, ADM-N53). Leaving a page that holds input asks first.
 const PageOutlet: FC = () => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   return (
-    <PageErrorBoundary resetKey={pathname}>
-      <Suspense fallback={<PageLoading />}>
-        <Outlet />
-      </Suspense>
-    </PageErrorBoundary>
+    <>
+      <LeaveGuard />
+      <PageErrorBoundary resetKey={`${pathname}${search}`}>
+        <Suspense fallback={<PageLoading />}>
+          <Outlet />
+        </Suspense>
+      </PageErrorBoundary>
+    </>
   );
 };
 

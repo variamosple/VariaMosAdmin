@@ -17,6 +17,7 @@ import {
   dispatchNotification,
 } from "@/features/notifications-admin/api/NotificationsAdminRepository";
 import { queryRoleChoices } from "@/features/role-management/api/RoleRepository";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import { RoleCheckboxList } from "@/shared/components/RoleCheckboxList";
 import { useLoadedList } from "@/shared/hooks/useLoadedList";
@@ -329,7 +330,7 @@ const AnnouncementButtons: FC<{ draft: Draft; onClose: () => void }> = ({
  * editable; nothing is sent without "Send", then the confirmation of the
  * number of accounts reached.
  */
-export const AnnouncementModal: FC<AnnouncementModalProps> = (props) => {
+const AnnouncementModalDialog: FC<AnnouncementModalProps> = (props) => {
   const { announcement, onClose } = props;
   const titleId = useId();
   const draft = useAnnouncementDraft(props);
@@ -375,3 +376,11 @@ export const AnnouncementModal: FC<AnnouncementModalProps> = (props) => {
     </Modal>
   );
 };
+
+export const AnnouncementModal = withDialogBoundary(
+  AnnouncementModalDialog,
+  (p) => ({
+    show: p.announcement !== null,
+    onClose: p.onClose,
+  }),
+);

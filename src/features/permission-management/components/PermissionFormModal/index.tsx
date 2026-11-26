@@ -6,6 +6,7 @@ import {
   PERMISSION_NAME_PATTERN,
   type Permission,
 } from "@/features/permission-management/domain/Entity/Permission";
+import { withDialogBoundary } from "@/shared/components/DialogBoundary";
 import { FormModal } from "@/shared/components/FormModal";
 import { useFormModal } from "@/shared/hooks/useFormModal";
 
@@ -28,7 +29,7 @@ const permissionFields = (
   ...permission,
 });
 
-export const PermissionFormModal: FC<PermissionFormModalProps> = ({
+const PermissionFormModalDialog: FC<PermissionFormModalProps> = ({
   modalTitle,
   showModal,
   onClose,
@@ -85,3 +86,11 @@ export const PermissionFormModal: FC<PermissionFormModalProps> = ({
     </FormModal>
   );
 };
+
+export const PermissionFormModal = withDialogBoundary(
+  PermissionFormModalDialog,
+  (p) => ({
+    show: p.showModal,
+    onClose: p.onClose,
+  }),
+);

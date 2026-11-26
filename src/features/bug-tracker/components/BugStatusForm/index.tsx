@@ -1,5 +1,7 @@
+import { isUnsavedInput } from "@variamosple/variamos-components";
 import { type FC, type SubmitEvent, useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
+import { useReportedInput } from "@/shared/hooks/useReportedInput";
 import {
   githubEffect,
   nextStatuses,
@@ -10,17 +12,27 @@ interface BugStatusFormProps {
   status: string;
   // Resolves to an error message, or null when the status changed
   onChangeStatus: (status: string, comment?: string) => Promise<string | null>;
+  /** Told whether a status or a comment is chosen and not saved yet. */
+  onHoldsInputChange?: (holdsInput: boolean) => void;
 }
 
 export const BugStatusForm: FC<BugStatusFormProps> = ({
   status,
   onChangeStatus,
+  onHoldsInputChange,
 }) => {
   const options = nextStatuses(status);
   const [target, setTarget] = useState(options[0] ?? "");
   const [comment, setComment] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useReportedInput(
+    isUnsavedInput(
+      { target: options[0] ?? "", comment: "" },
+      { target, comment },
+    ),
+    onHoldsInputChange,
+  );
 
   if (options.length === 0) return null;
 

@@ -1,3 +1,4 @@
+import { useUnsavedInput } from "@variamosple/variamos-components";
 import { type FC, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
@@ -22,8 +23,11 @@ const toOption = ({ id, name }: Permission): SelectOptionProps<number> => ({
   value: Number(id),
 });
 
+const NO_OPTION: SelectOptionProps<number> = { label: "", value: 0 };
+
 export interface RolePermissionFormProps {
-  onRolePermissionSubmit: (rolePermission: RolePermission) => void;
+  /** Says whether the permission was added: the form is then emptied. */
+  onRolePermissionSubmit: (rolePermission: RolePermission) => Promise<boolean>;
   isLoading: boolean;
   submitText?: string;
 }
@@ -33,12 +37,10 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
   isLoading,
   submitText = "Add permission",
 }) => {
-  const [selectedOption, setSelectedOption] = useState<
-    SelectOptionProps<number>
-  >({
-    label: "",
-    value: 0,
-  });
+  const [selectedOption, setSelectedOption] =
+    useState<SelectOptionProps<number>>(NO_OPTION);
+  // A permission chosen and not added yet is input: leaving the page asks first
+  useUnsavedInput(selectedOption.value !== NO_OPTION.value);
   const {
     options: permissionOptions,
     isFetching,
@@ -51,12 +53,15 @@ export const RolePermissionForm: FC<RolePermissionFormProps> = ({
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<RolePermission>();
 
-  const onSubmit: SubmitHandler<RolePermission> = (data) => {
-    if (!isLoading) {
-      onRolePermissionSubmit(data);
+  const onSubmit: SubmitHandler<RolePermission> = async (data) => {
+    if (isLoading) return;
+    if (await onRolePermissionSubmit(data)) {
+      setSelectedOption(NO_OPTION);
+      reset();
     }
   };
 

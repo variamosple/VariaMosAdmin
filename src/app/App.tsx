@@ -3,8 +3,13 @@ import {
   NotificationProvider,
   SessionProvider,
 } from "@variamosple/variamos-components";
-import { type FC, useEffect } from "react";
-import { HashRouter, useRoutes } from "react-router-dom";
+import { useEffect, useState } from "react";
+import {
+  createHashRouter,
+  Outlet,
+  type RouteObject,
+  RouterProvider,
+} from "react-router-dom";
 import "./App.css";
 import {
   getSessionInfo,
@@ -14,17 +19,28 @@ import {
   requestSignUp,
 } from "@/features/auth";
 import { registerVisit } from "@/features/metrics-dashboard/api/VisitsRepository";
-import { RouterProvider } from "@/shared/context/RouterContext";
+import { RouterContextProvider } from "@/shared/context/RouterContext";
 import { ToastProvider } from "@/shared/context/ToastContext";
 import { loadSiteName } from "@/shared/hooks/useSiteName";
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { ROUTES } from "./router";
 
-const Routes: FC = () => {
-  return useRoutes(ROUTES);
-};
+// A data router, so that leaving a page with unsaved input can be asked
+// (useBlocker). The routes are under one that gives the router to the
+// components of the library.
+const APP_ROUTES: RouteObject[] = [
+  {
+    element: (
+      <RouterContextProvider>
+        <Outlet />
+      </RouterContextProvider>
+    ),
+    children: ROUTES,
+  },
+];
 
 function App() {
+  const [router] = useState(() => createHashRouter(APP_ROUTES));
   useEffect(() => {
     void loadSiteName();
   }, []);
@@ -44,11 +60,7 @@ function App() {
           apiUrl={AppConfig.NOTIFICATION_API_URL}
           adminApiUrl={AppConfig.ADMIN_API_URL}
         >
-          <HashRouter>
-            <RouterProvider>
-              <Routes />
-            </RouterProvider>
-          </HashRouter>
+          <RouterProvider router={router} />
         </NotificationProvider>
       </SessionProvider>
     </ToastProvider>

@@ -130,6 +130,35 @@ test.describe("Auth - session kept while the admin does not answer", () => {
     await expect(page).toHaveURL(/#\/login/);
   });
 
+  // EV-96: the dialog traps the focus and hides the page from screen
+  // readers; the banner goes into it, first
+  test("shows the banner inside the open dialog, reached from the keyboard", async ({
+    page,
+  }) => {
+    const admin = { current: "signed-in" as AdminState };
+    await mockAdmin(page, admin);
+    const dialog = await startTypingARole(page);
+
+    admin.current = "signed-out";
+    await page.clock.fastForward(60_000);
+    await page.clock.fastForward(1_000);
+    const banner = dialog.getByRole("alert").filter({
+      hasText: "Your session has ended. Your input is still on this page",
+    });
+    await expect(banner).toBeVisible();
+
+    const signInHere = banner.getByRole("button", { name: "Sign in here" });
+    await dialog.getByLabel("Role name").focus();
+    for (let presses = 0; presses < 6; presses++) {
+      if (await signInHere.evaluate((el) => el === document.activeElement)) {
+        break;
+      }
+      await page.keyboard.press("Shift+Tab");
+    }
+    await expect(signInHere).toBeFocused();
+    await expect(dialog.getByLabel("Role name")).toHaveValue("Reviewers");
+  });
+
   test("waits for the admin on a first load instead of asking to sign in", async ({
     page,
   }) => {

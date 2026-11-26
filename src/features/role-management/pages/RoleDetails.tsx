@@ -96,7 +96,10 @@ const usePermissionChanges = (
   const { pushToast, removeToast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
 
-  const onRolePermissionCreate = (rolePermission: RolePermission) => {
+  // Says whether the permission was assigned, so that the form is emptied
+  const onRolePermissionCreate = (
+    rolePermission: RolePermission,
+  ): Promise<boolean> => {
     setIsCreating(true);
     const toastId = pushToast({
       title: "Permission assignment",
@@ -106,9 +109,9 @@ const usePermissionChanges = (
     if (!roleIdParam) {
       removeToast(toastId);
       setIsCreating(false);
-      return;
+      return Promise.resolve(false);
     }
-    void createRolePermission({
+    return createRolePermission({
       ...rolePermission,
       roleId: Number.parseInt(roleIdParam, 10),
     })
@@ -124,6 +127,7 @@ const usePermissionChanges = (
             failure: "Failed to assign permission",
           }),
         );
+        return !response.errorCode;
       })
       .finally(() => {
         setIsCreating(false);
