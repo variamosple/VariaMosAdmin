@@ -11,6 +11,10 @@ import { BugApprovalModal } from "./index";
 // Mock @variamosple/variamos-components to avoid ESM import errors when BugRepository is loaded
 vi.mock("@variamosple/variamos-components", async () => {
   return {
+    // The unsaved input and the discard confirmation of the forms
+    ...(await (
+      await import("@/shared/tests/mocks/variamosComponents")
+    ).formInput()),
     withPageVisit: <T,>(component: T) => component,
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
@@ -437,5 +441,40 @@ describe("BugApprovalModal Component", () => {
     expect(await screen.findByText("Disk full")).toBeInTheDocument();
     expect(screen.getByText("att1.jpg (image/jpeg)")).toBeInTheDocument();
     deleteSpy.mockRestore();
+  });
+
+  describe("closing (UX-08)", () => {
+    const renderOpen = () =>
+      render(
+        <BugApprovalModal
+          show={true}
+          bug={sampleBug}
+          onHide={mockOnHide}
+          onConfirmApprove={mockOnConfirmApprove}
+          repos={sampleRepos}
+          categories={sampleCategories}
+        />,
+      );
+
+    it("closes at once when the review is unchanged", async () => {
+      renderOpen();
+      await screen.findByDisplayValue("Old Title");
+
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+      expect(mockOnHide).toHaveBeenCalledOnce();
+    });
+
+    it("asks before dropping an edited review", async () => {
+      renderOpen();
+      const title = await screen.findByDisplayValue("Old Title");
+      await userEvent.type(title, " (checked)");
+
+      await userEvent.keyboard("{Escape}");
+      expect(mockOnHide).not.toHaveBeenCalled();
+      await userEvent.click(screen.getByRole("button", { name: "Discard" }));
+
+      expect(mockOnHide).toHaveBeenCalledOnce();
+    });
   });
 });

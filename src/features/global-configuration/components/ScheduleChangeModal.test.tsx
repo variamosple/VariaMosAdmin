@@ -42,17 +42,18 @@ const saved = () => {
 
 const renderModal = (change?: ScheduledChange, timeZone?: string) => {
   const onSaved = vi.fn();
+  const onClose = vi.fn();
   render(
     <ScheduleChangeModal
       config={MIN_LENGTH}
       change={change}
-      onClose={vi.fn()}
+      onClose={onClose}
       onSaved={onSaved}
       timeZone={timeZone}
       now={() => NOW}
     />,
   );
-  return { onSaved, user: userEvent.setup() };
+  return { onSaved, onClose, user: userEvent.setup() };
 };
 
 describe("ScheduleChangeModal (EV-115 lot B)", () => {
@@ -219,6 +220,29 @@ describe("ScheduleChangeModal (EV-115 lot B)", () => {
           "2027-10-31T01:30:00.000Z",
         ),
       );
+    });
+  });
+
+  describe("closing (UX-08)", () => {
+    it("closes at once when nothing was changed, even shown in another zone", async () => {
+      const { onClose, user } = renderModal(PLANNED, "America/Bogota");
+
+      await user.click(screen.getByRole("button", { name: "Bogota" }));
+      await user.keyboard("{Escape}");
+
+      expect(onClose).toHaveBeenCalledOnce();
+    });
+
+    it("asks before dropping a changed value", async () => {
+      const { onClose, user } = renderModal(PLANNED);
+
+      await user.clear(screen.getByLabelText("New value"));
+      await user.type(screen.getByLabelText("New value"), "14");
+      await user.keyboard("{Escape}");
+
+      expect(onClose).not.toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Discard" }));
+      expect(onClose).toHaveBeenCalledOnce();
     });
   });
 });

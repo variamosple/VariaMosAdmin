@@ -1,6 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ResponseModel } from "@variamosple/variamos-components";
+import {
+  hasUnsavedInput,
+  ResponseModel,
+} from "@variamosple/variamos-components";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { queryRoleChoices } from "@/features/role-management/api/RoleRepository";
 import type { Role } from "@/features/role-management/domain/Entity/Role";
@@ -82,6 +85,19 @@ describe("NotificationsAdminPage Component Tests", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: /Dispatch/i }));
   };
+
+  it("says a notification being written is unsaved input (TRV-65)", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<NotificationsAdminPage />);
+    await screen.findByLabelText(/Broadcast/i);
+    expect(hasUnsavedInput()).toBe(false);
+
+    await user.type(screen.getByLabelText("Message Body"), "Maintenance");
+
+    expect(hasUnsavedInput()).toBe(true);
+    unmount();
+    expect(hasUnsavedInput()).toBe(false);
+  });
 
   it("renders the page title and default audience options", async () => {
     render(<NotificationsAdminPage />);

@@ -37,15 +37,16 @@ export const PermissionFormModal: FC<PermissionFormModalProps> = ({
   isLoading,
   submitText = "Create permission",
 }) => {
-  const { form, onSubmit, onCloseModal } = useFormModal<Permission, Permission>(
-    {
-      defaultValue,
-      toFields: permissionFields,
-      submit: onPermissionSubmit,
-      isLoading,
-      onClose,
-    },
-  );
+  const { form, onSubmit, onCloseModal, holdsInput } = useFormModal<
+    Permission,
+    Permission
+  >({
+    defaultValue,
+    toFields: permissionFields,
+    submit: onPermissionSubmit,
+    isLoading,
+    onClose,
+  });
   const {
     register,
     formState: { errors },
@@ -58,6 +59,7 @@ export const PermissionFormModal: FC<PermissionFormModalProps> = ({
       isLoading={isLoading}
       submitText={submitText}
       onClose={onCloseModal}
+      holdsInput={holdsInput}
       onSubmit={onSubmit}
     >
       <Form.Group className="col-6 col-md-4" controlId="name">

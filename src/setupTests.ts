@@ -182,7 +182,7 @@ afterAll(async () => {
 });
 
 // Global mock for @variamosple/variamos-components to satisfy ResponseModel usages in all unit tests
-vi.mock("@variamosple/variamos-components", () => {
+vi.mock("@variamosple/variamos-components", async () => {
   class ResponseModel<T = Record<string, never>> {
     status: string;
     errorCode: number | null = null;
@@ -203,6 +203,10 @@ vi.mock("@variamosple/variamos-components", () => {
     }
   }
   return {
+    // The unsaved input and the discard confirmation of the forms
+    ...(await (
+      await import("@/shared/tests/mocks/variamosComponents")
+    ).formInput()),
     withPageVisit: <T>(component: T): T => component,
     NotificationProvider: ({ children }: { children: ReactNode }) => children,
     AuthWrapper: ({ children }: { children: ReactNode }) => children,

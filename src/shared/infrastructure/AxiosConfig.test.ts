@@ -3,21 +3,30 @@ import { HttpResponse, http } from "msw";
 import { server } from "../tests/mocks/server";
 import { ADMIN_CLIENT, setupAxiosInterceptors } from "./AxiosConfig";
 
+// Whether a form of the page holds unsaved input, as the library says
+const unsaved = vi.hoisted(() => ({ holds: false }));
+vi.mock("@variamosple/variamos-components", () => ({
+  hasUnsavedInput: () => unsaved.holds,
+}));
+
 describe("AxiosConfig Interceptors", () => {
   let navigateMock: import("vitest").Mock;
+  let checkSession: import("vitest").Mock;
   let testClient: import("axios").AxiosInstance;
 
   beforeEach(() => {
     navigateMock = vi.fn();
+    checkSession = vi.fn();
     testClient = axios.create({
       baseURL: "http://api.test",
     });
 
     // Setup the response interceptor we want to test
-    setupAxiosInterceptors(testClient, navigateMock);
+    setupAxiosInterceptors(testClient, navigateMock, checkSession);
 
     localStorage.clear();
     window.location.hash = "";
+    unsaved.holds = false;
   });
 
   it("never sends a token kept in localStorage: the cookie carries the session", async () => {
@@ -125,6 +134,49 @@ describe("AxiosConfig Interceptors", () => {
     navigateMock.mockClear();
     window.location.hash = "#/reset-password?token=abc";
     await expect(testClient.get("/secure")).rejects.toThrow();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps a page with unsaved input on 401, and checks the session instead", async () => {
+    window.location.hash = "#/roles";
+    server.use(
+      http.post("http://api.test/roles", () =>
+        HttpResponse.json({}, { status: 401 }),
+      ),
+    );
+    unsaved.holds = true;
+
+    await expect(testClient.post("/roles")).rejects.toThrow();
+    expect(navigateMock).not.toHaveBeenCalled();
+    expect(checkSession).toHaveBeenCalledOnce();
+  });
+
+  it("checks the session on 401 of a service that does not send to sign in", async () => {
+    window.location.hash = "#/projects";
+    const projects = axios.create({ baseURL: "http://projects.test" });
+    setupAxiosInterceptors(projects, null, checkSession);
+    server.use(
+      http.post("http://projects.test/projects", () =>
+        HttpResponse.json({}, { status: 401 }),
+      ),
+    );
+
+    await expect(projects.post("/projects")).rejects.toThrow();
+    expect(checkSession).toHaveBeenCalledOnce();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("leaves the 401 of the session check to the session watcher", async () => {
+    window.location.hash = "#/roles";
+    server.use(
+      http.get("http://api.test/auth/session-info", () =>
+        HttpResponse.json({}, { status: 401 }),
+      ),
+    );
+    unsaved.holds = true;
+
+    await expect(testClient.get("/auth/session-info")).rejects.toThrow();
+    expect(checkSession).not.toHaveBeenCalled();
     expect(navigateMock).not.toHaveBeenCalled();
   });
 

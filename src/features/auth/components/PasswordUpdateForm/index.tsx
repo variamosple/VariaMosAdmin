@@ -1,9 +1,14 @@
-import type { ResponseModel } from "@variamosple/variamos-components";
+import {
+  type ResponseModel,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
 import { type FC, useId, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { usePasswordPolicy } from "@/features/auth/hooks/usePasswordPolicy";
 import type { PasswordUpdate } from "@/features/user-management/domain/Entity/PasswordUpdate";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
+import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 
 export interface PasswordUpdateFormProps {
   onUpdatePasswordSubmit: (
@@ -20,13 +25,15 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
   onClose,
   isLoading,
 }) => {
+  const form = useForm<PasswordUpdate>();
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
     reset,
-  } = useForm<PasswordUpdate>();
+  } = form;
+  const holdsInput = useFormHoldsInput(form);
   const passwordPolicy = usePasswordPolicy();
   // A refused update is told in the open modal, the input kept (UX-05)
   const [serverError, setServerError] = useState<string | null>(null);
@@ -56,6 +63,12 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
     setServerError(null);
   };
 
+  // Closing with unsaved input asks first (UX-08)
+  const closing = useDiscardConfirmation({
+    holdsInput: showModal && holdsInput,
+    onClose: onCloseModal,
+  });
+
   const titleId = useId();
 
   return (
@@ -63,7 +76,8 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
       aria-labelledby={titleId}
       show={showModal}
       backdrop={isLoading ? "static" : true}
-      onHide={onCloseModal}
+      onHide={isLoading ? undefined : closing.requestClose}
+      keyboard={!isLoading}
     >
       <Modal.Header closeButton={!isLoading}>
         <Modal.Title id={titleId}>Password update</Modal.Title>
@@ -134,12 +148,12 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
             </Form.Control.Feedback>
           </Form.Group>
 
-          <Modal.Footer>
+          <ClosingFooter closing={closing}>
             <Button
               type="button"
               variant="secondary"
               disabled={isLoading}
-              onClick={onCloseModal}
+              onClick={closing.requestClose}
             >
               Cancel
             </Button>
@@ -156,7 +170,7 @@ export const PasswordUpdateForm: FC<PasswordUpdateFormProps> = ({
                 "Update Password"
               )}
             </Button>
-          </Modal.Footer>
+          </ClosingFooter>
         </Modal.Body>
       </Form>
     </Modal>

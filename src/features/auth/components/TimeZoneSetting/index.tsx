@@ -1,3 +1,4 @@
+import { useUnsavedInput } from "@variamosple/variamos-components";
 import { type FC, useId, useMemo, useState } from "react";
 import { Alert, Button, Form, ListGroup, Spinner } from "react-bootstrap";
 import { updateMyTimeZone } from "@/shared/api/PreferencesRepository";
@@ -37,6 +38,8 @@ const useTimeZoneDraft = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { pushToast } = useToast();
+  // Another zone picked and not saved keeps the page (TRV-65)
+  useUnsavedInput(editing && draft !== chosen);
 
   const startEditing = () => {
     setDraft(chosen);

@@ -484,4 +484,42 @@ describe("MicroServiceConfigModal - Behavior & Anti-Fragile Tests", () => {
 
     expect(onHideMock).toHaveBeenCalledOnce();
   });
+
+  describe("closing (UX-08)", () => {
+    const renderOpen = async (onHide: () => void) => {
+      render(
+        <MicroServiceConfigModal
+          show={true}
+          serviceName="ms_admin"
+          displayName="Administration Service"
+          onHide={onHide}
+        />,
+      );
+      await screen.findByText("MAX_CONNECTIONS");
+    };
+
+    it("closes at once with nothing typed", async () => {
+      const onHide = vi.fn();
+      await renderOpen(onHide);
+
+      await userEvent.click(screen.getByTestId("config-modal-close-btn"));
+
+      expect(onHide).toHaveBeenCalledOnce();
+    });
+
+    it("asks before dropping a new parameter being typed", async () => {
+      const onHide = vi.fn();
+      await renderOpen(onHide);
+      await userEvent.click(
+        screen.getByRole("button", { name: /Add parameter/i }),
+      );
+      await userEvent.type(screen.getByPlaceholderText(/KEY_NAME/i), "TTL");
+
+      await userEvent.keyboard("{Escape}");
+      expect(onHide).not.toHaveBeenCalled();
+      await userEvent.click(screen.getByRole("button", { name: "Discard" }));
+
+      expect(onHide).toHaveBeenCalledOnce();
+    });
+  });
 });

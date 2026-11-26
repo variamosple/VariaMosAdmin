@@ -1,3 +1,4 @@
+import { useDiscardConfirmation } from "@variamosple/variamos-components";
 import {
   type ChangeEvent,
   type FC,
@@ -13,6 +14,8 @@ import {
   type UseFormRegister,
   useForm,
 } from "react-hook-form";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
+import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 import { attachmentUrl } from "../../api/attachmentUrl";
 import {
   type BugStatusChange,
@@ -332,21 +335,22 @@ interface ApprovalFooterProps {
   isApproving: boolean;
   isUploading: boolean;
   onPublish: () => void;
-  onHide: () => void;
+  closing: ReturnType<typeof useDiscardConfirmation>;
 }
 
 const ApprovalFooter: FC<ApprovalFooterProps> = (props) => {
-  const { pendingApproval, isApproving, isUploading } = props;
-  if (!pendingApproval) {
+  const { pendingApproval, isApproving, isUploading, closing } = props;
+  // The question before dropping the review, whatever the step (UX-08)
+  if (!pendingApproval || closing.isConfirming) {
     return (
-      <Modal.Footer>
-        <Button variant="secondary" onClick={props.onHide}>
+      <ClosingFooter closing={closing}>
+        <Button variant="secondary" onClick={closing.requestClose}>
           Cancel
         </Button>
         <Button variant="success" type="submit" disabled={isUploading}>
           Approve & Send to GitHub
         </Button>
-      </Modal.Footer>
+      </ClosingFooter>
     );
   }
   return (
@@ -416,12 +420,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
   const files = useAttachments(bug, setModalError);
   const { setAttachments, setAttachmentToDelete } = files;
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ApproveFormData>({
+  const form = useForm<ApproveFormData>({
     defaultValues: {
       title: "",
       description: "",
@@ -431,6 +430,18 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
       githubRepo: "",
       comment: "",
     },
+  });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = form;
+  // An edited review is dropped only once confirmed (UX-08)
+  const holdsInput = useFormHoldsInput(form);
+  const closing = useDiscardConfirmation({
+    holdsInput: show && holdsInput,
+    onClose: onHide,
   });
 
   useEffect(() => {
@@ -473,13 +484,13 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
     <Modal
       aria-labelledby={titleId}
       show={show}
-      onHide={onHide}
-      backdrop="static"
-      keyboard={false}
+      onHide={isApproving ? undefined : closing.requestClose}
+      backdrop={isApproving ? "static" : true}
+      keyboard={!isApproving}
       size="lg"
       centered
     >
-      <Modal.Header closeButton>
+      <Modal.Header closeButton={!isApproving}>
         <Modal.Title id={titleId}>Review and Approve Local Bug</Modal.Title>
       </Modal.Header>
 
@@ -520,7 +531,7 @@ export const BugApprovalModal: FC<BugApprovalModalProps> = ({
           isApproving={isApproving}
           isUploading={files.isUploading}
           onPublish={publishApproval}
-          onHide={onHide}
+          closing={closing}
         />
       </Form>
     </Modal>

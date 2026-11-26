@@ -234,4 +234,26 @@ describe("TwoFactorCard", () => {
       }),
     ).toBeNull();
   });
+
+  it("asks before dropping a typed password, and closes at once without one (UX-08)", async () => {
+    const user = userEvent.setup();
+    mfaServer();
+    render(<TwoFactorCard />);
+
+    await user.click(await screen.findByRole("button", { name: "Turn on" }));
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Turn on" }));
+    await user.type(
+      screen.getByLabelText("Confirm your password"),
+      "Right-pass-1",
+    );
+    await user.keyboard("{Escape}");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Discard" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+  });
 });

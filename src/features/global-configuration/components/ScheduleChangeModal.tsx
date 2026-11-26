@@ -1,3 +1,7 @@
+import {
+  isUnsavedInput,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
 import { type FC, type SubmitEvent, useEffect, useId, useState } from "react";
 import {
   Alert,
@@ -7,6 +11,7 @@ import {
   Modal,
   Spinner,
 } from "react-bootstrap";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   cityOf,
   describeInstant,
@@ -25,6 +30,7 @@ import type {
   ConfigurationValue,
 } from "../domain/Entity/Configuration";
 import type { ScheduledChange } from "../domain/Entity/ScheduledChange";
+import { textOf } from "./ConfigurationFormModal";
 
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -227,6 +233,73 @@ export interface ScheduleChangeModalProps {
  */
 const currentDate = () => new Date();
 
+// The instant typed, or the text when it is not one yet
+const dueKeyOf = (due: Due, input: string) =>
+  "instant" in due ? due.instant.toISOString() : input;
+
+// What the dialog opened with, to tell an edit from it
+interface OpenedChange {
+  value: string;
+  enabled: boolean;
+  due: string;
+}
+
+/**
+ * The value and the date typed, filled from the setting or the planned
+ * change each time the dialog opens. `isEdited` is true once they differ
+ * from it; the same instant shown in another time zone is no edit.
+ */
+const useTypedChange = (config?: Configuration, change?: ScheduledChange) => {
+  const [value, setValue] = useState("");
+  const [enabled, setEnabled] = useState(false);
+  const [dueInput, setDueInput] = useState("");
+  // The time is typed in UTC or in the time zone of the profile
+  const [inputZone, setInputZone] = useState("UTC");
+  // Which of the two instants of a time that comes twice
+  const [pick, setPick] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [opened, setOpened] = useState<OpenedChange | null>(null);
+
+  useEffect(() => {
+    if (!config) return;
+    const start = change ? change.newValue : config.value;
+    const startInput = inputOf(
+      change ? new Date(change.dueAt) : defaultDue(new Date()),
+      "UTC",
+    );
+    setValue(textOf(start));
+    setEnabled(Boolean(start));
+    setDueInput(startInput);
+    setInputZone("UTC");
+    setPick(0);
+    setError(null);
+    setOpened({
+      value: textOf(start),
+      enabled: Boolean(start),
+      due: dueKeyOf(readDue(startInput, "UTC", 0), startInput),
+    });
+  }, [config, change]);
+
+  const due = readDue(dueInput, inputZone, pick);
+  const typed: OpenedChange = { value, enabled, due: dueKeyOf(due, dueInput) };
+
+  return {
+    ...{ value, setValue, enabled, setEnabled, dueInput, inputZone, pick },
+    ...{ setPick, error, setError, due },
+    isEdited: opened !== null && isUnsavedInput({ ...opened }, { ...typed }),
+    typeDue: (input: string) => {
+      setDueInput(input);
+      setPick(0);
+    },
+    // Switching keeps the instant and shows it in the other time zone
+    switchZone: (zone: string) => {
+      if ("instant" in due) setDueInput(inputOf(due.instant, zone));
+      setInputZone(zone);
+      setPick(0);
+    },
+  };
+};
+
 // A planned change is saved again; a new one is scheduled
 const submitLabelOf = (planned: boolean) =>
   planned ? "Save the planned change" : "Schedule";
@@ -240,38 +313,17 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
   now = currentDate,
 }) => {
   const titleId = useId();
-  const [value, setValue] = useState("");
-  const [enabled, setEnabled] = useState(false);
-  const [dueInput, setDueInput] = useState("");
-  // The time is typed in UTC or in the time zone of the profile
-  const [inputZone, setInputZone] = useState("UTC");
-  // Which of the two instants of a time that comes twice
-  const [pick, setPick] = useState(0);
+  const typed = useTypedChange(config, change);
+  const { value, setValue, enabled, setEnabled, due, dueInput } = typed;
+  const { inputZone, pick, setPick, error, setError } = typed;
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!config) return;
-    const start = change ? change.newValue : config.value;
-    setValue(String(start ?? ""));
-    setEnabled(Boolean(start));
-    setDueInput(
-      inputOf(change ? new Date(change.dueAt) : defaultDue(new Date()), "UTC"),
-    );
-    setInputZone("UTC");
-    setPick(0);
-    setError(null);
-  }, [config, change]);
+  // Closing with an edited change asks first (UX-08)
+  const closing = useDiscardConfirmation({
+    holdsInput: config !== undefined && typed.isEdited,
+    onClose,
+  });
 
   if (!config) return null;
-
-  const due = readDue(dueInput, inputZone, pick);
-  // Switching keeps the instant and shows it in the other time zone
-  const switchZone = (zone: string) => {
-    if ("instant" in due) setDueInput(inputOf(due.instant, zone));
-    setInputZone(zone);
-    setPick(0);
-  };
 
   const submit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -296,7 +348,8 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
   return (
     <Modal
       show
-      onHide={busy ? undefined : onClose}
+      onHide={busy ? undefined : closing.requestClose}
+      keyboard={!busy}
       aria-labelledby={titleId}
       centered
     >
@@ -324,12 +377,9 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
             dueInput={dueInput}
             inputZone={inputZone}
             pick={pick}
-            onInput={(input) => {
-              setDueInput(input);
-              setPick(0);
-            }}
+            onInput={typed.typeDue}
             onPick={setPick}
-            onSwitchZone={switchZone}
+            onSwitchZone={typed.switchZone}
           />
           {error ? (
             <Alert variant="danger" className="mb-0 py-2">
@@ -337,8 +387,12 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
             </Alert>
           ) : null}
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="outline-secondary" onClick={onClose} disabled={busy}>
+        <ClosingFooter closing={closing}>
+          <Button
+            variant="outline-secondary"
+            onClick={closing.requestClose}
+            disabled={busy}
+          >
             Close
           </Button>
           <Button type="submit" variant="primary" disabled={busy}>
@@ -348,7 +402,7 @@ export const ScheduleChangeModal: FC<ScheduleChangeModalProps> = ({
               submitLabelOf(change !== undefined)
             )}
           </Button>
-        </Modal.Footer>
+        </ClosingFooter>
       </Form>
     </Modal>
   );

@@ -225,3 +225,36 @@ describe("ConfigurationFormModal accepted values", () => {
     expect(screen.getByLabelText("Value").getAttribute("list")).toBeNull();
   });
 });
+
+describe("ConfigurationFormModal closing (UX-08)", () => {
+  const plain = configuration({
+    key: "general.motd",
+    value: "Welcome",
+    isSecret: false,
+    category: "general",
+  });
+
+  it("closes at once when the value is unchanged", async () => {
+    const user = userEvent.setup();
+    const { onClose } = renderForm(plain);
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("asks before dropping an edited value, then shows the setting again", async () => {
+    const user = userEvent.setup();
+    const { onClose } = renderForm(plain);
+    const field = screen.getByDisplayValue("Welcome");
+
+    await user.type(field, " back");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onClose).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Discard" }));
+
+    expect(onClose).toHaveBeenCalledOnce();
+    // Reopened, the field shows the setting, not the dropped text
+    expect(field).toHaveValue("Welcome");
+  });
+});

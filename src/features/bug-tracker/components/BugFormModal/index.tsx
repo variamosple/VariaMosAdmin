@@ -1,3 +1,4 @@
+import { useDiscardConfirmation } from "@variamosple/variamos-components";
 import {
   type ChangeEvent,
   type FC,
@@ -12,6 +13,8 @@ import {
   type UseFormRegister,
   useForm,
 } from "react-hook-form";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
+import { useFormHoldsInput } from "@/shared/hooks/useFormHoldsInput";
 import type { Bug } from "../../domain/Bug";
 import {
   BUG_COMPONENT_LABELS,
@@ -220,12 +223,7 @@ export const BugFormModal: FC<BugFormModalProps> = ({
   error,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<Bug>({
+  const form = useForm<Bug>({
     defaultValues: {
       title: "",
       description: "",
@@ -235,6 +233,12 @@ export const BugFormModal: FC<BugFormModalProps> = ({
       githubRepo: "",
     },
   });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = form;
 
   useEffect(() => {
     if (show) {
@@ -250,18 +254,25 @@ export const BugFormModal: FC<BugFormModalProps> = ({
     }
   }, [show, reset, categories]);
 
+  // Closing a report with input asks first (UX-08), never while sending
+  const holdsInput = useFormHoldsInput(form) || selectedFile !== null;
+  const closing = useDiscardConfirmation({
+    holdsInput: show && holdsInput,
+    onClose: onHide,
+  });
+
   const titleId = useId();
 
   return (
     <Modal
       aria-labelledby={titleId}
       show={show}
-      onHide={onHide}
-      backdrop="static"
-      keyboard={false}
+      onHide={isSubmitting ? undefined : closing.requestClose}
+      backdrop={isSubmitting ? "static" : true}
+      keyboard={!isSubmitting}
       centered
     >
-      <Modal.Header closeButton>
+      <Modal.Header closeButton={!isSubmitting}>
         <Modal.Title id={titleId}>
           {mode === "admin" ? "Report a GitHub Bug" : "Report a New Bug"}
         </Modal.Title>
@@ -288,14 +299,18 @@ export const BugFormModal: FC<BugFormModalProps> = ({
           />
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onHide} disabled={isSubmitting}>
+        <ClosingFooter closing={closing}>
+          <Button
+            variant="secondary"
+            onClick={closing.requestClose}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
           <Button variant="primary" type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Creating..." : submitLabelOf(mode)}
           </Button>
-        </Modal.Footer>
+        </ClosingFooter>
       </Form>
     </Modal>
   );

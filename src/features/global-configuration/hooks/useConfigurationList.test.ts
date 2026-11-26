@@ -5,6 +5,9 @@ import type { Configuration } from "../domain/Entity/Configuration";
 import { useConfigurationList } from "./useConfigurationList";
 
 const mockPushToast = vi.fn();
+
+import { hasUnsavedInput } from "@variamosple/variamos-components";
+
 vi.mock("@/shared/context/ToastContext", async () => ({
   useToast: () => ({
     pushToast: mockPushToast,
@@ -14,6 +17,10 @@ vi.mock("@/shared/context/ToastContext", async () => ({
 // Mock ResponseModel class since it's commonly imported from components
 vi.mock("@variamosple/variamos-components", async () => {
   return {
+    // The unsaved input and the discard confirmation of the forms
+    ...(await (
+      await import("@/shared/tests/mocks/variamosComponents")
+    ).formInput()),
     ResponseModel: class ResponseModel<T> {
       errorCode?: number;
       message?: string;
@@ -125,6 +132,8 @@ describe("useConfigurationList Hook Tests", () => {
     });
 
     expect(result.current.isDirty).toBe(true);
+    // The edited settings keep the page if the session is lost (TRV-65)
+    expect(hasUnsavedInput()).toBe(true);
     expect(result.current.modifiedKeys).toEqual(["general.site_name"]);
     expect(result.current.configurations[0]?.value).toBe("New Site Name");
     // Ensure original state is untouched

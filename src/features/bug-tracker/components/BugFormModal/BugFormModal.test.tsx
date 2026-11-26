@@ -275,4 +275,48 @@ describe("BugFormModal Component", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(mockOnHide).toHaveBeenCalledTimes(1);
   });
+
+  describe("closing (UX-08)", () => {
+    const renderOpen = (isSubmitting = false) =>
+      render(
+        <BugFormModal
+          show={true}
+          onHide={mockOnHide}
+          onSubmit={mockOnSubmit}
+          repos={sampleRepos}
+          categories={sampleCategories}
+          isSubmitting={isSubmitting}
+        />,
+      );
+
+    it("closes at once on Escape when nothing was typed", async () => {
+      renderOpen();
+
+      await userEvent.keyboard("{Escape}");
+
+      expect(mockOnHide).toHaveBeenCalledOnce();
+    });
+
+    it("asks before Cancel drops a written report", async () => {
+      renderOpen();
+      await userEvent.type(screen.getByLabelText(/Title \*/i), "Crash");
+
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+      expect(mockOnHide).not.toHaveBeenCalled();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Keep editing" }),
+      );
+
+      expect(mockOnHide).not.toHaveBeenCalled();
+      expect(screen.getByLabelText(/Title \*/i)).toHaveValue("Crash");
+    });
+
+    it("cannot be closed while sending", async () => {
+      renderOpen(true);
+
+      await userEvent.keyboard("{Escape}");
+
+      expect(mockOnHide).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -1,5 +1,17 @@
-import { type FC, type SubmitEvent, useEffect, useId, useState } from "react";
+import {
+  isUnsavedInput,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
+import {
+  type FC,
+  type SubmitEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import {
   type Configuration,
   type ConfigurationValue,
@@ -32,7 +44,7 @@ const knownTimeZones = (): string[] => {
 };
 
 // A value as text; a list or an object, even under another type, as JSON
-const textOf = (value: ConfigurationValue): string => {
+export const textOf = (value: ConfigurationValue): string => {
   if (typeof value === "string") return value;
   if (value === null) return "";
   // A number or a boolean reads the same as JSON (a JSON value is never NaN)
@@ -189,16 +201,36 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
   const [boolValue, setBoolValue] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (config) {
+  // The field shows the value of the setting: when it opens, and again
+  // when its edit is dropped, so that it never reopens with stale text
+  const fill = useCallback((setting?: Configuration) => {
+    if (setting) {
       setValidationError(null);
-      if (config.type === "boolean") {
-        setBoolValue(Boolean(config.value));
+      if (setting.type === "boolean") {
+        setBoolValue(Boolean(setting.value));
       } else {
-        setInputValue(fieldValueOf(config));
+        setInputValue(fieldValueOf(setting));
       }
     }
-  }, [config]);
+  }, []);
+
+  useEffect(() => fill(config), [config, fill]);
+
+  const close = () => {
+    fill(config);
+    onClose();
+  };
+  // Closing with an edited value asks first (UX-08)
+  const closing = useDiscardConfirmation({
+    holdsInput: showModal && config !== undefined && isEdited(config),
+    onClose: close,
+  });
+
+  function isEdited(setting: Configuration) {
+    return setting.type === "boolean"
+      ? Boolean(setting.value) !== boolValue
+      : isUnsavedInput({ value: fieldValueOf(setting) }, { value: inputValue });
+  }
 
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -220,7 +252,11 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
   if (!config) return null;
 
   return (
-    <Modal aria-labelledby={titleId} show={showModal} onHide={onClose}>
+    <Modal
+      aria-labelledby={titleId}
+      show={showModal}
+      onHide={closing.requestClose}
+    >
       <Modal.Header closeButton>
         <Modal.Title id={titleId}>Edit Configuration</Modal.Title>
       </Modal.Header>
@@ -247,15 +283,19 @@ export const ConfigurationFormModal: FC<ConfigurationFormModalProps> = ({
           />
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button type="button" variant="secondary" onClick={onClose}>
+        <ClosingFooter closing={closing}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={closing.requestClose}
+          >
             Cancel
           </Button>
 
           <Button variant="primary" type="submit" disabled={config.isReadOnly}>
             Apply Changes
           </Button>
-        </Modal.Footer>
+        </ClosingFooter>
       </Form>
     </Modal>
   );

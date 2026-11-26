@@ -12,6 +12,10 @@ import { ModelFormModal } from "./index";
 // Mock @variamosple/variamos-components completely
 vi.mock("@variamosple/variamos-components", async () => {
   return {
+    // The unsaved input and the discard confirmation of the forms
+    ...(await (
+      await import("@/shared/tests/mocks/variamosComponents")
+    ).formInput()),
     ResponseModel: class ResponseModel {
       errorCode?: number | null;
       message?: string;
@@ -233,5 +237,26 @@ describe("ModelFormModal Component", () => {
 
       expect(screen.getByRole("button", { name: "Alpha" })).toBeInTheDocument();
     });
+  });
+
+  it("asks before Cancel drops an edited model (UX-08)", async () => {
+    const user = userEvent.setup();
+    render(
+      <ModelFormModal
+        modalTitle="Edit"
+        showModal={true}
+        onClose={mockOnClose}
+        onModelSubmit={mockOnSubmit}
+        isLoading={false}
+        defaultValue={{ id: "m-1", projectId: "p-1", name: "Original Name" }}
+      />,
+    );
+
+    await user.type(screen.getByPlaceholderText("Model name"), " v2");
+    await user.click(screen.getByRole("button", { name: /cancel/i }));
+    expect(mockOnClose).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Discard" }));
+
+    expect(mockOnClose).toHaveBeenCalledOnce();
   });
 });

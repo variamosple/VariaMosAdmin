@@ -1,5 +1,10 @@
+import {
+  isUnsavedInput,
+  useDiscardConfirmation,
+} from "@variamosple/variamos-components";
 import { type FC, useId } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { ClosingFooter } from "@/shared/components/FormModal/ClosingFooter";
 import type { Bug, BugStatusLog, BugUserRef } from "../../domain/Bug";
 import type { BugNoteDraft } from "../../hooks/useBugDetails";
 import { BugAssigneesForm } from "../BugAssigneesForm";
@@ -110,13 +115,22 @@ const BugDiscussion: FC<BugDetailsProps> = (props) => {
 
 /** The details of a bug, its timeline, and what an administrator changes. */
 export const BugDetailsModal: FC<BugDetailsModalProps> = (props) => {
-  const { bug, onHide, canUpdate } = props;
+  const { bug, onHide, canUpdate, draft } = props;
   const titleId = useId();
+  // A written comment is dropped only once confirmed (UX-08), and then for
+  // good: it does not come back on the next bug
+  const closing = useDiscardConfirmation({
+    holdsInput: Boolean(bug) && isUnsavedInput({}, { body: draft.body }),
+    onClose: () => {
+      draft.setBody("");
+      onHide();
+    },
+  });
   return (
     <Modal
       aria-labelledby={titleId}
       show={Boolean(bug)}
-      onHide={onHide}
+      onHide={closing.requestClose}
       size="lg"
       centered
       scrollable
@@ -136,11 +150,11 @@ export const BugDetailsModal: FC<BugDetailsModalProps> = (props) => {
           </div>
         ) : null}
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
+      <ClosingFooter closing={closing}>
+        <Button variant="secondary" onClick={closing.requestClose}>
           Close
         </Button>
-      </Modal.Footer>
+      </ClosingFooter>
     </Modal>
   );
 };

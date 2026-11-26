@@ -6,6 +6,10 @@ import { PasswordUpdateForm } from "./index";
 
 // Mock @variamosple/variamos-components
 vi.mock("@variamosple/variamos-components", async () => ({
+  // The unsaved input and the discard confirmation of the forms
+  ...(await (
+    await import("@/shared/tests/mocks/variamosComponents")
+  ).formInput()),
   ResponseModel: class ResponseModel<T> {
     transactionId?: string;
     errorCode?: number;
@@ -178,7 +182,9 @@ describe("PasswordUpdateForm Component", () => {
       (screen.getByLabelText(/current password/i) as HTMLInputElement).value,
     ).toBe("oldPassword");
 
+    // The typed passwords are dropped only once confirmed (UX-08)
     await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Discard" }));
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -195,6 +201,8 @@ describe("PasswordUpdateForm Component", () => {
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/current password/i), "oldPassword");
     await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(mockOnClose).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Discard" }));
 
     expect(mockOnClose).toHaveBeenCalledOnce();
     expect(
