@@ -83,7 +83,7 @@ jobs:
           path: ./
           # The image of the same release, not "latest": change it with the
           # SHA above when Dependabot updates the action
-          version: 3.99.9
+          version: 3.100.1
 
   # The unit tests in four parts, one runner each. Each part keeps its results
   # and its coverage in a blob report; the coverage job merges them.
