@@ -25,12 +25,13 @@ const openBugForm = async (page: Page) => {
   return page.getByRole("dialog", { name: "Report a New Bug" });
 };
 
-const categoryNames = (page: Page) =>
+// A web-first assertion: reading the options in a loop while React
+// replaces them crashed the page under Firefox
+const categoryOptions = (page: Page) =>
   page
     .getByRole("dialog", { name: "Report a New Bug" })
     .getByLabel("Category")
-    .locator("option")
-    .allTextContents();
+    .locator("option");
 
 test.describe("Bug form - categories of the admin (mocked)", () => {
   test.beforeEach(async ({ page }) => {
@@ -56,7 +57,7 @@ test.describe("Bug form - categories of the admin (mocked)", () => {
     await bugForm.getByLabel("Title *").fill("Half a report");
     answer();
 
-    await expect.poll(() => categoryNames(page)).toEqual(["Editor", "Wiki"]);
+    await expect(categoryOptions(page)).toHaveText(["Editor", "Wiki"]);
     await expect(bugForm.getByLabel("Title *")).toHaveValue("Half a report");
   });
 
@@ -69,16 +70,14 @@ test.describe("Bug form - categories of the admin (mocked)", () => {
 
     await openBugForm(page);
 
-    await expect
-      .poll(() => categoryNames(page))
-      .toEqual([
-        "Editor",
-        "Model",
-        "Language",
-        "Project",
-        "Simulation",
-        "Account/Security",
-        "Other",
-      ]);
+    await expect(categoryOptions(page)).toHaveText([
+      "Editor",
+      "Model",
+      "Language",
+      "Project",
+      "Simulation",
+      "Account/Security",
+      "Other",
+    ]);
   });
 });
