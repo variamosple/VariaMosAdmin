@@ -1,4 +1,5 @@
 export * from "./api/AuthRepository";
+export { requestSignInMfa } from "./api/MfaRepository";
 export { DefaultCountry } from "./components/DefaultCountry";
 export { MfaInvitationBanner } from "./components/MfaInvitationBanner";
 export { ForgotPasswordPage } from "./pages/ForgotPasswordPage";

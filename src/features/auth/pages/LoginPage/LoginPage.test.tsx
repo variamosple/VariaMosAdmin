@@ -8,6 +8,7 @@ import type { Credentials } from "@/features/user-management/domain/Entity/Crede
 import { AppConfig } from "@/shared/infrastructure/AppConfig";
 import { pageLoader } from "@/shared/infrastructure/PageLoader";
 import { server } from "@/shared/tests/mocks/server";
+import { requestSignInMfa } from "../../api/MfaRepository";
 import { LoginPage } from "./index";
 
 const apiTarget = (path: string) => {
@@ -56,6 +57,8 @@ describe("LoginPage Page Component", () => {
   const mockNavigate = vi.fn();
   const mockSignIn = vi.fn();
   const mockSignInAsGuest = vi.fn();
+  // The library sends the code, then loads the session (0.13.0)
+  const mockVerifySecondFactor = vi.fn(requestSignInMfa);
   let mockQueryParams: URLSearchParams;
 
   beforeEach(() => {
@@ -71,6 +74,7 @@ describe("LoginPage Page Component", () => {
 
     (useSession as import("vitest").Mock).mockReturnValue({
       signIn: mockSignIn,
+      verifySecondFactor: mockVerifySecondFactor,
       signInAsGuest: mockSignInAsGuest,
       isLoading: false,
     });
@@ -310,8 +314,7 @@ describe("LoginPage Page Component", () => {
 
     const reachCodeStep = async (trustedDeviceDays = 0) => {
       mockSignIn.mockResolvedValueOnce({
-        errorCode: 428,
-        data: { mfaRequired: true, trustedDeviceDays },
+        data: { mfaRequired: true, trustedDeviceDays, redirect: "" },
       });
       renderLoginPage();
       const user = userEvent.setup();
@@ -338,7 +341,7 @@ describe("LoginPage Page Component", () => {
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
-    it("loads the page again once the code is right", async () => {
+    it("goes on through the session once the code is right, without a reload", async () => {
       const load = vi.spyOn(pageLoader, "load").mockImplementation(() => {});
       answerCode(200, { data: { redirect: "https://app.example/home" } });
       const user = await reachCodeStep();
@@ -346,20 +349,35 @@ describe("LoginPage Page Component", () => {
       await typeCode(user, "123456");
 
       await waitFor(() =>
-        expect(load).toHaveBeenCalledWith("https://app.example/home"),
+        expect(mockNavigate).toHaveBeenCalledWith("https://app.example/home"),
       );
+      expect(mockVerifySecondFactor).toHaveBeenCalledWith("123456", false);
+      expect(load).not.toHaveBeenCalled();
     });
 
-    it("loads the home page rather than a script address", async () => {
-      const load = vi.spyOn(pageLoader, "load").mockImplementation(() => {});
+    it("goes home rather than to a script address", async () => {
       answerCode(200, { data: { redirect: "javascript:alert(1)" } });
       const user = await reachCodeStep();
 
       await typeCode(user, "123456");
 
       await waitFor(() =>
-        expect(load).toHaveBeenCalledWith(AppConfig.HOME_PAGE),
+        expect(mockNavigate).toHaveBeenCalledWith(AppConfig.HOME_PAGE),
       );
+    });
+
+    it("asks for the password again when the session cannot be loaded", async () => {
+      mockVerifySecondFactor.mockResolvedValueOnce({
+        errorCode: 500,
+        message: "Sign in error.",
+      } as Awaited<ReturnType<typeof requestSignInMfa>>);
+      const user = await reachCodeStep();
+
+      await typeCode(user, "123456");
+
+      expect(await screen.findByText("Sign in error.")).toBeInTheDocument();
+      expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
 
     it("keeps the code step after a wrong code", async () => {
@@ -417,7 +435,6 @@ describe("LoginPage Page Component", () => {
     });
 
     it("sends the choice not to be asked again on this browser", async () => {
-      vi.spyOn(pageLoader, "load").mockImplementation(() => {});
       let body: { code: string; rememberDevice: boolean } | undefined;
       server.use(
         http.post(apiTarget("/auth/sign-in/mfa"), async ({ request }) => {

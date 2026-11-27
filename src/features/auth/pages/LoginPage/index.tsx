@@ -11,7 +11,6 @@ import {
   offerDefaultCountry,
   registerRedirect,
 } from "../../api/AuthRepository";
-import { requestSignInMfa } from "../../api/MfaRepository";
 import { GoogleLogin } from "../../components/GoogleLogin";
 import { LoginForm } from "../../components/LoginForm";
 import { MfaCodeForm } from "../../components/MfaCodeForm";
@@ -22,58 +21,45 @@ const useSignInSteps = () => {
   const { queryParams, navigate } = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isMfaStep, setIsMfaStep] = useState(false);
-  const [isCheckingCode, setIsCheckingCode] = useState(false);
   const [trustedDeviceDays, setTrustedDeviceDays] = useState(0);
-  const { signIn, signInAsGuest, isLoading } = useSession();
+  const { signIn, verifySecondFactor, signInAsGuest, isLoading } = useSession();
   // Back from a Google sign-in, only to be offered the country (EV-90)
   const isEndingGoogleSignIn = queryParams.get("signed-in") === "google";
 
+  // Before leaving: the next page may be another application (EV-90)
+  const leave = (redirect?: string) =>
+    void offerDefaultCountry().then(() =>
+      navigate(safeRedirectOf(redirect) || AppConfig.HOME_PAGE),
+    );
+
   const onSignIn = (credentials: Credentials) => {
     void signIn(credentials).then((response) => {
-      // Right password, second factor on: the code is still expected
-      // The session library types the answer as signed in; this one is not
-      const data = response.data;
-      if (data && "mfaRequired" in data && data.mfaRequired) {
-        setErrorMessage(undefined);
-        setTrustedDeviceDays(
-          "trustedDeviceDays" in data &&
-            typeof data.trustedDeviceDays === "number"
-            ? data.trustedDeviceDays
-            : 0,
-        );
-        setIsMfaStep(true);
-      } else if (response.errorCode) {
+      if (response.errorCode) {
         setErrorMessage(response.message);
+      } else if (response.data?.mfaRequired) {
+        // Right password, second factor on: the code is still expected
+        setErrorMessage(undefined);
+        setTrustedDeviceDays(response.data.trustedDeviceDays ?? 0);
+        setIsMfaStep(true);
       } else {
-        // Before leaving: the next page may be another application (EV-90)
-        void offerDefaultCountry().then(() =>
-          navigate(
-            safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
-          ),
-        );
+        leave(response.data?.redirect);
       }
     });
   };
 
+  // The session is open and loaded: no reload to read it
   const onSubmitCode = (code: string, rememberDevice: boolean) => {
-    setIsCheckingCode(true);
-    void requestSignInMfa(code, rememberDevice)
-      .then((response) => {
-        if (!response.errorCode) {
-          void offerDefaultCountry().then(() =>
-            pageLoader.load(
-              safeRedirectOf(response.data?.redirect) || AppConfig.HOME_PAGE,
-            ),
-          );
-          return;
-        }
-        setErrorMessage(response.message);
-        // Expired or blocked: the password has to be typed again
-        if (String(response.errorCode) !== "INVALID_INPUT") {
-          setIsMfaStep(false);
-        }
-      })
-      .finally(() => setIsCheckingCode(false));
+    void verifySecondFactor(code, rememberDevice).then((response) => {
+      if (!response.errorCode) {
+        leave(response.data?.redirect);
+        return;
+      }
+      setErrorMessage(response.message);
+      // Expired or blocked: the password has to be typed again
+      if (String(response.errorCode) !== "INVALID_INPUT") {
+        setIsMfaStep(false);
+      }
+    });
   };
 
   const onSignInAsGuest = () => {
@@ -125,7 +111,6 @@ const useSignInSteps = () => {
     isEndingGoogleSignIn,
     isMfaStep,
     setIsMfaStep,
-    isCheckingCode,
     trustedDeviceDays,
     isLoading,
     onSignIn,
@@ -209,7 +194,7 @@ export const LoginPage: FC = () => {
             steps.setIsMfaStep(false);
             setErrorMessage(undefined);
           }}
-          isLoading={steps.isCheckingCode}
+          isLoading={steps.isLoading}
           trustedDeviceDays={steps.trustedDeviceDays}
         />
       ) : (

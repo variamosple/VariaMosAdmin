@@ -11,10 +11,7 @@ export const signedInSchema: z.ZodMiniType<singInResponse> = z.looseObject({
 });
 
 /** The sign-in answer; `mfaRequired` when the code is still expected. */
-export type SignInResult = singInResponse & {
-  mfaRequired?: boolean;
-  trustedDeviceDays?: number;
-};
+export type SignInResult = singInResponse;
 
 // The answer that waits for the code opens no page: its redirect is empty
 const mfaRequiredSchema = z.pipe(

@@ -50,28 +50,16 @@ export const requestLogout = (): Promise<ResponseModel<void>> => {
     );
 };
 
-/**
- * Set on a sign-in that waits for the second factor: without a session yet,
- * an error code stops the session library before it asks for one.
- */
-export const MFA_REQUIRED_CODE = 428;
-
 export type { SignInResult } from "./authSchemas";
 
 export const requestSignIn = (
   request: Credentials,
 ): Promise<ResponseModel<SignInResult>> => {
   const failure = "Error when trying to sign in, please try again later.";
+  // The answer that waits for the code goes back as it is: the session
+  // library opens no session on it (variamos-components 0.13.0)
   return ADMIN_CLIENT.post("/auth/sign-in", request)
-    .then((response) => {
-      const result = parseResponse(signInSchema, response.data, failure);
-      // The answer that waits for the code travels as an error the login
-      // page reads
-      if (result.data?.mfaRequired) {
-        result.errorCode = MFA_REQUIRED_CODE;
-      }
-      return result;
-    })
+    .then((response) => parseResponse(signInSchema, response.data, failure))
     .catch((error) => toErrorResponse(error, failure));
 };
 
