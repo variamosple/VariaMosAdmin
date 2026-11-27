@@ -52,6 +52,7 @@ vi.mock("@/features/auth", async () => ({
   requestLogout: vi.fn(),
   requestSignIn: vi.fn(),
   requestSignInAsGuest: vi.fn(),
+  requestSignInMfa: vi.fn(),
   requestSignUp: vi.fn(),
 }));
 

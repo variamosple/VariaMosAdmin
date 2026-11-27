@@ -77,7 +77,7 @@ describe("MfaRepository", () => {
 });
 
 describe("requestSignIn", () => {
-  it("marks a sign-in that waits for the code, so no session is asked", async () => {
+  it("gives back a sign-in that waits for the code, without an error", async () => {
     server.use(
       http.post(apiTarget("/auth/sign-in"), () =>
         HttpResponse.json({ data: { mfaRequired: true } }),
@@ -86,7 +86,7 @@ describe("requestSignIn", () => {
 
     const response = await requestSignIn({ email: "a@b.c", password: "x" });
 
-    expect(response.errorCode).toBe(428);
+    expect(response.errorCode).toBeFalsy();
     expect(response.data?.mfaRequired).toBe(true);
   });
 

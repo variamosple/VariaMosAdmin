@@ -35,10 +35,6 @@ export const RouterContextProvider: FC<{ children?: ReactNode }> = ({
         target?: "_blank" | "_self" | "_parent" | "_top";
       },
     ) => {
-      if (url.endsWith("#report-bug")) {
-        Events.publish<Record<string, never>>("openReportBugModal", {});
-        return;
-      }
       const base = pathname.endsWith("/") ? pathname : `${pathname}/`;
       const fullBase = window.location.origin + base;
       if (isAbsoluteUrl(url) && !url.startsWith(fullBase)) {

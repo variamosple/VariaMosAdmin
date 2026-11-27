@@ -16,6 +16,7 @@ import {
   requestLogout,
   requestSignIn,
   requestSignInAsGuest,
+  requestSignInMfa,
   requestSignUp,
 } from "@/features/auth";
 import { registerVisit } from "@/features/metrics-dashboard/api/VisitsRepository";
@@ -54,6 +55,7 @@ function App() {
         requestSignUp={requestSignUp}
         requestSignIn={requestSignIn}
         requestSignInAsGuest={requestSignInAsGuest}
+        requestSignInMfa={requestSignInMfa}
         requestLogout={requestLogout}
       >
         <NotificationProvider
